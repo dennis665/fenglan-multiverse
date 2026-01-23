@@ -10,62 +10,73 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-import environ  # * 匯入 django-environ
+import environ
 import os
 
 from pathlib import Path
 
 
-#! 初始化 environ，設定變數型別與預設值
+#! 環境初始化與路徑設定
+# ? --------------------------------------------------------------------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 env = environ.Env(
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
 )
-
-BASE_DIR = Path(__file__).resolve().parent.parent
+# ? --------------------------------------------------------------------------
 
 #! 讀取 .env 檔案
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-#! 從 env 中提取機敏資料
+#! 2. 安全性與基礎設定 (從 env 讀取)
+# ? --------------------------------------------------------------------------
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
-GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET")
 
-INSTALLED_APPS = [
+ROOT_URLCONF = "config.urls"
+WSGI_APPLICATION = "config.wsgi.application"
+SITE_ID = 1  # * django-allauth 與 sites 框架必備
+# ? --------------------------------------------------------------------------
+
+#! 3. 應用程式定義 (INSTALLED_APPS)
+# ? --------------------------------------------------------------------------
+DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",  # * allauth 必備
+    "django.contrib.sites",
+]
+
+THIRD_PARTY_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",  # * 啟用 Google 登入
+    "allauth.socialaccount.providers.google",
     "crispy_forms",
-    "crispy_bootstrap5",  # * Bootstrap 5 樣式支援
-    "core",
+    "crispy_bootstrap5",
 ]
 
-#! 開發環境才執行
+LOCAL_APPS = [
+    "core",  # * 核心功能 app
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+# ? --------------------------------------------------------------------------
+
+#! 開發專用工具 (僅在 DEBUG=True 時啟用)
+# ? --------------------------------------------------------------------------
 if DEBUG:
-    INSTALLED_APPS += [
-        "django_extensions",  # * 這樣在本機才能執行 shell_plus
-    ]
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # * 將信件內容印在終端機而非真的寄出
+    INSTALLED_APPS += ["django_extensions"]
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# ? --------------------------------------------------------------------------
 
-#! allauth 需要 SITE_ID
-SITE_ID = 1
-
-AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",  # * Django 預設
-    "allauth.account.auth_backends.AuthenticationBackend",  # * allauth 專用
-]
-
+#! 中介軟體 (MIDDLEWARE)
+# ? --------------------------------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -74,28 +85,68 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # * allauth 必備
+]
+# ? --------------------------------------------------------------------------
+
+#! 模板、靜態檔案與媒體檔案
+# ? --------------------------------------------------------------------------
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",  # * allauth 必備
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
 ]
 
-#! 指定登入與識別方式 (只使用 Email)
+STATIC_URL = "static/"
+# STATIC_ROOT = BASE_DIR / "staticfiles" # * 生產環境部署時啟用
+# ? --------------------------------------------------------------------------
+
+#! 資料庫與密碼驗證
+# ? --------------------------------------------------------------------------
+DATABASES = {
+    "default": env.db(),  # * django-environ 會自動解析 DATABASE_URL
+}
+
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+# ? --------------------------------------------------------------------------
+
+#! 認證系統設定 (django-allauth)
+# ? --------------------------------------------------------------------------
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+# ? --------------------------------------------------------------------------
+
+#! 登入邏輯設定
+# ? --------------------------------------------------------------------------
 ACCOUNT_LOGIN_METHODS = {"email"}
-
-#! 定義註冊表單欄位 (星號代表必填)
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
-
-#! 驗證信設定
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 """
 "mandatory": 強制驗證。使用者必須點擊驗證信連結才能登入（Local 測試較麻煩）。
 "optional": 選用驗證。會發送驗證信，但使用者不驗證也能直接登入（適合目前階段）。
 "none": 不驗證。完全不發送驗證信。
 """
+# ? --------------------------------------------------------------------------
 
-#! Google 登入後自動建立帳號，不跳轉額外確認頁
+#! 社交帳號與跳轉設定
+# ? --------------------------------------------------------------------------
 SOCIALACCOUNT_AUTO_SIGNUP = True
-
-
-#! 登入/登出後的跳轉頁面
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -106,53 +157,21 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {"access_type": "online"},
     }
 }
+# ? --------------------------------------------------------------------------
 
-ROOT_URLCONF = "config.urls"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # * 確保這行有指向根目錄的 templates
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = "config.wsgi.application"
-
-#! 資料庫設定，django-environ 會自動解析 DATABASE_URL 並轉換為 Django 格式
-DATABASES = {
-    "default": env.db(),
-}
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
-
-#! 語系與時區設定
+#! 語系、時區與第三方套件配置
+# ? --------------------------------------------------------------------------
 LANGUAGE_CODE = "zh-hant"
 TIME_ZONE = "Asia/Taipei"
-USE_I18N = True  # * 是否啟用 Django 的翻譯功能
-USE_TZ = True  # * 時區感知，要在網頁上顯示時間時以 TIME_ZONE 設定為準
+USE_I18N = True
+USE_TZ = True
+# ? --------------------------------------------------------------------------
 
-STATIC_URL = "static/"
+#! Crispy Forms 配置
+# ? --------------------------------------------------------------------------
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+# ? --------------------------------------------------------------------------
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"  # * 允許使用 Bootstrap 5
-CRISPY_TEMPLATE_PACK = "bootstrap5"  # * 預設使用 Bootstrap 5 渲染
+#! 其他系統忽略警告 (選用)
+# SILENCED_SYSTEM_CHECKS = ["models.W036"]
