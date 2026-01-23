@@ -1,0 +1,47 @@
+mkdir csi_server
+cd csi_server
+
+安裝venv
+
+pip install -r requirements.txt
+
+django-admin startproject config .
+
+#! 初始化 Django 內建的資料庫（預設是 SQLite）
+python manage.py migrate
+
+#! 啟動
+python manage.py runserver
+
+#! 建立超級使用者
+python manage.py createsuperuser
+
+#! 建立 app
+python manage.py startapp core
+
+-------docker 相關-------
+#! 建立並啟動所有容器，改 Dockerfile、裝新套件
+docker compose up --build
+#! 建立並啟動所有容器，只改 .py 或 .html 檔
+docker compose up -d
+
+#! 徹底移除舊的容器（確保環境變數重載）
+docker compose down
+
+#! 建立資料庫表
+docker compose exec web python manage.py migrate
+
+#! 建立管理員
+docker compose exec web python manage.py createsuperuser
+
+#! 停止並移除容器
+docker compose down
+
+#! 容器裡安裝套件
+docker compose exec web pip install django-allauth
+
+#! 開發用，可直接看 model 或設定值
+docker compose exec web python manage.py shell_plus
+
+#! 清除舊的映象檔
+docker rmi csi_server-web

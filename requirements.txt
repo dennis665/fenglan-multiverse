@@ -1,0 +1,24 @@
+#! 基礎環境與資料庫
+django==6.0.1
+mysqlclient==2.2.7
+django-environ==0.12.0
+
+#! OAuth 2.0 與認證 (Google 登入核心)
+django-allauth==65.14.0
+requests==2.32.5
+PyJWT==2.10.1
+cryptography==46.0.3
+
+#! 靜態檔案與生產環境伺服器
+gunicorn==24.0.0
+whitenoise==6.11.0
+
+#! 圖片處理
+Pillow==12.1.0
+
+#! 前端 UI 快速開發
+django-crispy-forms==2.5
+crispy-bootstrap5==2025.6
+
+#! 開發工具 (僅建議開發階段使用)，提供 shell_plus 等強大除錯工具
+django-extensions==4.1

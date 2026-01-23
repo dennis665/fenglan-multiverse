@@ -1,0 +1,26 @@
+#! 排除 Python 虛擬環境與快取
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+
+#! 排除環境變數與機敏金鑰 (改由 Docker Compose 管理)
+.env
+.env.*
+
+#! 排除版本控制與 IDE 設定
+.git/
+.gitignore
+.vscode/
+.idea/
+
+#! 排除資料庫檔案 (如果有的話)
+*.sqlite3
+db.sqlite3
+
+#! 排除 Docker 相關檔案本身
+Dockerfile
+docker-compose*.yml
+.dockerignore
