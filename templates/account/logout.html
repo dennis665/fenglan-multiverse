@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Sign Out" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 text-center">
+                <div class="card-body p-5">
+                    <div class="mb-4 text-warning">
+                        <i class="fas fa-sign-out-alt fa-3x"></i>
+                    </div>
+
+                    <h3 class="mb-3">確認登出</h3>
+                    <p class="text-muted mb-4">您確定要離開 <strong>CSI Portal</strong> 嗎？</p>
+
+                    <form method="post" action="{% url 'account_logout' %}">
+                        {% csrf_token %}
+                        {% if redirect_field_value %}
+                        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                {% trans "Sign Out" %}
+                            </button>
+                            <a href="/" class="btn btn-outline-secondary">
+                                回到首頁
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -64,6 +64,12 @@ docker compose up -d
 
 # 徹底關閉並移除容器 (確保環境變數重載)
 docker compose down
+
+# 將映像檔匯出為檔案
+docker save -o csi_web_image.tar csi_server-web:latest
+
+# 對方拿到檔案後，在他們的電腦執行：
+docker load -i csi_web_image.tar
 ```
 
 ---
