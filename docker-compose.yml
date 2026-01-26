@@ -24,5 +24,22 @@ services:
       db:
         condition: service_started
 
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: always
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    ports:
+      - "4041:4040"
+    tty: true
+    stdin_open: true
+    entrypoint: [
+      "ngrok", "http", "web:8000",
+      "--domain=unjoinable-scribal-vanesa.ngrok-free.dev",
+      "--log=stdout"
+    ]
+    depends_on:
+      - web
+
 volumes:
   mysql_data:
