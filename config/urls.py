@@ -15,15 +15,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
+from django.views.generic.base import RedirectView
+
+from core.views import profile_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     #! 新增首頁路徑
     path("", TemplateView.as_view(template_name="index.html"), name="home"),
+    #! 個人檔案
+    path("accounts/profile/", profile_view, name="profile"),
     #! 公告系統
     path("notices/", include("notices.urls")),
+    path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "images/favicon.ico")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

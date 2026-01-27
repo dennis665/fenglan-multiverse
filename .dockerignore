@@ -36,3 +36,6 @@ docker-compose*.yml
 #! 排除說明文件 (選配)
 README.md
 LICENSE
+
+#! 排除本地產生的靜態檔案彙整目錄
+staticfiles/

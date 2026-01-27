@@ -29,3 +29,6 @@ logs/
 
 #! ngrok 相關
 *ngrok.exe*
+
+#! 排除本地產生的靜態檔案彙整目錄
+staticfiles/

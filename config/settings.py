@@ -10,10 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import mimetypes
 import os
 from pathlib import Path
 
 import environ
+
+mimetypes.add_type("text/css", ".css", True)
+mimetypes.add_type("text/javascript", ".js", True)
 
 #! 環境初始化與路徑設定
 # ? ==============================================================================
@@ -118,8 +122,14 @@ TEMPLATES = [
     },
 ]
 
-STATIC_URL = "static/"
-# STATIC_ROOT = BASE_DIR / "staticfiles" # * 生產環境部署時啟用
+#! 告訴瀏覽器去哪個網址找靜態檔
+STATIC_URL = "/static/"
+#! 執行 collectstatic 準備部署到 Docker 時，檔案會搜集到這裡
+STATIC_ROOT = BASE_DIR / "staticfiles"
+#! 自己的 CSS (例如放在專案根目錄 static/ 內) 時，Django 才找得到
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 # ? ==============================================================================
 
 #! 日誌相關設定
