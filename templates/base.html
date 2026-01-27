@@ -50,6 +50,14 @@
             </ul>
 
             <ul class="navbar-nav ms-auto">
+                {# 超級管理員專屬後台連結 #}
+                {% if user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link text-warning" href="/admin/" target="_blank">
+                        <i class="fas fa-cog me-1"></i>後台管理
+                    </a>
+                </li>
+                {% endif %}
                 {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
