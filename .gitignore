@@ -26,3 +26,6 @@ db.sqlite3
 #! 日誌檔案
 logs/
 *.log
+
+#! ngrok 相關
+*ngrok.exe*

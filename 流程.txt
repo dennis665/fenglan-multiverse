@@ -48,3 +48,9 @@ docker compose exec web python manage.py shell_plus
 
 #! 清除舊的映象檔
 docker rmi csi_server-web
+
+#! 綁定 ngrok_token
+./ngrok config add-authtoken 你的TOKEN字串
+
+#! 啟動 ngrok
+./ngrok http 8000 --domain=unjoinable-scribal-vanesa.ngrok-free.dev
