@@ -18,3 +18,18 @@ class Announcement(BaseModel):
 
     def __str__(self):
         return self.title
+
+class ExternalTool(models.Model):
+    title = models.CharField(max_length=50, verbose_name="工具名稱")
+    url = models.URLField(verbose_name="網址")
+    icon_class = models.CharField(max_length=50, default="fas fa-external-link-alt", verbose_name="FontAwesome 圖示碼")
+    order = models.IntegerField(default=0, verbose_name="排序")
+    is_active = models.BooleanField(default=True, verbose_name="是否啟用")
+
+    class Meta:
+        verbose_name = "外部工具"
+        verbose_name_plural = "外部工具管理"
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.title

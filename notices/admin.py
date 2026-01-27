@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Announcement
+from .models import Announcement, ExternalTool
 
 
 @admin.register(Announcement)
@@ -25,3 +25,15 @@ class AnnouncementAdmin(admin.ModelAdmin):
         if not change:  # * 只有在「新增」時才自動設定作者
             obj.author = request.user
         super().save_model(request, obj, form, change)
+
+
+@admin.register(ExternalTool)
+class ExternalToolAdmin(admin.ModelAdmin):
+    #! 列表顯示的欄位
+    list_display = ("order", "title", "url", "is_active")
+
+    #! 指定「工具名稱」作為進入編輯頁面的連結
+    list_display_links = ("title",)
+
+    #! 讓序號和啟用開關可以直接在列表修改
+    list_editable = ("order", "is_active")

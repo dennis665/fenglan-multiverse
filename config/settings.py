@@ -118,6 +118,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",  # * allauth 必備
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "notices.context_processors.external_tools_processor",
             ],
         },
     },

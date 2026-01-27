@@ -27,29 +27,23 @@
                 {# 測試人員專區下拉選單 (僅工作人員或超級使用者可見) #}
                 {% if user.is_staff or user.is_superuser %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-info fw-bold" href="#" id="testerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle text-info fw-bold" href="#" id="testerDropdown" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-vial me-1"></i>測試人員專區
                     </a>
-                    <ul class="dropdown-menu shadow" aria-labelledby="testerDropdown">
+                    <ul class="dropdown-menu shadow">
                         <li><h6 class="dropdown-header">測試管理系統</h6></li>
                         
-                        {# Squash TM 連結 #}
+                        {# 自動從資料庫產生連結 #}
+                        {% for tool in external_tools %}
                         <li>
-                            <a class="dropdown-item" href="http://10.0.101.57:8090/squash" target="_blank" rel="noopener noreferrer">
-                                <i class="fas fa-external-link-alt me-2"></i>Squash TM
+                            <a class="dropdown-item" href="{{ tool.url }}" target="_blank" rel="noopener noreferrer">
+                                <i class="{{ tool.icon_class }} me-2"></i>{{ tool.title }}
                             </a>
                         </li>
+                        {% empty %}
+                        <li><a class="dropdown-item disabled">目前無工具連結</a></li>
+                        {% endfor %}
 
-                        {# Kiwi TCMS 連結 #}
-                        <li>
-                            <a class="dropdown-item" href="https://10.0.101.57:8444" target="_blank" rel="noopener noreferrer">
-                                <i class="fas fa-bug me-2"></i>Kiwi TCMS
-                            </a>
-                        </li>
-
-                        {# 未來可以在此處繼續增加 <li> 項目 #}
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item disabled" href="#">更多工具開發中...</a></li>
                     </ul>
                 </li>
                 {% endif %}
