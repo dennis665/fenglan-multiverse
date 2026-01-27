@@ -14,7 +14,7 @@ python manage.py makemigrations app_name
 python manage.py migrate
 
 #! 所有樣式檔複製到 STATIC_ROOT 中
-python manage.py collectstatic
+python manage.py collectstatic --noinput
 
 #! 啟動
 python manage.py runserver

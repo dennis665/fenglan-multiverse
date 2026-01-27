@@ -22,3 +22,6 @@ crispy-bootstrap5==2025.6
 
 #! 開發工具 (僅建議開發階段使用)，提供 shell_plus 等強大除錯工具
 django-extensions==4.1
+
+#! 自動化處理 static 檔
+whitenoise==6.11.0
