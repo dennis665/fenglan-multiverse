@@ -65,6 +65,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "core",  # * 核心功能 app
+    "notices",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -165,7 +166,7 @@ LOGGING = {
         },
         #! Django 系統基本日誌也同步存入檔案
         "django": {
-            "handlers": ["daily_file"],
+            "handlers": ["console", "daily_file"],
             "level": "INFO",
             "propagate": True,
         },
@@ -237,4 +238,4 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # ? ==============================================================================
 
 #! 其他系統忽略警告 (選用)
-# SILENCED_SYSTEM_CHECKS = ["models.W036"]
+SILENCED_SYSTEM_CHECKS = ["models.W036"]

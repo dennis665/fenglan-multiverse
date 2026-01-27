@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block head_title %}公告列表 | CSI Portal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-bullhorn text-primary"></i> 系統公告</h2>
+        <span class="badge bg-secondary text-white">共 {{ notices.count }} 則公告</span>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 12%">類型</th>
+                        <th>標題</th>
+                        <th style="width: 15%">發布者</th>
+                        <th style="width: 20%">發布日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in notices %}
+                    <tr {% if item.is_pinned %}class="table-warning"{% endif %}>
+                        <td>
+                            {% if item.is_pinned %}
+                                <span class="badge bg-danger"><i class="fas fa-thumbtack"></i> 置頂</span>
+                            {% else %}
+                                <span class="badge bg-info text-dark">一般</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'notices:detail' item.pk %}" class="text-decoration-none fw-bold text-dark">
+                                {{ item.title }}
+                            </a>
+                        </td>
+                        <td><i class="fas fa-user-circle me-1 text-secondary"></i>{{ item.author.username }}</td>
+                        <td class="text-muted small">{{ item.created_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">目前尚無公告內容</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

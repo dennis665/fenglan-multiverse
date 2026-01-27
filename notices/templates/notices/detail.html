@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block head_title %}{{ announcement.title }} | CSI Portal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'notices:list' %}" class="text-decoration-none">公告列表</a></li>
+            <li class="breadcrumb-item active">詳細內容</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow border-0">
+        <div class="card-header bg-white py-4 border-bottom">
+            <div class="d-flex align-items-center mb-3">
+                {% if announcement.is_pinned %}
+                    <span class="badge bg-danger me-2"><i class="fas fa-thumbtack"></i> 置頂</span>
+                {% endif %}
+                <h2 class="mb-0 fw-bold">{{ announcement.title }}</h2>
+            </div>
+            <div class="row text-muted small g-3">
+                <div class="col-auto">
+                    <i class="fas fa-user me-1"></i> 發布者：<strong>{{ announcement.author.username }}</strong>
+                </div>
+                <div class="col-auto">
+                    <i class="fas fa-calendar-alt me-1"></i> 時間：{{ announcement.created_at|date:"Y-m-d H:i" }}
+                </div>
+                {% if announcement.created_at != announcement.updated_at %}
+                <div class="col-auto text-primary">
+                    <i class="fas fa-history me-1"></i> 更新於：{{ announcement.updated_at|date:"Y-m-d H:i" }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body p-4 p-lg-5" style="white-space: pre-wrap; line-height: 1.8; font-size: 1.1rem;">
+            {{ announcement.content }}
+        </div>
+        <div class="card-footer bg-light py-3 border-0">
+            <a href="{% url 'notices:list' %}" class="btn btn-secondary shadow-sm">
+                <i class="fas fa-arrow-left me-1"></i> 返回列表
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

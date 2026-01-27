@@ -24,4 +24,6 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     #! 新增首頁路徑
     path("", TemplateView.as_view(template_name="index.html"), name="home"),
+    #! 公告系統
+    path("notices/", include("notices.urls")),
 ]

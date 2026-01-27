@@ -5,7 +5,6 @@ logging.basicConfig(
     level=logging.INFO, format="[%(asctime)s] p%(process)s {%(filename)s:%(lineno)d} %(levelname)s - %(message)s"
 )
 
-
 class Colors:
     HEADER = "\033[95m"  #! 淡紫色
     OKBLUE = "\033[94m"  #! 藍色
@@ -24,7 +23,7 @@ class Colors:
         filename = "未知"
         lineno = "未知"
         if tb:
-            # 取得最後一筆追蹤紀錄 (實際報錯的位置)
+            #! 取得最後一筆追蹤紀錄 (實際報錯的位置)
             while tb.tb_next:
                 tb = tb.tb_next
             filename = tb.tb_frame.f_code.co_filename

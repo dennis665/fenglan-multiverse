@@ -7,6 +7,9 @@ pip install -r requirements.txt
 
 django-admin startproject config .
 
+#! 建立新 app 的 models
+python manage.py makemigrations app_name
+
 #! 初始化 Django 內建的資料庫（預設是 SQLite）
 python manage.py migrate
 
