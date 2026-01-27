@@ -10,14 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-import environ
 import os
-
 from pathlib import Path
 
+import environ
 
 #! 環境初始化與路徑設定
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
@@ -25,13 +24,13 @@ env = environ.Env(
     ALLOWED_HOSTS=(list, []),
     CSRF_TRUSTED_ORIGINS=(list, []),
 )
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! 讀取 .env 檔案
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 #! 2. 安全性與基礎設定 (從 env 讀取)
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
@@ -41,10 +40,10 @@ ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
 SITE_ID = 1  # * django-allauth 與 sites 框架必備
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # *讓代理伺服器(Proxy)通過
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! 3. 應用程式定義 (INSTALLED_APPS)
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -69,17 +68,26 @@ LOCAL_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! 開發專用工具 (僅在 DEBUG=True 時啟用)
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 if DEBUG:
     INSTALLED_APPS += ["django_extensions"]
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# ? --------------------------------------------------------------------------
+else:
+    #! 正式環境：使用 SMTP 寄信
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp.gmail.com"  # * 以 Gmail 為例
+    EMAIL_PORT = 587  # * TLS 常用的埠號
+    EMAIL_USE_TLS = True  # * 開啟 TLS 加密傳輸
+    EMAIL_HOST_USER = env("EMAIL_USER")  # * 從 .env 讀取你的 Email
+    EMAIL_HOST_PASSWORD = env("EMAIL_PASS")  # * 從 .env 讀取「應用程式密碼」
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# ? ==============================================================================
 
 #! 中介軟體 (MIDDLEWARE)
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -90,10 +98,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",  # * allauth 必備
 ]
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! 模板、靜態檔案與媒體檔案
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -111,10 +119,62 @@ TEMPLATES = [
 
 STATIC_URL = "static/"
 # STATIC_ROOT = BASE_DIR / "staticfiles" # * 生產環境部署時啟用
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
+
+#! 日誌相關設定
+# ? ==============================================================================
+#! 確保 logs 資料夾存在於專案根目錄
+LOGS_DIR = BASE_DIR / "logs"
+if not LOGS_DIR.exists():
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            "datefmt": "%Y/%m/%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        #! 終端機輸出：僅顯示，不存檔
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        #! 每日滾動存檔：每天凌晨 0 點自動切換檔案
+        "daily_file": {
+            "level": "INFO",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": LOGS_DIR / "csi_server.log",
+            "when": "midnight",  #! 每天午夜切割
+            "interval": 1,  #! 每 1 天一次
+            "backupCount": 30,  #! 保留最近 30 天的日誌，避免塞爆硬碟
+            "formatter": "standard",
+            "encoding": "utf-8",  #! 支援中文輸出
+        },
+    },
+    "loggers": {
+        #! 自訂應用邏輯日誌 (使用方式: logger = logging.getLogger('app_logic'))
+        "app_logic": {
+            "handlers": ["console", "daily_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        #! Django 系統基本日誌也同步存入檔案
+        "django": {
+            "handlers": ["daily_file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}
+# ? ==============================================================================
 
 #! 資料庫與密碼驗證
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 DATABASES = {
     "default": env.db(),  # * django-environ 會自動解析 DATABASE_URL
 }
@@ -125,18 +185,18 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! 認證系統設定 (django-allauth)
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! 登入邏輯設定
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "optional"
@@ -145,10 +205,10 @@ ACCOUNT_EMAIL_VERIFICATION = "optional"
 "optional": 選用驗證。會發送驗證信，但使用者不驗證也能直接登入（適合目前階段）。
 "none": 不驗證。完全不發送驗證信。
 """
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! 社交帳號與跳轉設定
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 SOCIALACCOUNT_AUTO_SIGNUP = True
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -160,21 +220,21 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {"access_type": "online"},
     }
 }
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! 語系、時區與第三方套件配置
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 LANGUAGE_CODE = "zh-hant"
 TIME_ZONE = "Asia/Taipei"
 USE_I18N = True
 USE_TZ = True
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! Crispy Forms 配置
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
-# ? --------------------------------------------------------------------------
+# ? ==============================================================================
 
 #! 其他系統忽略警告 (選用)
 # SILENCED_SYSTEM_CHECKS = ["models.W036"]
