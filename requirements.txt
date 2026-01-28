@@ -28,3 +28,6 @@ whitenoise==6.11.0
 
 #! 串接 gemini ai
 google-genai==1.60.0
+
+#! 處理 log
+concurrent-log-handler==0.9.28

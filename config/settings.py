@@ -152,34 +152,38 @@ LOGGING = {
         },
     },
     "handlers": {
-        #! 終端機輸出：僅顯示，不存檔
+        #! 終端機輸出
         "console": {
             "level": "INFO",
             "class": "logging.StreamHandler",
             "formatter": "standard",
         },
-        #! 每日滾動存檔：每天凌晨 0 點自動切換檔案
-        "daily_file": {
+        #! 並行安全滾動存檔：解決 Windows 上的 PermissionError [WinError 32]
+        "concurrent_file": {
             "level": "INFO",
-            "class": "logging.handlers.TimedRotatingFileHandler",
+            #! 改用 ConcurrentRotatingFileHandler 以支援多程序存取
+            "class": "concurrent_log_handler.ConcurrentRotatingFileHandler",
             "filename": LOGS_DIR / "csi_server.log",
-            "when": "midnight",  #! 每天午夜切割
-            "interval": 1,  #! 每 1 天一次
-            "backupCount": 30,  #! 保留最近 30 天的日誌，避免塞爆硬碟
+            #! 設定單一檔案大小 (例如 10MB)，超過即自動切分
+            "maxBytes": 1024 * 1024 * 10,
+            #! 保留最近 30 個備份檔案
+            "backupCount": 30,
             "formatter": "standard",
-            "encoding": "utf-8",  #! 支援中文輸出
+            "encoding": "utf-8",
+            #! 延遲開啟檔案，直到有第一筆日誌寫入
+            "delay": True,
         },
     },
     "loggers": {
-        #! 自訂應用邏輯日誌 (使用方式: logger = logging.getLogger('app_logic'))
+        #! 自訂應用邏輯日誌
         "app_logic": {
-            "handlers": ["console", "daily_file"],
+            "handlers": ["console", "concurrent_file"],
             "level": "INFO",
             "propagate": False,
         },
-        #! Django 系統基本日誌也同步存入檔案
+        #! Django 系統日誌
         "django": {
-            "handlers": ["console", "daily_file"],
+            "handlers": ["console", "concurrent_file"],
             "level": "INFO",
             "propagate": True,
         },
