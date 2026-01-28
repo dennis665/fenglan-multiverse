@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django.db import models
+from django.forms import Textarea
 
-from .models import Announcement, ExternalTool
+from .models import AISystemSetting, Announcement, ExternalTool
 
 
 @admin.register(Announcement)
@@ -37,3 +39,12 @@ class ExternalToolAdmin(admin.ModelAdmin):
 
     #! 讓序號和啟用開關可以直接在列表修改
     list_editable = ("order", "is_active")
+
+
+@admin.register(AISystemSetting)
+class AISystemSettingAdmin(admin.ModelAdmin):
+    list_display = ("updated_at", "is_active")
+    #! 讓指令輸入框大一點好編輯
+    formfield_overrides = {
+        models.TextField: {"widget": Textarea(attrs={"rows": 15, "cols": 80})},
+    }

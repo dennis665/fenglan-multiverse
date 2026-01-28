@@ -33,3 +33,19 @@ class ExternalTool(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class AISystemSetting(models.Model):
+    #! 存放 AI 的基本行為規範與排版要求
+    instruction_text = models.TextField(verbose_name="系統基本指令")
+    #! 存放網站功能的描述
+    website_info = models.TextField(verbose_name="網站功能資訊", blank=True)
+    is_active = models.BooleanField(default=True, verbose_name="是否啟用")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "AI 客服設定"
+        verbose_name_plural = "AI 客服設定"
+
+    def __str__(self):
+        return f"AI 設定 (更新時間: {self.updated_at.strftime('%Y-%m-%d %H:%M')})"
