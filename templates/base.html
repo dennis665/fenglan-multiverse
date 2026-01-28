@@ -6,6 +6,8 @@
     <title>{% block head_title %}CSI Portal{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {# 引入 Markdown 解析庫 #}
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -98,6 +100,131 @@
     {% block content %}
     {% endblock %}
 </main>
+
+{# --- 智能客服對話介面開始 --- #}
+<style>
+    /* 懸浮按鈕樣式 */
+    .ai-chat-launcher {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1050;
+        transition: transform 0.2s;
+    }
+    .ai-chat-launcher:hover { transform: scale(1.1); }
+
+    /* 對話視窗本體 */
+    #ai-chat-container {
+        position: fixed;
+        bottom: 100px;
+        right: 30px;
+        width: 350px;
+        max-height: 500px;
+        background: white;
+        border-radius: 12px;
+        display: none; /* 初始隱藏 */
+        flex-direction: column;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        z-index: 1050;
+        overflow: hidden;
+    }
+
+    .chat-header { background: #212529; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
+    .chat-body { flex: 1; padding: 15px; overflow-y: auto; height: 350px; background: #f8f9fa; }
+    .chat-footer { padding: 10px; border-top: 1px solid #dee2e6; display: flex; gap: 8px; }
+    
+    /* 對話氣泡 */
+    .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; max-width: 85%; font-size: 14px; }
+    .msg-user { background: #0d6efd; color: white; align-self: flex-end; margin-left: auto; }
+    .msg-ai { background: #e9ecef; color: #212529; align-self: flex-start; line-height: 1.6; }
+    /* 修正 Markdown 產生的列表邊距 */
+    .msg-ai ul, .msg-ai ol {
+        padding-left: 20px;
+        margin-bottom: 0;
+    }
+    .msg-ai p {
+        margin-bottom: 8px; /* 段落間距 */
+    }
+</style>
+
+<div class="ai-chat-launcher" onclick="toggleAIChat()">
+    <i class="fas fa-robot"></i>
+</div>
+
+<div id="ai-chat-container">
+    <div class="chat-header">
+        <span class="fw-bold"><i class="fas fa-headset me-2"></i>CSI 智能助理</span>
+        <button type="button" class="btn-close btn-close-white" onclick="toggleAIChat()"></button>
+    </div>
+    <div id="ai-chat-body" class="chat-body d-flex flex-column">
+        <div class="msg msg-ai">你好！我是 CSI Portal 的助手，有什麼我可以幫你的嗎？</div>
+    </div>
+    <div class="chat-footer">
+        <input type="text" id="ai-user-input" class="form-control form-control-sm" placeholder="請輸入問題..." onkeypress="handleChatKey(event)">
+        <button class="btn btn-primary btn-sm" onclick="sendToAI()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<script>
+    function toggleAIChat() {
+        const container = document.getElementById('ai-chat-container');
+        container.style.display = (container.style.display === 'none' || container.style.display === '') ? 'flex' : 'none';
+    }
+
+    function handleChatKey(e) {
+        if (e.key === 'Enter') sendToAI();
+    }
+
+    async function sendToAI() {
+        const input = document.getElementById('ai-user-input');
+        const chatBody = document.getElementById('ai-chat-body');
+        const message = input.value.trim();
+        
+        if (!message) return;
+
+        // 使用者訊息顯示
+        chatBody.innerHTML += `<div class="msg msg-user">${message}</div>`;
+        input.value = '';
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        try {
+            // 這裡連動你之前寫的 portal_ai_bot 視圖網址
+            const response = await fetch('/ai-chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `message=${encodeURIComponent(message)}`
+            });
+            const data = await response.json();
+            
+            // AI 回應顯示
+            if (data.reply) {
+                // 使用 marked.parse 將 Markdown 轉為 HTML
+                const formattedReply = marked.parse(data.reply);
+                chatBody.innerHTML += `<div class="msg msg-ai">${formattedReply}</div>`;
+            } else {
+                chatBody.innerHTML += `<div class="msg msg-ai text-danger">抱歉，系統暫時無法回應。</div>`;
+            }
+        } catch (error) {
+            chatBody.innerHTML += `<div class="msg msg-ai text-danger">連線失敗，請檢查網路。</div>`;
+        }
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+</script>
+{# --- 智能客服對話介面結束 --- #}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

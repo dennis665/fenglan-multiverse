@@ -25,3 +25,6 @@ django-extensions==4.1
 
 #! 自動化處理 static 檔
 whitenoise==6.11.0
+
+#! 串接 gemini ai
+google-genai==1.60.0
