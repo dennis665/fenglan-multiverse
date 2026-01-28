@@ -19,16 +19,16 @@ def portal_ai_bot(request):
     if request.method == "POST":
         user_query = request.POST.get("message")
 
-        #! 1. 從 DB 讀取後台設定的指令
+        #! 從 DB 讀取後台設定的指令
         ai_setting = AISystemSetting.objects.filter(is_active=True).last()
         base_instruction = ai_setting.instruction_text if ai_setting else "你是一位親切的助手。"
         web_info = ai_setting.website_info if ai_setting else ""
 
-        #! 2. 從 DB 讀取最新 5 則公告（即時學習內容）
+        #! 從 DB 讀取最新 5 則公告（即時學習內容）
         latest_notices = Announcement.objects.all().order_by("-created_at")[:5]
         notice_context = "\n".join([f"- {n.title}: {n.content[:50]}..." for n in latest_notices])
 
-        #! 3. 組合最終指令
+        #! 組合最終指令
         dynamic_instruction = f"""
         {base_instruction}
 
