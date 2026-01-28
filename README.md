@@ -5,9 +5,9 @@
 這是一個基於 **Django 6.0.1** 與 **MySQL 8.0.45** 構建的入口網站專案，支援 **Google OAuth 2.0** 登入、**Docker** 容器化部署。
 
 ## 🚀 快速導覽
-* **最新版本**: `v1.2.0`
-* **更新摘要**: [點此查看完整更新歷程 (CHANGELOG)](CHANGELOG.md)
-* **AI 引擎**: Gemini 3 Flash
+* **最新版本**：`v1.2.0`
+* **更新摘要**：[點此查看完整更新歷程 (CHANGELOG)](CHANGELOG.md)
+* **AI 引擎**：Gemini 3 Flash
 
 ---
 
@@ -130,11 +130,11 @@ docker compose down -v
 
 ## google-oauth-設定提醒
 ```bash
-Client ID: 必須於 .env 中正確設定 GOOGLE_CLIENT_ID。
+Client ID：必須於 .env 中正確設定 GOOGLE_CLIENT_ID。
 
-Redirect URI: Google Console 必須允許 http://127.0.0.1:8000/accounts/google/login/callback/。
+Redirect URI：Google Console 必須允許 http://127.0.0.1:8000/accounts/google/login/callback/。
 
-Site ID: 進入 Admin 後台將 example.com 修改為 127.0.0.1:8000 以避免跳轉錯誤。
+Site ID：進入 Admin 後台將 example.com 修改為 127.0.0.1:8000 以避免跳轉錯誤。
 
-Root URL: 確保 config/urls.py 已配置空路徑 path('', ...) 導向首頁，避免 404 Page not found 錯誤。
+Root URL：確保 config/urls.py 已配置空路徑 path('', ...) 導向首頁，避免 404 Page not found 錯誤。
 ```

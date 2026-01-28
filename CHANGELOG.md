@@ -1,16 +1,35 @@
 # Changelog
-此文件記錄 CSI Portal 專案的所有重大變更。
+
+此文件記錄 **CSI Portal** 專案的所有重大變更。
+版本號遵循 [語義化版本 (SemVer)](https://semver.org/lang/zh-TW/) 規範：
+* **Major (X)**：重大架構改動（如更換核心框架）。
+* **Minor (Y)**：新增功能。
+* **Patch (Z)**：Bug 修復或效能優化。
+
+---
 
 ## [1.1.0] - 2026-01-28
-### Added
-* 實作智能客服懸浮視窗，支援 Markdown 語法渲染。
-* 新增 `AISystemSetting` 後台資料表，支援動態調整 AI 系統指令。
-* 導入 `concurrent-log-handler` 解決 Windows 環境下的日誌檔案鎖定問題。
+### Added (新增)
+* **智能客服正式上線**：整合懸浮對話介面與後端 Gemini 3 引擎。
+* **RAG 知識庫管理**：新增 `AISystemSetting` 後台資料表，支援免代碼動態調整 AI 系統指令（System Instruction）與學習資料。
+* **Markdown 渲染支持**：前端引入 `marked.js`，使 AI 回覆支援標題、列表及粗體排版。
 
-### Changed
-* 升級 AI 引擎至 **Gemini 3 Flash** (使用 `gemini-flash-latest` 別名)。
-* 程式統一專案註解規範：Python 使用 `#!`，JavaScript 使用 `//`。
+### Fixed (修復)
+* **日誌鎖定修復**：導入 `concurrent-log-handler` 徹底解決 Windows 環境下 `WinError 32` 導致伺服器崩潰的問題。
 
-## [1.0.0] - 2026-01-21
-### Added
-* CSI Portal 入口網基礎架構建置。
+### Changed (變更)
+* **SDK 遷移**：從舊版 `google-generativeai` 升級為新版 `google-genai` 套件。
+* **註解規範標準化**：
+    * Python：統一使用 `#!`。
+    * JavaScript：統一使用 `//`。
+    * Html：統一使用 `{# #}`。
+
+---
+
+## [1.0.0] - 2026-01-23
+### Added (新增)
+* **入口網基礎架構**：建置基於 Django 的 CSI Portal 核心框架。
+* **開發環境配置**：確立 Python 3.13+ 環境、Ruff 格式化規範及 VS Code 工作區設定。
+* **AI 引擎升級**：全面遷移至 **Gemini 3 Flash** (透過 `gemini-flash-latest` 別名)。
+* **身分驗證系統**：實作 Google 帳號連動登入、個人檔案管理及 Email 驗證流程。
+* **動態公告與工具箱**：開發 Notice 系統與外部工具連結選單，支援從資料庫動態產生成員專區內容。
