@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 from core.models import BaseModel  # * 確保這裡的路徑正確
 
@@ -49,3 +50,18 @@ class AISystemSetting(models.Model):
 
     def __str__(self):
         return f"AI 設定 (更新時間: {self.updated_at.strftime('%Y-%m-%d %H:%M')})"
+
+class SiteVisit(models.Model):
+    # 總瀏覽人數
+    total_visits = models.PositiveIntegerField(default=0, verbose_name="總瀏覽量")
+
+    # 單日統計：紀錄日期與當天次數
+    date = models.DateField(default=timezone.now, unique=True, verbose_name="統計日期")
+    daily_count = models.PositiveIntegerField(default=0, verbose_name="當日瀏覽量")
+
+    class Meta:
+        verbose_name = "網站瀏覽統計"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return f"{self.date} 統計"

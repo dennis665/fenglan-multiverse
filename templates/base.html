@@ -123,6 +123,24 @@
     {% endblock %}
 </main>
 
+<footer class="bg-dark text-white-50 py-3 mt-5 border-top border-secondary">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="small">
+            &copy; CSI Portal. All Rights Reserved.
+        </div>
+        <div class="stats-box small">
+            <span class="me-3">
+                <i class="fas fa-user-clock me-1 text-info"></i>今日瀏覽：
+                <strong class="text-white">{{ today_count }} 人</strong>
+            </span>
+            <span>
+                <i class="fas fa-globe me-1 text-success"></i>累計造訪：
+                <strong class="text-white">{{ total_count }} 人</strong>
+            </span>
+        </div>
+    </div>
+</footer>
+
 {# --- 智能客服對話介面開始 --- #}
 <style>
     /* 懸浮按鈕樣式 */
