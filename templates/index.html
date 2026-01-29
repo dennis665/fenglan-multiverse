@@ -11,7 +11,7 @@
         
         {% if user.is_authenticated %}
             <div class="alert alert-success">
-                您好，<strong>{{ user.username }}</strong>！您已成功登入。
+                您好，<strong>{{ user.first_name|default:user.username }}</strong>！您已成功登入。
             </div>
             <a class="btn btn-primary btn-lg" href="{% url 'account_logout' %}" role="button">立即登出</a>
         {% else %}

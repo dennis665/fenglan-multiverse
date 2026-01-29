@@ -65,12 +65,28 @@
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             {% load socialaccount %}
                             {% get_social_accounts user as accounts %}
-                            {% if accounts.google %}
-                                <img src="{{ accounts.google.0.get_avatar_url }}" width="30" height="30" class="rounded-circle me-2">
+
+                            {# --- 大頭貼三層判斷邏輯 --- #}
+                            {% if user.profile.avatar %}
+                                {# 優先級 1: 手動上傳 #}
+                                <img src="{{ user.profile.avatar.url }}" 
+                                    width="30" height="30" 
+                                    class="rounded-circle me-2 shadow-sm" 
+                                    style="object-fit: cover; border: 1px solid rgba(255,255,255,0.2);">
+                            
+                            {% elif accounts.google %}
+                                {# 優先級 2: Google 帳號頭像 #}
+                                <img src="{{ accounts.google.0.get_avatar_url }}" 
+                                    width="30" height="30" 
+                                    class="rounded-circle me-2 shadow-sm" 
+                                    style="object-fit: cover;">
+                            
                             {% else %}
-                                <i class="fas fa-user-circle me-2"></i>
+                                {# 優先級 3: 最終保底圖示 #}
+                                <i class="fas fa-user-circle me-2" style="font-size: 1.2rem;"></i>
                             {% endif %}
-                            {{ user.username }}
+
+                            <span class="d-none d-lg-inline">{{ user.first_name|default:user.username }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/accounts/profile/">個人檔案</a></li>

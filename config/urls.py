@@ -18,9 +18,10 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
+from django.views.static import serve
 
 from core.views import portal_ai_bot, profile_view
 
@@ -39,6 +40,13 @@ urlpatterns = [
     path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "images/favicon.ico")),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+elif not settings.DEBUG:
+    urlpatterns += [
+        #! 手動強制開啟媒體檔案路徑，不論 DEBUG 狀態為何
+        re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+        #! 如果連 CSS/JS 都不見了，也補上這一行
+        re_path(r"^static/(?P<path>.*)$", serve, {"document_root": settings.STATIC_ROOT}),
+    ]
