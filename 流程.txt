@@ -13,6 +13,9 @@ python manage.py makemigrations app_name
 #! 初始化 Django 內建的資料庫（預設是 SQLite）
 python manage.py migrate
 
+#! 刪除 app 做的 migrate
+python manage.py migrate app_name zero
+
 #! 所有樣式檔複製到 STATIC_ROOT 中
 python manage.py collectstatic --noinput
 
@@ -23,7 +26,10 @@ python manage.py runserver
 python manage.py createsuperuser
 
 #! 建立 app
-python manage.py startapp core
+python manage.py startapp app_name
+
+#! 終端機開發用
+python manage.py shell
 
 -------docker 相關-------
 #! 建立並啟動所有容器，改 Dockerfile、裝新套件

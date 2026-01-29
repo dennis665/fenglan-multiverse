@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from google import genai
 
 from notices.models import AISystemSetting, Announcement
@@ -9,6 +10,15 @@ from notices.models import AISystemSetting, Announcement
 
 @login_required
 def profile_view(request):
+    #! 處理使用者點擊「更新照片」的 POST 請求
+    if request.method == "POST":
+        avatar_file = request.FILES.get("avatar")
+        if avatar_file:
+            profile = request.user.profile
+            profile.avatar = avatar_file
+            profile.save()
+            messages.success(request, "大頭貼更新成功！")
+            return redirect("profile")
     #! 因為使用了 socialaccount，我們可以在模板中拿到 Google 的資料
     return render(request, "core/profile.html")
 

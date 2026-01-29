@@ -1,3 +1,4 @@
+{# users/templates/users/profile.html #}
 {% extends "base.html" %}
 {% load socialaccount %}
 
@@ -7,43 +8,97 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
+            
+            {# --- 新增：訊息通知區 --- #}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
             <div class="card shadow border-0">
                 <div class="card-header bg-dark text-white py-3">
                     <h4 class="mb-0"><i class="fas fa-id-card me-2"></i>個人檔案</h4>
                 </div>
+                
                 <div class="card-body p-4 text-center">
                     {% get_social_accounts user as accounts %}
-                    {% if accounts.google %}
-                        <img src="{{ accounts.google.0.get_avatar_url }}" 
-                             alt="Avatar" 
-                             class="rounded-circle shadow mb-3" 
-                             style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
-                        <h3 class="fw-bold">{{ user.username }}</h3>
-                        <p class="text-muted"><i class="fab fa-google text-danger"></i> 已連結 Google 帳號</p>
-                    {% else %}
-                        <i class="fas fa-user-circle fa-7x text-secondary mb-3"></i>
-                        <h3 class="fw-bold">{{ user.username }}</h3>
-                    {% endif %}
+
+                    {# --- 大頭貼顯示區域 (三層邏輯) --- #}
+                    <div class="mb-3">
+                        {% if user.profile.avatar %}
+                            {# 優先級 1: 使用者手動上傳 #}
+                            <img src="{{ user.profile.avatar.url }}?t={{ user.profile.avatar.size }}" 
+                                        class="rounded-circle shadow mx-auto d-block" 
+                                        style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
+                        
+                        {% elif accounts.google %}
+                            {# 優先級 2: Google 帳號頭像 #}
+                            {# 注意：這裡抓取 Google 原生提供的頭像網址 #}
+                            <img src="{{ accounts.google.0.get_avatar_url }}" 
+                                 class="rounded-circle shadow" 
+                                 style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
+                        
+                        {% else %}
+                            {# 優先級 3: 最終保底 FontAwesome 圖示 #}
+                            <i class="fas fa-user-circle fa-7x text-secondary"></i>
+                        {% endif %}
+                    </div>
+
+                    <h3 class="fw-bold">{{ user.username }}</h3>
+
+                    {# --- 來源標籤 --- #}
+                    <div class="mb-3">
+                        {% if user.profile.avatar %}
+                            <span class="badge bg-primary rounded-pill fw-normal px-3"><i class="fas fa-camera me-1"></i> 自定義頭像</span>
+                        {% elif accounts.google %}
+                            <span class="text-muted small"><i class="fab fa-google text-danger"></i> 已連結 Google 帳號</span>
+                        {% endif %}
+                    </div>
 
                     <hr class="my-4">
 
-                    <div class="row text-start">
-                        <div class="col-sm-4 fw-bold text-secondary">電子郵件：</div>
-                        <div class="col-sm-8">{{ user.email }}</div>
+                    {# --- 圖片上傳表單 --- #}
+                    {# action 留空代表提交給目前的 URL (即 accounts/profile/) #}
+                    <div class="row justify-content-center mb-4">
+                        <div class="col-sm-10 col-md-9">
+                            <form method="POST" enctype="multipart/form-data" class="input-group input-group-sm">
+                                {% csrf_token %}
+                                <input type="file" name="avatar" class="form-control" id="profile_avatar" accept="image/*" required>
+                                <button class="btn btn-dark" type="submit">更新大頭貼</button>
+                            </form>
+                            <div class="form-text mt-2 text-start">
+                                <i class="fas fa-info-circle me-1"></i> 提示：上傳自定義照片後，將取代 Google 提供的頭像。
+                            </div>
+                        </div>
                     </div>
-                    <div class="row text-start mt-3">
-                        <div class="col-sm-4 fw-bold text-secondary">最後登入：</div>
-                        <div class="col-sm-8">{{ user.last_login|date:"Y-m-d H:i" }}</div>
-                    </div>
-                    <div class="row text-start mt-3">
-                        <div class="col-sm-4 fw-bold text-secondary">帳號加入時間：</div>
-                        <div class="col-sm-8">{{ user.date_joined|date:"Y-m-d H:i" }}</div>
+
+                    {# --- 使用者資訊區 --- #}
+                    <div class="mt-4 border-top pt-4">
+                        <div class="row text-start mb-2">
+                            <div class="col-sm-4 fw-bold text-secondary">電子郵件：</div>
+                            <div class="col-sm-8 text-break">{{ user.email }}</div>
+                        </div>
+                        <div class="row text-start mb-2">
+                            <div class="col-sm-4 fw-bold text-secondary">最後登入：</div>
+                            <div class="col-sm-8">{{ user.last_login|date:"Y-m-d H:i" }}</div>
+                        </div>
+                        <div class="row text-start mb-2">
+                            <div class="col-sm-4 fw-bold text-secondary">帳號加入時間：</div>
+                            <div class="col-sm-8">{{ user.date_joined|date:"Y-m-d H:i" }}</div>
+                        </div>
                     </div>
                 </div>
+
                 <div class="card-footer bg-white py-3">
                     <div class="d-flex justify-content-between">
-                        <a href="/" class="btn btn-outline-secondary">回到首頁</a>
-                        </div>
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> 回到首頁
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

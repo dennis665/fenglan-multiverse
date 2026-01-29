@@ -35,3 +35,6 @@ staticfiles/
 
 #! 測試的資料
 test*
+
+#! 上傳檔案儲存
+media/
