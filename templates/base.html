@@ -26,6 +26,12 @@
                 <li class="nav-item">
                     <a class="nav-link {% if 'notices' in request.path %}active{% endif %}" href="{% url 'notices:list' %}">系統公告</a>
                 </li>
+                {# --- 新增：抽獎輪盤連結 --- #}
+                <li class="nav-item">
+                    <a class="nav-link {% if 'lucky-draw' in request.path %}active{% endif %}" href="{% url 'lucky_draw' %}">
+                        <i class="fas fa-gift me-1 text-warning"></i>抽獎輪盤
+                    </a>
+                </li>
                 {# 測試人員專區下拉選單 (僅工作人員或超級使用者可見) #}
                 {% if user.is_staff or user.is_superuser %}
                 <li class="nav-item dropdown">

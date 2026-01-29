@@ -1,3 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def lucky_draw(request):
+    return render(request, "users/lucky_draw.html")

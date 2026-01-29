@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4 text-center"><i class="fas fa-gift me-2 text-danger"></i>CSI 幸運大轉盤</h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-dark text-white">設定獎品與機率</div>
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <span>設定獎項</span>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="ignoreWeight" onchange="drawWheel()">
+                        <label class="form-check-label small" for="ignoreWeight">忽略機率 (公平模式)</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm" id="prizeTable">
+                        <thead>
+                            <tr>
+                                <th>獎名</th>
+                                <th>權重(%)</th>
+                                <th>數量 (-1=無限)</th> <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" class="form-control form-control-sm prize-name" value="特等獎"></td>
+                                <td><input type="number" class="form-control form-control-sm prize-weight" value="5"></td>
+                                <td><input type="number" class="form-control form-control-sm prize-qty" value="1"></td> <td><button class="btn btn-sm text-danger" onclick="this.closest('tr').remove(); drawWheel();"><i class="fas fa-times"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button class="btn btn-outline-primary btn-sm w-100" onclick="addPrizeRow()">+ 新增獎項</button>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">匯入人員名單</div>
+                <div class="card-body">
+                    <input type="file" id="excelInput" class="form-control form-control-sm" accept=".xlsx, .xls">
+                    <div id="userCount" class="form-text mt-2">尚未匯入名單 (Excel 第一欄須為姓名)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 text-center">
+            <div class="wheel-container mb-4">
+                <canvas id="wheelCanvas" width="400" height="400"></canvas>
+                <div class="pointer"></div>
+            </div>
+            <button id="drawBtn" class="btn btn-danger btn-lg px-5 shadow" onclick="startSpin()">
+                <i class="fas fa-play me-2"></i>開始抽獎
+            </button>
+            <div id="resultDisplay" class="mt-4 h3 text-primary fw-bold"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-5">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-list-ul me-2"></i>中獎紀錄</span>
+        <div>
+            <button class="btn btn-sm btn-light me-2" onclick="exportToExcel()">
+                <i class="fas fa-file-export me-1"></i>匯出 Excel
+            </button>
+            <button class="btn btn-sm btn-outline-light" onclick="clearRecords()">清空紀錄</button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive" style="max-height: 300px;">
+            <table class="table table-hover mb-0" id="recordTable">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th>#</th>
+                        <th>時間</th>
+                        <th>得獎人</th>
+                        <th>獎項</th>
+                    </tr>
+                </thead>
+                <tbody id="recordBody">
+                    <tr id="noRecord">
+                        <td colspan="4" class="text-center text-muted py-3">目前尚無中獎紀錄</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<style>
+    .wheel-container { position: relative; display: inline-block; }
+    .pointer {
+        position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+        width: 0; height: 0; border-left: 15px solid transparent;
+        border-right: 15px solid transparent; border-top: 30px solid #ffc107; z-index: 10;
+    }
+    #wheelCanvas { border-radius: 50%; box-shadow: 0 0 20px rgba(0,0,0,0.2); transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
+</style>
+
+<script>
+let participants = [];
+let prizes = [];
+let currentRotation = 0;
+let recordCount = 0;
+
+// 讀取 Excel 人員名單
+document.getElementById('excelInput').addEventListener('change', function(e) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+        participants = json.map(row => row[0]).filter(name => name && name !== "姓名"); 
+        document.getElementById('userCount').innerHTML = `<i class="fas fa-check-circle text-success"></i> 已匯入 ${participants.length} 人`;
+    };
+    reader.readAsArrayBuffer(e.target.files[0]);
+});
+
+// 繪製轉盤邏輯 (自動過濾庫存為 0 的獎項)
+function drawWheel() {
+    const isIgnoreWeight = document.getElementById('ignoreWeight').checked;
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // 抓取所有輸入欄位
+    const names = document.querySelectorAll('.prize-name');
+    const weights = document.querySelectorAll('.prize-weight');
+    const qtys = document.querySelectorAll('.prize-qty');
+
+    // --- 關鍵修改：過濾庫存 ---
+    prizes = [];
+    names.forEach((n, i) => {
+        let q = parseInt(qtys[i].value);
+        // 只有在名字不為空，且 (數量 > 0 或 數量為 -1) 的情況下才加入轉盤
+        if (n.value && (q > 0 || q === -1)) {
+            prizes.push({ 
+                name: n.value, 
+                weight: isIgnoreWeight ? 1 : (parseFloat(weights[i].value) || 0) 
+            });
+        }
+    });
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = centerX - 10;
+    
+    // 清除畫布
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (prizes.length === 0) {
+        // 如果沒獎品了，畫一個灰色的空盤
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#e9ecef";
+        ctx.fill();
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#6c757d";
+        ctx.font = "bold 20px Arial";
+        ctx.fillText("獎項已抽完", centerX, centerY);
+        return;
+    }
+
+    const totalWeight = prizes.reduce((sum, p) => sum + p.weight, 0);
+    let startAngle = 0;
+
+    prizes.forEach((prize, i) => {
+        const sliceAngle = (prize.weight / totalWeight) * 2 * Math.PI;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+        ctx.closePath();
+
+        // 使用 HSL 配色
+        ctx.fillStyle = `hsl(${(i * 360) / prizes.length}, 70%, 60%)`;
+        ctx.fill();
+        ctx.stroke();
+
+        // 繪製文字
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "white";
+        ctx.font = "bold 16px Arial";
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.fillText(prize.name, radius - 20, 10);
+        ctx.restore();
+
+        startAngle += sliceAngle;
+    });
+}
+
+// 監聽輸入變化，即時更新轉盤
+document.addEventListener('input', (e) => {
+    if (e.target.classList.contains('prize-name') || e.target.classList.contains('prize-weight')) {
+        drawWheel();
+    }
+});
+
+// 初始化轉盤
+window.onload = drawWheel;
+
+function addPrizeRow() {
+    const tbody = document.querySelector('#prizeTable tbody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td><input type="text" class="form-control form-control-sm prize-name" placeholder="獎品"></td>
+        <td><input type="number" class="form-control form-control-sm prize-weight" value="10"></td>
+        <td><input type="number" class="form-control form-control-sm prize-qty" value="-1"></td>
+        <td><button class="btn btn-sm text-danger" onclick="this.closest('tr').remove(); drawWheel();"><i class="fas fa-times"></i></button></td>
+    `;
+    tbody.appendChild(newRow);
+    drawWheel();
+}
+
+// 開始抽獎動畫
+function startSpin() {
+    if (participants.length === 0) return alert("請先匯入人員名單！");
+
+    const isIgnoreWeight = document.getElementById('ignoreWeight').checked;
+    const names = document.querySelectorAll('.prize-name');
+    const weights = document.querySelectorAll('.prize-weight');
+    const qtys = document.querySelectorAll('.prize-qty');
+    
+    prizes = [];
+    names.forEach((n, i) => {
+        let q = parseInt(qtys[i].value);
+        if (n.value && (q > 0 || q === -1)) {
+            prizes.push({ 
+                name: n.value, 
+                weight: isIgnoreWeight ? 1 : (parseFloat(weights[i].value) || 0),
+                qty: q,
+                index: i
+            });
+        }
+    });
+
+    if (prizes.length === 0) return alert("所有獎品已抽完！");
+
+    // 加權隨機抽獎
+    const totalWeight = prizes.reduce((sum, p) => sum + p.weight, 0);
+    let random = Math.random() * totalWeight;
+    
+    let selectedPrize = null;
+    let accumulatedWeight = 0;
+    let prizeStartAngle = 0;
+    let prizeSliceAngle = 0;
+
+    for (let p of prizes) {
+        prizeSliceAngle = (p.weight / totalWeight) * 360; // 轉換為角度 (0-360)
+        if (random < p.weight + accumulatedWeight && !selectedPrize) {
+            selectedPrize = p;
+            prizeStartAngle = (accumulatedWeight / totalWeight) * 360;
+        }
+        accumulatedWeight += p.weight;
+    }
+
+    if (!selectedPrize) selectedPrize = prizes[prizes.length - 1];
+
+    // 計算旋轉度數，讓指針對準區塊中心
+    const canvas = document.getElementById('wheelCanvas');
+    
+    // 指針在 270 度 (12點鐘)，轉盤 0 度在 3 點鐘
+    // 我們需要計算：(270 - 區塊起始角度 - 區塊寬度的一半)
+    const centerOfSlice = prizeStartAngle + (prizeSliceAngle / 2);
+    const targetRotation = 270 - centerOfSlice;
+    
+    // 總旋轉 = 基礎旋轉(目前位置) + 至少 5 圈(1800度) + 修正到目標角度
+    // 使用正值確保旋轉方向順暢
+    const currentRotationBase = Math.ceil(currentRotation / 360) * 360;
+    currentRotation = currentRotationBase + 1800 + targetRotation;
+
+    canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+    // 剩餘流程
+    const winner = participants[Math.floor(Math.random() * participants.length)];
+    const btn = document.getElementById('drawBtn');
+    btn.disabled = true;
+
+    setTimeout(() => {
+        btn.disabled = false;
+        
+        if (selectedPrize.qty !== -1) {
+            let newQty = selectedPrize.qty - 1;
+            qtys[selectedPrize.index].value = newQty;
+            if (newQty === 0) {
+                names[selectedPrize.index].closest('tr').classList.add('table-danger');
+            }
+        }
+        
+        drawWheel();
+        document.getElementById('resultDisplay').innerHTML = `
+            <i class="fas fa-trophy text-warning"></i> 恭喜 ${winner} 獲得 ${selectedPrize.name}
+        `;
+        addRecord(winner, selectedPrize.name);
+    }, 4000);
+}
+
+// 新增紀錄函數
+function addRecord(winner, prizeName) {
+    const recordBody = document.getElementById('recordBody');
+    const noRecord = document.getElementById('noRecord');
+
+    if (noRecord) noRecord.remove(); // 移除「暫無紀錄」文字
+
+    recordCount++;
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+    const newRow = `
+        <tr class="animate__animated animate__fadeInDown">
+            <td>${recordCount}</td>
+            <td>${timeStr}</td>
+            <td class="fw-bold">${winner}</td>
+            <td><span class="badge bg-info text-dark">${prizeName}</span></td>
+        </tr>
+    `;
+
+    participants = participants.filter(p => p !== winner);
+    document.getElementById('userCount').innerText = "剩餘人數：" + participants.length;
+
+    // 將新紀錄插在最前面 (最上面)
+    recordBody.insertAdjacentHTML('afterbegin', newRow);
+}
+
+// 清空紀錄函數
+function clearRecords() {
+    if (confirm("確定要清空所有中獎紀錄嗎？")) {
+        document.getElementById('recordBody').innerHTML = `
+            <tr id="noRecord">
+                <td colspan="4" class="text-center text-muted py-3">目前尚無中獎紀錄</td>
+            </tr>
+        `;
+        recordCount = 0;
+    }
+}
+
+// 匯出紀錄至 Excel
+function exportToExcel() {
+    // 檢查是否有紀錄
+    const rows = document.querySelectorAll('#recordBody tr:not(#noRecord)');
+    if (rows.length === 0) {
+        alert("目前沒有任何中獎紀錄可以匯出！");
+        return;
+    }
+
+    // 準備資料陣列 (包含標題列)
+    const data = [
+        ["編號", "抽獎時間", "中獎人姓名", "獲得獎項"]
+    ];
+
+    // 遍歷表格抓取資料
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('td');
+        data.push([
+            cols[0].innerText, // 編號
+            cols[1].innerText, // 時間
+            cols[2].innerText, // 姓名
+            cols[3].innerText  // 獎項
+        ]);
+    });
+
+    // 使用 SheetJS 產生 Excel 檔案
+    const worksheet = XLSX.utils.aoa_to_sheet(data); // Array of Arrays 轉成 Sheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "中獎名單");
+
+    // 設定檔名 (包含當前日期時間)
+    const now = new Date();
+    const fileName = `CSI_LuckyDraw_Result_${now.getFullYear()}${now.getMonth()+1}${now.getDate()}.xlsx`;
+
+    // 觸發下載
+    XLSX.writeFile(workbook, fileName);
+}
+</script>
+{% endblock %}

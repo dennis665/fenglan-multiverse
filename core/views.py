@@ -62,3 +62,7 @@ def portal_ai_bot(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def lucky_draw(request):
+    return render(request, "core/lucky_draw.html")

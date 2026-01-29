@@ -23,7 +23,7 @@ from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 from django.views.static import serve
 
-from core.views import portal_ai_bot, profile_view
+from core.views import lucky_draw, portal_ai_bot, profile_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -36,6 +36,8 @@ urlpatterns = [
     path("notices/", include("notices.urls")),
     #! 智能客服
     path("ai-chat/", portal_ai_bot, name="portal_ai_bot"),
+    #! 幸運抽獎
+    path("lucky-draw/", lucky_draw, name="lucky_draw"),
     #! ICON
     path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "images/favicon.ico")),
 ]
