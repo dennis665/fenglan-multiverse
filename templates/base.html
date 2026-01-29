@@ -11,6 +11,8 @@
 </head>
 <body>
 
+<div class="bg-animation-container" id="bg-animation"></div>
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
         <a class="navbar-brand" href="/">CSI Server</a>
@@ -126,7 +128,7 @@
 <footer class="bg-dark text-white-50 py-3 mt-5 border-top border-secondary">
     <div class="container d-flex justify-content-between align-items-center">
         <div class="small">
-            &copy; CSI Portal. All Rights Reserved.
+            &copy; {% now "Y" %} CSI Portal. All Rights Reserved.
         </div>
         <div class="stats-box small">
             <span class="me-3">
@@ -141,8 +143,49 @@
     </div>
 </footer>
 
-{# --- 智能客服對話介面開始 --- #}
+{# --- CSS 設定 --- #}
 <style>
+    /* 動態背景容器 */
+    .bg-animation-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* 重要：讓滑鼠可以穿透，不影響點擊按鈕 */
+        z-index: -1; /* 放在所有內容後方 */
+        overflow: hidden;
+        background: linear-gradient(to bottom, #f8f9fa, #e9ecef); /* 給背景一點點漸層質感 */
+    }
+
+    /* 楓葉/雪花粒子 */
+    .particle {
+        position: absolute;
+        top: -50px;
+        color: rgba(210, 105, 30, 0.3); /* 楓葉色，透明度低才不會干擾閱讀 */
+        user-select: none;
+        font-size: 24px;
+        animation: fall linear infinite;
+    }
+
+    /* 下落動畫 */
+    @keyframes fall {
+        0% {
+            transform: translateY(0) rotate(0deg) translateX(0);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.8;
+        }
+        90% {
+            opacity: 0.8;
+        }
+        100% {
+            transform: translateY(110vh) rotate(720deg) translateX(100px);
+            opacity: 0;
+        }
+    }
+
     /* 懸浮按鈕樣式 */
     .ai-chat-launcher {
         position: fixed;
@@ -183,7 +226,7 @@
     .chat-header { background: #212529; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
     .chat-body { flex: 1; padding: 15px; overflow-y: auto; height: 350px; background: #f8f9fa; }
     .chat-footer { padding: 10px; border-top: 1px solid #dee2e6; display: flex; gap: 8px; }
-    
+
     /* 對話氣泡 */
     .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; max-width: 85%; font-size: 14px; }
     .msg-user { background: #0d6efd; color: white; align-self: flex-end; margin-left: auto; }
@@ -195,6 +238,28 @@
     }
     .msg-ai p {
         margin-bottom: 8px; /* 段落間距 */
+    }
+
+    /* 讓整個頁面至少佔滿螢幕高度 */
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* 關鍵：確保 body 至少跟視窗一樣高 */
+    }
+
+    /* 讓中間的內容區自動「撐開」剩下的空間 */
+    main {
+        flex: 1 0 auto; /* 關鍵：這會把 footer 推到底部 */
+    }
+
+    /* 確保 Footer 不會被壓縮 */
+    footer {
+        flex-shrink: 0;
     }
 </style>
 
@@ -267,5 +332,36 @@
 {# --- 智能客服對話介面結束 --- #}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function createParticles() {
+        const container = document.getElementById('bg-animation');
+        const particleCount = 20; // 粒子數量，20-30 個最有質感且不卡頓
+        const icons = ['🍁', '🍂', '❄', '❅'];
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.innerText = icons[Math.floor(Math.random() * icons.length)];
+            
+            // 隨機初始位置
+            particle.style.left = Math.random() * 100 + 'vw';
+            
+            // 隨機動畫時長 (10s ~ 25s)
+            const duration = Math.random() * 15 + 10;
+            particle.style.animationDuration = duration + 's';
+            
+            // 隨機延遲時間，讓它們不要同時掉下來
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            
+            // 隨機大小
+            particle.style.fontSize = (Math.random() * 10 + 15) + 'px';
+
+            container.appendChild(particle);
+        }
+    }
+
+    // 執行產生
+    createParticles();
+</script>
 </body>
 </html>
