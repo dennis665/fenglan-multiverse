@@ -32,7 +32,7 @@ urlpatterns = [
     path("", TemplateView.as_view(template_name="index.html"), name="home"),
     #! 個人檔案
     path("accounts/profile/", profile_view, name="profile"),
-    #! 公告系統
+    #! 公告消息
     path("notices/", include("notices.urls")),
     #! 智能客服
     path("ai-chat/", portal_ai_bot, name="portal_ai_bot"),
