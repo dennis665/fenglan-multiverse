@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow border-0 text-center animate__animated animate__fadeInUp">
+                <div class="card-header bg-success text-white py-4">
+                    <i class="fas fa-check-circle fa-4x mb-3"></i>
+                    <h2 class="fw-bold">取號成功！</h2>
+                </div>
+                
+                <div class="card-body p-5">
+                    <p class="text-muted mb-2">您的專屬發文字號如下：</p>
+                    
+                    <div class="bg-light border rounded p-4 mb-4">
+                        <h1 class="display-3 fw-bold text-primary mb-0" id="serialNumber">
+                            {{ serial }}
+                        </h1>
+                    </div>
+
+                    <div class="row text-start mb-4">
+                        <div class="col-6">
+                            <small class="text-muted d-block">取號人</small>
+                            <span class="fw-bold">{{ applicant|default:"(未提供)" }}</span>
+                        </div>
+                        <div class="col-6 border-start">
+                            <small class="text-muted d-block">申請日期</small>
+                            <span class="fw-bold">{% now "Y/m/d" %}</span>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <small class="text-muted d-block">事由</small>
+                            <span class="fw-bold">{{ matter|default:"(未提供)" }}</span>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                        <button class="btn btn-outline-primary px-4" onclick="copyToClipboard()">
+                            <i class="fas fa-copy me-2"></i>複製號碼
+                        </button>
+                        <button class="btn btn-primary px-4" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>列印憑證
+                        </button>
+                        <a href="{% url 'ticket_pull' %}" class="btn btn-secondary px-4">
+                            繼續取號
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-white text-muted py-3">
+                    <small>提示：請妥善保管此號碼以利後續查詢。</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 簡單的複製到剪貼簿功能
+    function copyToClipboard() {
+        const serial = document.getElementById('serialNumber').innerText;
+        navigator.clipboard.writeText(serial.trim()).then(() => {
+            alert('序號已複製到剪貼簿：' + serial);
+        });
+    }
+</script>
+
+<style>
+    /* 列印時隱藏不需要的元件 */
+    @media print {
+        nav, .ai-chat-launcher, footer, .btn, .text-muted {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        #serialNumber {
+            color: black !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -65,3 +65,17 @@ class SiteVisit(models.Model):
 
     def __str__(self):
         return f"{self.date} 統計"
+
+
+class TicketRecord(models.Model):
+    date = models.DateField(auto_now_add=True, verbose_name="日期")
+    serial_number = models.CharField(max_length=11, unique=True, verbose_name="發文字號")
+    matter = models.CharField(max_length=20, verbose_name="事由")
+    applicant = models.CharField(max_length=10, verbose_name="取號人")
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name = "發文簿紀錄"
+
+    def __str__(self):
+        return f"{self.serial_number} - {self.applicant}"

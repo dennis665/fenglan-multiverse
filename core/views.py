@@ -3,9 +3,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from google import genai
 
-from notices.models import AISystemSetting, Announcement
+from notices.models import AISystemSetting, Announcement, TicketRecord
 
 
 @login_required
@@ -66,3 +67,49 @@ def portal_ai_bot(request):
 
 def lucky_draw(request):
     return render(request, "core/lucky_draw.html")
+
+
+def ticket_pull(request):
+    #! 權限檢查：必須是登入狀態且具備工作人員 (is_staff) 以上權限
+    if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+        messages.warning(request, "您不具備存取「發文簿系統」的權限，已自動導回首頁。")
+        return redirect("home")
+
+    if request.method == "POST":
+        matter = request.POST.get("matter")
+        applicant = request.POST.get("applicant")
+
+        #! 計算民國年 (西元年 - 1911)
+        now = timezone.now()
+        minguo_year = now.year - 1911
+
+        #! 定義前綴 (請自行更換這 5 個字，例如 'CSITW')
+        dispatch_word = settings.DISPATCH_WORD
+
+        #! 搜尋「今年」已發出的最後一筆號碼
+        year_prefix = f"{dispatch_word}{minguo_year}"
+        last_ticket = (
+            TicketRecord.objects.filter(serial_number__startswith=year_prefix).order_by("serial_number").last()
+        )
+
+        if last_ticket:
+            #! 抓取最後 3 位數字並加 1 (例如 '001' -> 1 -> 2)
+            last_no = int(last_ticket.serial_number[-3:])
+            new_no = last_no + 1
+        else:
+            #! 每年重製：今年第一筆從 1 開始
+            new_no = 1
+
+        #! 格式化為 11 位字元：前綴(5) + 年(3) + 編號(000, 3位)
+        new_serial = f"{dispatch_word}{minguo_year}{new_no:03d}"
+
+        #! 存檔
+        TicketRecord.objects.create(serial_number=new_serial, matter=matter, applicant=applicant)
+
+        return render(
+            request, "core/ticket_success.html", {"serial": new_serial, "matter": matter, "applicant": applicant}
+        )
+
+    #! 取最新3筆歷史紀錄
+    history = TicketRecord.objects.all().order_by("-date", "-id")[:3]
+    return render(request, "core/ticket_pull.html", {"history": history})
