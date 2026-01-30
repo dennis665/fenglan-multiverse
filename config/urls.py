@@ -24,12 +24,14 @@ from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 from django.views.static import serve
 
-from core.views import lucky_draw, portal_ai_bot, profile_view, ticket_pull
+from core.views import feature_permission, lucky_draw, portal_ai_bot, profile_view, ticket_pull
 
 urlpatterns = [
     # ? =================================頁面=================================
     #! 首頁
     path("", TemplateView.as_view(template_name="index.html"), name="home"),
+    #! 功能權限清單
+    path("feature-permission/", feature_permission, name="feature_permission"),
     #! 後台
     path("admin/", admin.site.urls),
     #! 帳號個人檔案跳轉

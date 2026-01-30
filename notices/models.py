@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
 
-from core.models import BaseModel  # * 確保這裡的路徑正確
+from core.models import BaseModel
 
 
 class Announcement(BaseModel):

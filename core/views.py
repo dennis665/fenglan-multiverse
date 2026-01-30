@@ -7,6 +7,9 @@ from django.utils import timezone
 from google import genai
 
 from notices.models import AISystemSetting, Announcement, TicketRecord
+from utils.decorators import staff_required
+
+from .models import FeatureStatus
 
 
 @login_required
@@ -89,12 +92,8 @@ def lucky_draw(request):
     return render(request, "core/lucky_draw.html")
 
 
+@staff_required
 def ticket_pull(request):
-    #! 權限檢查：必須是登入狀態且具備工作人員 (is_staff) 以上權限
-    if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
-        messages.warning(request, "您不具備存取「發文簿系統」的權限，已自動導回首頁。")
-        return redirect("home")
-
     if request.method == "POST":
         matter = request.POST.get("matter")
         applicant = request.POST.get("applicant")
@@ -133,3 +132,9 @@ def ticket_pull(request):
     #! 取最新3筆歷史紀錄
     history = TicketRecord.objects.all().order_by("-date", "-id")[:3]
     return render(request, "core/ticket_pull.html", {"history": history})
+
+
+@staff_required
+def feature_permission(request):
+    features = FeatureStatus.objects.all().order_by("sort_order", "id")
+    return render(request, "core/feature_list.html", {"features": features})
