@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 
 from core.models import BaseModel  # * 確保這裡的路徑正確
@@ -37,25 +37,40 @@ class ExternalTool(models.Model):
 
 
 class AISystemSetting(models.Model):
-    #! 存放 AI 的基本行為規範與排版要求
+    ROLE_CHOICES = [
+        ("GUEST", "未登入訪客"),
+        ("USER", "一般使用者"),
+        ("STAFF", "工作人員"),
+        ("SUPERUSER", "超級管理員"),
+    ]
+
+    role_level = models.CharField(max_length=20, choices=ROLE_CHOICES, default="GUEST", verbose_name="適用權限")
     instruction_text = models.TextField(verbose_name="系統基本指令")
-    #! 存放網站功能的描述
     website_info = models.TextField(verbose_name="網站功能資訊", blank=True)
-    is_active = models.BooleanField(default=True, verbose_name="是否啟用")
+    is_active = models.BooleanField(default=False, verbose_name="是否啟用")
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "AI 客服設定"
         verbose_name_plural = "AI 客服設定"
 
+    #! 核心邏輯：確保同一權限等級只有一筆 is_active=True
+    def save(self, *args, **kwargs):
+        if self.is_active:
+            with transaction.atomic():
+                #! 將「同等級」且「目前啟用中」的其他設定全部設為 False
+                AISystemSetting.objects.filter(role_level=self.role_level, is_active=True).exclude(pk=self.pk).update(
+                    is_active=False
+                )
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"AI 設定 (更新時間: {self.updated_at.strftime('%Y-%m-%d %H:%M')})"
+        active_status = "✅啟用中" if self.is_active else "❌停用"
+        return f"[{self.get_role_level_display()}] {active_status} (更新於: {self.updated_at.strftime('%m-%d %H:%M')})"  # pyright: ignore[reportAttributeAccessIssue]
+
 
 class SiteVisit(models.Model):
-    # 總瀏覽人數
     total_visits = models.PositiveIntegerField(default=0, verbose_name="總瀏覽量")
-
-    # 單日統計：紀錄日期與當天次數
     date = models.DateField(default=timezone.now, unique=True, verbose_name="統計日期")
     daily_count = models.PositiveIntegerField(default=0, verbose_name="當日瀏覽量")
 

@@ -43,7 +43,7 @@ class ExternalToolAdmin(admin.ModelAdmin):
 
 @admin.register(AISystemSetting)
 class AISystemSettingAdmin(admin.ModelAdmin):
-    list_display = ("updated_at", "is_active")
+    list_display = ("role_level", "updated_at", "is_active")
     #! 讓指令輸入框大一點好編輯
     formfield_overrides = {
         models.TextField: {"widget": Textarea(attrs={"rows": 15, "cols": 80})},

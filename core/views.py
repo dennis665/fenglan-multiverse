@@ -29,9 +29,26 @@ def portal_ai_bot(request):
 
     if request.method == "POST":
         user_query = request.POST.get("message")
+        user = request.user
 
-        #! 從 DB 讀取後台設定的指令
-        ai_setting = AISystemSetting.objects.filter(is_active=True).last()
+        #! 判斷目前使用者的最高權限等級
+        if not user.is_authenticated:
+            target_role = "GUEST"
+        elif user.is_superuser:
+            target_role = "SUPERUSER"
+        elif user.is_staff:
+            target_role = "STAFF"
+        elif user.is_active:
+            target_role = "USER"
+
+        #! 從 DB 讀取該權限對應的設定
+        #! 使用 filter(...).first() 避免該權限尚未設定時出錯
+        ai_setting = AISystemSetting.objects.filter(role_level=target_role, is_active=True).first()
+
+        #! 如果沒設定該權限，則抓取 GUEST 做為保底，或是給予預設值
+        if not ai_setting:
+            ai_setting = AISystemSetting.objects.filter(role_level="GUEST", is_active=True).first()
+
         base_instruction = ai_setting.instruction_text if ai_setting else "你是一位親切的助手。"
         web_info = ai_setting.website_info if ai_setting else ""
 
@@ -39,16 +56,19 @@ def portal_ai_bot(request):
         latest_notices = Announcement.objects.all().order_by("-created_at")[:5]
         notice_context = "\n".join([f"- {n.title}: {n.content[:50]}..." for n in latest_notices])
 
-        #! 組合最終指令
+        #! 組合最終動態指令 (加入角色暗示)
         dynamic_instruction = f"""
+        ### Your Role
         {base_instruction}
 
-        ### 網站功能與資訊：
+        你現在正在服務的使用者權限為：{target_role}。
+
+        ### 網站功能資訊 (針對該使用者權限開放的內容)：
         {web_info}
 
         ### 最新公告資訊（請根據以下內容回答）：
         {notice_context if notice_context else "目前暫無公告。"}
-        
+
         請記住，如果使用者問的問題在上述資訊之外，請委婉告知你只負責 CSI Portal 的相關諮詢。
         """
 
@@ -59,8 +79,8 @@ def portal_ai_bot(request):
                 contents=user_query,
             )
             return JsonResponse({"reply": response.text})
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+        except Exception:
+            return JsonResponse({"error": "AI 暫時休息中，請稍後再試。"}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
