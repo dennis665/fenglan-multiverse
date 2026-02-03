@@ -2,6 +2,7 @@
 django==6.0.1
 mysqlclient==2.2.7
 django-environ==0.12.0
+pyodbc==5.3.0
 
 #! OAuth 2.0 與認證 (Google 登入核心)
 django-allauth==65.14.0
@@ -31,3 +32,7 @@ google-genai==1.60.0
 
 #! 處理 log
 concurrent-log-handler==0.9.28
+
+#! 處理 Excel 資料
+pandas==3.0.0
+openpyxl==3.1.5

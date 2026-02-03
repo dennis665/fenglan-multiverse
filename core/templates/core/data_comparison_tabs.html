@@ -1,0 +1,118 @@
+{# core/data_comparison_tabs.html #}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-11">
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-header bg-primary text-white fw-bold">
+                    <i class="fas fa-file-import me-2"></i>數據比對配置
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" class="row g-3 align-items-end">
+                        {% csrf_token %}
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">IFRS 報表名(例：A101)</label>
+                            <input type="text" name="table_name" class="form-control" value="{{ table_name }}" placeholder="請輸入 IFRS 報表名" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small">上傳申報檔</label>
+                            <input type="file" name="excel_file" class="form-control" required>
+                        </div>
+                        <div class="col-md-3 d-grid">
+                            <button type="submit" class="btn btn-dark"><i class="fas fa-sync me-2"></i>讀取DB並比對</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light p-0">
+                    <ul class="nav nav-tabs border-0" id="compareTab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active fw-bold px-4" data-bs-toggle="tab" data-bs-target="#excel-tab" type="button">
+                                <i class="fas fa-file-excel me-2 text-success"></i>申報資料
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link fw-bold px-4" data-bs-toggle="tab" data-bs-target="#db-tab" type="button">
+                                <i class="fas fa-database me-2 text-primary"></i>DB 資料
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link fw-bold px-4" data-bs-toggle="tab" data-bs-target="#compare-tab" type="button">
+                                <i class="fas fa-not-equal me-2 text-danger"></i>Row Number 資料比對
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body tab-content p-0" style="height: 600px; overflow-y: auto;">
+                    <div class="tab-pane fade show active" id="excel-tab">
+                        <table class="table table-sm table-hover mb-0 small">
+                            <thead class="table-light sticky-top">
+                                <tr>{% for key in excel_data.0.keys %}<th>{{ key }}</th>{% endfor %}</tr>
+                            </thead>
+                            <tbody>
+                                {% for row in excel_data %}
+                                <tr>{% for value in row.values %}<td>{{ value }}</td>{% endfor %}</tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="db-tab">
+                        <table class="table table-sm table-hover mb-0 small text-nowrap">
+                            <thead class="table-light sticky-top">
+                                <tr>{% for key in db_data.0.keys %}<th>{{ key }}</th>{% endfor %}</tr>
+                            </thead>
+                            <tbody>
+                                {% for row in db_data %}
+                                <tr>{% for value in row.values %}<td>{{ value }}</td>{% endfor %}</tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade p-3" id="compare-tab">
+                        <div class="alert alert-info py-2 small mb-3">
+                            <i class="fas fa-info-circle me-1"></i> 系統依照行號 (Row Number) 進行左右比對，檢查兩邊筆數與特定順序內容是否一致。
+                        </div>
+                        <table class="table table-bordered table-sm align-middle">
+                            <thead class="table-secondary text-center sticky-top">
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>申報內容 (對應行)</th>
+                                    <th style="width: 40px;"></th>
+                                    <th>DB 內容 (對應行)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in compare_list %}
+                                <tr>
+                                    <td class="text-center bg-light fw-bold">{{ item.row_num }}</td>
+                                    <td>
+                                        <div class="p-2 rounded bg-light">
+                                            {% for k, v in item.excel.items %}<small><b>{{ k }}:</b> {{ v }}</small> | {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        {% if item.excel == item.db %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-arrow-right text-danger"></i>{% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="p-2 rounded {% if item.excel != item.db %}bg-warning-subtle{% else %}bg-light{% endif %}">
+                                            {% for k, v in item.db.items %}<small><b>{{ k }}:</b> {{ v }}</small> | {% endfor %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

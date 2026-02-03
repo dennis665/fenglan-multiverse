@@ -138,3 +138,22 @@ def ticket_pull(request):
 def feature_permission(request):
     features = FeatureStatus.objects.all().order_by("sort_order", "id")
     return render(request, "core/feature_list.html", {"features": features})
+
+
+@staff_required
+def data_sync_comparison(request):
+    excel_data = []
+    db_data = []
+    compare_list = []
+    table_name = request.POST.get("table_name", "")
+
+    if request.method == "POST" and request.FILES.get("excel_file"):
+        file = request.FILES["excel_file"]
+
+    context = {
+        "table_name": table_name,
+        "excel_data": excel_data,
+        "db_data": db_data,
+        "compare_list": compare_list,
+    }
+    return render(request, "core/data_comparison_tabs.html", context)
