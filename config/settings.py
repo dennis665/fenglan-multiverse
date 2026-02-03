@@ -30,8 +30,8 @@ env = environ.Env(
 )
 # ? ==============================================================================
 
-#! 讀取 .env 檔案
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+#! 讀取 .env 檔案，加上 overwrite=True 確保以檔案內容為準
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"), overwrite=True)
 
 #! 2. 安全性與基礎設定 (從 env 讀取)
 # ? ==============================================================================
@@ -78,7 +78,7 @@ LOCAL_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # ? ==============================================================================
 
-#! 開發專用工具 (僅在 DEBUG=True 時啟用)
+#! 開發和伺服器區分
 # ? ==============================================================================
 if DEBUG:
     INSTALLED_APPS += ["django_extensions"]
@@ -92,6 +92,13 @@ else:
     EMAIL_HOST_USER = env("EMAIL_USER")  # * 從 .env 讀取你的 Email
     EMAIL_HOST_PASSWORD = env("EMAIL_PASS")  # * 從 .env 讀取「應用程式密碼」
     DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+    #! 使用 SSL (HTTPS)
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # * 1 年
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 # ? ==============================================================================
 
 #! 中介軟體 (MIDDLEWARE)

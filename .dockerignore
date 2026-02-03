@@ -39,3 +39,12 @@ LICENSE
 
 #! 排除本地產生的靜態檔案彙整目錄
 staticfiles/
+
+#! 測試的資料
+test*
+
+#! 上傳檔案儲存
+media/
+
+#! 檢查安全性檔案
+bandit_report.txt

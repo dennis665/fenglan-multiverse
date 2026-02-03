@@ -38,3 +38,6 @@ test*
 
 #! 上傳檔案儲存
 media/
+
+#! 檢查安全性檔案
+bandit_report.txt

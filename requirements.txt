@@ -36,3 +36,7 @@ concurrent-log-handler==0.9.28
 #! 處理 Excel 資料
 pandas==3.0.0
 openpyxl==3.1.5
+
+#! 安全性檢查套件
+bandit==1.9.3
+safety==3.7.0

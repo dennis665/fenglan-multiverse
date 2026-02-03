@@ -31,6 +31,15 @@ python manage.py startapp app_name
 #! 終端機開發用
 python manage.py shell
 
+#! Django 內建檢查安全性
+python manage.py check --deploy
+
+#! 專屬靜態掃描工具
+bandit -r . -x ./.venv,./venv,./tests -f txt -o bandit_report.txt
+
+#! Django 專用安全性分析：Safety & Djade
+safety check
+
 -------docker 相關-------
 #! 建立並啟動所有容器，改 Dockerfile、裝新套件
 docker compose up --build
