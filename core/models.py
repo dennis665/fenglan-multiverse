@@ -19,6 +19,7 @@ class FeatureStatus(models.Model):
         ("ai_chat", "AI 智能客服"),
         ("announcement", "公告系統"),
         ("admin_panel", "管理後台"),
+        ("tigf", "安定系統"),
     ]
 
     name = models.CharField(max_length=50, choices=FEATURE_CHOICES, unique=True, verbose_name="功能名稱")
