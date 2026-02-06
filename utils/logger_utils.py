@@ -18,16 +18,35 @@ class Colors:
 
     @staticmethod
     def _parse_error(error: Exception):
-        """內部工具：解析 Exception 的詳細資訊"""
+        """內部工具：解析 Exception，過濾掉套件庫路徑，找出專案內的報錯位置"""
         tb = error.__traceback__
         filename = "未知"
         lineno = "未知"
+
         if tb:
-            #! 取得最後一筆追蹤紀錄 (實際報錯的位置)
-            while tb.tb_next:
-                tb = tb.tb_next
-            filename = tb.tb_frame.f_code.co_filename
-            lineno = tb.tb_lineno
+            #! 我們要從頂層往底層找，保留最後一個「非套件」的位置
+            curr_tb = tb
+            while curr_tb:
+                f_code = curr_tb.tb_frame.f_code
+                f_name = f_code.co_filename
+
+                #! 判斷邏輯：如果檔名不包含 Python 套件常見的路徑關鍵字
+                #! 這裡過濾掉 .venv, site-packages, Lib 等
+                if "site-packages" not in f_name and "lib" not in f_name and "<frozen" not in f_name:
+                    filename = f_name
+                    lineno = curr_tb.tb_lineno
+                    #! 我們不 break，因為我們想找的是「你自己程式碼中，最接近報錯點」的那一行
+                    #! 如果你想要「最外層的 try-except」那一行，就在這裡加 break
+
+                curr_tb = curr_tb.tb_next
+
+            #! 如果遍歷完都沒找到（代表真的是系統級錯誤），才抓最底層的
+            if filename == "未知":
+                while tb.tb_next:
+                    tb = tb.tb_next
+                filename = tb.tb_frame.f_code.co_filename
+                lineno = tb.tb_lineno
+
         return str(error), filename, lineno
 
     @classmethod
@@ -59,12 +78,12 @@ class Colors:
 
 def jinfo(message: str = ""):
     """一般資訊紀錄 (藍色)"""
-    logging.info(f"{Colors.OKBLUE}{message}{Colors.ENDC}", stacklevel=2)
+    logging.info(f"{Colors.OKBLUE}{message}{Colors.ENDC}")
 
 
 def jdebug(message: str = ""):
     """除錯資訊紀錄 (青色)"""
-    logging.debug(f"{Colors.OKCYAN}[DEBUG] {message}{Colors.ENDC}", stacklevel=2)
+    logging.debug(f"{Colors.OKCYAN}[DEBUG] {message}{Colors.ENDC}")
 
 
 def jinfo_error(error: Exception | str = "", message: str = ""):
@@ -72,7 +91,7 @@ def jinfo_error(error: Exception | str = "", message: str = ""):
     if isinstance(error, Exception):
         err_msg, filename, lineno = Colors._parse_error(error)
         output = f"{Colors.FAIL}\n{message}\n錯誤訊息：{err_msg}\n檔名：{filename}\n行數：{lineno}\n{Colors.ENDC}"
-        logging.error(output, stacklevel=2)
+        logging.error(output)
     else:
         msg_content = message or error
-        logging.error(f"{Colors.FAIL}\n{msg_content}\n{Colors.ENDC}", stacklevel=2)
+        logging.error(f"{Colors.FAIL}\n{msg_content}\n{Colors.ENDC}")

@@ -24,7 +24,8 @@ from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 from django.views.static import serve
 
-from core.views import data_sync_comparison, feature_permission, lucky_draw, portal_ai_bot, profile_view, ticket_pull
+from core.views import feature_permission, lucky_draw, portal_ai_bot, profile_view, ticket_pull
+from tigf.views import download_diff_csv, tigf_dashboard
 
 urlpatterns = [
     # ? =================================頁面=================================
@@ -46,7 +47,8 @@ urlpatterns = [
     #! 發文簿系統
     path("ticket-pull/", ticket_pull, name="ticket_pull"),
     #! 安定專用比對
-    path("tigf-comparison/", data_sync_comparison, name="tigf_comparison"),
+    path("tigf-comparison/", tigf_dashboard, name="tigf_comparison"),
+    path("download-diff-csv/<str:fid>/", download_diff_csv, name="download_diff_csv"),
     # ? ======================================================================
     #! ICON
     path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "images/favicon.ico")),
