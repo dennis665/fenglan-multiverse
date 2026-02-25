@@ -1,22 +1,34 @@
 {% extends "base.html" %}
+{% load i18n %} {# 必須載入 i18n #}
 
-{% block head_title %}首頁 - CSI Portal{% endblock %}
+{% block head_title %}{% trans "Home" %} - CSI Portal{% endblock %}
 
 {% block content %}
 <div class="container text-center mt-5">
     <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
-        <h1 class="display-4">歡迎來到 CSI Server Portal</h1>
-        <p class="lead">這是一個使用 Django 6.0 與 Google OAuth 構建的系統。</p>
+        <h1 class="display-4">{% trans "Welcome to CSI Server Portal" %}</h1>
+        <p class="lead">
+            {% trans "This is a system built with Django 6.0 and Google OAuth." %}
+        </p>
         <hr class="my-4">
         
         {% if user.is_authenticated %}
             <div class="alert alert-success">
-                您好，<strong>{{ user.first_name|default:user.username }}</strong>！您已成功登入。
+                {% blocktrans with name=user.first_name|default:user.username %}
+                    Hello, <strong>{{ name }}</strong>! You have successfully logged in.
+                {% endblocktrans %}
             </div>
-            <a class="btn btn-primary btn-lg" href="{% url 'account_logout' %}" role="button">立即登出</a>
+            
+            {# 登出表單：因為 Allauth 登出預設需要 POST 請求以確保安全 #}
+            <form method="post" action="{% url 'account_logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-lg">{% trans "Logout Now" %}</button>
+            </form>
         {% else %}
-            <p>請先登入以使用完整功能。</p>
-            <a class="btn btn-primary btn-lg" href="{% url 'account_login' %}" role="button">前往登入頁面</a>
+            <p>{% trans "Please log in first to use full features." %}</p>
+            <a class="btn btn-primary btn-lg" href="{% url 'account_login' %}" role="button">
+                {% trans "Go to Login Page" %}
+            </a>
         {% endif %}
     </div>
 </div>

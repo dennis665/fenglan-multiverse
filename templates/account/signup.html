@@ -12,22 +12,27 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-5">
                     <h2 class="text-center mb-4">{% trans "Sign Up" %}</h2>
-                    <p class="text-center text-muted mb-4">歡迎加入 CSI Portal，請填寫以下資訊完成註冊</p>
+                    <p class="text-center text-muted mb-4">
+                        {% trans "Welcome to CSI Portal, please fill in the information below to complete registration." %}
+                    </p>
 
                     <div class="d-grid gap-2 mb-4">
                         <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger btn-lg">
-                            <i class="fab fa-google me-2"></i> 使用 Google 帳號快速註冊
+                            <i class="fab fa-google me-2"></i> {% trans "Sign up quickly with Google" %}
                         </a>
                     </div>
 
                     <div class="position-relative mb-4">
                         <hr>
-                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">或填寫資料</span>
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">
+                            {% trans "Or fill in details" %}
+                        </span>
                     </div>
 
                     <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
                         {% csrf_token %}
                         
+                        {# Crispy Forms 會自動根據語系翻譯 Label，前提是你的 settings 有設定好 #}
                         {{ form|crispy }}
 
                         {% if redirect_field_value %}
@@ -41,7 +46,7 @@
 
                     <div class="text-center mt-3">
                         <small class="text-muted">
-                            已經有帳號了？ <a href="{% url 'account_login' %}">立即登入</a>
+                            {% blocktrans %}Already have an account? <a href="{{ login_url }}">Log in now</a>{% endblocktrans %}
                         </small>
                     </div>
                 </div>

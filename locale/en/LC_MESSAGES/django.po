@@ -1,0 +1,501 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-25 08:59+0800\n"
+"PO-Revision-Date: 2026-02-25 09:10+0800\n"
+"Last-Translator: Dennis <dennis1027685@gmail.com>\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\config\settings.py:268
+msgid "繁體中文"
+msgstr "Traditional Chinese"
+
+#: .\config\settings.py:269
+msgid "English"
+msgstr "English"
+
+#: .\core\templates\core\lucky_draw.html:4 .\templates\base.html:35
+msgid "Lucky Draw"
+msgstr "Lucky Draw"
+
+#: .\core\templates\core\lucky_draw.html:8
+msgid "CSI Lucky Wheel"
+msgstr "CSI Lucky Wheel"
+
+#: .\core\templates\core\lucky_draw.html:14
+msgid "Prize Settings"
+msgstr "Prize Settings"
+
+#: .\core\templates\core\lucky_draw.html:17
+msgid "Ignore Probabilities (Fair Mode)"
+msgstr "Ignore Probabilities (Fair Mode)"
+
+#: .\core\templates\core\lucky_draw.html:24
+#: .\core\templates\core\lucky_draw.html:131
+msgid "Prize Name"
+msgstr "Prize Name"
+
+#: .\core\templates\core\lucky_draw.html:25
+msgid "Weight"
+msgstr "Weight"
+
+#: .\core\templates\core\lucky_draw.html:26
+msgid "Qty (-1=Inf)"
+msgstr "Qty (-1=Inf)"
+
+#: .\core\templates\core\lucky_draw.html:32
+msgid "Grand Prize"
+msgstr "Grand Prize"
+
+#: .\core\templates\core\lucky_draw.html:39
+msgid "Add Prize"
+msgstr "Add Prize"
+
+#: .\core\templates\core\lucky_draw.html:44
+msgid "Import Participant List"
+msgstr "Import Participants"
+
+#: .\core\templates\core\lucky_draw.html:50
+msgid "Choose File"
+msgstr "Choose File"
+
+#: .\core\templates\core\lucky_draw.html:53
+#: .\core\templates\core\lucky_draw.html:364
+msgid "No file selected"
+msgstr "No file selected"
+
+#: .\core\templates\core\lucky_draw.html:58
+msgid "First column must be names"
+msgstr "The first column must contain names"
+
+#: .\core\templates\core\lucky_draw.html:70
+msgid "Start Draw"
+msgstr "Start Drawing"
+
+#: .\core\templates\core\lucky_draw.html:79
+msgid "Winning Records"
+msgstr "Winning Records"
+
+#: .\core\templates\core\lucky_draw.html:82
+msgid "Export Excel"
+msgstr "Export to Excel"
+
+#: .\core\templates\core\lucky_draw.html:84
+msgid "Clear Records"
+msgstr "Clear Records"
+
+#: .\core\templates\core\lucky_draw.html:93
+msgid "Time"
+msgstr "Time"
+
+#: .\core\templates\core\lucky_draw.html:94
+msgid "Winner"
+msgstr "Winner"
+
+#: .\core\templates\core\lucky_draw.html:95
+msgid "Prize"
+msgstr "Prize"
+
+#: .\core\templates\core\lucky_draw.html:100
+#: .\core\templates\core\lucky_draw.html:326
+msgid "No records yet"
+msgstr "No records yet"
+
+#: .\core\templates\core\lucky_draw.html:123
+msgid "Imported"
+msgstr "Imported"
+
+#: .\core\templates\core\lucky_draw.html:124
+msgid "All prizes drawn!"
+msgstr "All prizes have been drawn!"
+
+#: .\core\templates\core\lucky_draw.html:125
+msgid "Please import participant list first!"
+msgstr "Please import the participant list first!"
+
+#: .\core\templates\core\lucky_draw.html:126
+msgid "Congratulations"
+msgstr "Congratulations"
+
+#: .\core\templates\core\lucky_draw.html:127
+msgid "won"
+msgstr "won"
+
+#: .\core\templates\core\lucky_draw.html:128
+msgid "Are you sure you want to clear all records?"
+msgstr "Are you sure you want to clear all records?"
+
+#: .\core\templates\core\lucky_draw.html:129
+msgid "No records to export!"
+msgstr "No records available to export!"
+
+#: .\core\templates\core\lucky_draw.html:130
+msgid "Prizes Sold Out"
+msgstr "Prizes Sold Out"
+
+#: .\core\templates\core\lucky_draw.html:132
+msgid "Winner List"
+msgstr "Winner List"
+
+#: .\core\templates\core\lucky_draw.html:133
+msgid "No."
+msgstr "No."
+
+#: .\core\templates\core\lucky_draw.html:133
+msgid "Draw Time"
+msgstr "Draw Time"
+
+#: .\core\templates\core\lucky_draw.html:133
+msgid "Winner Name"
+msgstr "Winner Name"
+
+#: .\core\templates\core\lucky_draw.html:133
+msgid "Award"
+msgstr "Award"
+
+#: .\core\templates\core\lucky_draw.html:134
+msgid "Remaining"
+msgstr "Remaining"
+
+#: .\core\templates\core\profile.html:6 .\templates\base.html:105
+msgid "Profile"
+msgstr "Profile"
+
+#: .\core\templates\core\profile.html:25
+msgid "User Profile"
+msgstr "User Profile"
+
+#: .\core\templates\core\profile.html:54
+msgid "Custom Avatar"
+msgstr "Custom Avatar"
+
+#: .\core\templates\core\profile.html:58
+msgid "Linked with Google Account"
+msgstr "Linked with Google Account"
+
+#: .\core\templates\core\profile.html:76
+msgid "Choose Image"
+msgstr "Choose Image"
+
+#: .\core\templates\core\profile.html:79
+msgid "No file chosen"
+msgstr "No file chosen"
+
+#: .\core\templates\core\profile.html:81
+msgid "Update Avatar"
+msgstr "Update Avatar"
+
+#: .\core\templates\core\profile.html:86
+msgid ""
+"Tip: Uploading a custom photo will replace the avatar provided by Google."
+msgstr "Tip: Uploading a custom photo will replace your Google avatar."
+
+#: .\core\templates\core\profile.html:94
+msgid "Email"
+msgstr "Email"
+
+#: .\core\templates\core\profile.html:98
+msgid "Last Login"
+msgstr "Last Login"
+
+#: .\core\templates\core\profile.html:102
+msgid "Date Joined"
+msgstr "Date Joined"
+
+#: .\core\templates\core\profile.html:111
+#: .\templates\account\email_confirm.html:47 .\templates\account\logout.html:32
+#: .\templates\account\verification_sent.html:24
+msgid "Back to Home"
+msgstr "Back to Home"
+
+#: .\core\views.py:25
+msgid "Avatar updated successfully!"
+msgstr "Avatar updated successfully!"
+
+#: .\notices\templates\notices\detail.html:11
+#: .\notices\templates\notices\list.html:4
+msgid "Notice List"
+msgstr "Notice List"
+
+#: .\notices\templates\notices\detail.html:13
+msgid "Notice Detail"
+msgstr "Notice Detail"
+
+#: .\notices\templates\notices\detail.html:21
+#: .\notices\templates\notices\list.html:31
+msgid "Pinned"
+msgstr "Pinned"
+
+#: .\notices\templates\notices\detail.html:27
+#: .\notices\templates\notices\list.html:22
+msgid "Author"
+msgstr "Author"
+
+#: .\notices\templates\notices\detail.html:30
+msgid "Posted"
+msgstr "Posted"
+
+#: .\notices\templates\notices\detail.html:34
+msgid "Updated at"
+msgstr "Updated at"
+
+#: .\notices\templates\notices\detail.html:45
+msgid "Back to List"
+msgstr "Back to List"
+
+#: .\notices\templates\notices\list.html:9 .\templates\base.html:31
+msgid "Notices"
+msgstr "Notices"
+
+#: .\notices\templates\notices\list.html:11
+#, python-format
+msgid "Total %(count)s notices"
+msgstr "Total of %(count)s notices"
+
+#: .\notices\templates\notices\list.html:20
+msgid "Type"
+msgstr "Type"
+
+#: .\notices\templates\notices\list.html:21
+msgid "Title"
+msgstr "Title"
+
+#: .\notices\templates\notices\list.html:23
+msgid "Date Posted"
+msgstr "Date Posted"
+
+#: .\notices\templates\notices\list.html:33
+msgid "General"
+msgstr "General"
+
+#: .\notices\templates\notices\list.html:47
+msgid "No notices available."
+msgstr "No notices available."
+
+#: .\templates\account\email_confirm.html:5
+#: .\templates\account\email_confirm.html:17
+msgid "Confirm Email Address"
+msgstr "Confirm Email Address"
+
+#: .\templates\account\email_confirm.html:22
+#, python-format
+msgid ""
+"\n"
+"                                請確認您要為帳號 <strong class=\"text-"
+"dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
+"                                <span class=\"badge bg-light text-primary "
+"fs-6 mt-2\">%(email)s</span>\n"
+"                            "
+msgstr ""
+"\n"
+"                                Please confirm that you wish to verify the email address for account <strong class=\"text-"
+"dark\">%(user_display)s</strong>:<br>\n"
+"                                <span class=\"badge bg-light text-primary "
+"fs-6 mt-2\">%(email)s</span>\n"
+"                            "
+
+#: .\templates\account\email_confirm.html:32
+msgid "Confirm"
+msgstr "Confirm"
+
+#: .\templates\account\email_confirm.html:39
+#, python-format
+msgid ""
+"\n"
+"                                此電子郵件確認連結已過期或無效。請嘗試 <a "
+"href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
+"                            "
+msgstr ""
+"\n"
+"                                This email confirmation link has expired or is invalid. Please try <a "
+"href=\"%(email_url)s\" class=\"alert-link\">resending the confirmation email</a>.\n"
+"                            "
+
+#: .\templates\account\login.html:6 .\templates\account\login.html:14
+#: .\templates\account\login.html:38 .\templates\socialaccount\login.html:5
+msgid "Sign In"
+msgstr "Sign In"
+
+#: .\templates\account\login.html:18 .\templates\socialaccount\login.html:17
+msgid "Sign in with Google"
+msgstr "Sign in with Google"
+
+#: .\templates\account\login.html:25
+msgid "Or use Email"
+msgstr "Or use Email"
+
+#: .\templates\account\login.html:44
+#, python-format
+msgid "Don't have an account? <a href=\"%(signup_url)s\">Register now</a>"
+msgstr "Don't have an account? <a href=\"%(signup_url)s\">Register now</a>"
+
+#: .\templates\account\logout.html:4 .\templates\account\logout.html:29
+msgid "Sign Out"
+msgstr "Sign Out"
+
+#: .\templates\account\logout.html:16
+msgid "Confirm Sign Out"
+msgstr "Confirm Sign Out"
+
+#: .\templates\account\logout.html:18
+msgid "Are you sure you want to sign out from <strong>CSI Portal</strong>?"
+msgstr "Are you sure you want to sign out from <strong>CSI Portal</strong>?"
+
+#: .\templates\account\signup.html:6
+msgid "Signup"
+msgstr "Signup"
+
+#: .\templates\account\signup.html:14 .\templates\account\signup.html:43
+msgid "Sign Up"
+msgstr "Sign Up"
+
+#: .\templates\account\signup.html:16
+msgid ""
+"Welcome to CSI Portal, please fill in the information below to complete "
+"registration."
+msgstr "Welcome to CSI Portal. Please fill in the details below to complete your registration."
+
+#: .\templates\account\signup.html:21
+msgid "Sign up quickly with Google"
+msgstr "Sign up quickly with Google"
+
+#: .\templates\account\signup.html:28
+msgid "Or fill in details"
+msgstr "Or fill in details"
+
+#: .\templates\account\signup.html:49
+#, python-format
+msgid "Already have an account? <a href=\"%(login_url)s\">Log in now</a>"
+msgstr "Already have an account? <a href=\"%(login_url)s\">Log in now</a>"
+
+#: .\templates\account\verification_sent.html:5
+#: .\templates\account\verification_sent.html:16
+msgid "Verify Your Email Address"
+msgstr "Verify Your Email Address"
+
+#: .\templates\account\verification_sent.html:18
+msgid "我們已向您發送了一封電子郵件，請點擊信中的連結以完成註冊。"
+msgstr "We have sent you an email. Please click the link in the message to complete your registration."
+
+#: .\templates\account\verification_sent.html:21
+msgid ""
+"If you haven't received the email, please check your spam folder or try "
+"again later."
+msgstr "If you haven't received the email, please check your spam folder or try again later."
+
+#: .\templates\base.html:28 .\templates\index.html:4
+msgid "Home"
+msgstr "Home"
+
+#: .\templates\base.html:41
+msgid "Tester Zone"
+msgstr "Tester Zone"
+
+#: .\templates\base.html:44
+msgid "Test Management System"
+msgstr "Test Management System"
+
+#: .\templates\base.html:52
+msgid "No tools available"
+msgstr "No tools available"
+
+#: .\templates\base.html:85
+msgid "Admin"
+msgstr "Admin"
+
+#: .\templates\base.html:110
+msgid "Logout"
+msgstr "Logout"
+
+#: .\templates\base.html:117
+msgid "Login"
+msgstr "Login"
+
+#: .\templates\base.html:120
+msgid "Register"
+msgstr "Register"
+
+#: .\templates\base.html:135
+msgid "All Rights Reserved."
+msgstr "All Rights Reserved."
+
+#: .\templates\base.html:139
+msgid "Daily Visits"
+msgstr "Daily Visits"
+
+#: .\templates\base.html:143
+msgid "Total Visits"
+msgstr "Total Visits"
+
+#: .\templates\base.html:277
+msgid "CSI Smart Assistant"
+msgstr "CSI Smart Assistant"
+
+#: .\templates\base.html:281
+msgid "Hello! I am the CSI Portal assistant, how can I help you today?"
+msgstr "Hello! I'm the CSI Portal assistant. How can I help you today?"
+
+#: .\templates\base.html:284
+msgid "Type a message..."
+msgstr "Type a message..."
+
+#: .\templates\index.html:9
+msgid "Welcome to CSI Server Portal"
+msgstr "Welcome to CSI Server Portal"
+
+#: .\templates\index.html:11
+msgid "This is a system built with Django 6.0 and Google OAuth."
+msgstr "This system is built with Django 6.0 and Google OAuth."
+
+#: .\templates\index.html:17
+#, python-format
+msgid ""
+"\n"
+"                    Hello, <strong>%(name)s</strong>! You have successfully "
+"logged in.\n"
+"                "
+msgstr ""
+"\n"
+"                    Hello, <strong>%(name)s</strong>! You have successfully logged in.\n"
+"                "
+
+#: .\templates\index.html:25
+msgid "Logout Now"
+msgstr "Logout Now"
+
+#: .\templates\index.html:28
+msgid "Please log in first to use full features."
+msgstr "Please log in first to use all features."
+
+#: .\templates\index.html:30
+msgid "Go to Login Page"
+msgstr "Go to Login Page"
+
+#: .\templates\socialaccount\login.html:20
+msgid ""
+"\n"
+"                        您即將使用 Google 帳號進行驗證。系統將導向 Google 授"
+"權頁面，請確認是否繼續？\n"
+"                        "
+msgstr ""
+"\n"
+"                        You are about to authenticate using your Google account. You will be redirected to the Google authorization page. Continue?\n"
+"                        "
+
+#: .\templates\socialaccount\login.html:29
+msgid "Continue"
+msgstr "Continue"
+
+#: .\templates\socialaccount\login.html:32
+msgid "Cancel and return to login page"
+msgstr "Cancel and return to login page"
+
+#: .\utils\decorators.py:14
+msgid "You do not have permission, redirected to home page."
+msgstr "You do not have permission. Redirected to the home page."

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load account socialaccount %}
-{% load crispy_forms_tags %} {% block head_title %}{% trans "Sign In" %}{% endblock %}
+{% load crispy_forms_tags %} 
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -13,18 +15,22 @@
 
                     <div class="d-grid gap-2 mb-4">
                         <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger btn-lg">
-                            <i class="fab fa-google me-2"></i> 使用 Google 帳號登入
+                            <i class="fab fa-google me-2"></i> {% trans "Sign in with Google" %}
                         </a>
                     </div>
 
                     <div class="position-relative mb-4">
                         <hr>
-                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">或使用 Email</span>
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">
+                            {% trans "Or use Email" %}
+                        </span>
                     </div>
 
                     <form class="login" method="POST" action="{% url 'account_login' %}">
                         {% csrf_token %}
-                        {{ form|crispy }} {% if redirect_field_value %}
+                        {{ form|crispy }} 
+                        
+                        {% if redirect_field_value %}
                         <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
                         {% endif %}
 
@@ -35,7 +41,7 @@
 
                     <div class="text-center mt-3">
                         <small class="text-muted">
-                            還沒有帳號？ <a href="{{ signup_url }}">立即註冊</a>
+                            {% blocktrans %}Don't have an account? <a href="{{ signup_url }}">Register now</a>{% endblocktrans %}
                         </small>
                     </div>
                 </div>

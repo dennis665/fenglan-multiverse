@@ -1,15 +1,16 @@
 {# users/templates/users/profile.html #}
 {% extends "base.html" %}
+{% load i18n %}
 {% load socialaccount %}
 
-{% block head_title %}個人檔案 | CSI Portal{% endblock %}
+{% block head_title %}{% trans "Profile" %} | CSI Portal{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             
-            {# --- 新增：訊息通知區 --- #}
+            {# --- 訊息通知區 --- #}
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
@@ -21,7 +22,7 @@
 
             <div class="card shadow border-0">
                 <div class="card-header bg-dark text-white py-3">
-                    <h4 class="mb-0"><i class="fas fa-id-card me-2"></i>個人檔案</h4>
+                    <h4 class="mb-0"><i class="fas fa-id-card me-2"></i>{% trans "User Profile" %}</h4>
                 </div>
                 
                 <div class="card-body p-4 text-center">
@@ -30,20 +31,16 @@
                     {# --- 大頭貼顯示區域 (三層邏輯) --- #}
                     <div class="mb-3">
                         {% if user.profile.avatar %}
-                            {# 優先級 1: 使用者手動上傳 #}
                             <img src="{{ user.profile.avatar.url }}?t={{ user.profile.avatar.size }}" 
-                                        class="rounded-circle shadow mx-auto d-block" 
-                                        style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
+                                    class="rounded-circle shadow mx-auto d-block" 
+                                    style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
                         
                         {% elif accounts.google %}
-                            {# 優先級 2: Google 帳號頭像 #}
-                            {# 注意：這裡抓取 Google 原生提供的頭像網址 #}
                             <img src="{{ accounts.google.0.get_avatar_url }}" 
                                  class="rounded-circle shadow" 
                                  style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
                         
                         {% else %}
-                            {# 優先級 3: 最終保底 FontAwesome 圖示 #}
                             <i class="fas fa-user-circle fa-7x text-secondary"></i>
                         {% endif %}
                     </div>
@@ -53,25 +50,40 @@
                     {# --- 來源標籤 --- #}
                     <div class="mb-3">
                         {% if user.profile.avatar %}
-                            <span class="badge bg-primary rounded-pill fw-normal px-3"><i class="fas fa-camera me-1"></i> 自定義頭像</span>
+                            <span class="badge bg-primary rounded-pill fw-normal px-3">
+                                <i class="fas fa-camera me-1"></i> {% trans "Custom Avatar" %}
+                            </span>
                         {% elif accounts.google %}
-                            <span class="text-muted small"><i class="fab fa-google text-danger"></i> 已連結 Google 帳號</span>
+                            <span class="text-muted small">
+                                <i class="fab fa-google text-danger"></i> {% trans "Linked with Google Account" %}
+                            </span>
                         {% endif %}
                     </div>
 
                     <hr class="my-4">
 
                     {# --- 圖片上傳表單 --- #}
-                    {# action 留空代表提交給目前的 URL (即 accounts/profile/) #}
                     <div class="row justify-content-center mb-4">
                         <div class="col-sm-10 col-md-9">
                             <form method="POST" enctype="multipart/form-data" class="input-group input-group-sm">
                                 {% csrf_token %}
-                                <input type="file" name="avatar" class="form-control" id="profile_avatar" accept="image/*" required>
-                                <button class="btn btn-dark" type="submit">更新大頭貼</button>
+
+                                <input type="file" name="avatar" class="form-control" id="profile_avatar" 
+                                    accept="image/*" required style="display: none;" onchange="updateFileName()">
+
+                                <div class="input-group input-group-sm">
+                                    <label for="profile_avatar" class="btn btn-outline-dark">
+                                        <i class="fas fa-folder-open me-1"></i> {% trans "Choose Image" %}
+                                    </label>
+                                    <span id="file-name" class="form-control text-start text-muted bg-light">
+                                        {% trans "No file chosen" %}
+                                    </span>
+                                    <button class="btn btn-dark" type="submit">{% trans "Update Avatar" %}</button>
+                                </div>
                             </form>
                             <div class="form-text mt-2 text-start">
-                                <i class="fas fa-info-circle me-1"></i> 提示：上傳自定義照片後，將取代 Google 提供的頭像。
+                                <i class="fas fa-info-circle me-1"></i> 
+                                {% trans "Tip: Uploading a custom photo will replace the avatar provided by Google." %}
                             </div>
                         </div>
                     </div>
@@ -79,15 +91,15 @@
                     {# --- 使用者資訊區 --- #}
                     <div class="mt-4 border-top pt-4">
                         <div class="row text-start mb-2">
-                            <div class="col-sm-4 fw-bold text-secondary">電子郵件：</div>
+                            <div class="col-sm-4 fw-bold text-secondary">{% trans "Email" %}：</div>
                             <div class="col-sm-8 text-break">{{ user.email }}</div>
                         </div>
                         <div class="row text-start mb-2">
-                            <div class="col-sm-4 fw-bold text-secondary">最後登入：</div>
+                            <div class="col-sm-4 fw-bold text-secondary">{% trans "Last Login" %}：</div>
                             <div class="col-sm-8">{{ user.last_login|date:"Y-m-d H:i" }}</div>
                         </div>
                         <div class="row text-start mb-2">
-                            <div class="col-sm-4 fw-bold text-secondary">帳號加入時間：</div>
+                            <div class="col-sm-4 fw-bold text-secondary">{% trans "Date Joined" %}：</div>
                             <div class="col-sm-8">{{ user.date_joined|date:"Y-m-d H:i" }}</div>
                         </div>
                     </div>
@@ -96,7 +108,7 @@
                 <div class="card-footer bg-white py-3">
                     <div class="d-flex justify-content-between">
                         <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-arrow-left me-1"></i> 回到首頁
+                            <i class="fas fa-arrow-left me-1"></i> {% trans "Back to Home" %}
                         </a>
                     </div>
                 </div>
@@ -104,4 +116,14 @@
         </div>
     </div>
 </div>
+
+<script>
+function updateFileName() {
+    const input = document.getElementById('profile_avatar');
+    const fileNameDisplay = document.getElementById('file-name');
+    if (input.files.length > 0) {
+        fileNameDisplay.innerText = input.files[0].name;
+    }
+}
+</script>
 {% endblock %}

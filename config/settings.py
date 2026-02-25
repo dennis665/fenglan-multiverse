@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 
 import environ
+from django.utils.translation import gettext_lazy as _
 
 mimetypes.add_type("text/css", ".css", True)
 mimetypes.add_type("text/javascript", ".js", True)
@@ -41,6 +42,7 @@ ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 GEMINI_API_KEY = env("GEMINI_API_KEY")
 DISPATCH_WORD = env("DISPATCH_WORD")
+CSI_EMAIL = env("CSI_EMAIL")
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -78,20 +80,23 @@ LOCAL_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # ? ==============================================================================
 
+#! 使用 SMTP 寄信
+# ? ==============================================================================
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"  # * 以 Gmail 為例
+EMAIL_PORT = 587  # * TLS 常用的埠號
+EMAIL_USE_TLS = True  # * 開啟 TLS 加密傳輸
+EMAIL_HOST_USER = env("EMAIL_USER")  # * 從 .env 讀取你的 Email
+EMAIL_HOST_PASSWORD = env("EMAIL_PASS")  # * 從 .env 讀取「應用程式密碼」
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# ? ==============================================================================
+
 #! 開發和伺服器區分
 # ? ==============================================================================
 if DEBUG:
     INSTALLED_APPS += ["django_extensions"]
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend" # * 看視窗用
 else:
-    #! 正式環境：使用 SMTP 寄信
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = "smtp.gmail.com"  # * 以 Gmail 為例
-    EMAIL_PORT = 587  # * TLS 常用的埠號
-    EMAIL_USE_TLS = True  # * 開啟 TLS 加密傳輸
-    EMAIL_HOST_USER = env("EMAIL_USER")  # * 從 .env 讀取你的 Email
-    EMAIL_HOST_PASSWORD = env("EMAIL_PASS")  # * 從 .env 讀取「應用程式密碼」
-    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
     #! 使用 SSL (HTTPS)
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -107,6 +112,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -145,6 +151,9 @@ STATICFILES_DIRS = [
 ]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
 # ? ==============================================================================
 
 #! 日誌相關設定
@@ -229,7 +238,7 @@ AUTHENTICATION_BACKENDS = [
 # ? ==============================================================================
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
-ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 """
 "mandatory": 強制驗證。使用者必須點擊驗證信連結才能登入（Local 測試較麻煩）。
 "optional": 選用驗證。會發送驗證信，但使用者不驗證也能直接登入（適合目前階段）。
@@ -255,6 +264,10 @@ SOCIALACCOUNT_PROVIDERS = {
 #! 語系、時區與第三方套件配置
 # ? ==============================================================================
 LANGUAGE_CODE = "zh-hant"
+LANGUAGES = [
+    ("zh-hant", _("繁體中文")),
+    ("en", _("English")),
+]
 TIME_ZONE = "Asia/Taipei"
 USE_I18N = True
 USE_TZ = True

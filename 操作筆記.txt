@@ -67,8 +67,19 @@ docker compose exec web python manage.py shell_plus
 #! 清除舊的映象檔
 docker rmi csi_server-web
 
+-------ngrok 相關-------
 #! 綁定 ngrok_token
 ./ngrok config add-authtoken 你的TOKEN字串
 
 #! 啟動 ngrok
 ./ngrok http 8000 --domain=unjoinable-scribal-vanesa.ngrok-free.dev
+
+------- i18N 相關-------
+#! gettext 下載連結，解壓縮後把 D:\gettext\bin 路徑加至 path 裡
+https://github.com/vslavik/gettext-tools-windows/releases
+
+#! 產生繁中、英文翻譯檔(裡面要自填)
+python manage.py makemessages -l zh_Hant -l en -i ".venv" -i "*.txt"
+
+#! 執行
+python manage.py compilemessages -l zh_Hant -l en -i .venv

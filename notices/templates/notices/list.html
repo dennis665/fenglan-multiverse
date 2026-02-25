@@ -1,12 +1,15 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block head_title %}公告列表 | CSI Portal{% endblock %}
+{% block head_title %}{% trans "Notice List" %} | CSI Portal{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold"><i class="fas fa-bullhorn text-primary"></i> 公告消息</h2>
-        <span class="badge bg-secondary text-white">共 {{ notices.count }} 則公告</span>
+        <h2 class="fw-bold"><i class="fas fa-bullhorn text-primary"></i> {% trans "Notices" %}</h2>
+        <span class="badge bg-secondary text-white">
+            {% blocktrans with count=notices.count %}Total {{ count }} notices{% endblocktrans %}
+        </span>
     </div>
 
     <div class="card shadow-sm border-0">
@@ -14,10 +17,10 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
-                        <th style="width: 12%">類型</th>
-                        <th>標題</th>
-                        <th style="width: 15%">發布者</th>
-                        <th style="width: 20%">發布日期</th>
+                        <th style="width: 12%">{% trans "Type" %}</th>
+                        <th>{% trans "Title" %}</th>
+                        <th style="width: 15%">{% trans "Author" %}</th>
+                        <th style="width: 20%">{% trans "Date Posted" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,22 +28,23 @@
                     <tr {% if item.is_pinned %}class="table-warning"{% endif %}>
                         <td>
                             {% if item.is_pinned %}
-                                <span class="badge bg-danger"><i class="fas fa-thumbtack"></i> 置頂</span>
+                                <span class="badge bg-danger"><i class="fas fa-thumbtack"></i> {% trans "Pinned" %}</span>
                             {% else %}
-                                <span class="badge bg-info text-dark">一般</span>
+                                <span class="badge bg-info text-dark">{% trans "General" %}</span>
                             {% endif %}
                         </td>
                         <td>
                             <a href="{% url 'notices:detail' item.pk %}" class="text-decoration-none fw-bold text-dark">
+                                {# 注意：這裡 item.title 屬於資料庫內容，需另行處理多語系套件 #}
                                 {{ item.title }}
                             </a>
                         </td>
                         <td><i class="fas fa-user-circle me-1 text-secondary"></i>{{ item.author.username }}</td>
-                        <td class="text-muted small">{{ item.created_at|date:"Y-m-d H:i" }}</td>
+                        <td class="text-muted small">{{ item.created_at|date:"SHORT_DATE_FORMAT" }} {{ item.created_at|time:"H:i" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">目前尚無公告內容</td>
+                        <td colspan="4" class="text-center py-5 text-muted">{% trans "No notices available." %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
 from google import genai
 
 from notices.models import AISystemSetting, Announcement, TicketRecord
@@ -21,7 +23,7 @@ def profile_view(request):
             profile = request.user.profile
             profile.avatar = avatar_file
             profile.save()
-            messages.success(request, "大頭貼更新成功！")
+            messages.success(request, _("Avatar updated successfully!"))
             return redirect("profile")
     #! 因為使用了 socialaccount，我們可以在模板中拿到 Google 的資料
     return render(request, "core/profile.html")
@@ -32,6 +34,10 @@ def portal_ai_bot(request):
 
     if request.method == "POST":
         user_query = request.POST.get("message")
+        current_lang = get_language()  # * 獲取當前語系 (如 'zh-hant' 或 'en')
+        #! 取得語系名稱對照，幫助 AI 理解
+        lang_name = "Traditional Chinese" if current_lang == "zh-hant" else "English"
+
         user = request.user
 
         #! 判斷目前使用者的最高權限等級
@@ -61,6 +67,10 @@ def portal_ai_bot(request):
 
         #! 組合最終動態指令 (加入角色暗示)
         dynamic_instruction = f"""
+        ### Language Requirement
+        IMPORTANT: The user's current interface language is {lang_name}. 
+        Please respond strictly in {lang_name}.
+
         ### Your Role
         {base_instruction}
 
@@ -83,9 +93,9 @@ def portal_ai_bot(request):
             )
             return JsonResponse({"reply": response.text})
         except Exception:
-            return JsonResponse({"error": "AI 暫時休息中，請稍後再試。"}, status=500)
+            return JsonResponse({"error": _("AI is currently resting, please try again later.")}, status=500)
 
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    return JsonResponse({"error": _("Invalid request")}, status=400)
 
 
 def lucky_draw(request):

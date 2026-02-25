@@ -1,15 +1,21 @@
 import os
 
+from allauth.account.signals import email_confirmed
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from PIL import Image, ImageOps
 
+from utils.logger_utils import jinfo
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True, verbose_name="自定義大頭貼")
+    is_employee = models.BooleanField(default=False, verbose_name="是否為公司人員")
+    employee_id = models.CharField(max_length=20, blank=True, null=True, verbose_name="工號")
 
     def __str__(self):
         return f"{self.user.username} 的個人檔案"
@@ -53,11 +59,31 @@ class Profile(models.Model):
 
 #! 自動化建立 Profile 的信號
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def create_user_profile(sender, instance: User, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)
+        company_domain = settings.CSI_EMAIL
+        is_company_staff = False
+        if instance.email and instance.email.endswith(company_domain):
+            is_company_staff = True
+        Profile.objects.create(user=instance, is_employee=is_company_staff)
 
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+
+@receiver(email_confirmed)
+def promote_to_employee(request, email_address, **kwargs):
+    """
+    當 Email 驗證成功後，檢查網域並提升權限
+    """
+    user = email_address.user
+    company_domain = settings.CSI_EMAIL
+
+    if user.email.endswith(company_domain):
+        #! 取得該使用者的 Profile 並更新
+        profile: Profile = user.profile
+        profile.is_employee = True
+        profile.save()
+        jinfo(f"使用者 {user.username} 已通過 Email 驗證，提升為公司員工。")

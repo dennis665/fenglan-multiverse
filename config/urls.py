@@ -35,6 +35,8 @@ urlpatterns = [
     path("feature-permission/", feature_permission, name="feature_permission"),
     #! 後台
     path("admin/", admin.site.urls),
+    #! 切換語言
+    path("i18n/", include("django.conf.urls.i18n")),
     #! 帳號個人檔案跳轉
     path("accounts/", lambda request: redirect("profile", permanent=False)),
     path("accounts/", include("allauth.urls")),

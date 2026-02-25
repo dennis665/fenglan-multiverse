@@ -1,46 +1,62 @@
 {% extends "base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Lucky Draw" %} | CSI Portal{% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <h2 class="mb-4 text-center"><i class="fas fa-gift me-2 text-danger"></i>CSI 幸運大轉盤</h2>
+    <h2 class="mb-4 text-center"><i class="fas fa-gift me-2 text-danger"></i>{% trans "CSI Lucky Wheel" %}</h2>
 
     <div class="row">
         <div class="col-md-4">
             <div class="card shadow-sm mb-3">
-                <div class="card-header bg-dark text-white">設定獎品與機率</div>
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                    <span>設定獎項</span>
+                    <span>{% trans "Prize Settings" %}</span>
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="ignoreWeight" onchange="drawWheel()">
-                        <label class="form-check-label small" for="ignoreWeight">忽略機率 (公平模式)</label>
+                        <label class="form-check-label small" for="ignoreWeight">{% trans "Ignore Probabilities (Fair Mode)" %}</label>
                     </div>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm" id="prizeTable">
                         <thead>
                             <tr>
-                                <th>獎名</th>
-                                <th>權重(%)</th>
-                                <th>數量 (-1=無限)</th> <th></th>
+                                <th>{% trans "Prize Name" %}</th>
+                                <th>{% trans "Weight" %}(%)</th>
+                                <th>{% trans "Qty (-1=Inf)" %}</th> 
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><input type="text" class="form-control form-control-sm prize-name" value="特等獎"></td>
+                                <td><input type="text" class="form-control form-control-sm prize-name" value="{% trans 'Grand Prize' %}"></td>
                                 <td><input type="number" class="form-control form-control-sm prize-weight" value="5"></td>
-                                <td><input type="number" class="form-control form-control-sm prize-qty" value="1"></td> <td><button class="btn btn-sm text-danger" onclick="this.closest('tr').remove(); drawWheel();"><i class="fas fa-times"></i></button></td>
+                                <td><input type="number" class="form-control form-control-sm prize-qty" value="1"></td> 
+                                <td><button class="btn btn-sm text-danger" onclick="this.closest('tr').remove(); drawWheel();"><i class="fas fa-times"></i></button></td>
                             </tr>
                         </tbody>
                     </table>
-                    <button class="btn btn-outline-primary btn-sm w-100" onclick="addPrizeRow()">+ 新增獎項</button>
+                    <button class="btn btn-outline-primary btn-sm w-100" onclick="addPrizeRow()">+ {% trans "Add Prize" %}</button>
                 </div>
             </div>
 
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">匯入人員名單</div>
+                <div class="card-header bg-primary text-white">{% trans "Import Participant List" %}</div>
                 <div class="card-body">
-                    <input type="file" id="excelInput" class="form-control form-control-sm" accept=".xlsx, .xls">
-                    <div id="userCount" class="form-text mt-2">尚未匯入名單 (Excel 第一欄須為姓名)</div>
+                    <input type="file" id="excelInput" class="form-control" accept=".xlsx, .xls" style="display: none;" onchange="updateExcelName()">
+                    
+                    <div class="input-group input-group-sm">
+                        <label for="excelInput" class="btn btn-outline-primary">
+                            <i class="fas fa-file-excel me-1"></i> {% trans "Choose File" %}
+                        </label>
+                        <span id="excel-file-name" class="form-control text-muted bg-light text-truncate">
+                            {% trans "No file selected" %}
+                        </span>
+                    </div>
+                    
+                    <div id="userCount" class="form-text mt-2">
+                        <i class="fas fa-info-circle me-1"></i> {% trans "First column must be names" %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -51,7 +67,7 @@
                 <div class="pointer"></div>
             </div>
             <button id="drawBtn" class="btn btn-danger btn-lg px-5 shadow" onclick="startSpin()">
-                <i class="fas fa-play me-2"></i>開始抽獎
+                <i class="fas fa-play me-2"></i>{% trans "Start Draw" %}
             </button>
             <div id="resultDisplay" class="mt-4 h3 text-primary fw-bold"></div>
         </div>
@@ -60,12 +76,12 @@
 
 <div class="card shadow-sm mt-5">
     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-        <span><i class="fas fa-list-ul me-2"></i>中獎紀錄</span>
+        <span><i class="fas fa-list-ul me-2"></i>{% trans "Winning Records" %}</span>
         <div>
             <button class="btn btn-sm btn-light me-2" onclick="exportToExcel()">
-                <i class="fas fa-file-export me-1"></i>匯出 Excel
+                <i class="fas fa-file-export me-1"></i>{% trans "Export Excel" %}
             </button>
-            <button class="btn btn-sm btn-outline-light" onclick="clearRecords()">清空紀錄</button>
+            <button class="btn btn-sm btn-outline-light" onclick="clearRecords()">{% trans "Clear Records" %}</button>
         </div>
     </div>
     <div class="card-body p-0">
@@ -74,14 +90,14 @@
                 <thead class="table-light sticky-top">
                     <tr>
                         <th>#</th>
-                        <th>時間</th>
-                        <th>得獎人</th>
-                        <th>獎項</th>
+                        <th>{% trans "Time" %}</th>
+                        <th>{% trans "Winner" %}</th>
+                        <th>{% trans "Prize" %}</th>
                     </tr>
                 </thead>
                 <tbody id="recordBody">
                     <tr id="noRecord">
-                        <td colspan="4" class="text-center text-muted py-3">目前尚無中獎紀錄</td>
+                        <td colspan="4" class="text-center text-muted py-3">{% trans "No records yet" %}</td>
                     </tr>
                 </tbody>
             </table>
@@ -102,6 +118,22 @@
 </style>
 
 <script>
+// --- JavaScript 翻譯變數定義 ---
+const i18n = {
+    importSuccess: "{% trans 'Imported' %}",
+    prizesOut: "{% trans 'All prizes drawn!' %}",
+    importError: "{% trans 'Please import participant list first!' %}",
+    congrats: "{% trans 'Congratulations' %}",
+    won: "{% trans 'won' %}",
+    confirmClear: "{% trans 'Are you sure you want to clear all records?' %}",
+    noRecordExport: "{% trans 'No records to export!' %}",
+    wheelEmpty: "{% trans 'Prizes Sold Out' %}",
+    prizePlaceholder: "{% trans 'Prize Name' %}",
+    excelSheetName: "{% trans 'Winner List' %}",
+    excelHeaders: ["{% trans 'No.' %}", "{% trans 'Draw Time' %}", "{% trans 'Winner Name' %}", "{% trans 'Award' %}"],
+    remainingPeople: "{% trans 'Remaining' %}"
+};
+
 let participants = [];
 let prizes = [];
 let currentRotation = 0;
@@ -115,8 +147,8 @@ document.getElementById('excelInput').addEventListener('change', function(e) {
         const workbook = XLSX.read(data, {type: 'array'});
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
-        participants = json.map(row => row[0]).filter(name => name && name !== "姓名"); 
-        document.getElementById('userCount').innerHTML = `<i class="fas fa-check-circle text-success"></i> 已匯入 ${participants.length} 人`;
+        participants = json.map(row => row[0]).filter(name => name && name !== "姓名" && name !== "Name"); 
+        document.getElementById('userCount').innerHTML = `<i class="fas fa-check-circle text-success"></i> ${i18n.importSuccess} ${participants.length}`;
     };
     reader.readAsArrayBuffer(e.target.files[0]);
 });
@@ -161,7 +193,7 @@ function drawWheel() {
         ctx.textAlign = "center";
         ctx.fillStyle = "#6c757d";
         ctx.font = "bold 20px Arial";
-        ctx.fillText("獎項已抽完", centerX, centerY);
+        ctx.fillText(i18n.wheelEmpty, centerX, centerY);
         return;
     }
 
@@ -197,21 +229,11 @@ function drawWheel() {
     });
 }
 
-// 監聽輸入變化，即時更新轉盤
-document.addEventListener('input', (e) => {
-    if (e.target.classList.contains('prize-name') || e.target.classList.contains('prize-weight')) {
-        drawWheel();
-    }
-});
-
-// 初始化轉盤
-window.onload = drawWheel;
-
 function addPrizeRow() {
     const tbody = document.querySelector('#prizeTable tbody');
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
-        <td><input type="text" class="form-control form-control-sm prize-name" placeholder="獎品"></td>
+        <td><input type="text" class="form-control form-control-sm prize-name" placeholder="${i18n.prizePlaceholder}"></td>
         <td><input type="number" class="form-control form-control-sm prize-weight" value="10"></td>
         <td><input type="number" class="form-control form-control-sm prize-qty" value="-1"></td>
         <td><button class="btn btn-sm text-danger" onclick="this.closest('tr').remove(); drawWheel();"><i class="fas fa-times"></i></button></td>
@@ -222,7 +244,7 @@ function addPrizeRow() {
 
 // 開始抽獎動畫
 function startSpin() {
-    if (participants.length === 0) return alert("請先匯入人員名單！");
+    if (participants.length === 0) return alert(i18n.importError);
 
     const isIgnoreWeight = document.getElementById('ignoreWeight').checked;
     const names = document.querySelectorAll('.prize-name');
@@ -242,7 +264,7 @@ function startSpin() {
         }
     });
 
-    if (prizes.length === 0) return alert("所有獎品已抽完！");
+    if (prizes.length === 0) return alert(i18n.prizesOut);
 
     // 加權隨機抽獎
     const totalWeight = prizes.reduce((sum, p) => sum + p.weight, 0);
@@ -297,7 +319,7 @@ function startSpin() {
         
         drawWheel();
         document.getElementById('resultDisplay').innerHTML = `
-            <i class="fas fa-trophy text-warning"></i> 恭喜 ${winner} 獲得 ${selectedPrize.name}
+            <i class="fas fa-trophy text-warning"></i> ${i18n.congrats} ${winner} ${i18n.won} ${selectedPrize.name}
         `;
         addRecord(winner, selectedPrize.name);
     }, 4000);
@@ -324,7 +346,7 @@ function addRecord(winner, prizeName) {
     `;
 
     participants = participants.filter(p => p !== winner);
-    document.getElementById('userCount').innerText = "剩餘人數：" + participants.length;
+    document.getElementById('userCount').innerText = `${i18n.remainingPeople}：${participants.length}`;
 
     // 將新紀錄插在最前面 (最上面)
     recordBody.insertAdjacentHTML('afterbegin', newRow);
@@ -332,10 +354,10 @@ function addRecord(winner, prizeName) {
 
 // 清空紀錄函數
 function clearRecords() {
-    if (confirm("確定要清空所有中獎紀錄嗎？")) {
+    if (confirm(i18n.confirmClear)) {
         document.getElementById('recordBody').innerHTML = `
             <tr id="noRecord">
-                <td colspan="4" class="text-center text-muted py-3">目前尚無中獎紀錄</td>
+                <td colspan="4" class="text-center text-muted py-3">{% trans "No records yet" %}</td>
             </tr>
         `;
         recordCount = 0;
@@ -346,15 +368,10 @@ function clearRecords() {
 function exportToExcel() {
     // 檢查是否有紀錄
     const rows = document.querySelectorAll('#recordBody tr:not(#noRecord)');
-    if (rows.length === 0) {
-        alert("目前沒有任何中獎紀錄可以匯出！");
-        return;
-    }
+    if (rows.length === 0) return alert(i18n.noRecordExport);
 
     // 準備資料陣列 (包含標題列)
-    const data = [
-        ["編號", "抽獎時間", "中獎人姓名", "獲得獎項"]
-    ];
+    const data = [ i18n.excelHeaders ];
 
     // 遍歷表格抓取資料
     rows.forEach(row => {
@@ -370,14 +387,32 @@ function exportToExcel() {
     // 使用 SheetJS 產生 Excel 檔案
     const worksheet = XLSX.utils.aoa_to_sheet(data); // Array of Arrays 轉成 Sheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "中獎名單");
-
-    // 設定檔名 (包含當前日期時間)
-    const now = new Date();
-    const fileName = `CSI_LuckyDraw_Result_${now.getFullYear()}${now.getMonth()+1}${now.getDate()}.xlsx`;
-
-    // 觸發下載
-    XLSX.writeFile(workbook, fileName);
+    XLSX.utils.book_append_sheet(workbook, worksheet, i18n.excelSheetName);
+    XLSX.writeFile(workbook, `LuckyDraw_Result.xlsx`);
 }
+
+// 更新顯示的檔名
+function updateExcelName() {
+    const input = document.getElementById('excelInput');
+    const fileNameDisplay = document.getElementById('excel-file-name');
+    
+    if (input.files.length > 0) {
+        fileNameDisplay.innerText = input.files[0].name;
+        fileNameDisplay.classList.remove('text-muted');
+    } else {
+        fileNameDisplay.innerText = "{% trans 'No file selected' %}";
+        fileNameDisplay.classList.add('text-muted');
+    }
+}
+
+// 監聽轉盤更新
+document.addEventListener('input', (e) => {
+    if (e.target.classList.contains('prize-name') || e.target.classList.contains('prize-weight')) {
+        drawWheel();
+    }
+});
+
+// 初始化轉盤
+window.onload = drawWheel;
 </script>
 {% endblock %}

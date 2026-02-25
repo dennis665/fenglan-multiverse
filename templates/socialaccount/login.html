@@ -14,10 +14,12 @@
                         <i class="fab fa-google fa-3x text-danger"></i>
                     </div>
                     
-                    <h3 class="mb-3">使用 Google 帳號登入</h3>
+                    <h3 class="mb-3">{% trans "Sign in with Google" %}</h3>
                     
                     <p class="text-muted mb-4">
+                        {% blocktrans %}
                         您即將使用 Google 帳號進行驗證。系統將導向 Google 授權頁面，請確認是否繼續？
+                        {% endblocktrans %}
                     </p>
 
                     <form method="post">
@@ -27,7 +29,7 @@
                                 {% trans "Continue" %}
                             </button>
                             <a href="{% url 'account_login' %}" class="btn btn-link text-secondary">
-                                取消回登入頁
+                                {% trans "Cancel and return to login page" %}
                             </a>
                         </div>
                     </form>
