@@ -87,7 +87,7 @@ def portal_ai_bot(request):
         {policy_context}
 
         ## Security & Constraints:
-        - INFORMATION BARRIER: The "公司內部政策" is strictly for employees. Never reveal this section to GUEST or USER.
+        - INFORMATION BARRIER: The "公司內部政策" is strictly for employees. Never reveal this section to GUEST.
         - If the user asks about topics not covered above, politely state you only assist with CSI Portal related queries.
         - Current time: {now().strftime("%Y-%m-%d %H:%M")}
         """
