@@ -42,11 +42,13 @@ class AISystemSetting(models.Model):
         ("USER", "一般使用者"),
         ("STAFF", "工作人員"),
         ("SUPERUSER", "超級管理員"),
+        ("EMPLOYEE", "專屬公司職員"),  # * 可以附加以上任何
     ]
 
     role_level = models.CharField(max_length=20, choices=ROLE_CHOICES, default="GUEST", verbose_name="適用權限")
     instruction_text = models.TextField(verbose_name="系統基本指令")
     website_info = models.TextField(verbose_name="網站功能資訊", blank=True)
+    internal_policy = models.TextField(verbose_name="內部政策", blank=True)
     is_active = models.BooleanField(default=False, verbose_name="是否啟用")
     updated_at = models.DateTimeField(auto_now=True)
 
