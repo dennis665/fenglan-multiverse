@@ -50,7 +50,7 @@ urlpatterns = [
     path("ticket-pull/", ticket_pull, name="ticket_pull"),
     #! 安定專用比對
     path("tigf-comparison/", tigf_dashboard, name="tigf_comparison"),
-    path("download-diff-csv/<str:fid>/", download_diff_csv, name="download_diff_csv"),
+    path("download-diff-csv/<str:cno>/<str:fid>/", download_diff_csv, name="download_diff_csv"),
     # ? ======================================================================
     #! ICON
     path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "images/favicon.ico")),
