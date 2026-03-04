@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-25 08:59+0800\n"
+"POT-Creation-Date: 2026-03-04 15:43+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -17,13 +17,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\config\settings.py:268
+#: .\config\settings.py:273
 msgid "繁體中文"
-msgstr "繁體中文"
+msgstr ""
 
-#: .\config\settings.py:269
+#: .\config\settings.py:274
 msgid "English"
-msgstr "English"
+msgstr ""
 
 #: .\core\templates\core\lucky_draw.html:4 .\templates\base.html:35
 msgid "Lucky Draw"
@@ -71,7 +71,7 @@ msgid "Choose File"
 msgstr "選擇檔案"
 
 #: .\core\templates\core\lucky_draw.html:53
-#: .\core\templates\core\lucky_draw.html:364
+#: .\core\templates\core\lucky_draw.html:403
 msgid "No file selected"
 msgstr "尚未選擇檔案"
 
@@ -108,7 +108,7 @@ msgid "Prize"
 msgstr "獎項"
 
 #: .\core\templates\core\lucky_draw.html:100
-#: .\core\templates\core\lucky_draw.html:326
+#: .\core\templates\core\lucky_draw.html:360
 msgid "No records yet"
 msgstr "目前尚無紀錄"
 
@@ -168,60 +168,113 @@ msgstr "獲得獎項"
 msgid "Remaining"
 msgstr "剩餘人數"
 
-#: .\core\templates\core\profile.html:6 .\templates\base.html:105
-msgid "Profile"
-msgstr "個人檔案"
-
-#: .\core\templates\core\profile.html:25
+#: .\core\templates\core\profile.html:28
 msgid "User Profile"
 msgstr "個人資訊"
 
-#: .\core\templates\core\profile.html:54
-msgid "Custom Avatar"
-msgstr "自定義頭像"
+#: .\core\templates\core\profile.html:50
+msgid "Change Photo"
+msgstr "更換照片"
 
-#: .\core\templates\core\profile.html:58
-msgid "Linked with Google Account"
-msgstr "已連結 Google 帳號"
-
-#: .\core\templates\core\profile.html:76
-msgid "Choose Image"
-msgstr "選擇圖片"
-
-#: .\core\templates\core\profile.html:79
-msgid "No file chosen"
-msgstr "未選擇任何檔案"
-
-#: .\core\templates\core\profile.html:81
-msgid "Update Avatar"
-msgstr "更新大頭貼"
-
-#: .\core\templates\core\profile.html:86
-msgid ""
-"Tip: Uploading a custom photo will replace the avatar provided by Google."
-msgstr "提示：上傳自定義照片後，將取代 Google 提供的頭像。"
-
-#: .\core\templates\core\profile.html:94
-msgid "Email"
-msgstr "電子郵件"
-
-#: .\core\templates\core\profile.html:98
+#: .\core\templates\core\profile.html:55
 msgid "Last Login"
 msgstr "最後登入"
 
-#: .\core\templates\core\profile.html:102
-msgid "Date Joined"
-msgstr "帳號加入時間"
+#: .\core\templates\core\profile.html:68
+msgid "My Wallet"
+msgstr "我的錢包"
 
-#: .\core\templates\core\profile.html:111
-#: .\templates\account\email_confirm.html:47 .\templates\account\logout.html:32
-#: .\templates\account\verification_sent.html:24
-msgid "Back to Home"
-msgstr "返回首頁"
+#: .\core\templates\core\profile.html:72
+msgid "Deposit Points"
+msgstr "儲值點數"
 
-#: .\core\views.py:25
+#: .\core\templates\core\profile.html:78
+msgid "Bonus Points"
+msgstr "紅利點數"
+
+#: .\core\templates\core\profile.html:85
+msgid "Recharge Now"
+msgstr "點數儲值"
+
+#: .\core\templates\core\profile.html:88
+msgid "Go Shopping"
+msgstr "前往商城"
+
+#: .\core\templates\core\profile.html:97
+msgid "Transaction History"
+msgstr "交易歷史紀錄"
+
+#: .\core\templates\core\profile.html:103
+msgid "Date"
+msgstr "日期"
+
+#: .\core\templates\core\profile.html:104
+msgid "Description"
+msgstr "說明"
+
+#: .\core\templates\core\profile.html:105
+msgid "Amount"
+msgstr "金額"
+
+#: .\core\templates\core\profile.html:126
+msgid "No records found."
+msgstr "目前尚無紀錄"
+
+#: .\core\views.py:29
 msgid "Avatar updated successfully!"
 msgstr "大頭貼更新成功！"
+
+#: .\core\views.py:120
+msgid "AI is currently resting, please try again later."
+msgstr "AI 目前正在休息，請稍後再試。"
+
+#: .\core\views.py:122
+msgid "Invalid request"
+msgstr "無效的請求"
+
+#: .\finance\templates\finance\recharge_store.html:4 .\templates\base.html:42
+msgid "Point Recharge"
+msgstr "點數儲值"
+
+#: .\finance\templates\finance\recharge_store.html:64
+msgid "點數儲值中心"
+msgstr ""
+
+#: .\finance\templates\finance\recharge_store.html:67
+msgid "選擇最適合您的儲值方案，享受專屬紅利回饋與購物體驗。"
+msgstr ""
+
+#: .\finance\templates\finance\recharge_store.html:126
+msgid "目前暫無可用的儲值方案"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:4 .\templates\base.html:47
+msgid "Point Shop"
+msgstr "點數商城"
+
+#: .\finance\templates\finance\shop.html:80
+msgid "CSI 點數商城"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:82
+msgid "使用您的點數兌換豐富商品與專屬權益"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:89
+msgid "我的資產總覽"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:92
+msgid "儲值點數"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:97
+msgid "紅利點數"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:175
+msgid "商城目前準備中，敬請期待！"
+msgstr ""
 
 #: .\notices\templates\notices\detail.html:11
 #: .\notices\templates\notices\list.html:4
@@ -298,12 +351,6 @@ msgid ""
 "fs-6 mt-2\">%(email)s</span>\n"
 "                            "
 msgstr ""
-"\n"
-"                                請確認您要為帳號 <strong class=\"text-"
-"dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
-"                                <span class=\"badge bg-light text-primary "
-"fs-6 mt-2\">%(email)s</span>\n"
-"                            "
 
 #: .\templates\account\email_confirm.html:32
 msgid "Confirm"
@@ -317,10 +364,11 @@ msgid ""
 "href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
 "                            "
 msgstr ""
-"\n"
-"                                此電子郵件確認連結已過期或無效。請嘗試 <a "
-"href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
-"                            "
+
+#: .\templates\account\email_confirm.html:47 .\templates\account\logout.html:32
+#: .\templates\account\verification_sent.html:24
+msgid "Back to Home"
+msgstr "返回首頁"
 
 #: .\templates\account\login.html:6 .\templates\account\login.html:14
 #: .\templates\account\login.html:38 .\templates\socialaccount\login.html:5
@@ -386,7 +434,7 @@ msgstr "驗證您的電子郵件地址"
 
 #: .\templates\account\verification_sent.html:18
 msgid "我們已向您發送了一封電子郵件，請點擊信中的連結以完成註冊。"
-msgstr "我們已向您發送了一封電子郵件，請點擊信中的連結以完成註冊。"
+msgstr ""
 
 #: .\templates\account\verification_sent.html:21
 msgid ""
@@ -398,55 +446,59 @@ msgstr "如果您沒有收到郵件，請檢查垃圾郵件箱或稍後再試。
 msgid "Home"
 msgstr "首頁"
 
-#: .\templates\base.html:41
+#: .\templates\base.html:55
 msgid "Tester Zone"
 msgstr "測試人員專區"
 
-#: .\templates\base.html:44
+#: .\templates\base.html:58
 msgid "Test Management System"
 msgstr "測試管理系統"
 
-#: .\templates\base.html:52
+#: .\templates\base.html:66
 msgid "No tools available"
 msgstr "目前無工具連結"
 
-#: .\templates\base.html:85
+#: .\templates\base.html:99
 msgid "Admin"
 msgstr "後台管理"
 
-#: .\templates\base.html:110
+#: .\templates\base.html:119
+msgid "Profile"
+msgstr "個人檔案"
+
+#: .\templates\base.html:124
 msgid "Logout"
 msgstr "登出"
 
-#: .\templates\base.html:117
+#: .\templates\base.html:131
 msgid "Login"
 msgstr "登入"
 
-#: .\templates\base.html:120
+#: .\templates\base.html:134
 msgid "Register"
 msgstr "註冊"
 
-#: .\templates\base.html:135
+#: .\templates\base.html:149
 msgid "All Rights Reserved."
 msgstr "保留所有權利。"
 
-#: .\templates\base.html:139
+#: .\templates\base.html:153
 msgid "Daily Visits"
 msgstr "今日瀏覽"
 
-#: .\templates\base.html:143
+#: .\templates\base.html:157
 msgid "Total Visits"
 msgstr "累計造訪"
 
-#: .\templates\base.html:277
+#: .\templates\base.html:316
 msgid "CSI Smart Assistant"
 msgstr "CSI 智能助理"
 
-#: .\templates\base.html:281
+#: .\templates\base.html:320
 msgid "Hello! I am the CSI Portal assistant, how can I help you today?"
 msgstr "你好！我是 CSI Portal 的助手，有什麼我可以幫你的嗎？"
 
-#: .\templates\base.html:284
+#: .\templates\base.html:323
 msgid "Type a message..."
 msgstr "請輸入問題..."
 
@@ -489,10 +541,6 @@ msgid ""
 "權頁面，請確認是否繼續？\n"
 "                        "
 msgstr ""
-"\n"
-"                        您即將使用 Google 帳號進行驗證。系統將導向 Google 授"
-"權頁面，請確認是否繼續？\n"
-"                        "
 
 #: .\templates\socialaccount\login.html:29
 msgid "Continue"
@@ -505,3 +553,28 @@ msgstr "取消並返回登入頁面"
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr "您不具備權限，已自動導回首頁。"
+
+#~ msgid "Custom Avatar"
+#~ msgstr "自定義頭像"
+
+#~ msgid "Linked with Google Account"
+#~ msgstr "已連結 Google 帳號"
+
+#~ msgid "Choose Image"
+#~ msgstr "選擇圖片"
+
+#~ msgid "No file chosen"
+#~ msgstr "未選擇任何檔案"
+
+#~ msgid "Update Avatar"
+#~ msgstr "更新大頭貼"
+
+#~ msgid ""
+#~ "Tip: Uploading a custom photo will replace the avatar provided by Google."
+#~ msgstr "提示：上傳自定義照片後，將取代 Google 提供的頭像。"
+
+#~ msgid "Email"
+#~ msgstr "電子郵件"
+
+#~ msgid "Date Joined"
+#~ msgstr "帳號加入時間"

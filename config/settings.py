@@ -43,6 +43,9 @@ CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 GEMINI_API_KEY = env("GEMINI_API_KEY")
 DISPATCH_WORD = env("DISPATCH_WORD")
 CSI_EMAIL = env("CSI_EMAIL")
+MERCHANT_ID = env("MERCHANT_ID")
+HASH_KEY = env("HASH_KEY")
+HASH_IV = env("HASH_IV")
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -75,6 +78,8 @@ LOCAL_APPS = [
     "core",  # * 核心功能 app
     "notices",
     "users",
+    "tigf",
+    "finance",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

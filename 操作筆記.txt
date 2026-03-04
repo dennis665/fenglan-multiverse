@@ -70,9 +70,11 @@ docker rmi csi_server-web
 -------ngrok 相關-------
 #! 綁定 ngrok_token
 ./ngrok config add-authtoken 你的TOKEN字串
+ngrok config add-authtoken 你的TOKEN字串
 
 #! 啟動 ngrok
 ./ngrok http 8000 --domain=unjoinable-scribal-vanesa.ngrok-free.dev
+ngrok http 8000 --domain=kiwi-loved-slug.ngrok-free.app
 
 ------- i18N 相關-------
 #! gettext 下載連結，解壓縮後把 D:\gettext\bin 路徑加至 path 裡

@@ -1,129 +1,177 @@
-{# users/templates/users/profile.html #}
 {% extends "base.html" %}
 {% load i18n %}
 {% load socialaccount %}
 
-{% block head_title %}{% trans "Profile" %} | CSI Portal{% endblock %}
-
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            
-            {# --- 訊息通知區 --- #}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+<style>
+    .profile-card { border-radius: 1rem; overflow: hidden; }
+    .wallet-stat-card {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    .wallet-stat-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .table-vcenter td, .table-vcenter th { vertical-align: middle; }
+    .badge-recharge { background-color: #e8f5e9; color: #2e7d32; }
+    .badge-purchase { background-color: #fff3e0; color: #ef6c00; }
+</style>
 
-            <div class="card shadow border-0">
-                <div class="card-header bg-dark text-white py-3">
-                    <h4 class="mb-0"><i class="fas fa-id-card me-2"></i>{% trans "User Profile" %}</h4>
+<div class="container py-4">
+    <div class="row g-4">
+        
+        {# --- 左側：個人資訊與頭像 --- #}
+        <div class="col-lg-4">
+            <div class="card profile-card shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white text-center py-4">
+                    <h5 class="mb-0">{% trans "User Profile" %}</h5>
                 </div>
-                
-                <div class="card-body p-4 text-center">
-                    {% get_social_accounts user as accounts %}
-
-                    {# --- 大頭貼顯示區域 (三層邏輯) --- #}
-                    <div class="mb-3">
+                <div class="card-body text-center p-4">
+                    {# 大頭貼邏輯 #}
+                    <div class="position-relative d-inline-block mb-3">
+                        {% get_social_accounts user as accounts %}
                         {% if user.profile.avatar %}
-                            <img src="{{ user.profile.avatar.url }}?t={{ user.profile.avatar.size }}" 
-                                    class="rounded-circle shadow mx-auto d-block" 
-                                    style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
-                        
+                            <img src="{{ user.profile.avatar.url }}" class="rounded-circle border" style="width: 120px; height: 120px; object-fit: cover;">
                         {% elif accounts.google %}
-                            <img src="{{ accounts.google.0.get_avatar_url }}" 
-                                 class="rounded-circle shadow" 
-                                 style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
-                        
+                            <img src="{{ accounts.google.0.get_avatar_url }}" class="rounded-circle border" style="width: 120px; height: 120px; object-fit: cover;">
                         {% else %}
-                            <i class="fas fa-user-circle fa-7x text-secondary"></i>
+                            <i class="fas fa-user-circle fa-7x text-light"></i>
                         {% endif %}
                     </div>
+                    
+                    <h4 class="fw-bold">{{ user.username }}</h4>
+                    <p class="text-muted small mb-4">{{ user.email }}</p>
 
-                    <h3 class="fw-bold">{{ user.username }}</h3>
-
-                    {# --- 來源標籤 --- #}
-                    <div class="mb-3">
-                        {% if user.profile.avatar %}
-                            <span class="badge bg-primary rounded-pill fw-normal px-3">
-                                <i class="fas fa-camera me-1"></i> {% trans "Custom Avatar" %}
-                            </span>
-                        {% elif accounts.google %}
-                            <span class="text-muted small">
-                                <i class="fab fa-google text-danger"></i> {% trans "Linked with Google Account" %}
-                            </span>
-                        {% endif %}
-                    </div>
-
-                    <hr class="my-4">
-
-                    {# --- 圖片上傳表單 --- #}
-                    <div class="row justify-content-center mb-4">
-                        <div class="col-sm-10 col-md-9">
-                            <form method="POST" enctype="multipart/form-data" class="input-group input-group-sm">
-                                {% csrf_token %}
-
-                                <input type="file" name="avatar" class="form-control" id="profile_avatar" 
-                                    accept="image/*" required style="display: none;" onchange="updateFileName()">
-
-                                <div class="input-group input-group-sm">
-                                    <label for="profile_avatar" class="btn btn-outline-dark">
-                                        <i class="fas fa-folder-open me-1"></i> {% trans "Choose Image" %}
-                                    </label>
-                                    <span id="file-name" class="form-control text-start text-muted bg-light">
-                                        {% trans "No file chosen" %}
-                                    </span>
-                                    <button class="btn btn-dark" type="submit">{% trans "Update Avatar" %}</button>
-                                </div>
-                            </form>
-                            <div class="form-text mt-2 text-start">
-                                <i class="fas fa-info-circle me-1"></i> 
-                                {% trans "Tip: Uploading a custom photo will replace the avatar provided by Google." %}
-                            </div>
-                        </div>
-                    </div>
-
-                    {# --- 使用者資訊區 --- #}
-                    <div class="mt-4 border-top pt-4">
-                        <div class="row text-start mb-2">
-                            <div class="col-sm-4 fw-bold text-secondary">{% trans "Email" %}：</div>
-                            <div class="col-sm-8 text-break">{{ user.email }}</div>
-                        </div>
-                        <div class="row text-start mb-2">
-                            <div class="col-sm-4 fw-bold text-secondary">{% trans "Last Login" %}：</div>
-                            <div class="col-sm-8">{{ user.last_login|date:"Y-m-d H:i" }}</div>
-                        </div>
-                        <div class="row text-start mb-2">
-                            <div class="col-sm-4 fw-bold text-secondary">{% trans "Date Joined" %}：</div>
-                            <div class="col-sm-8">{{ user.date_joined|date:"Y-m-d H:i" }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-footer bg-white py-3">
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-arrow-left me-1"></i> {% trans "Back to Home" %}
-                        </a>
+                    <form method="POST" enctype="multipart/form-data" class="mb-3">
+                        {% csrf_token %}
+                        <input type="file" name="avatar" id="avatarInput" hidden onchange="this.form.submit()">
+                        <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3" onclick="document.getElementById('avatarInput').click()">
+                            <i class="fas fa-camera me-1"></i> {% trans "Change Photo" %}
+                        </button>
+                    </form>
+                    
+                    <div class="text-start mt-4 pt-3 border-top">
+                        <div class="small text-secondary mb-1">{% trans "Last Login" %}</div>
+                        <div class="small fw-bold">{{ user.last_login|date:"Y-m-d H:i" }}</div>
                     </div>
                 </div>
             </div>
         </div>
+
+        {# --- 右側：錢包資訊與交易紀錄 --- #}
+        <div class="col-lg-8">
+            
+            {# --- 點數錢包摘要 --- #}
+            <div class="card profile-card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4"><i class="fas fa-wallet text-primary me-2"></i>{% trans "My Wallet" %}</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="wallet-stat-card text-center">
+                                <div class="text-secondary small mb-1">{% trans "Deposit Points" %}</div>
+                                <h2 class="fw-bold text-primary mb-0">{{ wallet.deposit_points }}</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="wallet-stat-card text-center">
+                                <div class="text-secondary small mb-1">{% trans "Bonus Points" %}</div>
+                                <h2 class="fw-bold text-warning mb-0">{{ wallet.bonus_points }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'finance:recharge_store' %}" class="btn btn-primary rounded-pill px-4 me-2">
+                            <i class="fas fa-plus-circle me-1"></i>{% trans "Recharge Now" %}
+                        </a>
+                        <a href="{% url 'finance:shop' %}" class="btn btn-outline-success rounded-pill px-4">
+                            <i class="fas fa-shopping-bag me-1"></i>{% trans "Go Shopping" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {# --- 交易歷史紀錄卡片 --- #}
+            <div class="card profile-card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0">{% trans "Transaction History" %}</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">{% trans "Date" %}</th>
+                                <th>{% trans "Description" %}</th>
+                                <th class="text-end pe-4">{% trans "Amount" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {# ❗ 注意：這裡改用 page_obj 迭代 #}
+                            {% for tx in page_obj %}
+                            <tr>
+                                <td class="ps-4 small text-muted">{{ tx.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ tx.description }}</div>
+                                    <span class="badge {% if tx.amount > 0 %}bg-success{% else %}bg-secondary{% endif %} small">
+                                        {{ tx.get_transaction_type_display }}
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <span class="fw-bold {% if tx.amount > 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ tx.amount|stringformat:"+d" }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center py-5">{% trans "No records found." %}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {# --- 🔢 分頁導覽按鈕 --- #}
+                {% if page_obj.paginator.num_pages > 1 %}
+                <div class="card-footer bg-white border-top-0 py-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            
+                            {# 上一頁 #}
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link shadow-none" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>
+                            {% endif %}
+
+                            {# 頁碼數字 #}
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item"><a class="page-link shadow-none" href="?page={{ num }}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {# 下一頁 #}
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link shadow-none" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>
+                            {% endif %}
+                            
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
-
-<script>
-function updateFileName() {
-    const input = document.getElementById('profile_avatar');
-    const fileNameDisplay = document.getElementById('file-name');
-    if (input.files.length > 0) {
-        fileNameDisplay.innerText = input.files[0].name;
-    }
-}
-</script>
 {% endblock %}

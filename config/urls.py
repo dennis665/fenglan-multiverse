@@ -58,6 +58,8 @@ urlpatterns = [
     #! 智能客服
     path("ai-chat/", portal_ai_bot, name="portal_ai_bot"),
     # ? ======================================================================
+    #! 金流
+    path("finance/", include("finance.urls")),
 ]
 
 if settings.DEBUG:

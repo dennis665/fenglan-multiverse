@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Point Shop" %} - CSI Portal{% endblock %}
+
+{% block content %}
+<style>
+    /* 尊榮錢包儀表板 */
+    .wallet-dashboard {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border-radius: 1rem;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+    }
+    .wallet-dashboard::after {
+        content: '\f263'; /* FontAwesome 錢包 icon */
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: -20px;
+        bottom: -30px;
+        font-size: 8rem;
+        opacity: 0.1;
+        transform: rotate(-15deg);
+    }
+
+    /* 商品卡片與圖片 */
+    .product-card {
+        border-radius: 1rem;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    .product-img-wrapper {
+        height: 220px;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+    }
+    .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .product-card:hover .product-img {
+        transform: scale(1.08); /* 圖片懸浮放大效果 */
+    }
+
+    /* 庫存標籤 */
+    .stock-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 2;
+    }
+
+    /* 價格排版 */
+    .price-tag {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #198754;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold display-6">
+            <i class="fas fa-store text-success me-2"></i>{% trans "CSI 點數商城" %}
+        </h2>
+        <p class="text-muted">{% trans "使用您的點數兌換豐富商品與專屬權益" %}</p>
+    </div>
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="wallet-dashboard p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="opacity-75 mb-1"><i class="fas fa-wallet me-2"></i>{% trans "我的資產總覽" %}</h5>
+                    <div class="d-flex gap-4 mt-3">
+                        <div>
+                            <div class="small opacity-75">{% trans "儲值點數" %}</div>
+                            <h3 class="fw-bold mb-0">{{ wallet.deposit_points }} <span class="fs-6 fw-normal">點</span></h3>
+                        </div>
+                        <div class="border-start border-light opacity-25"></div>
+                        <div>
+                            <div class="small opacity-75">{% trans "紅利點數" %}</div>
+                            <h3 class="fw-bold text-warning mb-0">{{ wallet.bonus_points }} <span class="fs-6 fw-normal text-white">點</span></h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-none d-md-block text-end z-1">
+                    <a href="{% url 'finance:recharge_store' %}" class="btn btn-light rounded-pill px-4 fw-bold text-primary shadow-sm">
+                        <i class="fas fa-plus-circle me-1"></i>前往儲值
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for item in products %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card product-card h-100 bg-white">
+                
+                <div class="product-img-wrapper">
+                    {% if item.stock <= 5 and item.stock > 0 %}
+                        <span class="badge bg-danger stock-badge shadow-sm">即將完售 (剩餘 {{ item.stock }})</span>
+                    {% elif item.stock == 0 %}
+                        <span class="badge bg-secondary stock-badge shadow-sm">已售完</span>
+                    {% endif %}
+
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="product-img">
+                    {% else %}
+                        <i class="fas fa-box-open fa-4x text-muted opacity-25"></i>
+                    {% endif %}
+                </div>
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="card-title fw-bold text-dark mb-2">{{ item.name }}</h5>
+                    <p class="card-text text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        {{ item.description }}
+                    </p>
+
+                    <div class="mt-auto mb-3">
+                        <span class="price-tag">{{ item.price_in_points }} <span class="fs-6 text-muted fw-normal">點</span></span>
+                    </div>
+
+                    <hr class="opacity-10 my-3">
+
+                    <form method="POST" action="{% url 'finance:checkout_cart' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ item.id }}">
+
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary fw-bold d-flex justify-content-between">
+                                <span><i class="fas fa-coins text-warning me-1"></i>紅利折抵</span>
+                                <span class="text-muted">(最多 {{ item.price_in_points }} 點)</span>
+                            </label>
+                            <input type="number" name="bonus_to_use" class="form-control form-control-sm bonus-input" 
+                                   data-price="{{ item.price_in_points }}"
+                                   data-max-bonus="{{ wallet.bonus_points }}"
+                                   max="{{ wallet.bonus_points }}" min="0" value="0"
+                                   {% if item.stock == 0 %}disabled{% endif %}>
+                            
+                            <div class="form-text small text-end mt-1 payment-summary">
+                                將扣除 <strong class="text-primary deposit-calc">{{ item.price_in_points }}</strong> 儲值點
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold" 
+                                {% if item.stock == 0 %}disabled{% endif %}
+                                onclick="confirmRedeem('{{ item.id }}', '{{ item.name }}', '{{ item.price_in_points }}', this)">
+                            {% if item.stock == 0 %}售完補貨中{% else %}<i class="fas fa-shopping-bag me-1"></i>立即兌換{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="text-muted">
+                <i class="fas fa-store-slash fa-4x mb-3 opacity-25"></i>
+                <h5>{% trans "商城目前準備中，敬請期待！" %}</h5>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body text-center p-4">
+                <div class="text-warning mb-3">
+                    <i class="fas fa-question-circle fa-3x"></i>
+                </div>
+                <h5 class="fw-bold">確認兌換？</h5>
+                <p class="text-muted small">您即將兌換「<span id="modal-prod-name"></span>」</p>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-light flex-grow-1" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary flex-grow-1" id="final-confirm-btn">確定兌換</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'success' %}
+        <div class="modal fade" id="successModal" tabindex="-1" onclick="this.style.display='none'">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content border-0 shadow bg-success text-white">
+                    <div class="modal-body text-center p-5">
+                        <i class="fas fa-check-circle fa-4x mb-3 animate__animated animate__bounceIn"></i>
+                        <h4 class="fw-bold">兌換成功！</h4>
+                        <p class="mb-0 opacity-75">點擊任意處關閉視窗</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<script>
+    let currentForm = null;
+
+    // 點擊卡片按鈕時：準備資料並開啟確認 Modal
+    function confirmRedeem(prodId, prodName, price, btnElement) {
+        currentForm = btnElement.closest('form');
+        document.getElementById('modal-prod-name').innerText = prodName;
+
+        // 顯示確認視窗
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        confirmModal.show();
+    }
+
+    // 在確認 Modal 點擊「確定兌換」時：送出原本的表單
+    document.getElementById('final-confirm-btn').addEventListener('click', function() {
+        if (currentForm) {
+            currentForm.submit();
+        }
+    });
+
+    // 頁面載入後：如果發現有成功訊息，自動跳出成功小視窗
+    document.addEventListener("DOMContentLoaded", function() {
+        const successModalEl = document.getElementById('successModal');
+        if (successModalEl) {
+            const successModal = new bootstrap.Modal(successModalEl);
+            successModal.show();
+
+            // 隨意點擊後關閉 (Modal 本身點擊就會關閉，這是 Bootstrap 特性)
+        }
+
+        // 原本的紅利計算邏輯保留
+        const bonusInputs = document.querySelectorAll('.bonus-input');
+        bonusInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                let val = parseInt(this.value) || 0;
+                let price = parseInt(this.getAttribute('data-price'));
+                let maxBonus = parseInt(this.getAttribute('data-max-bonus'));
+                let maxAllowed = Math.min(price, maxBonus);
+                if (val > maxAllowed) this.value = maxAllowed;
+                if (val < 0) this.value = 0;
+                let remainDeposit = price - (parseInt(this.value) || 0);
+                let summarySpan = this.closest('form').querySelector('.deposit-calc');
+                if(summarySpan) summarySpan.innerText = remainDeposit;
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -9,6 +10,7 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from google import genai
 
+from finance.models import PointTransaction, UserPoints
 from notices.models import AISystemSetting, Announcement, TicketRecord
 from utils.decorators import staff_required
 
@@ -17,7 +19,7 @@ from .models import FeatureStatus
 
 @login_required
 def profile_view(request):
-    #! 處理使用者點擊「更新照片」的 POST 請求
+    #! 處理頭像上傳
     if request.method == "POST":
         avatar_file = request.FILES.get("avatar")
         if avatar_file:
@@ -26,8 +28,23 @@ def profile_view(request):
             profile.save()
             messages.success(request, _("Avatar updated successfully!"))
             return redirect("profile")
-    #! 因為使用了 socialaccount，我們可以在模板中拿到 Google 的資料
-    return render(request, "core/profile.html")
+
+    #! 抓取點數錢包 (若無則建立)
+    wallet, _ = UserPoints.objects.get_or_create(user=request.user)
+
+    #!  交易紀錄分頁處理
+    transaction_list = PointTransaction.objects.filter(user=request.user).order_by("-created_at")
+
+    #! 每頁顯示 10 筆
+    paginator = Paginator(transaction_list, 10)
+    page_number = request.GET.get("page")  # * 從網址抓取 ?page=2
+    page_obj = paginator.get_page(page_number)  # * 抓取該頁的資料物件
+
+    context = {
+        "wallet": wallet,
+        "page_obj": page_obj,
+    }
+    return render(request, "core/profile.html", context)
 
 
 def portal_ai_bot(request):

@@ -1,6 +1,7 @@
 import io
 import warnings
 import zipfile
+from decimal import Decimal
 
 import pandas as pd
 from django.core.cache import cache
@@ -156,7 +157,28 @@ def tigf_dashboard(request):
 
                         #! 讀取申報檔
                         df_r = smart_read_excel(report_obj, header=None)
-                        df_r.columns = df_r.iloc[start_row - 3]
+                        #! 提取兩列標題列
+                        row_upper = df_r.iloc[start_row - 4]  # * 上層標題 (例如：大分類)
+                        row_lower = df_r.iloc[start_row - 3]  # * 下層標題 (例如：細目)
+                        #! 定義合併邏輯：處理 NaN 並組合名稱
+                        new_columns = []
+                        for upper, lower in zip(row_upper, row_lower):
+                            #! 轉為字串並去除前後空白，如果是 NaN 則變成空字串
+                            top = str(upper).strip() if pd.notna(upper) else ""
+                            bottom = str(lower).strip() if pd.notna(lower) else ""
+
+                            if top and bottom:
+                                #! 兩行都有值：組合在一起
+                                new_columns.append(f"{top}_{bottom}")
+                            elif top:
+                                #! 只有上層有值 (下層空)
+                                new_columns.append(top)
+                            else:
+                                #! 只有下層有值，或兩者皆無 (取下層，若下層也空則會是空字串)
+                                new_columns.append(bottom)
+
+                        #! 正式設定回 DataFrame
+                        df_r.columns = new_columns
 
                         #! 讀取共用 DB 檔，並進行過濾
                         df_db_full = smart_read_csv(global_dbs[fid])
@@ -205,8 +227,17 @@ def tigf_dashboard(request):
 
                                 if val_r != val_db:
                                     try:
-                                        if float(val_r) == float(val_db):
+                                        #! 嘗試將兩者都轉為 Decimal 進行數值比對
+                                        dec_r = Decimal(val_r)
+                                        dec_db = Decimal(val_db)
+                                        if dec_r == dec_db:
                                             continue
+                                        else:
+                                            #! 💡 核心邏輯：計算相對誤差
+                                            #! 如果誤差小於 0.001% (1e-5)，視為相同 (因為科學符號四捨五入產生的誤差)
+                                            relative_error = abs(dec_r - dec_db) / abs(dec_db)
+                                            if relative_error < 1e-5:
+                                                continue
                                     except Exception:
                                         pass
 
