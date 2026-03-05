@@ -5,8 +5,6 @@ from . import views
 app_name = "finance"
 
 urlpatterns = [
-    #! 測試儲值
-    path("checkout/", views.ecpay_checkout, name="checkout"),
     #! 💰 儲值中心
     path("recharge/", views.recharge_store, name="recharge_store"),
     #! 處理儲值的隱藏路由 (帶入方案 ID)
