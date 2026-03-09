@@ -6,19 +6,25 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 from PIL import Image, ImageOps
 
 from utils.logger_utils import jinfo
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True, verbose_name="自定義大頭貼")
-    is_employee = models.BooleanField(default=False, verbose_name="是否為公司人員")
-    employee_id = models.CharField(max_length=20, blank=True, null=True, verbose_name="工號")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile", verbose_name=_("使用者"))
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True, verbose_name=_("自定義大頭貼"))
+    is_employee = models.BooleanField(default=False, verbose_name=_("是否為公司人員"))
+    employee_id = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("工號"))
 
     def __str__(self):
-        return f"{self.user.username} 的個人檔案"
+        # * 將單位文字也套用翻譯
+        return f"{self.user.username} {_('的個人檔案')}"
+
+    class Meta:
+        verbose_name = _("個人檔案")
+        verbose_name_plural = _("個人檔案")
 
     def save(self, *args, **kwargs):
         #! 先執行 Django 原本的儲存動作，確保檔案已經寫入硬碟
@@ -37,8 +43,6 @@ class Profile(models.Model):
                     #! 如果圖片比目標尺寸大，才需要處理
                     if img.height > target_size[1] or img.width > target_size[0]:
                         #! 智慧裁切與縮放
-                        #! ImageOps.fit 會保持比例，從中心裁切出一個正方形，然後縮放到指定大小
-                        #! 這是製作大頭貼最完美的方法
                         processed_img = ImageOps.fit(
                             img,
                             target_size,
@@ -50,7 +54,6 @@ class Profile(models.Model):
                         processed_img = ImageOps.exif_transpose(processed_img)
 
                         #! 存回原路徑，覆蓋掉原本的大圖
-                        #! optimize=True 幫你壓縮檔案大小，quality=85 保持良好畫質
                         processed_img.save(img_path, optimize=True, quality=85)
 
             except Exception as e:
@@ -70,7 +73,9 @@ def create_user_profile(sender, instance: User, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    #! 加入 hasattr 檢查以增加強健性
+    if hasattr(instance, "profile"):
+        instance.profile.save()
 
 
 @receiver(email_confirmed)
@@ -83,7 +88,8 @@ def promote_to_employee(request, email_address, **kwargs):
 
     if user.email.endswith(company_domain):
         #! 取得該使用者的 Profile 並更新
-        profile: Profile = user.profile
-        profile.is_employee = True
-        profile.save()
-        jinfo(f"使用者 {user.username} 已通過 Email 驗證，提升為公司員工。")
+        if hasattr(user, "profile"):
+            profile: Profile = user.profile
+            profile.is_employee = True
+            profile.save()
+            jinfo(f"使用者 {user.username} 已通過 Email 驗證，提升為公司員工。")

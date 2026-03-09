@@ -114,7 +114,7 @@ class Transaction(models.Model):
                 self.realized_pnl = gross_profit - self.fee - self.tax
 
             elif self.transaction_type == "DIVIDEND":
-                #! 股息的損益 = (每股配息 * 持有股數) - 匯費/手續費 - 稅金
+                #! 股息的損益 = (每股配息 * 持持有股數) - 匯費/手續費 - 稅金
                 #! 這裡的 price_per_share 我們當作「每股配發金額」來用
                 gross_dividend = self.price_per_share * self.shares
                 self.realized_pnl = gross_dividend - self.fee - self.tax

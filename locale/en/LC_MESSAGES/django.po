@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-09 10:37+0800\n"
+"POT-Creation-Date: 2026-03-09 11:10+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -130,7 +130,9 @@ msgstr "Exception Message"
 
 #: .\core\apps.py:68
 msgid "任務執行期間發生的異常詳細資訊 (若有的話)。"
-msgstr "Detailed information about any exception that occurred during task execution (if any)."
+msgstr ""
+"Detailed information about any exception that occurred during task execution "
+"(if any)."
 
 #: .\core\apps.py:71
 msgid "錯誤追蹤"
@@ -138,7 +140,83 @@ msgstr "Error Traceback"
 
 #: .\core\apps.py:72
 msgid "任務執行期間發生異常的追蹤紀錄 (若有的話)。"
-msgstr "The traceback record of an exception that occurred during task execution (if any)."
+msgstr ""
+"The traceback record of an exception that occurred during task execution (if "
+"any)."
+
+#: .\core\models.py:8 .\finance\models.py:38 .\finance\models.py:76
+#: .\finance\models.py:149 .\invest\models.py:58 .\invest\models.py:93
+msgid "建立時間"
+msgstr "Created At"
+
+#: .\core\models.py:9 .\finance\models.py:12 .\invest\models.py:37
+#: .\notices\models.py:57
+msgid "更新時間"
+msgstr "Updated At"
+
+#: .\core\models.py:17
+msgid "幸運大轉盤"
+msgstr "Lucky Spin"
+
+#: .\core\models.py:18
+msgid "發文簿系統"
+msgstr "Post Registry System"
+
+#: .\core\models.py:19
+msgid "個人化大頭貼"
+msgstr "Personalized Avatar"
+
+#: .\core\models.py:20
+msgid "AI 智能客服"
+msgstr "AI Smart Customer Service"
+
+#: .\core\models.py:21
+msgid "公告系統"
+msgstr "Announcement System"
+
+#: .\core\models.py:22
+msgid "管理後台"
+msgstr "Admin Dashboard"
+
+#: .\core\models.py:23
+msgid "安定系統"
+msgstr "Stability System"
+
+#: .\core\models.py:26
+msgid "功能名稱"
+msgstr "Feature Name"
+
+#: .\core\models.py:27
+msgid "全局啟用狀態"
+msgstr "Active Status"
+
+#: .\core\models.py:30
+msgid "訪客可用"
+msgstr "Available for Guests"
+
+#: .\core\models.py:31
+msgid "一般用戶可用"
+msgstr "Available for General Users"
+
+#: .\core\models.py:32
+msgid "工作人員可用"
+msgstr "Staff"
+
+#: .\core\models.py:33
+msgid "管理員可用"
+msgstr "Available for Administrators"
+
+#: .\core\models.py:35
+msgid "功能簡介"
+msgstr "Feature Description"
+
+#: .\core\models.py:36
+msgid "顯示順序"
+msgstr "Display Order"
+
+#: .\core\models.py:39 .\core\models.py:40
+msgid "功能權限管理"
+msgstr "Feature Permission Management"
 
 #: .\core\templates\core\lucky_draw.html:4 .\templates\base.html:35
 msgid "Lucky Draw"
@@ -351,6 +429,193 @@ msgstr ""
 msgid "財務與商城"
 msgstr "finance"
 
+#: .\finance\models.py:9 .\finance\models.py:31 .\finance\models.py:60
+#: .\finance\models.py:133 .\users\models.py:16
+msgid "使用者"
+msgstr "users"
+
+#: .\finance\models.py:10 .\finance\models.py:20 .\finance\models.py:56
+#: .\finance\templates\finance\shop.html:92
+msgid "儲值點數"
+msgstr "Deposit Points"
+
+#: .\finance\models.py:11 .\finance\models.py:20 .\finance\models.py:57
+#: .\finance\templates\finance\shop.html:97
+msgid "紅利點數"
+msgstr "Bonus Points"
+
+#: .\finance\models.py:15 .\finance\models.py:16
+msgid "錢包餘額"
+msgstr "Wallet Balance"
+
+#: .\finance\models.py:27 .\finance\models.py:128
+msgid "待付款"
+msgstr "Pending Payment"
+
+#: .\finance\models.py:28
+msgid "付款成功"
+msgstr "Payment Successful"
+
+#: .\finance\models.py:29 .\finance\models.py:130
+msgid "付款失敗"
+msgstr "Payment Failed"
+
+#: .\finance\models.py:34
+msgid "特店交易編號"
+msgstr "Merchant Trade No."
+
+#: .\finance\models.py:35
+msgid "儲值金額"
+msgstr "Top-up Amount"
+
+#: .\finance\models.py:36 .\finance\models.py:143
+msgid "訂單狀態"
+msgstr "Order Status"
+
+#: .\finance\models.py:37
+msgid "付款時間"
+msgstr "Payment Time"
+
+#: .\finance\models.py:41 .\finance\models.py:42
+msgid "綠界儲值訂單"
+msgstr "ECPay Top-up Order"
+
+#: .\finance\models.py:49
+msgid "儲值"
+msgstr "Deposit Points"
+
+#: .\finance\models.py:50
+msgid "購物扣抵"
+msgstr "Purchase Deduction"
+
+#: .\finance\models.py:51
+msgid "活動贈送"
+msgstr "Campaign Reward"
+
+#: .\finance\models.py:52
+msgid "退貨返還"
+msgstr "Refund Return"
+
+#: .\finance\models.py:61 .\invest\models.py:81
+msgid "交易類型"
+msgstr "Transaction Type"
+
+#: .\finance\models.py:62
+msgid "點數類型"
+msgstr "Point Type"
+
+#: .\finance\models.py:65
+msgid "變動金額"
+msgstr "Transaction Amount"
+
+#: .\finance\models.py:68
+msgid "關聯單號"
+msgstr "Reference Number"
+
+#: .\finance\models.py:72
+msgid "關聯儲值訂單"
+msgstr "Related Top-up Order"
+
+#: .\finance\models.py:75
+msgid "備註"
+msgstr "Remarks"
+
+#: .\finance\models.py:79 .\finance\models.py:80
+msgid "點數交易紀錄"
+msgstr "Transaction Record"
+
+#: .\finance\models.py:87
+msgid "方案名稱"
+msgstr "Plan Name"
+
+#: .\finance\models.py:88 .\finance\models.py:108
+msgid "台幣售價"
+msgstr "Price (TWD)"
+
+#: .\finance\models.py:89
+msgid "獲得儲值點數"
+msgstr "Deposit Points"
+
+#: .\finance\models.py:90
+msgid "加贈紅利點數"
+msgstr "Bonus Points"
+
+#: .\finance\models.py:91 .\finance\models.py:110
+msgid "是否上架"
+msgstr "Is Active"
+
+#: .\finance\models.py:94 .\finance\models.py:95
+msgid "儲值方案"
+msgstr "Top-up Plan"
+
+#: .\finance\models.py:104
+msgid "商品名稱"
+msgstr "Product Name"
+
+#: .\finance\models.py:105
+msgid "商品描述"
+msgstr "Product Description"
+
+#: .\finance\models.py:106
+msgid "商品圖片"
+msgstr "Product Image"
+
+#: .\finance\models.py:107
+msgid "點數售價"
+msgstr "Point Price"
+
+#: .\finance\models.py:109
+msgid "庫存數量"
+msgstr "Stock Quantity"
+
+#: .\finance\models.py:113 .\finance\models.py:114
+msgid "商城商品"
+msgstr "Store Product"
+
+#: .\finance\models.py:124
+msgid "點數全額扣抵"
+msgstr "Full Point Deduction"
+
+#: .\finance\models.py:125
+msgid "綠界金流付款"
+msgstr "ECPay Payment"
+
+#: .\finance\models.py:129
+msgid "已付款"
+msgstr "Paid"
+
+#: .\finance\models.py:136
+msgid "購買商品"
+msgstr "Purchased Product"
+
+#: .\finance\models.py:137
+msgid "購買數量"
+msgstr "Purchase Quantity"
+
+#: .\finance\models.py:141
+msgid "付款方式"
+msgstr "Payment Method"
+
+#: .\finance\models.py:145
+msgid "總點數花費"
+msgstr "Total Points Spent"
+
+#: .\finance\models.py:146
+msgid "使用儲值點數"
+msgstr "Deposit Points"
+
+#: .\finance\models.py:147
+msgid "使用紅利點數"
+msgstr "Bonus Points"
+
+#: .\finance\models.py:148
+msgid "台幣實付金額"
+msgstr "Actual Amount Paid (TWD)"
+
+#: .\finance\models.py:152 .\finance\models.py:153
+msgid "點數購物訂單"
+msgstr "Point Purchase Order"
+
 #: .\finance\templates\finance\recharge_store.html:4 .\templates\base.html:42
 msgid "Point Recharge"
 msgstr ""
@@ -385,14 +650,6 @@ msgstr ""
 #: .\finance\templates\finance\shop.html:89
 msgid "我的資產總覽"
 msgstr "My Wallet Overview"
-
-#: .\finance\templates\finance\shop.html:92
-msgid "儲值點數"
-msgstr "Deposit Points"
-
-#: .\finance\templates\finance\shop.html:97
-msgid "紅利點數"
-msgstr "Bonus Points"
 
 #: .\finance\templates\finance\shop.html:175
 msgid "商城目前準備中，敬請期待！"
@@ -501,10 +758,6 @@ msgstr "Daily Change"
 msgid "漲跌幅(%)"
 msgstr "Change (%)"
 
-#: .\invest\models.py:37
-msgid "更新時間"
-msgstr "Updated At"
-
 #: .\invest\models.py:40 .\invest\models.py:41
 msgid "行情快取"
 msgstr "Price Cache"
@@ -529,10 +782,6 @@ msgstr "Target Monthly Passive Income (NT$)"
 msgid "預估殖利率(%)"
 msgstr "Expected Yield (%)"
 
-#: .\invest\models.py:58 .\invest\models.py:93
-msgid "建立時間"
-msgstr "Created At"
-
 #: .\invest\models.py:61 .\invest\models.py:62 .\invest\models.py:78
 #: .\invest\models.py:138
 msgid "投資組合"
@@ -549,10 +798,6 @@ msgstr "Sell"
 #: .\invest\models.py:74
 msgid "股息"
 msgstr "Dividend"
-
-#: .\invest\models.py:81
-msgid "交易類型"
-msgstr "Transaction Type"
 
 #: .\invest\models.py:83
 msgid "成交股數"
@@ -777,6 +1022,150 @@ msgstr ""
 #: .\notices\apps.py:7
 msgid "系統公告"
 msgstr "notices"
+
+#: .\notices\models.py:10
+msgid "標題"
+msgstr "Title"
+
+#: .\notices\models.py:11
+msgid "內容"
+msgstr "Content"
+
+#: .\notices\models.py:12
+msgid "發布者"
+msgstr "Publisher"
+
+#: .\notices\models.py:13 .\notices\models.py:32 .\notices\models.py:56
+msgid "是否啟用"
+msgstr "Is Enabled"
+
+#: .\notices\models.py:14
+msgid "是否置頂"
+msgstr "Is Pinned"
+
+#: .\notices\models.py:17
+msgid "公告"
+msgstr "notices"
+
+#: .\notices\models.py:18
+msgid "公告管理"
+msgstr "Announcement Management"
+
+#: .\notices\models.py:26
+msgid "工具名稱"
+msgstr "Tool Name"
+
+#: .\notices\models.py:27
+msgid "網址"
+msgstr "URL"
+
+#: .\notices\models.py:29
+msgid "FontAwesome 圖示碼"
+msgstr "FontAwesome Icon Code"
+
+#: .\notices\models.py:31
+msgid "排序"
+msgstr "Sort Order"
+
+#: .\notices\models.py:35
+msgid "外部工具"
+msgstr "External Tool"
+
+#: .\notices\models.py:36
+msgid "外部工具管理"
+msgstr "External Tool Management"
+
+#: .\notices\models.py:45
+msgid "未登入訪客"
+msgstr "Guest"
+
+#: .\notices\models.py:46
+msgid "一般使用者"
+msgstr "General User"
+
+#: .\notices\models.py:47
+msgid "工作人員"
+msgstr "Staff"
+
+#: .\notices\models.py:48
+msgid "超級管理員"
+msgstr "Superuser"
+
+#: .\notices\models.py:49
+msgid "專屬公司職員"
+msgstr "Company Employee"
+
+#: .\notices\models.py:52
+msgid "適用權限"
+msgstr "Applicable Permissions"
+
+#: .\notices\models.py:53
+msgid "系統基本指令"
+msgstr "Basic System Commands"
+
+#: .\notices\models.py:54
+msgid "網站功能資訊"
+msgstr "Website Feature Info"
+
+#: .\notices\models.py:55
+msgid "內部政策"
+msgstr "Internal Policy"
+
+#: .\notices\models.py:60 .\notices\models.py:61
+msgid "AI 客服設定"
+msgstr "AI Customer Service Settings"
+
+#: .\notices\models.py:75
+msgid "✅啟用中"
+msgstr "✅ Enabled"
+
+#: .\notices\models.py:75
+msgid "❌停用"
+msgstr "❌ Disabled"
+
+#: .\notices\models.py:76
+msgid "更新於"
+msgstr "Updated At"
+
+#: .\notices\models.py:81
+msgid "總瀏覽量"
+msgstr "Total Page Views"
+
+#: .\notices\models.py:82
+msgid "統計日期"
+msgstr "Statistics Date"
+
+#: .\notices\models.py:83
+msgid "當日瀏覽量"
+msgstr "Daily Page Views"
+
+#: .\notices\models.py:86 .\notices\models.py:87
+msgid "網站瀏覽統計"
+msgstr "Website Traffic Statistics"
+
+#: .\notices\models.py:90
+msgid "統計"
+msgstr "Statistics"
+
+#: .\notices\models.py:95
+msgid "日期"
+msgstr "Transaction Date"
+
+#: .\notices\models.py:96
+msgid "發文字號"
+msgstr "Official Document Number"
+
+#: .\notices\models.py:97
+msgid "事由"
+msgstr "Subject"
+
+#: .\notices\models.py:98
+msgid "取號人"
+msgstr "Requester"
+
+#: .\notices\models.py:102 .\notices\models.py:103
+msgid "發文簿紀錄"
+msgstr "Post Registry Log"
 
 #: .\notices\templates\notices\detail.html:11
 #: .\notices\templates\notices\list.html:4
@@ -1078,6 +1467,26 @@ msgstr "tigf"
 #: .\users\apps.py:7
 msgid "使用者管理"
 msgstr "users"
+
+#: .\users\models.py:17
+msgid "自定義大頭貼"
+msgstr "Custom Avatar"
+
+#: .\users\models.py:18
+msgid "是否為公司人員"
+msgstr "Is Staff Member"
+
+#: .\users\models.py:19
+msgid "工號"
+msgstr "Employee ID"
+
+#: .\users\models.py:23
+msgid "的個人檔案"
+msgstr "'s Profile"
+
+#: .\users\models.py:26 .\users\models.py:27
+msgid "個人檔案"
+msgstr "User Profile"
 
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
