@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 15:43+0800\n"
+"POT-Creation-Date: 2026-03-09 09:37+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -12,13 +12,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\config\settings.py:273
+#: .\config\settings.py:275
 msgid "繁體中文"
 msgstr "Traditional Chinese"
 
-#: .\config\settings.py:274
+#: .\config\settings.py:276
 msgid "English"
-msgstr "英文"
+msgstr ""
 
 #: .\core\templates\core\lucky_draw.html:4 .\templates\base.html:35
 msgid "Lucky Draw"
@@ -274,6 +274,378 @@ msgstr "Bonus Points"
 msgid "商城目前準備中，敬請期待！"
 msgstr "The shop is currently under preparation, please stay tuned!"
 
+#: .\invest\forms.py:12
+msgid "交易標的"
+msgstr "Trading Target"
+
+#: .\invest\forms.py:16 .\invest\models.py:92
+msgid "交易日期"
+msgstr "Transaction Date"
+
+#: .\invest\forms.py:33
+msgid "保守型 (追求穩定，無法承受本金大幅波動)"
+msgstr ""
+"Conservative (Seeks stability, cannot tolerate large capital fluctuations)"
+
+#: .\invest\forms.py:34
+#, python-format
+msgid "穩健型 (平衡風險與報酬，可接受 10%-20% 回檔)"
+msgstr "Moderate (Balances risk and reward, accepts 10%-20% drawdown)"
+
+#: .\invest\forms.py:35
+msgid "積極型 (追求高成長，能承受 30% 以上的市場波動)"
+msgstr ""
+"Aggressive (Seeks high growth, can tolerate market fluctuations of 30%+)"
+
+#: .\invest\forms.py:39
+msgid "目前年齡"
+msgstr "Current Age"
+
+#: .\invest\forms.py:44
+msgid "例如: 30"
+msgstr "e.g., 30"
+
+#: .\invest\forms.py:48
+msgid "每月可定期定額投入 (NT$)"
+msgstr "Monthly Investment (NT$)"
+
+#: .\invest\forms.py:55
+msgid "目標每月被動收入 (NT$)"
+msgstr "Target Monthly Passive Income (NT$)"
+
+#: .\invest\forms.py:62
+msgid "預計多少年後達成目標？"
+msgstr "Years to Target?"
+
+#: .\invest\forms.py:66
+msgid "例如: 15"
+msgstr "e.g., 15"
+
+#: .\invest\forms.py:70
+msgid "風險承受度"
+msgstr "Risk Tolerance"
+
+#: .\invest\models.py:12
+msgid "股票"
+msgstr "Stock"
+
+#: .\invest\models.py:13
+msgid "指數型基金"
+msgstr "ETF"
+
+#: .\invest\models.py:16
+msgid "代碼"
+msgstr "Code"
+
+#: .\invest\models.py:17
+msgid "標的名稱"
+msgstr "Target Name"
+
+#: .\invest\models.py:18
+msgid "交易所"
+msgstr "Trading Target"
+
+#: .\invest\models.py:19
+msgid "類別"
+msgstr "Category"
+
+#: .\invest\models.py:20
+msgid "啟用狀態"
+msgstr "Active Status"
+
+#: .\invest\models.py:23 .\invest\models.py:24
+msgid "標的資訊"
+msgstr "Target Information"
+
+#: .\invest\models.py:33 .\invest\models.py:80 .\invest\models.py:140
+msgid "標的"
+msgstr "Trading Target"
+
+#: .\invest\models.py:34
+msgid "當前股價"
+msgstr "Current Price"
+
+#: .\invest\models.py:35
+msgid "今日漲跌"
+msgstr "Daily Change"
+
+#: .\invest\models.py:36
+msgid "漲跌幅(%)"
+msgstr "Change (%)"
+
+#: .\invest\models.py:37
+msgid "更新時間"
+msgstr "Updated At"
+
+#: .\invest\models.py:40 .\invest\models.py:41
+msgid "行情快取"
+msgstr "Price Cache"
+
+#: .\invest\models.py:48
+msgid "所屬用戶"
+msgstr "Owner"
+
+#: .\invest\models.py:50
+msgid "組合名稱"
+msgstr "Portfolio Name"
+
+#: .\invest\models.py:51
+msgid "說明"
+msgstr "Description"
+
+#: .\invest\models.py:53
+msgid "每月被動收入目標"
+msgstr "Target Monthly Passive Income (NT$)"
+
+#: .\invest\models.py:56
+msgid "預估殖利率(%)"
+msgstr "Expected Yield (%)"
+
+#: .\invest\models.py:58 .\invest\models.py:93
+msgid "建立時間"
+msgstr "Created At"
+
+#: .\invest\models.py:61 .\invest\models.py:62 .\invest\models.py:78
+#: .\invest\models.py:138
+msgid "投資組合"
+msgstr "Portfolio"
+
+#: .\invest\models.py:72
+msgid "買入"
+msgstr "Buy"
+
+#: .\invest\models.py:73
+msgid "賣出"
+msgstr "Sell"
+
+#: .\invest\models.py:74
+msgid "股息"
+msgstr "Dividend"
+
+#: .\invest\models.py:81
+msgid "交易類型"
+msgstr "Transaction Type"
+
+#: .\invest\models.py:83
+msgid "成交股數"
+msgstr "Executed Shares"
+
+#: .\invest\models.py:84
+msgid "成交單價"
+msgstr "Price Per Share"
+
+#: .\invest\models.py:86
+msgid "手續費"
+msgstr "Fee"
+
+#: .\invest\models.py:87
+msgid "稅金"
+msgstr "Tax"
+
+#: .\invest\models.py:89
+msgid "已實現損益"
+msgstr "Realized PnL"
+
+#: .\invest\models.py:126 .\invest\models.py:127
+msgid "交易紀錄"
+msgstr "Transaction Record"
+
+#: .\invest\models.py:143
+msgid "總持股數"
+msgstr "Total Shares"
+
+#: .\invest\models.py:146
+msgid "平均成本"
+msgstr "Average Cost"
+
+#: .\invest\models.py:149
+msgid "最後更新時間"
+msgstr "Last Updated"
+
+#: .\invest\models.py:153 .\invest\models.py:154
+msgid "當前持股"
+msgstr "Current Holdings"
+
+#: .\invest\models.py:158
+msgid "股"
+msgstr "Shares"
+
+#: .\invest\templates\invest\dashboard.html:7
+msgid "Investment Portfolio Dashboard"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:14
+msgid "Total Market Value"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:16
+msgid "Total Cost"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:24
+#: .\invest\templates\invest\dashboard.html:128
+msgid "Unrealized PnL"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:29
+msgid "Return Rate"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:38
+msgid "Realized PnL"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:43
+msgid "Incl. Dividends"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:57
+msgid "Target Monthly Income"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:68
+msgid "Expected Yield"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:79
+msgid "Recalculate"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:91
+msgid "Required Capital"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:103
+msgid "Enter symbol to check history (e.g. 0050)"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:104
+msgid "Search"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:109
+msgid "Expand Market Data"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:118
+msgid "Holdings"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:124
+msgid "Symbol"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:125
+msgid "Shares"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:126
+msgid "Avg Cost / Current"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:127
+msgid "Market Value"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:163
+msgid "Your AI Financial Advisor"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:164
+msgid "Your portfolio is currently empty. Not sure where to start?"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:164
+msgid ""
+"Fill out the information below to let AI generate a customized ETF "
+"allocation plan for you!"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:180
+msgid "Generate Custom Plan"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:199
+msgid "Record Transaction"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:212
+msgid "Submit Record"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:221
+msgid "Market Data & Analysis"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:225
+msgid "Asset Allocation"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:230
+msgid "No portfolio data available"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:238
+#, python-format
+msgid "Top 10 Gainers (%%)"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:245
+#, python-format
+msgid "Top 10 Losers (%%)"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:252
+msgid "Highest Priced Stocks Top 10"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:259
+msgid "Penny Stocks Top 10"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:271
+msgid "Loading..."
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:300
+msgid "AI is planning for you, please wait..."
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:351
+#: .\invest\templates\invest\dashboard.html:352
+#, python-format
+msgid "Change (%%)"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:353
+#: .\invest\templates\invest\dashboard.html:354
+msgid "Price"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:377
+msgid "Loading data for"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:383
+msgid "Failed to load data:"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:387
+msgid "6-Month Trend"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:400
+msgid "Close Price"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:428
+msgid "Network Error"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:438
+msgid "Please enter a stock symbol first!"
+msgstr ""
+
 #: .\notices\templates\notices\detail.html:11
 #: .\notices\templates\notices\list.html:4
 msgid "Notice List"
@@ -458,88 +830,92 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: .\templates\base.html:55
+#: .\templates\base.html:52
+msgid "Investment"
+msgstr ""
+
+#: .\templates\base.html:60
 msgid "Tester Zone"
 msgstr ""
 
-#: .\templates\base.html:58
+#: .\templates\base.html:63
 msgid "Test Management System"
 msgstr ""
 
-#: .\templates\base.html:66
+#: .\templates\base.html:71
 msgid "No tools available"
 msgstr ""
 
-#: .\templates\base.html:99
+#: .\templates\base.html:104
 msgid "Admin"
 msgstr ""
 
-#: .\templates\base.html:119
+#: .\templates\base.html:124
 msgid "Profile"
 msgstr ""
 
-#: .\templates\base.html:124
+#: .\templates\base.html:129
 msgid "Logout"
 msgstr ""
 
-#: .\templates\base.html:131
+#: .\templates\base.html:136
 msgid "Login"
 msgstr ""
 
-#: .\templates\base.html:134
+#: .\templates\base.html:139
 msgid "Register"
 msgstr ""
 
-#: .\templates\base.html:149
+#: .\templates\base.html:154
 msgid "All Rights Reserved."
 msgstr ""
 
-#: .\templates\base.html:153
+#: .\templates\base.html:158
 msgid "Daily Visits"
 msgstr ""
 
-#: .\templates\base.html:157
+#: .\templates\base.html:162
 msgid "Total Visits"
 msgstr ""
 
-#: .\templates\base.html:316
+#: .\templates\base.html:321
 msgid "CSI Smart Assistant"
 msgstr ""
 
-#: .\templates\base.html:320
+#: .\templates\base.html:325
 msgid "Hello! I am the CSI Portal assistant, how can I help you today?"
 msgstr ""
 
-#: .\templates\base.html:323
+#: .\templates\base.html:328
 msgid "Type a message..."
 msgstr ""
 
-#: .\templates\index.html:9
+#: .\templates\index.html:156
 msgid "Welcome to CSI Server Portal"
 msgstr ""
 
-#: .\templates\index.html:11
+#: .\templates\index.html:158
 msgid "This is a system built with Django 6.0 and Google OAuth."
 msgstr ""
 
-#: .\templates\index.html:17
+#: .\templates\index.html:167
 #, python-format
 msgid ""
 "\n"
-"                    Hello, <strong>%(name)s</strong>! You have successfully "
-"logged in.\n"
-"                "
+"                            Hello, <strong class=\"text-success\">%(name)s</"
+"strong>! Authorization Granted.\n"
+"                        "
 msgstr ""
 
-#: .\templates\index.html:25
+#: .\templates\index.html:177
 msgid "Logout Now"
 msgstr ""
 
-#: .\templates\index.html:28
+#: .\templates\index.html:182
 msgid "Please log in first to use full features."
 msgstr ""
 
-#: .\templates\index.html:30
+#: .\templates\index.html:184
 msgid "Go to Login Page"
 msgstr ""
 
@@ -566,28 +942,3 @@ msgstr ""
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr ""
-
-#~ msgid "Custom Avatar"
-#~ msgstr ""
-
-#~ msgid "Linked with Google Account"
-#~ msgstr ""
-
-#~ msgid "Choose Image"
-#~ msgstr ""
-
-#~ msgid "No file chosen"
-#~ msgstr ""
-
-#~ msgid "Update Avatar"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Tip: Uploading a custom photo will replace the avatar provided by Google."
-#~ msgstr ""
-
-#~ msgid "Email"
-#~ msgstr ""
-
-#~ msgid "Date Joined"
-#~ msgstr ""

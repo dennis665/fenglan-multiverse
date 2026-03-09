@@ -60,6 +60,8 @@ urlpatterns = [
     # ? ======================================================================
     #! 金流
     path("finance/", include("finance.urls")),
+    #! 投資理財
+    path("invest/", include("invest.urls")),
 ]
 
 if settings.DEBUG:

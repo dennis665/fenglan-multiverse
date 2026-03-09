@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 15:43+0800\n"
+"POT-Creation-Date: 2026-03-09 09:37+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\config\settings.py:273
+#: .\config\settings.py:275
 msgid "繁體中文"
 msgstr ""
 
-#: .\config\settings.py:274
+#: .\config\settings.py:276
 msgid "English"
 msgstr ""
 
@@ -276,6 +276,376 @@ msgstr ""
 msgid "商城目前準備中，敬請期待！"
 msgstr ""
 
+#: .\invest\forms.py:12
+msgid "交易標的"
+msgstr ""
+
+#: .\invest\forms.py:16 .\invest\models.py:92
+msgid "交易日期"
+msgstr ""
+
+#: .\invest\forms.py:33
+msgid "保守型 (追求穩定，無法承受本金大幅波動)"
+msgstr ""
+
+#: .\invest\forms.py:34
+#, python-format
+msgid "穩健型 (平衡風險與報酬，可接受 10%-20% 回檔)"
+msgstr ""
+
+#: .\invest\forms.py:35
+msgid "積極型 (追求高成長，能承受 30% 以上的市場波動)"
+msgstr ""
+
+#: .\invest\forms.py:39
+msgid "目前年齡"
+msgstr ""
+
+#: .\invest\forms.py:44
+msgid "例如: 30"
+msgstr ""
+
+#: .\invest\forms.py:48
+msgid "每月可定期定額投入 (NT$)"
+msgstr ""
+
+#: .\invest\forms.py:55
+msgid "目標每月被動收入 (NT$)"
+msgstr ""
+
+#: .\invest\forms.py:62
+msgid "預計多少年後達成目標？"
+msgstr ""
+
+#: .\invest\forms.py:66
+msgid "例如: 15"
+msgstr ""
+
+#: .\invest\forms.py:70
+msgid "風險承受度"
+msgstr ""
+
+#: .\invest\models.py:12
+msgid "股票"
+msgstr ""
+
+#: .\invest\models.py:13
+msgid "指數型基金"
+msgstr ""
+
+#: .\invest\models.py:16
+msgid "代碼"
+msgstr ""
+
+#: .\invest\models.py:17
+msgid "標的名稱"
+msgstr ""
+
+#: .\invest\models.py:18
+msgid "交易所"
+msgstr ""
+
+#: .\invest\models.py:19
+msgid "類別"
+msgstr ""
+
+#: .\invest\models.py:20
+msgid "啟用狀態"
+msgstr ""
+
+#: .\invest\models.py:23 .\invest\models.py:24
+msgid "標的資訊"
+msgstr ""
+
+#: .\invest\models.py:33 .\invest\models.py:80 .\invest\models.py:140
+msgid "標的"
+msgstr ""
+
+#: .\invest\models.py:34
+msgid "當前股價"
+msgstr ""
+
+#: .\invest\models.py:35
+msgid "今日漲跌"
+msgstr ""
+
+#: .\invest\models.py:36
+msgid "漲跌幅(%)"
+msgstr ""
+
+#: .\invest\models.py:37
+msgid "更新時間"
+msgstr ""
+
+#: .\invest\models.py:40 .\invest\models.py:41
+msgid "行情快取"
+msgstr ""
+
+#: .\invest\models.py:48
+msgid "所屬用戶"
+msgstr ""
+
+#: .\invest\models.py:50
+msgid "組合名稱"
+msgstr ""
+
+#: .\invest\models.py:51
+msgid "說明"
+msgstr ""
+
+#: .\invest\models.py:53
+msgid "每月被動收入目標"
+msgstr ""
+
+#: .\invest\models.py:56
+msgid "預估殖利率(%)"
+msgstr ""
+
+#: .\invest\models.py:58 .\invest\models.py:93
+msgid "建立時間"
+msgstr ""
+
+#: .\invest\models.py:61 .\invest\models.py:62 .\invest\models.py:78
+#: .\invest\models.py:138
+msgid "投資組合"
+msgstr ""
+
+#: .\invest\models.py:72
+msgid "買入"
+msgstr ""
+
+#: .\invest\models.py:73
+msgid "賣出"
+msgstr ""
+
+#: .\invest\models.py:74
+msgid "股息"
+msgstr ""
+
+#: .\invest\models.py:81
+msgid "交易類型"
+msgstr ""
+
+#: .\invest\models.py:83
+msgid "成交股數"
+msgstr ""
+
+#: .\invest\models.py:84
+msgid "成交單價"
+msgstr ""
+
+#: .\invest\models.py:86
+msgid "手續費"
+msgstr ""
+
+#: .\invest\models.py:87
+msgid "稅金"
+msgstr ""
+
+#: .\invest\models.py:89
+msgid "已實現損益"
+msgstr ""
+
+#: .\invest\models.py:126 .\invest\models.py:127
+msgid "交易紀錄"
+msgstr ""
+
+#: .\invest\models.py:143
+msgid "總持股數"
+msgstr ""
+
+#: .\invest\models.py:146
+msgid "平均成本"
+msgstr ""
+
+#: .\invest\models.py:149
+msgid "最後更新時間"
+msgstr ""
+
+#: .\invest\models.py:153 .\invest\models.py:154
+msgid "當前持股"
+msgstr ""
+
+#: .\invest\models.py:158
+msgid "股"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:7
+msgid "Investment Portfolio Dashboard"
+msgstr "投資組合儀表板"
+
+#: .\invest\templates\invest\dashboard.html:14
+msgid "Total Market Value"
+msgstr "總資產市值"
+
+#: .\invest\templates\invest\dashboard.html:16
+msgid "Total Cost"
+msgstr "累計造訪"
+
+#: .\invest\templates\invest\dashboard.html:24
+#: .\invest\templates\invest\dashboard.html:128
+msgid "Unrealized PnL"
+msgstr "未實現損益"
+
+#: .\invest\templates\invest\dashboard.html:29
+msgid "Return Rate"
+msgstr "報酬率"
+
+#: .\invest\templates\invest\dashboard.html:38
+msgid "Realized PnL"
+msgstr "已實現總損益"
+
+#: .\invest\templates\invest\dashboard.html:43
+msgid "Incl. Dividends"
+msgstr "含累計股息"
+
+#: .\invest\templates\invest\dashboard.html:57
+msgid "Target Monthly Income"
+msgstr "每月目標收入"
+
+#: .\invest\templates\invest\dashboard.html:68
+msgid "Expected Yield"
+msgstr "預估年殖利率"
+
+#: .\invest\templates\invest\dashboard.html:79
+msgid "Recalculate"
+msgstr "重新試算"
+
+#: .\invest\templates\invest\dashboard.html:91
+msgid "Required Capital"
+msgstr "需達標本金"
+
+#: .\invest\templates\invest\dashboard.html:103
+msgid "Enter symbol to check history (e.g. 0050)"
+msgstr "輸入代碼查詢走勢 (如: 0050)"
+
+#: .\invest\templates\invest\dashboard.html:104
+msgid "Search"
+msgstr "查詢"
+
+#: .\invest\templates\invest\dashboard.html:109
+msgid "Expand Market Data"
+msgstr "展開市場數據與圖表"
+
+#: .\invest\templates\invest\dashboard.html:118
+msgid "Holdings"
+msgstr "持股明細"
+
+#: .\invest\templates\invest\dashboard.html:124
+msgid "Symbol"
+msgstr "標的"
+
+#: .\invest\templates\invest\dashboard.html:125
+msgid "Shares"
+msgstr "股數"
+
+#: .\invest\templates\invest\dashboard.html:126
+msgid "Avg Cost / Current"
+msgstr "均價 / 現價"
+
+#: .\invest\templates\invest\dashboard.html:127
+msgid "Market Value"
+msgstr "市值"
+
+#: .\invest\templates\invest\dashboard.html:163
+msgid "Your AI Financial Advisor"
+msgstr "專屬您的 AI 理財規劃師"
+
+#: .\invest\templates\invest\dashboard.html:164
+msgid "Your portfolio is currently empty. Not sure where to start?"
+msgstr "發現您的庫存目前是空的。不知道從何開始嗎？"
+
+#: .\invest\templates\invest\dashboard.html:164
+msgid ""
+"Fill out the information below to let AI generate a customized ETF "
+"allocation plan for you!"
+msgstr "填寫以下資訊，讓 AI 為您生成專屬的 ETF 資產配置建議！"
+
+#: .\invest\templates\invest\dashboard.html:180
+msgid "Generate Custom Plan"
+msgstr "開始生成專屬投資計畫"
+
+#: .\invest\templates\invest\dashboard.html:199
+msgid "Record Transaction"
+msgstr "紀錄交易"
+
+#: .\invest\templates\invest\dashboard.html:212
+msgid "Submit Record"
+msgstr "送出紀錄"
+
+#: .\invest\templates\invest\dashboard.html:221
+msgid "Market Data & Analysis"
+msgstr "市場數據與資產分析"
+
+#: .\invest\templates\invest\dashboard.html:225
+msgid "Asset Allocation"
+msgstr "我的資產配置比例"
+
+#: .\invest\templates\invest\dashboard.html:230
+msgid "No portfolio data available"
+msgstr "目前無工具連結"
+
+#: .\invest\templates\invest\dashboard.html:238
+#, python-format
+msgid "Top 10 Gainers (%%)"
+msgstr "今日漲幅 Top 10 (%%)"
+
+#: .\invest\templates\invest\dashboard.html:245
+#, python-format
+msgid "Top 10 Losers (%%)"
+msgstr "今日跌幅 Top 10 (%%)"
+
+#: .\invest\templates\invest\dashboard.html:252
+msgid "Highest Priced Stocks Top 10"
+msgstr "台股千金榜 (最高價 Top 10)"
+
+#: .\invest\templates\invest\dashboard.html:259
+msgid "Penny Stocks Top 10"
+msgstr "銅板股排行榜 (最低價 Top 10)"
+
+#: .\invest\templates\invest\dashboard.html:271
+msgid "Loading..."
+msgstr "載入中..."
+
+#: .\invest\templates\invest\dashboard.html:300
+msgid "AI is planning for you, please wait..."
+msgstr "AI 正在為您量身規劃中，請稍候..."
+
+#: .\invest\templates\invest\dashboard.html:351
+#: .\invest\templates\invest\dashboard.html:352
+#, python-format
+msgid "Change (%%)"
+msgstr "更換照片"
+
+#: .\invest\templates\invest\dashboard.html:353
+#: .\invest\templates\invest\dashboard.html:354
+msgid "Price"
+msgstr "股價(元)"
+
+#: .\invest\templates\invest\dashboard.html:377
+msgid "Loading data for"
+msgstr "載入"
+
+#: .\invest\templates\invest\dashboard.html:383
+msgid "Failed to load data:"
+msgstr "無法載入資料:"
+
+#: .\invest\templates\invest\dashboard.html:387
+msgid "6-Month Trend"
+msgstr "近 6 個月走勢"
+
+#: .\invest\templates\invest\dashboard.html:400
+msgid "Close Price"
+msgstr "選擇檔案"
+
+#: .\invest\templates\invest\dashboard.html:428
+msgid "Network Error"
+msgstr "網路連線錯誤"
+
+#: .\invest\templates\invest\dashboard.html:438
+msgid "Please enter a stock symbol first!"
+msgstr "請先輸入股票代碼！"
+
 #: .\notices\templates\notices\detail.html:11
 #: .\notices\templates\notices\list.html:4
 msgid "Notice List"
@@ -446,91 +816,96 @@ msgstr "如果您沒有收到郵件，請檢查垃圾郵件箱或稍後再試。
 msgid "Home"
 msgstr "首頁"
 
-#: .\templates\base.html:55
+#: .\templates\base.html:52
+msgid "Investment"
+msgstr "投資理財"
+
+#: .\templates\base.html:60
 msgid "Tester Zone"
 msgstr "測試人員專區"
 
-#: .\templates\base.html:58
+#: .\templates\base.html:63
 msgid "Test Management System"
 msgstr "測試管理系統"
 
-#: .\templates\base.html:66
+#: .\templates\base.html:71
 msgid "No tools available"
 msgstr "目前無工具連結"
 
-#: .\templates\base.html:99
+#: .\templates\base.html:104
 msgid "Admin"
 msgstr "後台管理"
 
-#: .\templates\base.html:119
+#: .\templates\base.html:124
 msgid "Profile"
 msgstr "個人檔案"
 
-#: .\templates\base.html:124
+#: .\templates\base.html:129
 msgid "Logout"
 msgstr "登出"
 
-#: .\templates\base.html:131
+#: .\templates\base.html:136
 msgid "Login"
 msgstr "登入"
 
-#: .\templates\base.html:134
+#: .\templates\base.html:139
 msgid "Register"
 msgstr "註冊"
 
-#: .\templates\base.html:149
+#: .\templates\base.html:154
 msgid "All Rights Reserved."
 msgstr "保留所有權利。"
 
-#: .\templates\base.html:153
+#: .\templates\base.html:158
 msgid "Daily Visits"
 msgstr "今日瀏覽"
 
-#: .\templates\base.html:157
+#: .\templates\base.html:162
 msgid "Total Visits"
 msgstr "累計造訪"
 
-#: .\templates\base.html:316
+#: .\templates\base.html:321
 msgid "CSI Smart Assistant"
 msgstr "CSI 智能助理"
 
-#: .\templates\base.html:320
+#: .\templates\base.html:325
 msgid "Hello! I am the CSI Portal assistant, how can I help you today?"
 msgstr "你好！我是 CSI Portal 的助手，有什麼我可以幫你的嗎？"
 
-#: .\templates\base.html:323
+#: .\templates\base.html:328
 msgid "Type a message..."
 msgstr "請輸入問題..."
 
-#: .\templates\index.html:9
+#: .\templates\index.html:156
 msgid "Welcome to CSI Server Portal"
 msgstr "歡迎來到 CSI Server Portal"
 
-#: .\templates\index.html:11
+#: .\templates\index.html:158
 msgid "This is a system built with Django 6.0 and Google OAuth."
 msgstr "這是一個使用 Django 6.0 與 Google OAuth 構建的系統。"
 
-#: .\templates\index.html:17
+#: .\templates\index.html:167
 #, python-format
 msgid ""
 "\n"
-"                    Hello, <strong>%(name)s</strong>! You have successfully "
-"logged in.\n"
-"                "
+"                            Hello, <strong class=\"text-success\">%(name)s</"
+"strong>! Authorization Granted.\n"
+"                        "
 msgstr ""
 "\n"
-"                    您好，<strong>%(name)s</strong>！您已成功登入。\n"
-"                "
+"                            您好，<strong class=\"text-success\">%(name)s</"
+"strong>！系統授權已通過。\n"
+"                        "
 
-#: .\templates\index.html:25
+#: .\templates\index.html:177
 msgid "Logout Now"
 msgstr "立即登出"
 
-#: .\templates\index.html:28
+#: .\templates\index.html:182
 msgid "Please log in first to use full features."
 msgstr "請先登入以使用完整功能。"
 
-#: .\templates\index.html:30
+#: .\templates\index.html:184
 msgid "Go to Login Page"
 msgstr "前往登入頁面"
 

@@ -47,6 +47,11 @@
                         <i class="fas fa-store me-1 text-success"></i>{% trans "Point Shop" %}
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'invest' in request.path %}active{% endif %}" href="{% url 'invest:dashboard' %}">
+                        <i class="fas fa-chart-line me-1 text-warning"></i>{% trans "Investment" %}
+                    </a>
+                </li>
                 {% endif %}
 
                 {% if user.is_staff or user.is_superuser %}

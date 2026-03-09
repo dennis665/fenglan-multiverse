@@ -72,6 +72,7 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount.providers.google",
     "crispy_forms",
     "crispy_bootstrap5",
+    "django_apscheduler",
 ]
 
 LOCAL_APPS = [
@@ -80,6 +81,7 @@ LOCAL_APPS = [
     "users",
     "tigf",
     "finance",
+    "invest",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

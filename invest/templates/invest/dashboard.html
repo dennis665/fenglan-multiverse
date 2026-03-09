@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-chart-pie text-primary me-2"></i>{% trans "Investment Portfolio Dashboard" %}</h2>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-dark text-white">
+                <div class="card-body p-3">
+                    <h6 class="opacity-75 mb-2">{% trans "Total Market Value" %}</h6>
+                    <h3 class="fw-bold mb-0">NT$ {{ total_market_value|floatformat:0 }}</h3>
+                    <div class="mt-2 small opacity-75">{% trans "Total Cost" %}：NT$ {{ total_cost|floatformat:0 }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 border-start border-4 border-warning">
+                <div class="card-body p-3">
+                    <h6 class="text-muted mb-2">{% trans "Unrealized PnL" %}</h6>
+                    <h3 class="fw-bold mb-0 {% if total_unrealized_pnl > 0 %}text-danger{% elif total_unrealized_pnl < 0 %}text-success{% endif %}">
+                        {{ total_unrealized_pnl|floatformat:0 }}
+                    </h3>
+                    <div class="mt-2 small fw-bold {% if total_pnl_percent > 0 %}text-danger{% elif total_pnl_percent < 0 %}text-success{% endif %}">
+                        {% trans "Return Rate" %}：{{ total_pnl_percent|floatformat:2 }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 border-start border-4 border-info bg-light">
+                <div class="card-body p-3">
+                    <h6 class="text-muted mb-2">{% trans "Realized PnL" %}</h6>
+                    <h3 class="fw-bold mb-0 {% if total_realized_pnl > 0 %}text-danger{% elif total_realized_pnl < 0 %}text-success{% endif %}">
+                        NT$ {{ total_realized_pnl|floatformat:0 }}
+                    </h3>
+                    <div class="mt-2 small text-primary fw-bold">
+                        <i class="fas fa-coins me-1"></i>{% trans "Incl. Dividends" %}：NT$ {{ total_dividends|floatformat:0 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <form method="POST" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="update_target" value="1">
+                        
+                        <div class="row g-2 align-items-center mb-2">
+                            <div class="col-6"><span class="text-muted small fw-bold">{% trans "Target Monthly Income" %}</span></div>
+                            <div class="col-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-end-0 text-muted">$</span>
+                                    <input type="number" name="target_monthly_income" class="form-control border-start-0 ps-0" 
+                                        value="{{ portfolio.target_monthly_income|floatformat:0 }}" min="1000" step="1000">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 align-items-center mb-2">
+                            <div class="col-6"><span class="text-muted small fw-bold">{% trans "Expected Yield" %}</span></div>
+                            <div class="col-6">
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="expected_dividend_yield" class="form-control border-end-0 text-end" 
+                                        value="{{ portfolio.expected_dividend_yield|floatformat:2 }}" min="0.1" step="0.1">
+                                    <span class="input-group-text bg-light border-start-0 text-muted">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-outline-success btn-sm w-100 mt-1 rounded-pill" type="submit">
+                            <i class="fas fa-sync-alt me-1"></i>{% trans "Recalculate" %}
+                        </button>
+                    </form>
+
+                    <div class="progress shadow-sm" style="height: 20px; border-radius: 1rem;">
+                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated fw-bold" 
+                            role="progressbar" style="width: {{ progress_percent|floatformat:2 }}%;">
+                            {{ progress_percent|floatformat:1 }}%
+                        </div>
+                    </div>
+
+                    <div class="mt-2 text-end small text-muted">
+                        {% trans "Required Capital" %}: <strong class="text-dark">NT$ {{ target_value|floatformat:0 }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4 bg-white">
+        <div class="card-body p-3 d-flex flex-wrap justify-content-between align-items-center">
+            <div class="d-flex align-items-center" style="min-width: 300px; flex: 1; margin-right: 15px;">
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text bg-white border-end-0 text-primary"><i class="fas fa-search"></i></span>
+                    <input type="text" id="stockSearchInput" class="form-control border-start-0 ps-0" placeholder="{% trans 'Enter symbol to check history (e.g. 0050)' %}">
+                    <button class="btn btn-primary px-4 fw-bold" type="button" onclick="searchStockHistory()">{% trans "Search" %}</button>
+                </div>
+            </div>
+            
+            <button class="btn btn-outline-secondary fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#marketAnalysisCharts" aria-expanded="false" aria-controls="marketAnalysisCharts">
+                <i class="fas fa-chart-bar me-2"></i>{% trans "Expand Market Data" %}
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">{% trans "Holdings" %}</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">{% trans "Symbol" %}</th>
+                                <th>{% trans "Shares" %}</th>
+                                <th>{% trans "Avg Cost / Current" %}</th>
+                                <th>{% trans "Market Value" %}</th>
+                                <th class="text-end pe-4">{% trans "Unrealized PnL" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in holdings %}
+                            <tr>
+                                <td class="ps-4">
+                                    <a href="javascript:void(0);" class="fw-bold text-decoration-none text-primary" 
+                                    onclick="showHistoryChart('{{ item.stock.symbol }}')">
+                                        <i class="fas fa-chart-line me-1"></i>{{ item.stock.symbol }}
+                                    </a>
+                                    <div class="small text-muted">{{ item.stock.name }}</div>
+                                </td>
+                                <td>{{ item.shares|floatformat:0 }}</td>
+                                <td>
+                                    <div>{{ item.avg_cost|floatformat:2 }}</div>
+                                    <div class="small text-muted">{{ item.current_price|floatformat:2 }}</div>
+                                </td>
+                                <td>{{ item.market_value|floatformat:0 }}</td>
+                                <td class="text-end pe-4">
+                                    <div class="fw-bold {% if item.unrealized_pnl > 0 %}text-danger{% elif item.unrealized_pnl < 0 %}text-success{% endif %}">
+                                        {{ item.unrealized_pnl|floatformat:0 }}
+                                    </div>
+                                    <div class="small {% if item.pnl_percent > 0 %}text-danger{% elif item.pnl_percent < 0 %}text-success{% endif %}">
+                                        {{ item.pnl_percent|floatformat:2 }}%
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="py-4">
+                                        <div class="mb-3">
+                                            <i class="fas fa-robot fa-3x text-primary opacity-75"></i>
+                                        </div>
+                                        <h4 class="fw-bold mb-2">{% trans "Your AI Financial Advisor" %}</h4>
+                                        <p class="text-muted mb-4">{% trans "Your portfolio is currently empty. Not sure where to start?" %}<br>{% trans "Fill out the information below to let AI generate a customized ETF allocation plan for you!" %}</p>
+                                        
+                                        <div class="mx-auto text-start" style="max-width: 500px;">
+                                            <div class="card border border-primary shadow-sm">
+                                                <div class="card-body p-4 bg-light rounded">
+                                                    <form action="{% url 'invest:ai_plan' %}" method="POST">
+                                                        {% csrf_token %}
+                                                        {% for field in robo_form %}
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold text-secondary small">{{ field.label }}</label>
+                                                                {{ field }}
+                                                            </div>
+                                                        {% endfor %}
+                                                        <button type="submit" id="ai-submit-btn" class="btn btn-primary w-100 fw-bold mt-2 rounded-pill">
+                                                            <span id="btn-icon"><i class="fas fa-magic me-2"></i></span>
+                                                            <span id="btn-spinner" class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                                                            <span id="btn-text">{% trans "Generate Custom Plan" %}</span>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm bg-light h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4"><i class="fas fa-plus-circle text-success me-2"></i>{% trans "Record Transaction" %}</h5>
+                    <form method="POST">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-secondary">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill mt-2">
+                            {% trans "Submit Record" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="collapse mt-4" id="marketAnalysisCharts">
+        <h4 class="fw-bold mb-4"><i class="fas fa-chart-area text-primary me-2"></i>{% trans "Market Data & Analysis" %}</h4>
+        <div class="row g-4 mb-5">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold">{% trans "Asset Allocation" %}</h6></div>
+                    <div class="card-body d-flex justify-content-center align-items-center">
+                        {% if holdings %}
+                            <canvas id="portfolioPieChart" style="max-height: 300px;"></canvas>
+                        {% else %}
+                            <p class="text-muted small">{% trans "No portfolio data available" %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-danger">📈 {% trans "Top 10 Gainers (%)" %}</h6></div>
+                    <div class="card-body"><canvas id="gainersChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-success">📉 {% trans "Top 10 Losers (%)" %}</h6></div>
+                    <div class="card-body"><canvas id="losersChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold">👑 {% trans "Highest Priced Stocks Top 10" %}</h6></div>
+                    <div class="card-body"><canvas id="highPriceChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold">🪙 {% trans "Penny Stocks Top 10" %}</h6></div>
+                    <div class="card-body"><canvas id="lowPriceChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="historyChartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-0">
+                <h5 class="modal-title fw-bold" id="historyModalTitle">{% trans "Loading..." %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <canvas id="stockLineChart" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. AI 規劃表單動畫邏輯
+        const aiForm = document.querySelector("form[action='{% url 'invest:ai_plan' %}']");
+        if (aiForm) {
+            aiForm.addEventListener('submit', function() {
+                const btn = document.getElementById('ai-submit-btn');
+                const btnIcon = document.getElementById('btn-icon');
+                const btnSpinner = document.getElementById('btn-spinner');
+                const btnText = document.getElementById('btn-text');
+
+                btn.disabled = true;
+                btn.classList.add('opacity-75'); 
+                btnIcon.classList.add('d-none');
+                btnSpinner.classList.remove('d-none');
+                // 💡 JavaScript 中的翻譯寫法
+                btnText.textContent = '{% trans "AI is planning for you, please wait..." %}';
+            });
+        }
+
+        // 2. Chart.js 圖表繪製邏輯
+        const colors = [
+            'rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)',
+            'rgba(199, 199, 199, 0.7)', 'rgba(83, 102, 255, 0.7)', 'rgba(40, 159, 64, 0.7)',
+            'rgba(210, 199, 199, 0.7)'
+        ];
+
+        const pieCtx = document.getElementById('portfolioPieChart');
+        if (pieCtx) {
+            new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ pie_labels|safe }},
+                    datasets: [{
+                        data: {{ pie_data|safe }},
+                        backgroundColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function createBarChart(canvasId, labels, data, labelName, color, isHorizontal=false) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+            new Chart(ctx, {
+                type: 'bar', 
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelName,
+                        data: data,
+                        backgroundColor: color,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: isHorizontal ? 'y' : 'x', 
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: false } }
+                }
+            });
+        }
+
+        createBarChart('gainersChart', {{ gainers_labels|safe }}, {{ gainers_data|safe }}, '{% trans "Change (%)" %}', 'rgba(220, 53, 69, 0.7)', true); 
+        createBarChart('losersChart', {{ losers_labels|safe }}, {{ losers_data|safe }}, '{% trans "Change (%)" %}', 'rgba(25, 135, 84, 0.7)', true);  
+        createBarChart('highPriceChart', {{ high_price_labels|safe }}, {{ high_price_data|safe }}, '{% trans "Price" %}', 'rgba(255, 193, 7, 0.7)'); 
+        createBarChart('lowPriceChart', {{ low_price_labels|safe }}, {{ low_price_data|safe }}, '{% trans "Price" %}', 'rgba(13, 110, 253, 0.7)'); 
+    
+        // 3. 搜尋框 Enter 鍵觸發邏輯
+        const searchInput = document.getElementById('stockSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); 
+                    searchStockHistory();
+                }
+            });
+        }
+    });
+
+    // 4. 取得歷史走勢圖的 API 邏輯
+    let lineChartInstance = null;
+
+    function showHistoryChart(symbol) {
+        if (!symbol) return; 
+
+        const modal = new bootstrap.Modal(document.getElementById('historyChartModal'));
+        modal.show();
+        
+        document.getElementById('historyModalTitle').textContent = `📊 {% trans "Loading data for" %} ${symbol}...`;
+
+        fetch(`/invest/api/history/${symbol}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('historyModalTitle').textContent = `❌ {% trans "Failed to load data:" %} ${data.error}`;
+                    return;
+                }
+
+                document.getElementById('historyModalTitle').textContent = `📈 ${data.symbol} ${data.name} ({% trans "6-Month Trend" %})`;
+                
+                const ctx = document.getElementById('stockLineChart').getContext('2d');
+                
+                if (lineChartInstance) {
+                    lineChartInstance.destroy();
+                }
+
+                lineChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [{
+                            label: '{% trans "Close Price" %}',
+                            data: data.prices,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { 
+                                min: Math.min(...data.prices) * 0.95 
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                document.getElementById('historyModalTitle').textContent = '❌ {% trans "Network Error" %}';
+            });
+    }
+
+    // 搜尋按鈕觸發的功能
+    function searchStockHistory() {
+        const inputVal = document.getElementById('stockSearchInput').value.trim();
+        if (inputVal) {
+            showHistoryChart(inputVal);
+        } else {
+            alert('{% trans "Please enter a stock symbol first!" %}');
+        }
+    }
+</script>
+
+{% endblock %}

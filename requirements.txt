@@ -40,3 +40,9 @@ openpyxl==3.1.5
 #! 安全性檢查套件
 bandit==1.9.3
 safety==3.7.0
+
+#! 金融資訊
+yfinance==1.2.0
+
+#! 排程
+django-apscheduler==0.7.0

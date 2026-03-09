@@ -30,7 +30,7 @@ def profile_view(request):
             return redirect("profile")
 
     #! 抓取點數錢包 (若無則建立)
-    wallet, _ = UserPoints.objects.get_or_create(user=request.user)
+    wallet, created = UserPoints.objects.get_or_create(user=request.user)
 
     #!  交易紀錄分頁處理
     transaction_list = PointTransaction.objects.filter(user=request.user).order_by("-created_at")

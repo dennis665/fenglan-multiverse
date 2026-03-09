@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{# 覆寫標題文字 #}
+{% block title %}{{ title }} | CSI Server Admin{% endblock %}
+
+{# 覆寫左上角的 Branding #}
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">CSI Server 系統後台</a></h1>
+{% endblock %}
+
+{# 覆寫右上角的使用者區塊 (Userlinks)，加入語言切換表單 #}
+{% block userlinks %}
+    {{ block.super }}
+    
+    <span class="separator">|</span>
+    <form action="{% url 'set_language' %}" method="post" style="display: inline-block; margin-left: 5px;">
+        {% csrf_token %}
+        <input name="next" type="hidden" value="{{ request.get_full_path }}">
+        <select name="language" onchange="this.form.submit()" style="padding: 2px; border-radius: 4px; background: #333; color: white; border: 1px solid #666;">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+            {% for language in languages %}
+                <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                    {{ language.name_local }} ({{ language.code }})
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-4">
+                <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                <h2 class="fw-bold">您的專屬 AI 理財規劃書</h2>
+                <p class="text-muted">基於您的目標：{{ user_data.target_years }} 年後達成每月 ${{ user_data.target_monthly_income }} 被動收入</p>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4 bg-primary bg-opacity-10">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-primary mb-3">{{ plan.strategy_name }}</h5>
+                    <p class="mb-3">{{ plan.analysis }}</p>
+                    <div class="d-inline-block bg-white px-3 py-2 rounded shadow-sm text-success fw-bold">
+                        <i class="fas fa-chart-line me-2"></i>AI 預估年化報酬率：{{ plan.expected_annual_return }}%
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3">建議 ETF 配置清單</h5>
+            <div class="row g-3">
+                {% for item in plan.holdings %}
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100 border-start border-4 border-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="fw-bold mb-0">{{ item.symbol }} {{ item.name }}</h5>
+                                <span class="badge bg-primary rounded-pill fs-6">{{ item.weight }}%</span>
+                            </div>
+                            <p class="text-muted small mb-0">{{ item.reason }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="text-center mt-5">
+                <a href="{% url 'invest:dashboard' %}" class="btn btn-outline-secondary me-2">回儀表板</a>
+                <form action="{% url 'invest:apply_ai_plan' %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="target_monthly_income" value="{{ user_data.target_monthly_income }}">
+                    <input type="hidden" name="expected_return" value="{{ plan.expected_annual_return }}">
+                    
+                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">
+                        <i class="fas fa-save me-2"></i>套用此策略目標
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
