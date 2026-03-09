@@ -231,6 +231,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+#! # 指定整個專案所有 App 的預設主鍵類型
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ? ==============================================================================
 
 #! 認證系統設定 (django-allauth)

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-09 09:37+0800\n"
+"POT-Creation-Date: 2026-03-09 10:37+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -12,13 +12,133 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\config\settings.py:275
+#: .\config\settings.py:278
 msgid "繁體中文"
 msgstr "Traditional Chinese"
 
-#: .\config\settings.py:276
+#: .\config\settings.py:279
 msgid "English"
 msgstr ""
+
+#: .\core\admin.py:40
+msgid "平均耗時 (秒)"
+msgstr "Avg Duration (sec)"
+
+#: .\core\admin.py:45 .\core\apps.py:30
+msgid "下次執行時間"
+msgstr "Next Run Time"
+
+#: .\core\admin.py:51
+msgid "立刻執行選定的任務"
+msgstr "Run selected tasks now"
+
+#: .\core\admin.py:59
+msgid "狀態標籤"
+msgstr "Status Tag"
+
+#: .\core\admin.py:64
+msgid "本地執行時間"
+msgstr "Local Execution Time"
+
+#: .\core\admin.py:69
+msgid "實際耗時"
+msgstr "Actual Duration"
+
+#: .\core\apps.py:7
+msgid "核心系統"
+msgstr "Core System"
+
+#: .\core\apps.py:17
+msgid "排程任務管理"
+msgstr "Scheduled Task Management"
+
+#: .\core\apps.py:21 .\core\apps.py:22
+msgid "背景任務"
+msgstr "Background Task"
+
+#: .\core\apps.py:26
+msgid "任務 ID"
+msgstr "Task ID"
+
+#: .\core\apps.py:27
+msgid "此任務的唯一識別碼。"
+msgstr "The unique identifier for this task."
+
+#: .\core\apps.py:31
+msgid "排定下次執行此任務的日期與時間。"
+msgstr "The scheduled date and time for the next execution of this task."
+
+#: .\core\apps.py:34
+msgid "任務狀態 (二進位)"
+msgstr "Task Status (Binary)"
+
+#: .\core\apps.py:38 .\core\apps.py:39
+msgid "執行紀錄"
+msgstr "Execution Log"
+
+#: .\core\apps.py:43
+msgid "紀錄 ID"
+msgstr "Log ID"
+
+#: .\core\apps.py:44
+msgid "此任務執行紀錄的唯一 ID。"
+msgstr "The unique ID for this task execution log."
+
+#: .\core\apps.py:47
+msgid "所屬任務"
+msgstr "Belongs to Task"
+
+#: .\core\apps.py:48
+msgid "此執行紀錄關聯的排程任務。"
+msgstr "The scheduled task associated with this execution log."
+
+#: .\core\apps.py:51
+msgid "執行狀態"
+msgstr "Execution Status"
+
+#: .\core\apps.py:52
+msgid "此任務執行的當前狀態。"
+msgstr "The current status of this task execution."
+
+#: .\core\apps.py:55
+msgid "執行時間"
+msgstr "Execution Time"
+
+#: .\core\apps.py:56
+msgid "此任務開始執行的日期與時間。"
+msgstr "The date and time when this task started executing."
+
+#: .\core\apps.py:59
+msgid "耗時 (秒)"
+msgstr "Duration (sec)"
+
+#: .\core\apps.py:60
+msgid "此任務的總執行時間 (以秒為單位)。"
+msgstr "Total execution time of this task (in seconds)."
+
+#: .\core\apps.py:63
+msgid "完成時間戳"
+msgstr "Completion Timestamp"
+
+#: .\core\apps.py:64
+msgid "此任務完成時的時間戳記。"
+msgstr "The timestamp when this task was completed."
+
+#: .\core\apps.py:67
+msgid "異常訊息"
+msgstr "Exception Message"
+
+#: .\core\apps.py:68
+msgid "任務執行期間發生的異常詳細資訊 (若有的話)。"
+msgstr "Detailed information about any exception that occurred during task execution (if any)."
+
+#: .\core\apps.py:71
+msgid "錯誤追蹤"
+msgstr "Error Traceback"
+
+#: .\core\apps.py:72
+msgid "任務執行期間發生異常的追蹤紀錄 (若有的話)。"
+msgstr "The traceback record of an exception that occurred during task execution (if any)."
 
 #: .\core\templates\core\lucky_draw.html:4 .\templates\base.html:35
 msgid "Lucky Draw"
@@ -227,6 +347,10 @@ msgstr ""
 msgid "Invalid request"
 msgstr ""
 
+#: .\finance\apps.py:7
+msgid "財務與商城"
+msgstr "finance"
+
 #: .\finance\templates\finance\recharge_store.html:4 .\templates\base.html:42
 msgid "Point Recharge"
 msgstr ""
@@ -273,6 +397,10 @@ msgstr "Bonus Points"
 #: .\finance\templates\finance\shop.html:175
 msgid "商城目前準備中，敬請期待！"
 msgstr "The shop is currently under preparation, please stay tuned!"
+
+#: .\invest\apps.py:7
+msgid "投資理財"
+msgstr "invest"
 
 #: .\invest\forms.py:12
 msgid "交易標的"
@@ -646,6 +774,10 @@ msgstr ""
 msgid "Please enter a stock symbol first!"
 msgstr ""
 
+#: .\notices\apps.py:7
+msgid "系統公告"
+msgstr "notices"
+
 #: .\notices\templates\notices\detail.html:11
 #: .\notices\templates\notices\list.html:4
 msgid "Notice List"
@@ -938,6 +1070,14 @@ msgstr ""
 #: .\templates\socialaccount\login.html:32
 msgid "Cancel and return to login page"
 msgstr ""
+
+#: .\tigf\apps.py:7
+msgid "安定基金"
+msgstr "tigf"
+
+#: .\users\apps.py:7
+msgid "使用者管理"
+msgstr "users"
 
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
