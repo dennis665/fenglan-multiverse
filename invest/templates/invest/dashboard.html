@@ -78,7 +78,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <button class="btn btn-outline-success btn-sm w-100 mt-1 rounded-pill" type="submit">
                             <i class="fas fa-sync-alt me-1"></i>{% trans "Recalculate" %}
                         </button>
@@ -109,7 +109,7 @@
                     <button class="btn btn-primary px-4 fw-bold" type="button" onclick="searchStockHistory()">{% trans "Search" %}</button>
                 </div>
             </div>
-            
+
             <button class="btn btn-outline-secondary fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#marketAnalysisCharts" aria-expanded="false" aria-controls="marketAnalysisCharts">
                 <i class="fas fa-chart-bar me-2"></i>{% trans "Expand Market Data" %}
             </button>
@@ -223,36 +223,50 @@
         </div>
     </div>
 
-    {# 市場數據分析圖表區 (預設折疊) #}
+    {# 市場數據分析圖表區 #}
     <div class="collapse mt-4" id="marketAnalysisCharts">
         <h4 class="fw-bold mb-4"><i class="fas fa-chart-area text-primary me-2"></i>{% trans "Market Data & Analysis" %}</h4>
         <div class="row g-4 mb-5">
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold">{% trans "Asset Allocation" %}</h6></div>
-                    <div class="card-body d-flex justify-content-center align-items-center">
-                        {% if holdings %}
+            {% if holdings %}
+                {# 有持股時：採用 4-4-4 分欄佈局 #}
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold">{% trans "Asset Allocation" %}</h6></div>
+                        <div class="card-body d-flex justify-content-center align-items-center">
                             <canvas id="portfolioPieChart" style="max-height: 300px;"></canvas>
-                        {% else %}
-                            <p class="text-muted small">{% trans "No portfolio data available" %}</p>
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-danger">📈 {% trans "Top 10 Gainers (%)" %}</h6></div>
-                    <div class="card-body"><canvas id="gainersChart"></canvas></div>
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-danger">📈 {% trans "Top 10 Gainers (%)" %}</h6></div>
+                        <div class="card-body"><canvas id="gainersChart"></canvas></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-success">📉 {% trans "Top 10 Losers (%)" %}</h6></div>
-                    <div class="card-body"><canvas id="losersChart"></canvas></div>
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-success">📉 {% trans "Top 10 Losers (%)" %}</h6></div>
+                        <div class="card-body"><canvas id="losersChart"></canvas></div>
+                    </div>
                 </div>
-            </div>
+            {% else %}
+                {# 無持股時：資產配置隱藏，漲跌幅改為 6-6 分欄佈局以增加展示空間 #}
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-danger">📈 {% trans "Top 10 Gainers (%)" %}</h6></div>
+                        <div class="card-body"><canvas id="gainersChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-success">📉 {% trans "Top 10 Losers (%)" %}</h6></div>
+                        <div class="card-body"><canvas id="losersChart"></canvas></div>
+                    </div>
+                </div>
+            {% endif %}
 
             <div class="col-lg-6">
                 <div class="card border-0 shadow-sm h-100">
