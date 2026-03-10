@@ -1,0 +1,141 @@
+{% load i18n static %}
+{% get_current_language as LANGUAGE_CODE %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+            <img src="{% static 'images/CSI.ico' %}" 
+                width="30" 
+                height="30" 
+                class="d-inline-block align-top me-2" 
+                alt="CSI Logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        <i class="fas fa-home me-1 text-primary"></i>{% trans "Home" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'notices' in request.path %}active{% endif %}" href="{% url 'notices:list' %}">
+                        <i class="fas fa-bullhorn me-1 text-danger"></i>{% trans "Notices" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'lucky-draw' in request.path %}active{% endif %}" href="{% url 'lucky_draw' %}">
+                        <i class="fas fa-gift me-1 text-warning"></i>{% trans "Lucky Draw" %}
+                    </a>
+                </li>
+
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link {% if 'finance/recharge' in request.path %}active{% endif %}" href="{% url 'finance:recharge_store' %}">
+                        <i class="fas fa-gem me-1 text-info"></i>{% trans "Point Recharge" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'finance/shop' in request.path %}active{% endif %}" href="{% url 'finance:shop' %}">
+                        <i class="fas fa-store me-1 text-success"></i>{% trans "Point Shop" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'invest' in request.path %}active{% endif %}" href="{% url 'invest:dashboard' %}">
+                        <i class="fas fa-chart-line me-1 text-warning"></i>{% trans "Investment" %}
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if user.is_staff or user.is_superuser %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-info fw-bold" href="#" id="testerDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-vial me-1"></i>{% trans "Tester Zone" %}
+                    </a>
+                    <ul class="dropdown-menu shadow">
+                        <li><h6 class="dropdown-header">{% trans "Test Management System" %}</h6></li>
+                        {% for tool in external_tools %}
+                        <li>
+                            <a class="dropdown-item" href="{{ tool.url }}" target="_blank" rel="noopener noreferrer">
+                                <i class="{{ tool.icon_class }} me-2"></i>{{ tool.title }}
+                            </a>
+                        </li>
+                        {% empty %}
+                        <li><a class="dropdown-item disabled">{% trans "No tools available" %}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
+            </ul>
+
+            <ul class="navbar-nav ms-auto align-items-center">
+                {# --- 語系切換選單 --- #}
+                <li class="nav-item me-lg-3 mb-2 mb-lg-0">
+                    <form action="{% url 'set_language' %}" method="post" class="d-flex align-items-center">
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-secondary border-secondary text-white">
+                                <i class="fas fa-globe small"></i>
+                            </span>
+                            <select name="language" onchange="this.form.submit()" class="form-select form-select-sm bg-dark text-white border-secondary shadow-none" style="width: auto; cursor: pointer;">
+                                {% get_available_languages as LANGUAGES %}
+                                {% get_language_info_list for LANGUAGES as languages %}
+                                {% for language in languages %}
+                                    <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                                        {{ language.name_local }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </li>
+
+                {% if user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link text-warning" href="/admin/" target="_blank">
+                        <i class="fas fa-cog me-1"></i>{% trans "Admin" %}
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            {% load socialaccount %}
+                            {% get_social_accounts user as accounts %}
+                            {% if user.profile.avatar %}
+                                <img src="{{ user.profile.avatar.url }}" width="30" height="30" class="rounded-circle me-2 shadow-sm" style="object-fit: cover; border: 1px solid rgba(255,255,255,0.2);">
+                            {% elif accounts.google %}
+                                <img src="{{ accounts.google.0.get_avatar_url }}" width="30" height="30" class="rounded-circle me-2 shadow-sm" style="object-fit: cover;">
+                            {% else %}
+                                <i class="fas fa-user-circle me-2" style="font-size: 1.2rem;"></i>
+                            {% endif %}
+                            <span class="d-none d-lg-inline">{{ user.first_name|default:user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/accounts/profile/">{% trans "Profile" %}</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'account_logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger">{% trans "Logout" %}</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account_login' %}">{% trans "Login" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-lg-2" href="{% url 'account_signup' %}">{% trans "Register" %}</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

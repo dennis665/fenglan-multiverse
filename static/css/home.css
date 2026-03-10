@@ -1,0 +1,149 @@
+/*! 首頁專屬樣式 (Home Page Styles) */
+.cyber-wrapper {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #0a1120 0%, #010309 100%);
+    overflow: hidden;
+    border-radius: 1.5rem;
+    margin-top: 2rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+.cyber-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center;
+    z-index: 1;
+}
+
+/*! 強化後的隨機彩色電流層 */
+.cyber-grid::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    /** 使用多色漸層並提高不透明度讓顏色更深 */
+    background-image:
+        linear-gradient(90deg, transparent 45%, #00f2ff 50%, transparent 55%),
+        linear-gradient(0deg, transparent 45%, #7000ff 50%, transparent 55%),
+        repeating-linear-gradient(90deg, #ff00ff 0, #ff00ff 2px, transparent 2px, transparent 40px),
+        repeating-linear-gradient(0deg, #00ff88 0, #00ff88 2px, transparent 2px, transparent 40px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+
+    -webkit-mask-image: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 15%, transparent 50%);
+    mask-image: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 15%, transparent 50%);
+    -webkit-mask-size: 250% 250%;
+    mask-size: 250% 250%;
+
+    /** 移除消失時間，加入色相旋轉動畫 */
+    animation:
+        currentFlow 10s linear infinite,
+        sparkPulse 0.8s ease-in-out infinite alternate,
+        colorCycle 6s linear infinite;
+    opacity: 0.7;
+    /** 初始透明度調高，確保顏色加深 */
+}
+
+.glass-panel {
+    position: relative;
+    z-index: 10;
+    background: rgba(17, 24, 39, 0.65);
+    /** 稍微加深背景色，與彩色電流對比 */
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 4rem 3rem;
+    text-align: center;
+    max-width: 800px;
+    width: 90%;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+}
+
+.neon-text {
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 800;
+    letter-spacing: 2px;
+    animation: neon-breathing 4s ease-in-out infinite;
+}
+
+.btn-cyber {
+    background: transparent;
+    color: #38bdf8;
+    border: 2px solid #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+/*! 動畫定義 */
+
+/** 電流流動動畫：移除 opacity: 0，確保隨時有光 */
+@keyframes currentFlow {
+    0% {
+        -webkit-mask-position: 120% 120%;
+        mask-position: 120% 120%;
+    }
+
+    50% {
+        -webkit-mask-position: 0% 0%;
+        mask-position: 0% 0%;
+    }
+
+    100% {
+        -webkit-mask-position: -120% -120%;
+        mask-position: -150% -150%;
+    }
+}
+
+/** 隨機變色動畫：透過旋轉色相環產生彩色效果 */
+@keyframes colorCycle {
+    0% {
+        filter: hue-rotate(0deg) saturate(1.5);
+    }
+
+    100% {
+        filter: hue-rotate(360deg) saturate(2);
+    }
+}
+
+@keyframes neon-breathing {
+
+    0%,
+    100% {
+        text-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+        opacity: 0.8;
+    }
+
+    50% {
+        text-shadow: 0 0 25px rgba(14, 165, 233, 0.6), 0 0 40px rgba(14, 165, 233, 0.2);
+        opacity: 1;
+        color: #fff;
+    }
+}
+
+@keyframes sparkPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+}

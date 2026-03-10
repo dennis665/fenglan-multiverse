@@ -1,41 +1,43 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% load account %}
 
-{% block head_title %}{% trans "Confirm Email Address" %}{% endblock %}
+{% block head_title %}{% trans "Confirm Email Address" %} - CSI Portal{% endblock %}
 
 {% block content %}
+{# --- 電子郵件驗證確認頁面 --- #}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
                 <div class="card-body p-5 text-center">
                     <div class="mb-4">
-                        <i class="fas fa-envelope-open-text fa-4x text-primary"></i>
+                        <i class="fas fa-envelope-open-text fa-4x text-primary" style="filter: drop-shadow(0 0 10px rgba(13, 110, 253, 0.2));"></i>
                     </div>
 
-                    <h2 class="mb-3">{% trans "Confirm Email Address" %}</h2>
+                    <h2 class="fw-bold mb-3">{% trans "Confirm Email Address" %}</h2>
 
                     {% if confirmation %}
                         {% user_display confirmation.email_address.user as user_display %}
                         <p class="text-muted mb-4">
                             {% blocktrans with confirmation.email_address.email as email %}
                                 請確認您要為帳號 <strong class="text-dark">{{ user_display }}</strong> 驗證此電子郵件地址：<br>
-                                <span class="badge bg-light text-primary fs-6 mt-2">{{ email }}</span>
+                                <span class="badge bg-light text-primary fs-6 mt-2 border border-primary-subtle">{{ email }}</span>
                             {% endblocktrans %}
                         </p>
 
                         <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
                             {% csrf_token %}
                             <div class="d-grid">
-                                <button class="btn btn-primary btn-lg" type="submit">
+                                <button class="btn btn-primary btn-lg rounded-pill shadow-sm" type="submit">
                                     <i class="fas fa-check-circle me-2"></i>{% trans "Confirm" %}
                                 </button>
                             </div>
                         </form>
                     {% else %}
                         {% url 'account_email' as email_url %}
-                        <div class="alert alert-warning">
+                        <div class="alert alert-warning border-0 shadow-sm" style="border-radius: 1rem;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
                             {% blocktrans %}
                                 此電子郵件確認連結已過期或無效。請嘗試 <a href="{{ email_url }}" class="alert-link">重新發送確認信</a>。
                             {% endblocktrans %}
@@ -43,7 +45,7 @@
                     {% endif %}
 
                     <div class="mt-4">
-                        <a href="/" class="text-decoration-none text-muted">
+                        <a href="/" class="text-decoration-none text-muted small">
                             <i class="fas fa-arrow-left me-1"></i> {% trans "Back to Home" %}
                         </a>
                     </div>

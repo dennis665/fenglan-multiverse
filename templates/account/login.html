@@ -1,33 +1,36 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% load account socialaccount %}
 {% load crispy_forms_tags %} 
 
-{% block head_title %}{% trans "Sign In" %}{% endblock %}
+{% block head_title %}{% trans "Sign In" %} - CSI Portal{% endblock %}
 
 {% block content %}
+{# --- 登入主頁面：整合 Google 與 Email --- #}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
                 <div class="card-body p-5">
-                    <h2 class="text-center mb-4">{% trans "Sign In" %}</h2>
+                    <h2 class="text-center fw-bold mb-4">{% trans "Sign In" %}</h2>
 
                     <div class="d-grid gap-2 mb-4">
-                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger btn-lg">
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger btn-lg rounded-pill shadow-sm">
                             <i class="fab fa-google me-2"></i> {% trans "Sign in with Google" %}
                         </a>
                     </div>
 
                     <div class="position-relative mb-4">
                         <hr>
-                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">
-                            {% trans "Or use Email" %}
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
+                            {% trans "Or use Email" %} #* 或使用電子郵件
                         </span>
                     </div>
 
                     <form class="login" method="POST" action="{% url 'account_login' %}">
                         {% csrf_token %}
+                        
+                        {# 使用 crispy 渲染表單，會自動對應你在 models/forms 定義的繁體中文 verbose_name #}
                         {{ form|crispy }} 
                         
                         {% if redirect_field_value %}
@@ -35,16 +38,27 @@
                         {% endif %}
 
                         <div class="d-grid mt-4">
-                            <button class="primaryAction btn btn-primary btn-lg" type="submit">{% trans "Sign In" %}</button>
+                            <button class="primaryAction btn btn-primary btn-lg rounded-pill shadow-sm" type="submit">
+                                <i class="fas fa-sign-in-alt me-2"></i>{% trans "Sign In" %}
+                            </button>
                         </div>
                     </form>
 
-                    <div class="text-center mt-3">
+                    <div class="text-center mt-4">
                         <small class="text-muted">
-                            {% blocktrans %}Don't have an account? <a href="{{ signup_url }}">Register now</a>{% endblocktrans %}
+                            {% url 'account_signup' as signup_url %}
+                            {% blocktrans %}
+                                還沒有帳號嗎？ <a href="{{ signup_url }}" class="fw-bold text-decoration-none">立即註冊</a>
+                            {% endblocktrans %}
                         </small>
                     </div>
                 </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="/" class="text-decoration-none text-muted small">
+                    <i class="fas fa-chevron-left me-1"></i>{% trans "Back to Home" %}
+                </a>
             </div>
         </div>
     </div>

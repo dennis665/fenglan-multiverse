@@ -213,7 +213,7 @@ LOGGING = {
         "django": {
             "handlers": ["console", "concurrent_file"],
             "level": "INFO",
-            "propagate": True,
+            "propagate": False,
         },
     },
 }

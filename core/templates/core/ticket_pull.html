@@ -1,53 +1,60 @@
 {% extends "base.html" %}
+{% load i18n static %}
+
+{% block head_title %}{% trans "Outgoing Ledger System" %} - CSI Portal{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-primary text-white py-3">
-                    <h5 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>發文簿系統</h5>
+            {# 發文取號表單卡片 #}
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 1rem;">
+                <div class="card-header bg-primary text-white py-3" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                    <h5 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>{% trans "Outgoing Ledger System" %}</h5>
                 </div>
                 <div class="card-body p-4">
                     <form method="POST">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label class="form-label fw-bold">事由 (限20字)</label>
-                            <input type="text" name="matter" class="form-control" maxlength="20" placeholder="請輸入申請事由" required>
+                            <label class="form-label fw-bold">{% trans "Subject (Max 20 chars)" %}</label>
+                            <input type="text" name="matter" class="form-control" maxlength="20" placeholder="{% trans 'Please enter application subject' %}" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">取號人 (限10字)</label>
-                            <input type="text" name="applicant" class="form-control" maxlength="10" placeholder="請輸入姓名" required>
+                            <label class="form-label fw-bold">{% trans "Applicant (Max 10 chars)" %}</label>
+                            <input type="text" name="applicant" class="form-control" maxlength="10" placeholder="{% trans 'Please enter name' %}" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
-                            立即取號
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm">
+                            {% trans "Get Number Now" %}
                         </button>
                     </form>
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-light fw-bold">最近三筆取號紀錄</div>
+            {# 最近取號紀錄列表 #}
+            <div class="card shadow-sm border-0" style="border-radius: 1rem; overflow: hidden;">
+                <div class="card-header bg-light fw-bold">{% trans "Recent 3 Records" %}</div>
                 <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>日期</th>
-                                <th>發文字號</th>
-                                <th>取號人</th>
-                                <th>事由</th>
+                                <th class="ps-3">{% trans "Date" %}</th>
+                                <th>{% trans "Serial Number" %}</th>
+                                <th>{% trans "Applicant" %}</th>
+                                <th>{% trans "Subject" %}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for record in history %}
                             <tr>
-                                <td class="text-muted">{{ record.date|date:"Y/m/d" }}</td>
+                                <td class="ps-3 text-muted">{{ record.date|date:"Y/m/d" }}</td>
                                 <td class="text-primary fw-bold">{{ record.serial_number }}</td>
                                 <td>{{ record.applicant }}</td>
                                 <td class="text-muted small">{{ record.matter }}</td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="3" class="text-center py-3">尚無紀錄</td></tr>
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">{% trans "No records found" %}</td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>

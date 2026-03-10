@@ -1,21 +1,22 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% load socialaccount %}
 
-{% block head_title %}{% trans "Sign In" %}{% endblock %}
+{% block head_title %}{% trans "Sign In" %} - CSI Portal{% endblock %}
 
 {% block content %}
+{# --- Google 登入跳轉確認頁面 --- #}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
                 <div class="card-body p-5 text-center">
                     <div class="mb-4">
-                        <i class="fab fa-google fa-3x text-danger"></i>
+                        <i class="fab fa-google fa-4x text-danger" style="filter: drop-shadow(0 0 10px rgba(220, 53, 69, 0.2));"></i>
                     </div>
-                    
-                    <h3 class="mb-3">{% trans "Sign in with Google" %}</h3>
-                    
+
+                    <h3 class="fw-bold mb-3">{% trans "Sign in with Google" %}</h3>
+
                     <p class="text-muted mb-4">
                         {% blocktrans %}
                         您即將使用 Google 帳號進行驗證。系統將導向 Google 授權頁面，請確認是否繼續？
@@ -24,16 +25,21 @@
 
                     <form method="post">
                         {% csrf_token %}
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                {% trans "Continue" %}
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                                <i class="fas fa-arrow-right me-2"></i>{% trans "Continue" %}
                             </button>
+
                             <a href="{% url 'account_login' %}" class="btn btn-link text-secondary">
                                 {% trans "Cancel and return to login page" %}
                             </a>
                         </div>
                     </form>
                 </div>
+            </div>
+
+            <div class="text-center mt-4 text-muted small">
+                <i class="fas fa-shield-alt me-1"></i> {% trans "Your connection is encrypted and secure." %}
             </div>
         </div>
     </div>

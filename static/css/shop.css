@@ -1,0 +1,76 @@
+/*! 點數商城專屬樣式 */
+
+/*! 尊榮錢包儀表板 */
+.wallet-dashboard {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.wallet-dashboard::after {
+    content: '\f263';
+    /** FontAwesome 錢包 icon */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: -20px;
+    bottom: -30px;
+    font-size: 8rem;
+    opacity: 0.1;
+    transform: rotate(-15deg);
+}
+
+/*! 商品卡片與圖片 */
+.product-card {
+    border-radius: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.product-img-wrapper {
+    height: 220px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-img {
+    transform: scale(1.08);
+    /** 圖片懸浮放大效果 */
+}
+
+/*! 庫存標籤 */
+.stock-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 2;
+}
+
+/*! 價格排版 */
+.price-tag {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #198754;
+}

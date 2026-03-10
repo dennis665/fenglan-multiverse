@@ -1,0 +1,26 @@
+/*! 幸運大轉盤專屬樣式 */
+.wheel-container {
+    position: relative;
+    display: inline-block;
+}
+
+/*! 轉盤指針樣式 */
+.pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 30px solid #ffc107;
+    z-index: 10;
+}
+
+/*! 畫布圓角與陰影 */
+#wheelCanvas {
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+}

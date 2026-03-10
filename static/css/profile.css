@@ -1,0 +1,34 @@
+/*! 個人中心與錢包儀表板專屬樣式 */
+.profile-card {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.wallet-stat-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.wallet-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.table-vcenter td, 
+.table-vcenter th {
+    vertical-align: middle;
+}
+
+/*! 交易類型標籤樣式 **/
+.badge-recharge {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-purchase {
+    background-color: #fff3e0;
+    color: #ef6c00;
+}

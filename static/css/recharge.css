@@ -1,0 +1,54 @@
+/*! 儲值中心專屬樣式 */
+.pricing-card {
+    border-radius: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.pricing-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1) !important;
+    border-color: rgba(13, 110, 253, 0.3);
+}
+
+/*! 熱門標籤緞帶效果 */
+.ribbon {
+    position: absolute;
+    top: 15px;
+    right: -35px;
+    background: #dc3545;
+    color: white;
+    padding: 5px 40px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/*! 價格數字美化 */
+.price-display {
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.currency-symbol {
+    font-size: 1.2rem;
+    vertical-align: super;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+/*! 漸層按鈕 */
+.btn-gradient {
+    background: linear-gradient(135deg, #0d6efd, #00d2ff);
+    border: none;
+    color: white;
+    transition: opacity 0.3s;
+}
+
+.btn-gradient:hover {
+    opacity: 0.9;
+    color: white;
+}

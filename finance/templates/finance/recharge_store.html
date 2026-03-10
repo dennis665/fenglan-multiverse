@@ -1,70 +1,21 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block head_title %}{% trans "Point Recharge" %} - CSI Portal{% endblock %}
 
+{% block extra_css %}
+{# 載入專屬 CSS 檔案 #}
+<link rel="stylesheet" href="{% static 'css/recharge.css' %}">
+{% endblock %}
+
 {% block content %}
-<style>
-    /* 卡片懸浮與過渡動畫 */
-    .pricing-card {
-        border-radius: 1rem;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: 1px solid rgba(0,0,0,0.05);
-        position: relative;
-        overflow: hidden;
-    }
-    .pricing-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
-        border-color: rgba(13, 110, 253, 0.3);
-    }
-    
-    /* 熱門標籤緞帶效果 */
-    .ribbon {
-        position: absolute;
-        top: 15px;
-        right: -35px;
-        background: #dc3545;
-        color: white;
-        padding: 5px 40px;
-        font-size: 0.8rem;
-        font-weight: bold;
-        transform: rotate(45deg);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    /* 價格數字美化 */
-    .price-display {
-        font-weight: 800;
-        letter-spacing: -1px;
-    }
-    .currency-symbol {
-        font-size: 1.2rem;
-        vertical-align: super;
-        color: #6c757d;
-        font-weight: 600;
-    }
-
-    /* 漸層按鈕 */
-    .btn-gradient {
-        background: linear-gradient(135deg, #0d6efd, #00d2ff);
-        border: none;
-        color: white;
-        transition: opacity 0.3s;
-    }
-    .btn-gradient:hover {
-        opacity: 0.9;
-        color: white;
-    }
-</style>
-
 <div class="container py-5">
     <div class="text-center mb-5">
         <h2 class="fw-bold display-6 mb-3">
-            <i class="fas fa-gem text-primary me-2"></i>{% trans "點數儲值中心" %}
+            <i class="fas fa-gem text-primary me-2"></i>{% trans "Point Recharge Center" %}
         </h2>
         <p class="text-muted lead">
-            {% trans "選擇最適合您的儲值方案，享受專屬紅利回饋與購物體驗。" %}
+            {% trans "Choose the best recharge plan for you to enjoy exclusive bonus rewards and shopping experiences." %}
         </p>
     </div>
 
@@ -72,10 +23,10 @@
         {% for pkg in packages %}
         <div class="col-lg-4 col-md-6">
             <div class="card h-100 shadow-sm pricing-card bg-white">
-                
+
                 {% if pkg.bonus_points > 0 %}
                 <div class="ribbon">
-                    <i class="fas fa-fire me-1"></i>超值推薦
+                    <i class="fas fa-fire me-1"></i>{% trans "Recommended" %}
                 </div>
                 {% endif %}
 
@@ -83,7 +34,7 @@
                     <h5 class="card-title text-uppercase fw-bold text-secondary mb-4 text-center">
                         {{ pkg.name }}
                     </h5>
-                    
+
                     <div class="text-center mb-4">
                         <span class="currency-symbol">NT$</span>
                         <span class="display-4 price-display text-dark">{{ pkg.price }}</span>
@@ -94,18 +45,26 @@
                     <ul class="list-unstyled flex-grow-1 mb-4">
                         <li class="mb-3 d-flex align-items-center">
                             <i class="fas fa-coins text-warning me-3 fs-5"></i>
-                            <span class="fs-5">獲得 <strong>{{ pkg.deposit_points }}</strong> 點</span>
+                            <span class="fs-5">
+                                {% blocktrans with points=pkg.deposit_points %}
+                                    獲得 <strong>{{ points }}</strong> 點
+                                {% endblocktrans %}
+                            </span>
                         </li>
-                        
+
                         {% if pkg.bonus_points > 0 %}
                         <li class="mb-3 d-flex align-items-center text-danger">
                             <i class="fas fa-gift me-3 fs-5"></i>
-                            <span class="fs-5 fw-bold">+ {{ pkg.bonus_points }} 紅利點數</span>
+                            <span class="fs-5 fw-bold">
+                                {% blocktrans with bonus=pkg.bonus_points %}
+                                    + {{ bonus }} 紅利點數
+                                {% endblocktrans %}
+                            </span>
                         </li>
                         {% else %}
                         <li class="mb-3 d-flex align-items-center text-muted opacity-50">
                             <i class="fas fa-minus me-3 fs-5"></i>
-                            <span>無額外紅利</span>
+                            <span>{% trans "No extra bonus" %}</span>
                         </li>
                         {% endif %}
                     </ul>
@@ -113,7 +72,7 @@
                     <form method="POST" action="{% url 'finance:process_recharge' pkg.id %}" class="mt-auto">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-gradient w-100 py-3 rounded-pill fw-bold shadow-sm fs-5">
-                            <i class="fas fa-shopping-cart me-2"></i>立即儲值
+                            <i class="fas fa-shopping-cart me-2"></i>{% trans "Recharge Now" %}
                         </button>
                     </form>
                 </div>
@@ -123,7 +82,7 @@
         <div class="col-12 text-center py-5">
             <div class="text-muted">
                 <i class="fas fa-box-open fa-4x mb-3 opacity-25"></i>
-                <h5>{% trans "目前暫無可用的儲值方案" %}</h5>
+                <h5>{% trans "No recharge packages available at the moment." %}</h5>
             </div>
         </div>
         {% endfor %}

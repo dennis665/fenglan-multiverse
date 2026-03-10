@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-09 11:10+0800\n"
+"POT-Creation-Date: 2026-03-10 08:46+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -130,9 +130,7 @@ msgstr "Exception Message"
 
 #: .\core\apps.py:68
 msgid "任務執行期間發生的異常詳細資訊 (若有的話)。"
-msgstr ""
-"Detailed information about any exception that occurred during task execution "
-"(if any)."
+msgstr "Detailed information about any exception that occurred during task execution (if any)."
 
 #: .\core\apps.py:71
 msgid "錯誤追蹤"
@@ -140,9 +138,7 @@ msgstr "Error Traceback"
 
 #: .\core\apps.py:72
 msgid "任務執行期間發生異常的追蹤紀錄 (若有的話)。"
-msgstr ""
-"The traceback record of an exception that occurred during task execution (if "
-"any)."
+msgstr "The traceback record of an exception that occurred during task execution (if any)."
 
 #: .\core\models.py:8 .\finance\models.py:38 .\finance\models.py:76
 #: .\finance\models.py:149 .\invest\models.py:58 .\invest\models.py:93
@@ -188,7 +184,7 @@ msgstr "Feature Name"
 
 #: .\core\models.py:27
 msgid "全局啟用狀態"
-msgstr "Active Status"
+msgstr "Global Active Status"
 
 #: .\core\models.py:30
 msgid "訪客可用"
@@ -200,7 +196,7 @@ msgstr "Available for General Users"
 
 #: .\core\models.py:32
 msgid "工作人員可用"
-msgstr "Staff"
+msgstr "Available for Staff"
 
 #: .\core\models.py:33
 msgid "管理員可用"
@@ -218,199 +214,449 @@ msgstr "Display Order"
 msgid "功能權限管理"
 msgstr "Feature Permission Management"
 
-#: .\core\templates\core\lucky_draw.html:4 .\templates\base.html:35
+#: .\core\templates\core\feature_list.html:5
+#: .\core\templates\core\feature_list.html:11
+msgid "System Feature Permissions"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:13
+msgid "Last Updated"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:23
+msgid "Feature Module"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:24
+msgid "Global Status"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:25
+msgid "Guest"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:26
+msgid "User"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:27
+msgid "Staff"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:28
+msgid "Administrator"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:40
+msgid "Active"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:42
+msgid "Maintenance"
+msgstr ""
+
+#: .\core\templates\core\feature_list.html:85
+msgid ""
+"\n"
+"                提示：管理員可透過 Django Admin 後台即時調整各項功能的存取權"
+"限與全局啟動狀態。\n"
+"            "
+msgstr ""
+"\n"
+"                Note: Administrators can manage access permissions and global "
+"activation status for each feature in real-time via the Django Admin panel.\n"
+"            "
+
+#: .\core\templates\core\lucky_draw.html:4 .\templates\includes\navbar.html:31
 msgid "Lucky Draw"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:8
+#: .\core\templates\core\lucky_draw.html:12
 msgid "CSI Lucky Wheel"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:14
+#: .\core\templates\core\lucky_draw.html:19
 msgid "Prize Settings"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:17
+#: .\core\templates\core\lucky_draw.html:22
 msgid "Ignore Probabilities (Fair Mode)"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:24
-#: .\core\templates\core\lucky_draw.html:131
+#: .\core\templates\core\lucky_draw.html:29
+#: .\core\templates\core\lucky_draw.html:127
 msgid "Prize Name"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:25
+#: .\core\templates\core\lucky_draw.html:30
 msgid "Weight"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:26
+#: .\core\templates\core\lucky_draw.html:31
 msgid "Qty (-1=Inf)"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:32
+#: .\core\templates\core\lucky_draw.html:37
 msgid "Grand Prize"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:39
+#: .\core\templates\core\lucky_draw.html:44
 msgid "Add Prize"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:44
+#: .\core\templates\core\lucky_draw.html:50
 msgid "Import Participant List"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:50
+#: .\core\templates\core\lucky_draw.html:55
 msgid "Choose File"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:53
-#: .\core\templates\core\lucky_draw.html:403
+#: .\core\templates\core\lucky_draw.html:58
 msgid "No file selected"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:58
+#: .\core\templates\core\lucky_draw.html:62
 msgid "First column must be names"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:70
+#: .\core\templates\core\lucky_draw.html:76
 msgid "Start Draw"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:79
+#: .\core\templates\core\lucky_draw.html:86
 msgid "Winning Records"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:82
+#: .\core\templates\core\lucky_draw.html:89
 msgid "Export Excel"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:84
+#: .\core\templates\core\lucky_draw.html:91
 msgid "Clear Records"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:93
+#: .\core\templates\core\lucky_draw.html:100
 msgid "Time"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:94
+#: .\core\templates\core\lucky_draw.html:101
 msgid "Winner"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:95
+#: .\core\templates\core\lucky_draw.html:102
 msgid "Prize"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:100
-#: .\core\templates\core\lucky_draw.html:360
+#: .\core\templates\core\lucky_draw.html:107
+#: .\core\templates\core\lucky_draw.html:131
 msgid "No records yet"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:123
+#: .\core\templates\core\lucky_draw.html:119
 msgid "Imported"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:124
+#: .\core\templates\core\lucky_draw.html:120
 msgid "All prizes drawn!"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:125
+#: .\core\templates\core\lucky_draw.html:121
 msgid "Please import participant list first!"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:126
+#: .\core\templates\core\lucky_draw.html:122
 msgid "Congratulations"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:127
+#: .\core\templates\core\lucky_draw.html:123
 msgid "won"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:128
+#: .\core\templates\core\lucky_draw.html:124
 msgid "Are you sure you want to clear all records?"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:129
+#: .\core\templates\core\lucky_draw.html:125
 msgid "No records to export!"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:130
+#: .\core\templates\core\lucky_draw.html:126
 msgid "Prizes Sold Out"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:132
+#: .\core\templates\core\lucky_draw.html:128
 msgid "Winner List"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:133
+#: .\core\templates\core\lucky_draw.html:129
 msgid "No."
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:133
+#: .\core\templates\core\lucky_draw.html:129
 msgid "Draw Time"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:133
+#: .\core\templates\core\lucky_draw.html:129
 msgid "Winner Name"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:133
+#: .\core\templates\core\lucky_draw.html:129
 msgid "Award"
 msgstr ""
 
-#: .\core\templates\core\lucky_draw.html:134
+#: .\core\templates\core\lucky_draw.html:130
 msgid "Remaining"
 msgstr ""
 
-#: .\core\templates\core\profile.html:28
+#: .\core\templates\core\profile.html:5 .\core\templates\core\profile.html:19
 msgid "User Profile"
 msgstr ""
 
-#: .\core\templates\core\profile.html:50
+#: .\core\templates\core\profile.html:41
 msgid "Change Photo"
 msgstr ""
 
-#: .\core\templates\core\profile.html:55
+#: .\core\templates\core\profile.html:46
 msgid "Last Login"
 msgstr ""
 
-#: .\core\templates\core\profile.html:68
+#: .\core\templates\core\profile.html:58
 msgid "My Wallet"
 msgstr ""
 
-#: .\core\templates\core\profile.html:72
+#: .\core\templates\core\profile.html:62
+#: .\finance\templates\finance\shop.html:28
 msgid "Deposit Points"
 msgstr ""
 
-#: .\core\templates\core\profile.html:78
+#: .\core\templates\core\profile.html:68
+#: .\finance\templates\finance\shop.html:33
 msgid "Bonus Points"
 msgstr ""
 
-#: .\core\templates\core\profile.html:85
+#: .\core\templates\core\profile.html:75
+#: .\finance\templates\finance\recharge_store.html:75
 msgid "Recharge Now"
 msgstr ""
 
-#: .\core\templates\core\profile.html:88
+#: .\core\templates\core\profile.html:78
 msgid "Go Shopping"
 msgstr ""
 
-#: .\core\templates\core\profile.html:97
+#: .\core\templates\core\profile.html:87
 msgid "Transaction History"
 msgstr ""
 
-#: .\core\templates\core\profile.html:103
+#: .\core\templates\core\profile.html:93
+#: .\core\templates\core\ticket_pull.html:40
 msgid "Date"
 msgstr ""
 
-#: .\core\templates\core\profile.html:104
+#: .\core\templates\core\profile.html:94
 msgid "Description"
 msgstr ""
 
-#: .\core\templates\core\profile.html:105
+#: .\core\templates\core\profile.html:95
 msgid "Amount"
 msgstr ""
 
-#: .\core\templates\core\profile.html:126
+#: .\core\templates\core\profile.html:117
 msgid "No records found."
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:4
+#: .\core\templates\core\ticket_pull.html:13
+msgid "Outgoing Ledger System"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:19
+msgid "Subject (Max 20 chars)"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:20
+msgid "Please enter application subject"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:23
+msgid "Applicant (Max 10 chars)"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:24
+msgid "Please enter name"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:27
+msgid "Get Number Now"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:35
+msgid "Recent 3 Records"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:41
+msgid "Serial Number"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:42
+#: .\core\templates\core\ticket_success.html:34
+msgid "Applicant"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:43
+#: .\core\templates\core\ticket_success.html:42
+msgid "Subject"
+msgstr ""
+
+#: .\core\templates\core\ticket_pull.html:56
+msgid "No records found"
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:4
+msgid "Ticket Generated Successfully"
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:18
+msgid "Success!"
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:22
+msgid "Your unique outgoing serial number is:"
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:35
+#: .\core\templates\core\ticket_success.html:43
+msgid "(Not provided)"
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:38
+msgid "Date Applied"
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:52
+msgid "Copy Number"
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:55
+msgid "Print Certificate"
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:58
+msgid "Continue Drawing"
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:65
+msgid "Notice: Please keep this number carefully for future reference."
+msgstr ""
+
+#: .\core\templates\core\ticket_success.html:75
+msgid "Serial number copied to clipboard"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:4
+msgid "Data Verification Dashboard"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:12
+msgid "Report File"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:18
+msgid "Template File"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:24
+msgid "Database File"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:41
+msgid "Mapping Check"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:44
+msgid "Comparison Results"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:63
+#: .\core\templates\core\tigf_dashboard.html:117
+msgid "No files detected"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:74
+msgid "ID"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:75
+#: .\core\templates\core\tigf_dashboard.html:118
+msgid "Report"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:76
+msgid "Template"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:77
+msgid "Database"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:86
+#: .\core\templates\core\tigf_dashboard.html:122
+msgid "Start Data Comparison"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:95
+#, python-format
+msgid "編號 %(fid)s 的差異數：%(count)s"
+msgstr "Discrepancy count for ID %(fid)s: %(count)s"
+
+#: .\core\templates\core\tigf_dashboard.html:96
+msgid "Download CSV"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:99
+#: .\core\templates\core\tigf_dashboard.html:123
+msgid "No comparison data"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:116
+msgid "Upload Error"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:119
+msgid "Company"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:120
+msgid "Comparing..."
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:121
+msgid "Comparison failed, please re-upload modified files"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:124
+msgid "Download Difference List"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:125
+msgid "Data Consistent"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:126
+#, python-brace-format
+msgid "Detected {count} cell differences"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:127
+msgid "Content matches database perfectly"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:128
+msgid "Has Differences"
+msgstr ""
+
+#: .\core\templates\core\tigf_dashboard.html:129
+msgid "Fully Matched"
 msgstr ""
 
 #: .\core\views.py:29
@@ -427,20 +673,18 @@ msgstr ""
 
 #: .\finance\apps.py:7
 msgid "財務與商城"
-msgstr "finance"
+msgstr "Finance & Mall"
 
 #: .\finance\models.py:9 .\finance\models.py:31 .\finance\models.py:60
 #: .\finance\models.py:133 .\users\models.py:16
 msgid "使用者"
-msgstr "users"
+msgstr "User"
 
 #: .\finance\models.py:10 .\finance\models.py:20 .\finance\models.py:56
-#: .\finance\templates\finance\shop.html:92
 msgid "儲值點數"
 msgstr "Deposit Points"
 
 #: .\finance\models.py:11 .\finance\models.py:20 .\finance\models.py:57
-#: .\finance\templates\finance\shop.html:97
 msgid "紅利點數"
 msgstr "Bonus Points"
 
@@ -482,7 +726,7 @@ msgstr "ECPay Top-up Order"
 
 #: .\finance\models.py:49
 msgid "儲值"
-msgstr "Deposit Points"
+msgstr "Deposit"
 
 #: .\finance\models.py:50
 msgid "購物扣抵"
@@ -522,7 +766,7 @@ msgstr "Remarks"
 
 #: .\finance\models.py:79 .\finance\models.py:80
 msgid "點數交易紀錄"
-msgstr "Transaction Record"
+msgstr "Point Transaction Record"
 
 #: .\finance\models.py:87
 msgid "方案名稱"
@@ -534,11 +778,11 @@ msgstr "Price (TWD)"
 
 #: .\finance\models.py:89
 msgid "獲得儲值點數"
-msgstr "Deposit Points"
+msgstr "Deposit Points Earned"
 
 #: .\finance\models.py:90
 msgid "加贈紅利點數"
-msgstr "Bonus Points"
+msgstr "Bonus Points Reward"
 
 #: .\finance\models.py:91 .\finance\models.py:110
 msgid "是否上架"
@@ -602,11 +846,11 @@ msgstr "Total Points Spent"
 
 #: .\finance\models.py:146
 msgid "使用儲值點數"
-msgstr "Deposit Points"
+msgstr "Deposit Points Used"
 
 #: .\finance\models.py:147
 msgid "使用紅利點數"
-msgstr "Bonus Points"
+msgstr "Bonus Points Used"
 
 #: .\finance\models.py:148
 msgid "台幣實付金額"
@@ -616,52 +860,152 @@ msgstr "Actual Amount Paid (TWD)"
 msgid "點數購物訂單"
 msgstr "Point Purchase Order"
 
-#: .\finance\templates\finance\recharge_store.html:4 .\templates\base.html:42
+#: .\finance\templates\finance\recharge_store.html:4
+#: .\templates\includes\navbar.html:38
 msgid "Point Recharge"
 msgstr ""
 
-#: .\finance\templates\finance\recharge_store.html:64
-msgid "點數儲值中心"
-msgstr "Point Recharge Center"
+#: .\finance\templates\finance\recharge_store.html:15
+msgid "Point Recharge Center"
+msgstr ""
+
+#: .\finance\templates\finance\recharge_store.html:18
+msgid "Choose the best recharge plan for you to enjoy exclusive bonus rewards and shopping experiences."
+msgstr ""
+
+#: .\finance\templates\finance\recharge_store.html:29
+msgid "Recommended"
+msgstr ""
+
+#: .\finance\templates\finance\recharge_store.html:49
+#, python-format
+msgid ""
+"\n"
+"                                    獲得 <strong>%(points)s</strong> 點\n"
+"                                "
+msgstr ""
+"\n"
+"                                    Earn <strong>%(points)s</strong> pts\n"
+"                                "
+
+#: .\finance\templates\finance\recharge_store.html:59
+#, python-format
+msgid ""
+"\n"
+"                                    + %(bonus)s 紅利點數\n"
+"                                "
+msgstr ""
+"\n"
+"                                    + %(bonus)s Bonus Points\n"
+"                                "
 
 #: .\finance\templates\finance\recharge_store.html:67
-msgid "選擇最適合您的儲值方案，享受專屬紅利回饋與購物體驗。"
+msgid "No extra bonus"
 msgstr ""
-"Choose the best recharge plan for you and enjoy exclusive bonus rewards and "
-"shopping experiences."
 
-#: .\finance\templates\finance\recharge_store.html:126
-msgid "目前暫無可用的儲值方案"
-msgstr "No recharge plans available at the moment."
+#: .\finance\templates\finance\recharge_store.html:85
+msgid "No recharge packages available at the moment."
+msgstr ""
 
-#: .\finance\templates\finance\shop.html:4 .\templates\base.html:47
+#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:43
 msgid "Point Shop"
 msgstr ""
 
-#: .\finance\templates\finance\shop.html:80
-msgid "CSI 點數商城"
-msgstr "CSI Point Shop"
-
-#: .\finance\templates\finance\shop.html:82
-msgid "使用您的點數兌換豐富商品與專屬權益"
+#: .\finance\templates\finance\shop.html:15
+msgid "CSI Point Shop"
 msgstr ""
-"Use your points to redeem a variety of products and exclusive benefits."
 
-#: .\finance\templates\finance\shop.html:89
-msgid "我的資產總覽"
-msgstr "My Wallet Overview"
+#: .\finance\templates\finance\shop.html:17
+msgid "Redeem your points for rich products and exclusive rights"
+msgstr ""
 
-#: .\finance\templates\finance\shop.html:175
-msgid "商城目前準備中，敬請期待！"
-msgstr "The shop is currently under preparation, please stay tuned!"
+#: .\finance\templates\finance\shop.html:25
+msgid "Asset Overview"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:29
+#: .\finance\templates\finance\shop.html:34
+#: .\finance\templates\finance\shop.html:76
+msgid "Points"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:40
+msgid "Go to Recharge"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:56
+#, python-format
+msgid "Almost Sold Out (%(stock)s left)"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:59
+msgid "Sold Out"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:87
+msgid "Bonus Deduction"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:88
+#, python-format
+msgid "Max %(price)s points"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:97
+#, python-format
+msgid ""
+"\n"
+"                                    將扣除 <strong class=\"text-primary deposit-calc\">%(points)s</strong> 儲值點\n"
+"                                "
+msgstr ""
+"\n"
+"                                    Will deduct <strong class=\"text-primary deposit-calc\">%(points)s</strong> deposit pts\n"
+"                                "
+
+#: .\finance\templates\finance\shop.html:107
+msgid "Restocking"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:109
+msgid "Redeem Now"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:120
+msgid "The shop is currently under preparation, please stay tuned!"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:135
+msgid "Confirm Redemption?"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:136
+msgid "You are about to redeem <span id=\"modal-prod-name\"></span>"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:138
+msgid "Cancel"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:139
+#: .\templates\account\email_confirm.html:33
+msgid "Confirm"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:155
+msgid "Redeemed Successfully!"
+msgstr ""
+
+#: .\finance\templates\finance\shop.html:156
+msgid "Click anywhere to close"
+msgstr ""
 
 #: .\invest\apps.py:7
 msgid "投資理財"
-msgstr "invest"
+msgstr "Investment"
 
 #: .\invest\forms.py:12
 msgid "交易標的"
-msgstr "Trading Target"
+msgstr "Trading Symbol"
 
 #: .\invest\forms.py:16 .\invest\models.py:92
 msgid "交易日期"
@@ -669,8 +1013,7 @@ msgstr "Transaction Date"
 
 #: .\invest\forms.py:33
 msgid "保守型 (追求穩定，無法承受本金大幅波動)"
-msgstr ""
-"Conservative (Seeks stability, cannot tolerate large capital fluctuations)"
+msgstr "Conservative (Seeks stability, cannot tolerate large capital fluctuations)"
 
 #: .\invest\forms.py:34
 #, python-format
@@ -679,8 +1022,7 @@ msgstr "Moderate (Balances risk and reward, accepts 10%-20% drawdown)"
 
 #: .\invest\forms.py:35
 msgid "積極型 (追求高成長，能承受 30% 以上的市場波動)"
-msgstr ""
-"Aggressive (Seeks high growth, can tolerate market fluctuations of 30%+)"
+msgstr "Aggressive (Seeks high growth, can tolerate market fluctuations of 30%+)"
 
 #: .\invest\forms.py:39
 msgid "目前年齡"
@@ -728,7 +1070,7 @@ msgstr "Target Name"
 
 #: .\invest\models.py:18
 msgid "交易所"
-msgstr "Trading Target"
+msgstr "Exchange"
 
 #: .\invest\models.py:19
 msgid "類別"
@@ -744,7 +1086,7 @@ msgstr "Target Information"
 
 #: .\invest\models.py:33 .\invest\models.py:80 .\invest\models.py:140
 msgid "標的"
-msgstr "Trading Target"
+msgstr "Target"
 
 #: .\invest\models.py:34
 msgid "當前股價"
@@ -776,7 +1118,7 @@ msgstr "Description"
 
 #: .\invest\models.py:53
 msgid "每月被動收入目標"
-msgstr "Target Monthly Passive Income (NT$)"
+msgstr "Target Monthly Passive Income"
 
 #: .\invest\models.py:56
 msgid "預估殖利率(%)"
@@ -843,185 +1185,218 @@ msgstr "Current Holdings"
 msgid "股"
 msgstr "Shares"
 
-#: .\invest\templates\invest\dashboard.html:7
+#: .\invest\templates\invest\ai_plan_result.html:5
+msgid "AI Financial Planning Report"
+msgstr ""
+
+#: .\invest\templates\invest\ai_plan_result.html:14
+msgid "Your Personalized AI Financial Plan"
+msgstr ""
+
+#: .\invest\templates\invest\ai_plan_result.html:16
+#, python-format
+msgid ""
+"\n"
+"                        基於您的目標：%(years)s 年後達成每月 $%(income)s 被動"
+"收入\n"
+"                    "
+msgstr ""
+"\n"
+"                        Based on your goal: Achieve a monthly passive income of $%(income)s in %(years)s years.\n"
+"                    "
+
+#: .\invest\templates\invest\ai_plan_result.html:28
+msgid "AI Estimated Annual Return"
+msgstr ""
+
+#: .\invest\templates\invest\ai_plan_result.html:34
+msgid "Recommended ETF Allocation List"
+msgstr ""
+
+#: .\invest\templates\invest\ai_plan_result.html:54
+msgid "Back to Dashboard"
+msgstr ""
+
+#: .\invest\templates\invest\ai_plan_result.html:63
+msgid "Apply This Strategy Goal"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:4
+#: .\invest\templates\invest\dashboard.html:9
 msgid "Investment Portfolio Dashboard"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:14
+#: .\invest\templates\invest\dashboard.html:17
 msgid "Total Market Value"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:16
+#: .\invest\templates\invest\dashboard.html:19
 msgid "Total Cost"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:24
-#: .\invest\templates\invest\dashboard.html:128
+#: .\invest\templates\invest\dashboard.html:27
+#: .\invest\templates\invest\dashboard.html:134
 msgid "Unrealized PnL"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:29
+#: .\invest\templates\invest\dashboard.html:32
 msgid "Return Rate"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:38
+#: .\invest\templates\invest\dashboard.html:41
 msgid "Realized PnL"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:43
+#: .\invest\templates\invest\dashboard.html:46
 msgid "Incl. Dividends"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:57
+#: .\invest\templates\invest\dashboard.html:61
 msgid "Target Monthly Income"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:68
+#: .\invest\templates\invest\dashboard.html:72
 msgid "Expected Yield"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:79
+#: .\invest\templates\invest\dashboard.html:83
 msgid "Recalculate"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:91
+#: .\invest\templates\invest\dashboard.html:95
 msgid "Required Capital"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:103
+#: .\invest\templates\invest\dashboard.html:108
 msgid "Enter symbol to check history (e.g. 0050)"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:104
+#: .\invest\templates\invest\dashboard.html:109
 msgid "Search"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:109
+#: .\invest\templates\invest\dashboard.html:114
 msgid "Expand Market Data"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:118
+#: .\invest\templates\invest\dashboard.html:124
 msgid "Holdings"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:124
+#: .\invest\templates\invest\dashboard.html:130
 msgid "Symbol"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:125
+#: .\invest\templates\invest\dashboard.html:131
 msgid "Shares"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:126
+#: .\invest\templates\invest\dashboard.html:132
 msgid "Avg Cost / Current"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:127
+#: .\invest\templates\invest\dashboard.html:133
 msgid "Market Value"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:163
+#: .\invest\templates\invest\dashboard.html:169
 msgid "Your AI Financial Advisor"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:164
+#: .\invest\templates\invest\dashboard.html:170
 msgid "Your portfolio is currently empty. Not sure where to start?"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:164
-msgid ""
-"Fill out the information below to let AI generate a customized ETF "
-"allocation plan for you!"
+#: .\invest\templates\invest\dashboard.html:170
+msgid "Fill out the information below to let AI generate a customized ETF allocation plan for you!"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:180
+#: .\invest\templates\invest\dashboard.html:186
 msgid "Generate Custom Plan"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:199
+#: .\invest\templates\invest\dashboard.html:205
 msgid "Record Transaction"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:212
+#: .\invest\templates\invest\dashboard.html:218
 msgid "Submit Record"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:221
+#: .\invest\templates\invest\dashboard.html:228
 msgid "Market Data & Analysis"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:225
+#: .\invest\templates\invest\dashboard.html:232
 msgid "Asset Allocation"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:230
+#: .\invest\templates\invest\dashboard.html:237
 msgid "No portfolio data available"
-msgstr ""
-
-#: .\invest\templates\invest\dashboard.html:238
-#, python-format
-msgid "Top 10 Gainers (%%)"
 msgstr ""
 
 #: .\invest\templates\invest\dashboard.html:245
 #, python-format
-msgid "Top 10 Losers (%%)"
+msgid "Top 10 Gainers (%%)"
 msgstr ""
 
 #: .\invest\templates\invest\dashboard.html:252
-msgid "Highest Priced Stocks Top 10"
+#, python-format
+msgid "Top 10 Losers (%%)"
 msgstr ""
 
 #: .\invest\templates\invest\dashboard.html:259
+msgid "Highest Priced Stocks Top 10"
+msgstr ""
+
+#: .\invest\templates\invest\dashboard.html:266
 msgid "Penny Stocks Top 10"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:271
+#: .\invest\templates\invest\dashboard.html:279
 msgid "Loading..."
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:300
+#: .\invest\templates\invest\dashboard.html:293
 msgid "AI is planning for you, please wait..."
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:351
-#: .\invest\templates\invest\dashboard.html:352
+#: .\invest\templates\invest\dashboard.html:294
 #, python-format
 msgid "Change (%%)"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:353
-#: .\invest\templates\invest\dashboard.html:354
+#: .\invest\templates\invest\dashboard.html:295
 msgid "Price"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:377
+#: .\invest\templates\invest\dashboard.html:296
 msgid "Loading data for"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:383
+#: .\invest\templates\invest\dashboard.html:297
 msgid "Failed to load data:"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:387
+#: .\invest\templates\invest\dashboard.html:298
 msgid "6-Month Trend"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:400
+#: .\invest\templates\invest\dashboard.html:299
 msgid "Close Price"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:428
+#: .\invest\templates\invest\dashboard.html:300
 msgid "Network Error"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:438
+#: .\invest\templates\invest\dashboard.html:301
 msgid "Please enter a stock symbol first!"
 msgstr ""
 
 #: .\notices\apps.py:7
 msgid "系統公告"
-msgstr "notices"
+msgstr "System Announcements"
 
 #: .\notices\models.py:10
 msgid "標題"
@@ -1045,7 +1420,7 @@ msgstr "Is Pinned"
 
 #: .\notices\models.py:17
 msgid "公告"
-msgstr "notices"
+msgstr "Announcement"
 
 #: .\notices\models.py:18
 msgid "公告管理"
@@ -1149,7 +1524,7 @@ msgstr "Statistics"
 
 #: .\notices\models.py:95
 msgid "日期"
-msgstr "Transaction Date"
+msgstr "Date"
 
 #: .\notices\models.py:96
 msgid "發文字號"
@@ -1167,306 +1542,321 @@ msgstr "Requester"
 msgid "發文簿紀錄"
 msgstr "Post Registry Log"
 
-#: .\notices\templates\notices\detail.html:11
+#: .\notices\templates\notices\detail.html:12
 #: .\notices\templates\notices\list.html:4
 msgid "Notice List"
 msgstr ""
 
-#: .\notices\templates\notices\detail.html:13
+#: .\notices\templates\notices\detail.html:14
 msgid "Notice Detail"
 msgstr ""
 
-#: .\notices\templates\notices\detail.html:21
-#: .\notices\templates\notices\list.html:31
+#: .\notices\templates\notices\detail.html:23
+#: .\notices\templates\notices\list.html:36
 msgid "Pinned"
 msgstr ""
 
-#: .\notices\templates\notices\detail.html:27
-#: .\notices\templates\notices\list.html:22
+#: .\notices\templates\notices\detail.html:31
+#: .\notices\templates\notices\list.html:25
 msgid "Author"
 msgstr ""
 
-#: .\notices\templates\notices\detail.html:30
+#: .\notices\templates\notices\detail.html:34
 msgid "Posted"
 msgstr ""
 
-#: .\notices\templates\notices\detail.html:34
+#: .\notices\templates\notices\detail.html:38
 msgid "Updated at"
 msgstr ""
 
-#: .\notices\templates\notices\detail.html:45
+#: .\notices\templates\notices\detail.html:51
 msgid "Back to List"
 msgstr ""
 
-#: .\notices\templates\notices\list.html:9 .\templates\base.html:31
+#: .\notices\templates\notices\list.html:11 .\templates\includes\navbar.html:26
 msgid "Notices"
 msgstr ""
 
-#: .\notices\templates\notices\list.html:11
+#: .\notices\templates\notices\list.html:14
 #, python-format
-msgid "Total %(count)s notices"
-msgstr ""
+msgid "共 %(count)s 則公告"
+msgstr "Total of %(count)s announcements"
 
-#: .\notices\templates\notices\list.html:20
+#: .\notices\templates\notices\list.html:23
 msgid "Type"
 msgstr ""
 
-#: .\notices\templates\notices\list.html:21
+#: .\notices\templates\notices\list.html:24
 msgid "Title"
 msgstr ""
 
-#: .\notices\templates\notices\list.html:23
+#: .\notices\templates\notices\list.html:26
 msgid "Date Posted"
 msgstr ""
 
-#: .\notices\templates\notices\list.html:33
+#: .\notices\templates\notices\list.html:40
 msgid "General"
 msgstr ""
 
-#: .\notices\templates\notices\list.html:47
+#: .\notices\templates\notices\list.html:64
 msgid "No notices available."
 msgstr ""
 
 #: .\templates\account\email_confirm.html:5
-#: .\templates\account\email_confirm.html:17
+#: .\templates\account\email_confirm.html:18
 msgid "Confirm Email Address"
 msgstr ""
 
-#: .\templates\account\email_confirm.html:22
+#: .\templates\account\email_confirm.html:23
 #, python-format
 msgid ""
 "\n"
-"                                請確認您要為帳號 <strong class=\"text-"
-"dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
-"                                <span class=\"badge bg-light text-primary "
-"fs-6 mt-2\">%(email)s</span>\n"
+"                                請確認您要為帳號 <strong class=\"text-dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
+"                                <span class=\"badge bg-light text-primary fs-6 mt-2 border border-primary-subtle\">%(email)s</span>\n"
 "                            "
 msgstr ""
 "\n"
-"                                Please confirm that you wish to verify the "
-"email address for account <strong class=\"text-dark\">%(user_display)s</"
-"strong>:<br>\n"
-"                                <span class=\"badge bg-light text-primary "
-"fs-6 mt-2\">%(email)s</span>\n"
+"                                Please confirm that you wish to verify the email address for account <strong class=\"text-dark\">%(user_display)s</strong>:<br>\n"
+"                                <span class=\"badge bg-light text-primary fs-6 mt-2\">%(email)s</span>\n"
 "                            "
 
-#: .\templates\account\email_confirm.html:32
-msgid "Confirm"
-msgstr ""
-
-#: .\templates\account\email_confirm.html:39
+#: .\templates\account\email_confirm.html:41
 #, python-format
 msgid ""
 "\n"
-"                                此電子郵件確認連結已過期或無效。請嘗試 <a "
-"href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
+"                                此電子郵件確認連結已過期或無效。請嘗試 <a href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
 "                            "
 msgstr ""
 "\n"
-"                                This email confirmation link has expired or "
-"is invalid. Please try <a href=\"%(email_url)s\" class=\"alert-"
-"link\">resending the confirmation email</a>.\n"
+"                                This email confirmation link has expired or is invalid. Please try <a href=\"%(email_url)s\" class=\"alert-link\">resending the confirmation email</a>.\n"
 "                            "
 
-#: .\templates\account\email_confirm.html:47 .\templates\account\logout.html:32
-#: .\templates\account\verification_sent.html:24
+#: .\templates\account\email_confirm.html:49 .\templates\account\login.html:60
+#: .\templates\account\logout.html:39 .\templates\account\signup.html:68
+#: .\templates\account\verification_sent.html:39
 msgid "Back to Home"
 msgstr ""
 
-#: .\templates\account\login.html:6 .\templates\account\login.html:14
-#: .\templates\account\login.html:38 .\templates\socialaccount\login.html:5
+#: .\templates\account\login.html:6 .\templates\account\login.html:15
+#: .\templates\account\login.html:42 .\templates\socialaccount\login.html:5
 msgid "Sign In"
 msgstr ""
 
-#: .\templates\account\login.html:18 .\templates\socialaccount\login.html:17
+#: .\templates\account\login.html:19 .\templates\socialaccount\login.html:18
 msgid "Sign in with Google"
 msgstr ""
 
-#: .\templates\account\login.html:25
+#: .\templates\account\login.html:26
 msgid "Or use Email"
 msgstr ""
 
-#: .\templates\account\login.html:44
+#: .\templates\account\login.html:50
 #, python-format
-msgid "Don't have an account? <a href=\"%(signup_url)s\">Register now</a>"
+msgid ""
+"\n"
+"                                還沒有帳號嗎？ <a href=\"%(signup_url)s\" class=\"fw-bold text-decoration-none\">立即註冊</a>\n"
+"                            "
 msgstr ""
+"\n"
+"                                Don't have an account? <a href=\"%(signup_url)s\" class=\"fw-bold text-decoration-none\">Sign Up Now</a>\n"
+"                            "
 
-#: .\templates\account\logout.html:4 .\templates\account\logout.html:29
+#: .\templates\account\logout.html:4 .\templates\account\logout.html:34
 msgid "Sign Out"
 msgstr ""
 
-#: .\templates\account\logout.html:16
+#: .\templates\account\logout.html:19
 msgid "Confirm Sign Out"
 msgstr ""
 
-#: .\templates\account\logout.html:18
-msgid "Are you sure you want to sign out from <strong>CSI Portal</strong>?"
-msgstr ""
+#: .\templates\account\logout.html:22
+msgid "您確定要登出 <strong>CSI Portal</strong> 嗎？"
+msgstr "Are you sure you want to sign out of <strong>CSI Portal</strong>?"
 
-#: .\templates\account\signup.html:6
-msgid "Signup"
-msgstr ""
-
-#: .\templates\account\signup.html:14 .\templates\account\signup.html:43
+#: .\templates\account\signup.html:6 .\templates\account\signup.html:15
+#: .\templates\account\signup.html:48
 msgid "Sign Up"
 msgstr ""
 
-#: .\templates\account\signup.html:16
-msgid ""
-"Welcome to CSI Portal, please fill in the information below to complete "
-"registration."
+#: .\templates\account\signup.html:18
+msgid "Welcome to CSI Portal, please fill in the information below to complete registration."
 msgstr ""
 
-#: .\templates\account\signup.html:21
+#: .\templates\account\signup.html:24
 msgid "Sign up quickly with Google"
 msgstr ""
 
-#: .\templates\account\signup.html:28
+#: .\templates\account\signup.html:32
 msgid "Or fill in details"
 msgstr ""
 
-#: .\templates\account\signup.html:49
+#: .\templates\account\signup.html:57
 #, python-format
-msgid "Already have an account? <a href=\"%(login_url)s\">Log in now</a>"
+msgid ""
+"\n"
+"                                已經有帳號了嗎？ <a href=\"%(login_url)s\" class=\"fw-bold text-decoration-none\">立即登入</a>\n"
+"                            "
 msgstr ""
+"\n"
+"                                Already have an account? <a href=\"%(login_url)s\" class=\"fw-bold text-decoration-none\">Login Now</a>\n"
+"                            "
 
 #: .\templates\account\verification_sent.html:5
-#: .\templates\account\verification_sent.html:16
+#: .\templates\account\verification_sent.html:20
 msgid "Verify Your Email Address"
 msgstr ""
 
-#: .\templates\account\verification_sent.html:18
-msgid "我們已向您發送了一封電子郵件，請點擊信中的連結以完成註冊。"
-msgstr ""
-"We have sent you an email. Please click the link in the message to complete "
-"your registration."
-
-#: .\templates\account\verification_sent.html:21
+#: .\templates\account\verification_sent.html:23
 msgid ""
-"If you haven't received the email, please check your spam folder or try "
-"again later."
+"\n"
+"                            我們已向您發送了一封電子郵件，請點擊信中的連結以完成註冊。\n"
+"                        "
+msgstr ""
+"\n"
+"                            We have sent you an email. Please click the link in the message to complete your registration.\n"
+"                        "
+
+#: .\templates\account\verification_sent.html:32
+msgid "If you haven't received the email, please check your spam folder or try again later."
 msgstr ""
 
-#: .\templates\base.html:28 .\templates\index.html:4
-msgid "Home"
+#: .\templates\account\verification_sent.html:49
+msgid "Need help?"
 msgstr ""
 
-#: .\templates\base.html:52
-msgid "Investment"
+#: .\templates\account\verification_sent.html:49
+msgid "Contact Support"
 msgstr ""
 
-#: .\templates\base.html:60
-msgid "Tester Zone"
-msgstr ""
-
-#: .\templates\base.html:63
-msgid "Test Management System"
-msgstr ""
-
-#: .\templates\base.html:71
-msgid "No tools available"
-msgstr ""
-
-#: .\templates\base.html:104
-msgid "Admin"
-msgstr ""
-
-#: .\templates\base.html:124
-msgid "Profile"
-msgstr ""
-
-#: .\templates\base.html:129
-msgid "Logout"
-msgstr ""
-
-#: .\templates\base.html:136
-msgid "Login"
-msgstr ""
-
-#: .\templates\base.html:139
-msgid "Register"
-msgstr ""
-
-#: .\templates\base.html:154
-msgid "All Rights Reserved."
-msgstr ""
-
-#: .\templates\base.html:158
-msgid "Daily Visits"
-msgstr ""
-
-#: .\templates\base.html:162
-msgid "Total Visits"
-msgstr ""
-
-#: .\templates\base.html:321
+#: .\templates\base.html:39
 msgid "CSI Smart Assistant"
 msgstr ""
 
-#: .\templates\base.html:325
+#: .\templates\base.html:43
 msgid "Hello! I am the CSI Portal assistant, how can I help you today?"
 msgstr ""
 
-#: .\templates\base.html:328
+#: .\templates\base.html:46
 msgid "Type a message..."
 msgstr ""
 
-#: .\templates\index.html:156
+#: .\templates\base.html:55
+msgid "Sorry, the system cannot respond at the moment."
+msgstr ""
+
+#: .\templates\base.html:56
+msgid "Connection failed, please check your network."
+msgstr ""
+
+#: .\templates\includes\footer.html:7
+msgid "All Rights Reserved."
+msgstr ""
+
+#: .\templates\includes\footer.html:12
+msgid "Daily Visits"
+msgstr ""
+
+#: .\templates\includes\footer.html:16
+msgid "Total Visits"
+msgstr ""
+
+#: .\templates\includes\navbar.html:21 .\templates\index.html:4
+msgid "Home"
+msgstr ""
+
+#: .\templates\includes\navbar.html:48
+msgid "Investment"
+msgstr ""
+
+#: .\templates\includes\navbar.html:56
+msgid "Tester Zone"
+msgstr ""
+
+#: .\templates\includes\navbar.html:59
+msgid "Test Management System"
+msgstr ""
+
+#: .\templates\includes\navbar.html:67
+msgid "No tools available"
+msgstr ""
+
+#: .\templates\includes\navbar.html:100
+msgid "Admin"
+msgstr ""
+
+#: .\templates\includes\navbar.html:120
+msgid "Profile"
+msgstr ""
+
+#: .\templates\includes\navbar.html:125
+msgid "Logout"
+msgstr ""
+
+#: .\templates\includes\navbar.html:132
+msgid "Login"
+msgstr ""
+
+#: .\templates\includes\navbar.html:135
+msgid "Register"
+msgstr ""
+
+#: .\templates\index.html:21
 msgid "Welcome to CSI Server Portal"
 msgstr ""
 
-#: .\templates\index.html:158
+#: .\templates\index.html:24
 msgid "This is a system built with Django 6.0 and Google OAuth."
 msgstr ""
 
-#: .\templates\index.html:167
+#: .\templates\index.html:33
 #, python-format
 msgid ""
 "\n"
-"                            Hello, <strong class=\"text-success\">%(name)s</"
-"strong>! Authorization Granted.\n"
+"                            Hello, <strong class=\"text-success\">%(name)s</strong>! Authorization Granted.\n"
 "                        "
 msgstr ""
 
-#: .\templates\index.html:177
+#: .\templates\index.html:43
 msgid "Logout Now"
 msgstr ""
 
-#: .\templates\index.html:182
+#: .\templates\index.html:49
 msgid "Please log in first to use full features."
 msgstr ""
 
-#: .\templates\index.html:184
+#: .\index.html:52
 msgid "Go to Login Page"
 msgstr ""
 
-#: .\templates\socialaccount\login.html:20
+#: .\templates\socialaccount\login.html:21
 msgid ""
 "\n"
-"                        您即將使用 Google 帳號進行驗證。系統將導向 Google 授"
-"權頁面，請確認是否繼續？\n"
+"                        您即將使用 Google 帳號進行驗證。系統將導向 Google 授權頁面，請確認是否繼續？\n"
 "                        "
 msgstr ""
 "\n"
-"                        You are about to authenticate using your Google "
-"account. You will be redirected to the Google authorization page. Continue?\n"
+"                        You are about to authenticate using your Google account. You will be redirected to the Google authorization page. Continue?\n"
 "                        "
 
-#: .\templates\socialaccount\login.html:29
+#: .\templates\socialaccount\login.html:30
 msgid "Continue"
 msgstr ""
 
-#: .\templates\socialaccount\login.html:32
+#: .\templates\socialaccount\login.html:34
 msgid "Cancel and return to login page"
+msgstr ""
+
+#: .\templates\socialaccount\login.html:42
+msgid "Your connection is encrypted and secure."
 msgstr ""
 
 #: .\tigf\apps.py:7
 msgid "安定基金"
-msgstr "tigf"
+msgstr "TIGF"
 
 #: .\users\apps.py:7
 msgid "使用者管理"
-msgstr "users"
+msgstr "User Management"
 
 #: .\users\models.py:17
 msgid "自定義大頭貼"
@@ -1491,3 +1881,27 @@ msgstr "User Profile"
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr ""
+
+#~ msgid "點數儲值中心"
+#~ msgstr "Point Recharge Center"
+
+#~ msgid "選擇最適合您的儲值方案，享受專屬紅利回饋與購物體驗。"
+#~ msgstr ""
+#~ "Choose the best recharge plan for you and enjoy exclusive bonus rewards "
+#~ "and shopping experiences."
+
+#~ msgid "目前暫無可用的儲值方案"
+#~ msgstr "No recharge plans available at the moment."
+
+#~ msgid "CSI 點數商城"
+#~ msgstr "CSI Point Shop"
+
+#~ msgid "使用您的點數兌換豐富商品與專屬權益"
+#~ msgstr ""
+#~ "Use your points to redeem a variety of products and exclusive benefits."
+
+#~ msgid "我的資產總覽"
+#~ msgstr "My Wallet Overview"
+
+#~ msgid "商城目前準備中，敬請期待！"
+#~ msgstr "The shop is currently under preparation, please stay tuned!"

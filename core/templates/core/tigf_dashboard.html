@@ -1,69 +1,90 @@
 {% extends "base.html" %}
+{% load i18n static %}
+
+{% block head_title %}{% trans "Data Verification Dashboard" %} - CSI Portal{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
+    {# 檔案上傳區域 #}
     <div class="row g-3 mb-2">
         <div class="col-md-4">
             <div class="card border-dashed p-3 text-center bg-light">
-                <h6 class="fw-bold text-primary">申報檔 (Single/Zip)</h6>
+                <h6 class="fw-bold text-primary">{% trans "Report File" %} (Single/Zip)</h6>
                 <input type="file" name="files_report" class="form-control form-control-sm" multiple>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-dashed p-3 text-center bg-light">
-                <h6 class="fw-bold text-success">範本檔 (Single/Zip)</h6>
+                <h6 class="fw-bold text-success">{% trans "Template File" %} (Single/Zip)</h6>
                 <input type="file" name="files_template" class="form-control form-control-sm" multiple>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-dashed p-3 text-center bg-light">
-                <h6 class="fw-bold text-info">資料庫檔 (Single/Zip)</h6>
+                <h6 class="fw-bold text-info">{% trans "Database File" %} (Single/Zip)</h6>
                 <input type="file" name="files_db" class="form-control form-control-sm" multiple>
             </div>
         </div>
     </div>
 
+    {# 錯誤訊息提示區 #}
     <div id="upload-error-msg" class="text-danger small fw-bold mb-3" style="display: none;">
-        <i class="fas fa-exclamation-triangle me-1"></i> 
+        <i class="fas fa-exclamation-triangle me-1"></i>
         <span id="error-text"></span>
     </div>
 
+    {# 主要內容卡片與頁籤 #}
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white">
             <ul class="nav nav-tabs card-header-tabs" id="mainTab" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#check-tab">對應檢查</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#result-tab">比對結果</button></li>
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#check-tab">{% trans "Mapping Check" %}</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#result-tab">{% trans "Comparison Results" %}</button>
+                </li>
             </ul>
         </div>
         <div class="card-body p-0">
             <div class="row g-0">
-                <div class="col-md-3 border-end bg-light" style="height: 500px; overflow-y: auto;">
+                {# 左側編號列表 #}
+                <div class="col-md-3 border-end bg-light" style="min-height: 500px; max-height: 700px; overflow-y: auto;">
                     <div class="list-group list-group-flush" id="id-list">
                         {% for fid, status in status_map.items %}
                         <a href="#" class="list-group-item list-group-item-action small">
-                            {{ fid }} 
+                            {{ fid }}
                             {% if status.report and status.template and status.db %}
                                 <i class="fas fa-check-circle text-success float-end"></i>
                             {% else %}
                                 <i class="fas fa-exclamation-triangle text-warning float-end"></i>
                             {% endif %}
                         </a>
+                        {% empty %}
+                        <div class="p-3 text-muted small text-center">{% trans "No files detected" %}</div>
                         {% endfor %}
                     </div>
                 </div>
 
+                {# 右側內容區塊 #}
                 <div class="col-md-9 tab-content">
                     <div class="tab-pane fade show active p-4" id="check-tab">
-                        <table class="table table-sm align-middle"> <thead class="table-light">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <th class="text-center" style="width: 20%;">編號</th>
-                                    <th class="text-center" style="width: 26%;">申報</th> <th class="text-center" style="width: 26%;">範本</th> <th class="text-center" style="width: 26%;">資料庫</th> </tr>
+                                    <th class="text-center" style="width: 20%;">{% trans "ID" %}</th>
+                                    <th class="text-center" style="width: 26%;">{% trans "Report" %}</th>
+                                    <th class="text-center" style="width: 26%;">{% trans "Template" %}</th>
+                                    <th class="text-center" style="width: 26%;">{% trans "Database" %}</th>
+                                </tr>
                             </thead>
                             <tbody>
-                                </tbody>
+                                {# 初始內容由後端渲染或 JS 更新 #}
+                            </tbody>
                         </table>
                         <div class="text-end mt-4">
-                            <button id="btn-compare" class="btn btn-primary" disabled>開始比對資料</button>
+                            <button id="btn-compare" class="btn btn-primary" {% if not all_matched %}disabled{% endif %}>
+                                {% trans "Start Data Comparison" %}
+                            </button>
                         </div>
                     </div>
 
@@ -71,9 +92,11 @@
                         <div class="list-group">
                             {% for fid, diff_count in diff_results.items %}
                             <div class="list-group-item d-flex justify-content-between align-items-center">
-                                編號 {{ fid }} 的差異數：<span class="badge bg-danger rounded-pill">{{ diff_count }}</span>
-                                <a href="/download-csv/{{ fid }}/" class="btn btn-sm btn-outline-dark">下載 CSV</a>
+                                {% blocktrans with fid=fid count=diff_count %}編號 {{ fid }} 的差異數：{{ count }}{% endblocktrans %}
+                                <a href="/download-csv/{{ fid }}/" class="btn btn-sm btn-outline-dark">{% trans "Download CSV" %}</a>
                             </div>
+                            {% empty %}
+                            <div class="p-4 text-center text-muted">{% trans "No comparison data" %}</div>
                             {% endfor %}
                         </div>
                     </div>
@@ -83,207 +106,29 @@
     </div>
 </div>
 
+{# 傳遞配置與翻譯至外部 JS #}
 <script>
-    // JS 檢查：如果所有編號的 report/template/db 都是 True，則開啟比對按鈕
-    // 這裡可以透過後端傳入一個 flag 來判斷
-    const allMatched = {{ all_matched|yesno:"true,false" }};
-    if (allMatched) {
-        document.getElementById('btn-compare').disabled = false;
-    }
+    const VERIFY_CONFIG = {
+        csrfToken: "{{ csrf_token }}"
+    };
 
-    // 在 tigf_dashboard.html 的 <script> 中
-    async function uploadAndRefresh() {
-        console.log("開始上傳...");
-        const formData = new FormData();
-        formData.append('action', 'check'); // 強制指定為 check 動作
-        const filesReport = document.querySelector('input[name="files_report"]').files;
-        const filesTemplate = document.querySelector('input[name="files_template"]').files;
-        const filesDb = document.querySelector('input[name="files_db"]').files;
-
-        if (filesReport.length === 0 && filesTemplate.length === 0 && filesDb.length === 0) return;
-
-        for (let f of filesReport) formData.append('files_report', f);
-        for (let f of filesTemplate) formData.append('files_template', f);
-        for (let f of filesDb) formData.append('files_db', f);
-
-        try {
-            const response = await fetch("", {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest", // 讓 Django 知道這是 AJAX
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            });
-
-            // 如果後端傳回的是 HTML 而不是 JSON，這裡會報錯並被 catch
-            const data = await response.json();
-            console.log("成功解析 JSON:", data);
-            updateUI(data.status_map, data.all_matched, data.errors); // 確保這裡有傳 errors
-        } catch (error) {
-            console.error("解析失敗，請確認後端是否回傳 JsonResponse:", error);
-        }
-    }
-
-    function updateUI(statusMap, allMatched, errors) {
-        const idList = document.getElementById('id-list');
-        const checkTableBody = document.querySelector('#check-tab table tbody');
-        const compareBtn = document.getElementById('btn-compare');
-        const errorMsgContainer = document.getElementById('upload-error-msg');
-        const errorText = document.getElementById('error-text');
-        const checkIcon = '<i class="fas fa-check-square text-success fs-5"></i>';
-        const crossIcon = '<i class="fas fa-window-close text-danger fs-5"></i>';
-
-        // 處理錯誤訊息
-        if (errors && errors.length > 0) {
-            errorText.innerText = "上傳錯誤：" + errors.join(', ');
-            errorMsgContainer.style.display = 'block';
-        } else {
-            errorMsgContainer.style.display = 'none';
-        }
-
-        idList.innerHTML = '';
-        checkTableBody.innerHTML = '';
-
-        const companies = Object.entries(statusMap);
-        if (companies.length === 0) {
-            idList.innerHTML = '<div class="p-3 text-muted small text-center">尚未偵測到檔案</div>';
-        } else {
-            // 使用 Bootstrap Accordion 產生左側選單
-            let accordionHtml = '<div class="accordion accordion-flush" id="companyAccordion">';
-            let tableHtml = '';
-
-            companies.forEach(([cno, fids], index) => {
-                const isFirst = index === 0;
-                let companyAllComplete = true;
-                let reportsHtml = '<div class="list-group list-group-flush">';
-                
-                Object.entries(fids).forEach(([fid, status]) => {
-                    const isComplete = status.report && status.template && status.db;
-                    if (!isComplete) companyAllComplete = false;
-                    
-                    const icon = isComplete 
-                        ? '<i class="fas fa-check-circle text-success float-end mt-1"></i>' 
-                        : '<i class="fas fa-exclamation-triangle text-warning float-end mt-1"></i>';
-                    
-                    reportsHtml += `<div class="list-group-item small ps-4 bg-light">${fid} 報表 ${icon}</div>`;
-                    
-                    // 表格內容 (加入公司編號)
-                    tableHtml += `
-                    <tr>
-                        <td class="ps-3"><span class="badge bg-secondary">${cno}</span> ${fid}</td>
-                        <td class="text-center">${status.report ? checkIcon : crossIcon}</td>
-                        <td class="text-center">${status.template ? checkIcon : crossIcon}</td>
-                        <td class="text-center">${status.db ? checkIcon : crossIcon}</td>
-                    </tr>`;
-                });
-                reportsHtml += '</div>';
-
-                const headerIcon = companyAllComplete ? '<i class="fas fa-check text-success me-2"></i>' : '<i class="fas fa-exclamation text-warning me-2"></i>';
-
-                accordionHtml += `
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="heading-${cno}">
-                        <button class="accordion-button ${isFirst ? '' : 'collapsed'} py-2 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${cno}">
-                            ${headerIcon} 公司: ${cno}
-                        </button>
-                    </h2>
-                    <div id="collapse-${cno}" class="accordion-collapse collapse ${isFirst ? 'show' : ''}" data-bs-parent="#companyAccordion">
-                        <div class="accordion-body p-0">${reportsHtml}</div>
-                    </div>
-                </div>`;
-            });
-            accordionHtml += '</div>';
-            
-            idList.innerHTML = accordionHtml;
-            checkTableBody.innerHTML = tableHtml;
-        }
-
-        compareBtn.disabled = !allMatched;
-        if (allMatched) {
-            compareBtn.classList.replace('btn-primary', 'btn-success');
-        } else {
-            compareBtn.classList.replace('btn-success', 'btn-primary');
-        }
-    }
-
-    // 重新選取檔案即觸發 (支援重新上傳)
-    document.querySelectorAll('input[type="file"]').forEach(input => {
-        input.addEventListener('change', uploadAndRefresh);
-    });
-
-    // 綁定比對按鈕
-    document.getElementById('btn-compare').addEventListener('click', async function() {
-        const btn = this;
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 比對中...';
-
-        const formData = new FormData();
-        formData.append('action', 'compare'); // 告訴後端我要執行比對
-        
-        // 再次抓取所有檔案 (AJAX 是無狀態的，所以比對時需再傳一次或從後端暫存讀取)
-        document.querySelectorAll('input[type="file"]').forEach(input => {
-            for (let file of input.files) { formData.append(input.name, file); }
-        });
-
-        try {
-            const response = await fetch("", {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            });
-
-            const data = await response.json();
-            if (data.action === "compare_results") {
-                renderResults(data.diff_results);
-                // 自動切換到第二個頁籤
-                const resultTab = new bootstrap.Tab(document.querySelector('button[data-bs-target="#result-tab"]'));
-                resultTab.show();
-            }
-        } catch (error) {
-            alert("比對執行失敗，請重新上傳改過的檔案");
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '開始比對資料';
-        }
-    });
-
-    function renderResults(diffResults) {
-        const resultContainer = document.querySelector('#result-tab .list-group');
-        resultContainer.innerHTML = ''; 
-
-        if (diffResults.length === 0) {
-            resultContainer.innerHTML = '<div class="p-4 text-center text-muted">無比對資料</div>';
-            return;
-        }
-
-        diffResults.forEach(res => {
-            // 下載網址加上了 res.cno
-            const downloadBtn = res.diff_count > 0 
-                ? `<a href="/download-diff-csv/${res.cno}/${res.fid}/" target="_blank" class="btn btn-sm btn-outline-danger">
-                    <i class="fas fa-download me-1"></i>下載差異清單
-                </a>`
-                : `<span class="text-success small"><i class="fas fa-check-double me-1"></i>資料一致</span>`;
-
-            resultContainer.innerHTML += `
-                <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                    <div>
-                        <span class="fw-bold ${res.diff_count > 0 ? 'text-danger' : 'text-dark'}">公司 ${res.cno} - 報表 ${res.fid}</span>
-                        <div class="small text-muted">
-                            ${res.diff_count > 0 ? `偵測到 ${res.diff_count} 處儲存格差異` : '內容與資料庫完全吻合'}
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <span class="badge ${res.diff_count > 0 ? 'bg-danger' : 'bg-success'} me-3">
-                            ${res.diff_count > 0 ? '有差異' : '完全符合'}
-                        </span>
-                        ${downloadBtn}
-                    </div>
-                </div>`;
-        });
-    }
+    const VERIFY_I18N = {
+        uploadError: "{% trans 'Upload Error' %}",
+        noFilesDetected: "{% trans 'No files detected' %}",
+        reportText: "{% trans 'Report' %}",
+        companyText: "{% trans 'Company' %}",
+        comparing: "{% trans 'Comparing...' %}",
+        compareFailed: "{% trans 'Comparison failed, please re-upload modified files' %}",
+        btnStartCompare: "{% trans 'Start Data Comparison' %}",
+        noComparisonData: "{% trans 'No comparison data' %}",
+        downloadDiff: "{% trans 'Download Difference List' %}",
+        dataConsistent: "{% trans 'Data Consistent' %}",
+        detectedDiff: "{% trans 'Detected {count} cell differences' %}",
+        consistentWithDb: "{% trans 'Content matches database perfectly' %}",
+        hasDiff: "{% trans 'Has Differences' %}",
+        fullyMatched: "{% trans 'Fully Matched' %}"
+    };
 </script>
+
+<script src="{% static 'js/tigf_dashboard.js' %}"></script>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 {% get_current_language as LANGUAGE_CODE %}
 
 <!DOCTYPE html>
@@ -6,310 +6,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
     <title>{% block head_title %}CSI Portal{% endblock %}</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    {% block extra_css %}{% endblock %}
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
 <div class="bg-animation-container" id="bg-animation"></div>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-    <div class="container">
-        <a class="navbar-brand" href="/">CSI Server</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">{% trans "Home" %}</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if 'notices' in request.path %}active{% endif %}" href="{% url 'notices:list' %}">{% trans "Notices" %}</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if 'lucky-draw' in request.path %}active{% endif %}" href="{% url 'lucky_draw' %}">
-                        <i class="fas fa-gift me-1 text-warning"></i>{% trans "Lucky Draw" %}
-                    </a>
-                </li>
-
-                {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link {% if 'finance/recharge' in request.path %}active{% endif %}" href="{% url 'finance:recharge_store' %}">
-                        <i class="fas fa-gem me-1 text-info"></i>{% trans "Point Recharge" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if 'finance/shop' in request.path %}active{% endif %}" href="{% url 'finance:shop' %}">
-                        <i class="fas fa-store me-1 text-success"></i>{% trans "Point Shop" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if 'invest' in request.path %}active{% endif %}" href="{% url 'invest:dashboard' %}">
-                        <i class="fas fa-chart-line me-1 text-warning"></i>{% trans "Investment" %}
-                    </a>
-                </li>
-                {% endif %}
-
-                {% if user.is_staff or user.is_superuser %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-info fw-bold" href="#" id="testerDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-vial me-1"></i>{% trans "Tester Zone" %}
-                    </a>
-                    <ul class="dropdown-menu shadow">
-                        <li><h6 class="dropdown-header">{% trans "Test Management System" %}</h6></li>
-                        {% for tool in external_tools %}
-                        <li>
-                            <a class="dropdown-item" href="{{ tool.url }}" target="_blank" rel="noopener noreferrer">
-                                <i class="{{ tool.icon_class }} me-2"></i>{{ tool.title }}
-                            </a>
-                        </li>
-                        {% empty %}
-                        <li><a class="dropdown-item disabled">{% trans "No tools available" %}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                {% endif %}
-            </ul>
-
-            <ul class="navbar-nav ms-auto align-items-center">
-                {# --- 語系切換選單 --- #}
-                <li class="nav-item me-lg-3 mb-2 mb-lg-0">
-                    <form action="{% url 'set_language' %}" method="post" class="d-flex align-items-center">
-                        {% csrf_token %}
-                        <input name="next" type="hidden" value="{{ request.get_full_path }}">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-secondary border-secondary text-white">
-                                <i class="fas fa-globe small"></i>
-                            </span>
-                            <select name="language" onchange="this.form.submit()" class="form-select form-select-sm bg-dark text-white border-secondary shadow-none" style="width: auto; cursor: pointer;">
-                                {% get_available_languages as LANGUAGES %}
-                                {% get_language_info_list for LANGUAGES as languages %}
-                                {% for language in languages %}
-                                    <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
-                                        {{ language.name_local }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </form>
-                </li>
-
-                {% if user.is_superuser %}
-                <li class="nav-item">
-                    <a class="nav-link text-warning" href="/admin/" target="_blank">
-                        <i class="fas fa-cog me-1"></i>{% trans "Admin" %}
-                    </a>
-                </li>
-                {% endif %}
-                
-                {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            {% load socialaccount %}
-                            {% get_social_accounts user as accounts %}
-                            {% if user.profile.avatar %}
-                                <img src="{{ user.profile.avatar.url }}" width="30" height="30" class="rounded-circle me-2 shadow-sm" style="object-fit: cover; border: 1px solid rgba(255,255,255,0.2);">
-                            {% elif accounts.google %}
-                                <img src="{{ accounts.google.0.get_avatar_url }}" width="30" height="30" class="rounded-circle me-2 shadow-sm" style="object-fit: cover;">
-                            {% else %}
-                                <i class="fas fa-user-circle me-2" style="font-size: 1.2rem;"></i>
-                            {% endif %}
-                            <span class="d-none d-lg-inline">{{ user.first_name|default:user.username }}</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/accounts/profile/">{% trans "Profile" %}</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form method="post" action="{% url 'account_logout' %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item text-danger">{% trans "Logout" %}</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'account_login' %}">{% trans "Login" %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-lg-2" href="{% url 'account_signup' %}">{% trans "Register" %}</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</nav>
+{% include "includes/navbar.html" %}
 
 <main class="py-4">
     {% block content %}{% endblock %}
 </main>
 
-<footer class="bg-dark text-white-50 py-3 mt-5 border-top border-secondary">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="small">
-            &copy; {% now "Y" %} CSI Portal. {% trans "All Rights Reserved." %}
-        </div>
-        <div class="stats-box small">
-            <span class="me-3">
-                <i class="fas fa-user-clock me-1 text-info"></i>{% trans "Daily Visits" %}：
-                <strong class="text-white">{{ today_count }}</strong>
-            </span>
-            <span>
-                <i class="fas fa-globe me-1 text-success"></i>{% trans "Total Visits" %}：
-                <strong class="text-white">{{ total_count }}</strong>
-            </span>
-        </div>
-    </div>
-</footer>
-
-{# --- CSS 設定 --- #}
-<style>
-    /* 動態背景容器 */
-    .bg-animation-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none; /* 重要：讓滑鼠可以穿透，不影響點擊按鈕 */
-        z-index: -1; /* 放在所有內容後方 */
-        overflow: hidden;
-        background: linear-gradient(to bottom, #f8f9fa, #e9ecef); /* 給背景一點點漸層質感 */
-    }
-
-    /* 楓葉/雪花粒子 */
-    .particle {
-        position: absolute;
-        top: -50px;
-        color: rgba(210, 105, 30, 0.3); /* 楓葉色，透明度低才不會干擾閱讀 */
-        user-select: none;
-        font-size: 24px;
-        animation: fall linear infinite;
-    }
-
-    /* 下落動畫 */
-    @keyframes fall {
-        0% {
-            transform: translateY(0) rotate(0deg) translateX(0);
-            opacity: 0;
-        }
-        10% {
-            opacity: 0.8;
-        }
-        90% {
-            opacity: 0.8;
-        }
-        100% {
-            transform: translateY(110vh) rotate(720deg) translateX(100px);
-            opacity: 0;
-        }
-    }
-
-    /* 懸浮按鈕樣式 */
-    .ai-chat-launcher {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background-color: #0d6efd;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 1050;
-        transition: transform 0.2s;
-    }
-    .ai-chat-launcher:hover { transform: scale(1.1); }
-
-    /* 對話視窗本體 */
-    #ai-chat-container {
-        position: fixed;
-        bottom: 100px;
-        right: 30px;
-        width: 350px;
-        max-height: 500px;
-        background: white;
-        border-radius: 12px;
-        display: none; /* 初始隱藏 */
-        flex-direction: column;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        z-index: 1050;
-        overflow: hidden;
-    }
-
-    .chat-header { background: #212529; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
-    .chat-body { flex: 1; padding: 15px; overflow-y: auto; height: 350px; background: #f8f9fa; }
-    .chat-footer { padding: 10px; border-top: 1px solid #dee2e6; display: flex; gap: 8px; }
-
-    /* 對話氣泡 */
-    .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; max-width: 85%; font-size: 14px; }
-    .msg-user { background: #0d6efd; color: white; align-self: flex-end; margin-left: auto; }
-    .msg-ai { background: #e9ecef; color: #212529; align-self: flex-start; line-height: 1.6; }
-    /* 修正 Markdown 產生的列表邊距 */
-    .msg-ai ul, .msg-ai ol {
-        padding-left: 20px;
-        margin-bottom: 0;
-    }
-    .msg-ai p {
-        margin-bottom: 8px; /* 段落間距 */
-    }
-
-    /* 讓整個頁面至少佔滿螢幕高度 */
-    html, body {
-        height: 100%;
-        margin: 0;
-    }
-
-    body {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh; /* 關鍵：確保 body 至少跟視窗一樣高 */
-    }
-
-    /* 讓中間的內容區自動「撐開」剩下的空間 */
-    main {
-        flex: 1 0 auto; /* 關鍵：這會把 footer 推到底部 */
-    }
-
-    /* 確保 Footer 不會被壓縮 */
-    footer {
-        flex-shrink: 0;
-    }
-
-    /* AI 載入中 (打字中) 動畫 */
-    .typing-loader {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 10px 15px;
-    }
-
-    .typing-loader span {
-        width: 8px;
-        height: 8px;
-        background-color: #6c757d;
-        border-radius: 50%;
-        display: inline-block;
-        animation: typing-bounce 1.4s infinite ease-in-out both;
-    }
-
-    .typing-loader span:nth-child(1) { animation-delay: -0.32s; }
-    .typing-loader span:nth-child(2) { animation-delay: -0.16s; }
-
-    @keyframes typing-bounce {
-        0%, 80%, 100% { transform: scale(0); }
-        40% { transform: scale(1.0); }
-    }
-</style>
+{% include "includes/footer.html" %}
 
 {# --- AI 客服介面 --- #}
 <div class="ai-chat-launcher" onclick="toggleAIChat()">
@@ -331,102 +49,19 @@
 </div>
 
 <script>
-    function toggleAIChat() {
-        const container = document.getElementById('ai-chat-container');
-        container.style.display = (container.style.display === 'none' || container.style.display === '') ? 'flex' : 'none';
-    }
-
-    function handleChatKey(e) {
-        if (e.key === 'Enter') sendToAI();
-    }
-
-    async function sendToAI() {
-        const input = document.getElementById('ai-user-input');
-        const chatBody = document.getElementById('ai-chat-body');
-        const message = input.value.trim();
-        
-        if (!message) return;
-
-        // 使用者訊息顯示
-        chatBody.innerHTML += `<div class="msg msg-user">${message}</div>`;
-        input.value = '';
-        chatBody.scrollTop = chatBody.scrollHeight;
-
-        // 插入「載入中」氣泡
-        const loadingId = 'ai-loading-' + Date.now();
-        const loadingHtml = `
-            <div id="${loadingId}" class="msg msg-ai">
-                <div class="typing-loader">
-                    <span></span><span></span><span></span>
-                </div>
-            </div>
-        `;
-        chatBody.insertAdjacentHTML('beforeend', loadingHtml);
-        chatBody.scrollTop = chatBody.scrollHeight;
-
-        try {
-            // 這裡連動你之前寫的 portal_ai_bot 視圖網址
-            const response = await fetch('/ai-chat/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: `message=${encodeURIComponent(message)}`
-            });
-            const data = await response.json();
-
-            // 移除載入中氣泡
-            const loadingElement = document.getElementById(loadingId);
-            if (loadingElement) loadingElement.remove();
-
-            // AI 回應顯示
-            if (data.reply) {
-                // 使用 marked.parse 將 Markdown 轉為 HTML
-                const formattedReply = marked.parse(data.reply);
-                chatBody.innerHTML += `<div class="msg msg-ai">${formattedReply}</div>`;
-            } else {
-                chatBody.innerHTML += `<div class="msg msg-ai text-danger">抱歉，系統暫時無法回應。</div>`;
-            }
-        } catch (error) {
-            chatBody.innerHTML += `<div class="msg msg-ai text-danger">連線失敗，請檢查網路。</div>`;
+    const CSI_CONFIG = {
+        csrfToken: '{{ csrf_token }}',
+        trans: {
+            systemError: '{% trans "Sorry, the system cannot respond at the moment." %}',
+            netError: '{% trans "Connection failed, please check your network." %}'
         }
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
+    };
 </script>
-{# --- 智能客服對話介面結束 --- #}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    function createParticles() {
-        const container = document.getElementById('bg-animation');
-        const particleCount = 20; // 粒子數量，20-30 個最有質感且不卡頓
-        const icons = ['🍁', '🍂', '❄', '❅'];
+<script src="{% static 'js/base.js' %}"></script>
 
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.innerText = icons[Math.floor(Math.random() * icons.length)];
-            
-            // 隨機初始位置
-            particle.style.left = Math.random() * 100 + 'vw';
-            
-            // 隨機動畫時長 (10s ~ 25s)
-            const duration = Math.random() * 15 + 10;
-            particle.style.animationDuration = duration + 's';
-            
-            // 隨機延遲時間，讓它們不要同時掉下來
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            
-            // 隨機大小
-            particle.style.fontSize = (Math.random() * 10 + 15) + 'px';
+{% block extra_js %}{% endblock %}
 
-            container.appendChild(particle);
-        }
-    }
-
-    // 執行產生
-    createParticles();
-</script>
 </body>
 </html>

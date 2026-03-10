@@ -1,175 +1,41 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block head_title %}{% trans "Home" %} - CSI Portal{% endblock %}
 
+{# --- 載入首頁專屬 CSS --- #}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
 {% block content %}
-<style>
-    /* 科技感深色背景與動態電流 */
-    .cyber-wrapper {
-        position: relative;
-        min-height: 70vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        /* 更深邃的背景徑向漸層 */
-        background: radial-gradient(circle at center, #0a1120 0%, #010309 100%);
-        overflow: hidden;
-        border-radius: 1.5rem;
-        margin-top: 2rem;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-    }
-
-    /* 基底靜態網格 */
-    .cyber-grid {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-image: 
-            linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
-        background-size: 40px 40px; /* 稍微放大網格 */
-        background-position: center;
-        z-index: 1;
-        /* 移除了網格移動動畫 gridMove */
-    }
-
-    /* 隨機電流效果層 */
-    .cyber-grid::after {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        z-index: 2;
-        /* 模擬不規則電流的基礎紋理 */
-        background-image: 
-            linear-gradient(90deg, transparent 50%, rgba(56, 189, 248, 0.1) 50.5%, transparent 51%),
-            linear-gradient(0deg, transparent 50%, rgba(56, 189, 248, 0.1) 50.5%, transparent 51%),
-            repeating-linear-gradient(90deg, rgba(56, 189, 248, 0.2) 0, rgba(56, 189, 248, 0.2) 1px, transparent 1px, transparent 40px),
-            repeating-linear-gradient(0deg, rgba(56, 189, 248, 0.2) 0, rgba(56, 189, 248, 0.2) 1px, transparent 1px, transparent 40px);
-        background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
-        background-position: center;
-        
-        /* 使用 CSS Mask 結合背景移動來模擬電流流動 */
-        -webkit-mask-image: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 10%, transparent 40%);
-        mask-image: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 10%, transparent 40%);
-        -webkit-mask-size: 300% 300%;
-        mask-size: 300% 300%;
-        -webkit-mask-repeat: no-repeat;
-        mask-repeat: no-repeat;
-        
-        /* 電流隨機閃爍與移動動畫 */
-        animation: currentFlow 8s ease-in-out infinite, sparkPulse 0.5s ease-in-out infinite alternate;
-        opacity: 0;
-    }
-
-    /* 玻璃擬物化主面板 (Glassmorphism) */
-    .glass-panel {
-        position: relative;
-        z-index: 10; /* 確保在電流層上方 */
-        background: rgba(17, 24, 39, 0.5); /* 稍微降低不透明度 */
-        backdrop-filter: blur(20px); /* 增加模糊度 */
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(56, 189, 248, 0.2);
-        border-top: 1px solid rgba(56, 189, 248, 0.4);
-        border-bottom: 1px solid rgba(16, 185, 129, 0.4); /* 底部透出點綠光 */
-        border-radius: 1rem;
-        padding: 4rem 3rem;
-        text-align: center;
-        max-width: 800px;
-        width: 90%;
-        /* 移除了上下晃動動畫 float */
-        box-shadow: 0 0 60px rgba(56, 189, 248, 0.15);
-        transition: box-shadow 0.3s ease;
-    }
-    
-    .glass-panel:hover {
-        box-shadow: 0 0 80px rgba(56, 189, 248, 0.25);
-    }
-
-    /* 霓虹發光標題 */
-    .neon-text {
-        color: #fff;
-        text-shadow: 
-            0 0 5px #fff,
-            0 0 10px #fff,
-            0 0 20px #0ea5e9,
-            0 0 40px #0ea5e9,
-            0 0 80px rgba(14, 165, 233, 0.5); /* 增加擴散光暈 */
-        font-weight: 800;
-        letter-spacing: 2px;
-    }
-
-    /* 科技感按鈕 */
-    .btn-cyber {
-        background: transparent;
-        color: #38bdf8;
-        border: 2px solid #38bdf8;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-weight: bold;
-        box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.1);
-    }
-    .btn-cyber:hover {
-        background: #38bdf8;
-        color: #030712;
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.8);
-        transform: translateY(-3px) scale(1.02);
-    }
-
-    /* 動畫定義 */
-    
-    /* 電流移動動畫 (透過移動遮罩位置) */
-    @keyframes currentFlow {
-        0% { -webkit-mask-position: 150% 150%; mask-position: 150% 150%; opacity: 0; }
-        10% { opacity: 1; }
-        20% { -webkit-mask-position: -50% 80%; mask-position: -50% 80%; }
-        40% { -webkit-mask-position: 120% -20%; mask-position: 120% -20%; }
-        60% { -webkit-mask-position: -20% 120%; mask-position: -20% 120%; }
-        80% { -webkit-mask-position: 80% 150%; mask-position: 80% 150%; }
-        90% { opacity: 1; }
-        100% { -webkit-mask-position: -150% -150%; mask-position: -150% -150%; opacity: 0; }
-    }
-    
-    /* 電流隨機閃爍動畫 */
-    @keyframes sparkPulse {
-        0% { filter: brightness(1) drop-shadow(0 0 2px #38bdf8); }
-        100% { filter: brightness(1.8) drop-shadow(0 0 10px #38bdf8); }
-    }
-
-    @keyframes pulse-glow {
-        0%, 100% { opacity: 0.8; }
-        50% { opacity: 1; text-shadow: 0 0 30px #34d399; }
-    }
-</style>
-
 <div class="container mb-5">
     <div class="cyber-wrapper">
         <div class="cyber-grid"></div>
 
         <div class="glass-panel">
             <div class="mb-4">
-                <i class="fas fa-microchip fa-3x text-info mb-3" style="opacity: 0.9;"></i>
+                <i class="fas fa-microchip fa-3x text-info mb-3" style="opacity: 0.8;"></i>
             </div>
-            
+
             <h1 class="display-4 neon-text mb-4">{% trans "Welcome to CSI Server Portal" %}</h1>
-            <p class="lead text-light mb-5" style="opacity: 0.9; font-weight: 300;">
+
+            <p class="lead text-light mb-5" style="opacity: 0.8; font-weight: 300;">
                 {% trans "This is a system built with Django 6.0 and Google OAuth." %}
             </p>
-            
-            <div class="w-100 mx-auto" style="height: 1px; background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.6), transparent); margin-bottom: 2rem;"></div>
-            
+
+            <div class="w-100 mx-auto" style="height: 1px; background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), transparent); margin-bottom: 2rem;"></div>
+
             {% if user.is_authenticated %}
-                <div class="d-inline-block px-4 py-3 rounded-pill mb-4" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);">
+                <div class="d-inline-block px-4 py-3 rounded-pill mb-4" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.4);">
                     <span class="text-light fs-5">
-                        <i class="fas fa-check-circle text-success me-2" style="animation: pulse-glow 2s infinite;"></i>
+                        <i class="fas fa-check-circle text-success me-2"></i>
                         {% blocktrans with name=user.first_name|default:user.username %}
                             Hello, <strong class="text-success">{{ name }}</strong>! Authorization Granted.
                         {% endblocktrans %}
                     </span>
                 </div>
-                
+
                 <div>
                     <form method="post" action="{% url 'account_logout' %}" class="d-inline">
                         {% csrf_token %}
@@ -179,7 +45,9 @@
                     </form>
                 </div>
             {% else %}
-                <p class="text-info mb-4" style="letter-spacing: 1px;"><i class="fas fa-shield-alt me-2"></i>{% trans "Please log in first to use full features." %}</p>
+                <p class="text-info mb-4" style="letter-spacing: 1px;">
+                    <i class="fas fa-shield-alt me-2"></i>{% trans "Please log in first to use full features." %}
+                </p>
                 <a class="btn btn-cyber btn-lg px-5 rounded-pill" href="{% url 'account_login' %}" role="button">
                     <i class="fas fa-fingerprint me-2"></i>{% trans "Go to Login Page" %}
                 </a>
@@ -187,19 +55,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-{# 加入極輕量的 JS，讓電流位置隨滑鼠微調，增加互動感 (不加也不影響效果) #}
-<script>
-    const wrapper = document.querySelector('.cyber-wrapper');
-    if (wrapper) {
-        wrapper.addEventListener('mousemove', e => {
-            const rect = wrapper.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            wrapper.style.setProperty('--mouse-x', `${x}%`);
-            wrapper.style.setProperty('--mouse-y', `${y}%`);
-        });
-    }
-</script>
-
+{# --- 載入首頁專屬 JS --- #}
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,42 @@
+/*! 取號成功頁面專屬樣式 */
+.ticket-success-card {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+/*! 序列號區塊美化 **/
+.serial-display-box {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+}
+
+/*! 列印模式優化 */
+@media print {
+
+    nav,
+    .ai-chat-launcher,
+    footer,
+    .btn,
+    .text-muted,
+    .card-footer {
+        display: none !important;
+        /** 隱藏非必要元件 **/
+    }
+
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    #serialNumber {
+        color: black !important;
+        /** 確保黑白列印清晰 **/
+    }
+
+    .container {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}

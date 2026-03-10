@@ -18,6 +18,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
@@ -53,7 +54,9 @@ urlpatterns = [
     path("download-diff-csv/<str:cno>/<str:fid>/", download_diff_csv, name="download_diff_csv"),
     # ? ======================================================================
     #! ICON
-    path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "images/favicon.ico")),
+    path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "images/CSI.ico")),
+    #! 網頁開發者模式
+    path(".well-known/appspecific/com.chrome.devtools.json", lambda r: JsonResponse({})),
     # ? =================================API==================================
     #! 智能客服
     path("ai-chat/", portal_ai_bot, name="portal_ai_bot"),
