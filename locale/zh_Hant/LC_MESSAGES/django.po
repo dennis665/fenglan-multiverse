@@ -1801,6 +1801,9 @@ msgid ""
 "                            Hello, <strong class=\"text-success\">%(name)s</strong>! Authorization Granted.\n"
 "                        "
 msgstr ""
+"\n"
+"                            您好，<strong class=\"text-success\">%(name)s</strong>！系統授權已通過。\n"
+"                        "
 
 #: .\templates\index.html:43
 msgid "Logout Now"

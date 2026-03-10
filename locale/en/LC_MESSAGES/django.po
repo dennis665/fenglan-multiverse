@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-10 08:46+0800\n"
+"POT-Creation-Date: 2026-03-10 09:06+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -130,7 +130,9 @@ msgstr "Exception Message"
 
 #: .\core\apps.py:68
 msgid "任務執行期間發生的異常詳細資訊 (若有的話)。"
-msgstr "Detailed information about any exception that occurred during task execution (if any)."
+msgstr ""
+"Detailed information about any exception that occurred during task execution "
+"(if any)."
 
 #: .\core\apps.py:71
 msgid "錯誤追蹤"
@@ -138,7 +140,9 @@ msgstr "Error Traceback"
 
 #: .\core\apps.py:72
 msgid "任務執行期間發生異常的追蹤紀錄 (若有的話)。"
-msgstr "The traceback record of an exception that occurred during task execution (if any)."
+msgstr ""
+"The traceback record of an exception that occurred during task execution (if "
+"any)."
 
 #: .\core\models.py:8 .\finance\models.py:38 .\finance\models.py:76
 #: .\finance\models.py:149 .\invest\models.py:58 .\invest\models.py:93
@@ -263,8 +267,9 @@ msgid ""
 "            "
 msgstr ""
 "\n"
-"                Note: Administrators can manage access permissions and global "
-"activation status for each feature in real-time via the Django Admin panel.\n"
+"                Note: Administrators can manage access permissions and "
+"global activation status for each feature in real-time via the Django Admin "
+"panel.\n"
 "            "
 
 #: .\core\templates\core\lucky_draw.html:4 .\templates\includes\navbar.html:31
@@ -870,7 +875,9 @@ msgid "Point Recharge Center"
 msgstr ""
 
 #: .\finance\templates\finance\recharge_store.html:18
-msgid "Choose the best recharge plan for you to enjoy exclusive bonus rewards and shopping experiences."
+msgid ""
+"Choose the best recharge plan for you to enjoy exclusive bonus rewards and "
+"shopping experiences."
 msgstr ""
 
 #: .\finance\templates\finance\recharge_store.html:29
@@ -955,11 +962,13 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                    將扣除 <strong class=\"text-primary deposit-calc\">%(points)s</strong> 儲值點\n"
+"                                    將扣除 <strong class=\"text-primary "
+"deposit-calc\">%(points)s</strong> 儲值點\n"
 "                                "
 msgstr ""
 "\n"
-"                                    Will deduct <strong class=\"text-primary deposit-calc\">%(points)s</strong> deposit pts\n"
+"                                    Will deduct <strong class=\"text-primary "
+"deposit-calc\">%(points)s</strong> deposit pts\n"
 "                                "
 
 #: .\finance\templates\finance\shop.html:107
@@ -1013,7 +1022,8 @@ msgstr "Transaction Date"
 
 #: .\invest\forms.py:33
 msgid "保守型 (追求穩定，無法承受本金大幅波動)"
-msgstr "Conservative (Seeks stability, cannot tolerate large capital fluctuations)"
+msgstr ""
+"Conservative (Seeks stability, cannot tolerate large capital fluctuations)"
 
 #: .\invest\forms.py:34
 #, python-format
@@ -1022,7 +1032,8 @@ msgstr "Moderate (Balances risk and reward, accepts 10%-20% drawdown)"
 
 #: .\invest\forms.py:35
 msgid "積極型 (追求高成長，能承受 30% 以上的市場波動)"
-msgstr "Aggressive (Seeks high growth, can tolerate market fluctuations of 30%+)"
+msgstr ""
+"Aggressive (Seeks high growth, can tolerate market fluctuations of 30%+)"
 
 #: .\invest\forms.py:39
 msgid "目前年齡"
@@ -1202,7 +1213,8 @@ msgid ""
 "                    "
 msgstr ""
 "\n"
-"                        Based on your goal: Achieve a monthly passive income of $%(income)s in %(years)s years.\n"
+"                        Based on your goal: Achieve a monthly passive income "
+"of $%(income)s in %(years)s years.\n"
 "                    "
 
 #: .\invest\templates\invest\ai_plan_result.html:28
@@ -1308,7 +1320,9 @@ msgid "Your portfolio is currently empty. Not sure where to start?"
 msgstr ""
 
 #: .\invest\templates\invest\dashboard.html:170
-msgid "Fill out the information below to let AI generate a customized ETF allocation plan for you!"
+msgid ""
+"Fill out the information below to let AI generate a customized ETF "
+"allocation plan for you!"
 msgstr ""
 
 #: .\invest\templates\invest\dashboard.html:186
@@ -1611,24 +1625,32 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                請確認您要為帳號 <strong class=\"text-dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
-"                                <span class=\"badge bg-light text-primary fs-6 mt-2 border border-primary-subtle\">%(email)s</span>\n"
+"                                請確認您要為帳號 <strong class=\"text-"
+"dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
+"                                <span class=\"badge bg-light text-primary "
+"fs-6 mt-2 border border-primary-subtle\">%(email)s</span>\n"
 "                            "
 msgstr ""
 "\n"
-"                                Please confirm that you wish to verify the email address for account <strong class=\"text-dark\">%(user_display)s</strong>:<br>\n"
-"                                <span class=\"badge bg-light text-primary fs-6 mt-2\">%(email)s</span>\n"
+"                                Please confirm that you wish to verify the "
+"email address for account <strong class=\"text-dark\">%(user_display)s</"
+"strong>:<br>\n"
+"                                <span class=\"badge bg-light text-primary "
+"fs-6 mt-2\">%(email)s</span>\n"
 "                            "
 
 #: .\templates\account\email_confirm.html:41
 #, python-format
 msgid ""
 "\n"
-"                                此電子郵件確認連結已過期或無效。請嘗試 <a href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
+"                                此電子郵件確認連結已過期或無效。請嘗試 <a "
+"href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
 "                            "
 msgstr ""
 "\n"
-"                                This email confirmation link has expired or is invalid. Please try <a href=\"%(email_url)s\" class=\"alert-link\">resending the confirmation email</a>.\n"
+"                                This email confirmation link has expired or "
+"is invalid. Please try <a href=\"%(email_url)s\" class=\"alert-"
+"link\">resending the confirmation email</a>.\n"
 "                            "
 
 #: .\templates\account\email_confirm.html:49 .\templates\account\login.html:60
@@ -1654,11 +1676,14 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                還沒有帳號嗎？ <a href=\"%(signup_url)s\" class=\"fw-bold text-decoration-none\">立即註冊</a>\n"
+"                                還沒有帳號嗎？ <a href=\"%(signup_url)s\" "
+"class=\"fw-bold text-decoration-none\">立即註冊</a>\n"
 "                            "
 msgstr ""
 "\n"
-"                                Don't have an account? <a href=\"%(signup_url)s\" class=\"fw-bold text-decoration-none\">Sign Up Now</a>\n"
+"                                Don't have an account? <a "
+"href=\"%(signup_url)s\" class=\"fw-bold text-decoration-none\">Sign Up Now</"
+"a>\n"
 "                            "
 
 #: .\templates\account\logout.html:4 .\templates\account\logout.html:34
@@ -1679,7 +1704,9 @@ msgid "Sign Up"
 msgstr ""
 
 #: .\templates\account\signup.html:18
-msgid "Welcome to CSI Portal, please fill in the information below to complete registration."
+msgid ""
+"Welcome to CSI Portal, please fill in the information below to complete "
+"registration."
 msgstr ""
 
 #: .\templates\account\signup.html:24
@@ -1694,11 +1721,13 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                已經有帳號了嗎？ <a href=\"%(login_url)s\" class=\"fw-bold text-decoration-none\">立即登入</a>\n"
+"                                已經有帳號了嗎？ <a href=\"%(login_url)s\" "
+"class=\"fw-bold text-decoration-none\">立即登入</a>\n"
 "                            "
 msgstr ""
 "\n"
-"                                Already have an account? <a href=\"%(login_url)s\" class=\"fw-bold text-decoration-none\">Login Now</a>\n"
+"                                Already have an account? <a "
+"href=\"%(login_url)s\" class=\"fw-bold text-decoration-none\">Login Now</a>\n"
 "                            "
 
 #: .\templates\account\verification_sent.html:5
@@ -1709,15 +1738,19 @@ msgstr ""
 #: .\templates\account\verification_sent.html:23
 msgid ""
 "\n"
-"                            我們已向您發送了一封電子郵件，請點擊信中的連結以完成註冊。\n"
+"                            我們已向您發送了一封電子郵件，請點擊信中的連結以"
+"完成註冊。\n"
 "                        "
 msgstr ""
 "\n"
-"                            We have sent you an email. Please click the link in the message to complete your registration.\n"
+"                            We have sent you an email. Please click the link "
+"in the message to complete your registration.\n"
 "                        "
 
 #: .\templates\account\verification_sent.html:32
-msgid "If you haven't received the email, please check your spam folder or try again later."
+msgid ""
+"If you haven't received the email, please check your spam folder or try "
+"again later."
 msgstr ""
 
 #: .\templates\account\verification_sent.html:49
@@ -1812,7 +1845,8 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                            Hello, <strong class=\"text-success\">%(name)s</strong>! Authorization Granted.\n"
+"                            Hello, <strong class=\"text-success\">%(name)s</"
+"strong>! Authorization Granted.\n"
 "                        "
 msgstr ""
 
@@ -1824,18 +1858,20 @@ msgstr ""
 msgid "Please log in first to use full features."
 msgstr ""
 
-#: .\index.html:52
+#: .\templates\index.html:52
 msgid "Go to Login Page"
 msgstr ""
 
 #: .\templates\socialaccount\login.html:21
 msgid ""
 "\n"
-"                        您即將使用 Google 帳號進行驗證。系統將導向 Google 授權頁面，請確認是否繼續？\n"
+"                        您即將使用 Google 帳號進行驗證。系統將導向 Google 授"
+"權頁面，請確認是否繼續？\n"
 "                        "
 msgstr ""
 "\n"
-"                        You are about to authenticate using your Google account. You will be redirected to the Google authorization page. Continue?\n"
+"                        You are about to authenticate using your Google "
+"account. You will be redirected to the Google authorization page. Continue?\n"
 "                        "
 
 #: .\templates\socialaccount\login.html:30
