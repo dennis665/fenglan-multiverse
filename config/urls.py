@@ -65,6 +65,8 @@ urlpatterns = [
     path("finance/", include("finance.urls")),
     #! 投資理財
     path("invest/", include("invest.urls")),
+    #! AI 教材學習
+    path("study_brain/", include("study_brain.urls")),
 ]
 
 if settings.DEBUG:

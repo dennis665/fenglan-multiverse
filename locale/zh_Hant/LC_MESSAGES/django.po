@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-10 08:46+0800\n"
+"POT-Creation-Date: 2026-03-10 14:56+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\config\settings.py:278
+#: .\config\settings.py:279
 msgid "繁體中文"
 msgstr ""
 
-#: .\config\settings.py:279
+#: .\config\settings.py:280
 msgid "English"
 msgstr "英文"
 
@@ -147,6 +147,7 @@ msgstr ""
 
 #: .\core\models.py:8 .\finance\models.py:38 .\finance\models.py:76
 #: .\finance\models.py:149 .\invest\models.py:58 .\invest\models.py:93
+#: .\study_brain\models.py:11
 msgid "建立時間"
 msgstr ""
 
@@ -451,6 +452,7 @@ msgstr "交易紀錄"
 
 #: .\core\templates\core\profile.html:93
 #: .\core\templates\core\ticket_pull.html:40
+#: .\study_brain\templates\study_brain\quiz_history.html:26
 msgid "Date"
 msgstr "日期"
 
@@ -677,7 +679,8 @@ msgid "財務與商城"
 msgstr ""
 
 #: .\finance\models.py:9 .\finance\models.py:31 .\finance\models.py:60
-#: .\finance\models.py:133 .\users\models.py:16
+#: .\finance\models.py:133 .\study_brain\models.py:65
+#: .\study_brain\models.py:81 .\users\models.py:16
 msgid "使用者"
 msgstr ""
 
@@ -958,12 +961,10 @@ msgstr "最高 %(price)s 點"
 #, python-format
 msgid ""
 "\n"
-"                                    將扣除 <strong class=\"text-primary deposit-calc\">%(points)s</strong> 儲值點\n"
+"                                    將扣除 <strong class=\"text-primary "
+"deposit-calc\">%(points)s</strong> 儲值點\n"
 "                                "
 msgstr ""
-"\n"
-"                                    將扣除 <strong class=\"text-primary deposit-calc\">%(points)s</strong> 儲值點\n"
-"                                "
 
 #: .\finance\templates\finance\shop.html:107
 msgid "Restocking"
@@ -1214,6 +1215,8 @@ msgid "Recommended ETF Allocation List"
 msgstr "推薦 ETF 配置清單"
 
 #: .\invest\templates\invest\ai_plan_result.html:54
+#: .\study_brain\templates\study_brain\quiz_history.html:12
+#: .\study_brain\templates\study_brain\quiz_result.html:85
 msgid "Back to Dashboard"
 msgstr "返回儀表板"
 
@@ -1329,70 +1332,68 @@ msgstr "送出紀錄"
 msgid "Market Data & Analysis"
 msgstr "市場數據與分析"
 
-#: .\invest\templates\invest\dashboard.html:232
+#: .\invest\templates\invest\dashboard.html:234
 msgid "Asset Allocation"
 msgstr "資產配置"
 
-#: .\invest\templates\invest\dashboard.html:237
-msgid "No portfolio data available"
-msgstr "無可用投資數據"
-
-#: .\invest\templates\invest\dashboard.html:245
+#: .\invest\templates\invest\dashboard.html:243
+#: .\invest\templates\invest\dashboard.html:258
 #, python-format
 msgid "Top 10 Gainers (%%)"
 msgstr "漲幅前 10 名 (%%)"
 
-#: .\invest\templates\invest\dashboard.html:252
+#: .\invest\templates\invest\dashboard.html:250
+#: .\invest\templates\invest\dashboard.html:265
 #, python-format
 msgid "Top 10 Losers (%%)"
 msgstr "跌幅前 10 名 (%%)"
 
-#: .\invest\templates\invest\dashboard.html:259
+#: .\invest\templates\invest\dashboard.html:273
 msgid "Highest Priced Stocks Top 10"
 msgstr "高價股前 10 名"
 
-#: .\invest\templates\invest\dashboard.html:266
+#: .\invest\templates\invest\dashboard.html:280
 msgid "Penny Stocks Top 10"
 msgstr "低價股前 10 名"
 
-#: .\invest\templates\invest\dashboard.html:279
+#: .\invest\templates\invest\dashboard.html:293
 msgid "Loading..."
 msgstr "載入中..."
 
-#: .\invest\templates\invest\dashboard.html:293
+#: .\invest\templates\invest\dashboard.html:307
 msgid "AI is planning for you, please wait..."
 msgstr "AI 正在為您規劃中，請稍候..."
 
-#: .\invest\templates\invest\dashboard.html:294
+#: .\invest\templates\invest\dashboard.html:308
 #, python-format
 msgid "Change (%%)"
 msgstr "漲跌 (%%)"
 
-#: .\invest\templates\invest\dashboard.html:295
+#: .\invest\templates\invest\dashboard.html:309
 msgid "Price"
 msgstr "價格"
 
-#: .\invest\templates\invest\dashboard.html:296
+#: .\invest\templates\invest\dashboard.html:310
 msgid "Loading data for"
 msgstr "正在載入數據："
 
-#: .\invest\templates\invest\dashboard.html:297
+#: .\invest\templates\invest\dashboard.html:311
 msgid "Failed to load data:"
 msgstr "載入數據失敗："
 
-#: .\invest\templates\invest\dashboard.html:298
+#: .\invest\templates\invest\dashboard.html:312
 msgid "6-Month Trend"
 msgstr "近 6 個月走勢"
 
-#: .\invest\templates\invest\dashboard.html:299
+#: .\invest\templates\invest\dashboard.html:313
 msgid "Close Price"
 msgstr "收盤價"
 
-#: .\invest\templates\invest\dashboard.html:300
+#: .\invest\templates\invest\dashboard.html:314
 msgid "Network Error"
 msgstr "網路錯誤"
 
-#: .\invest\templates\invest\dashboard.html:301
+#: .\invest\templates\invest\dashboard.html:315
 msgid "Please enter a stock symbol first!"
 msgstr "請先輸入股票代號！"
 
@@ -1604,6 +1605,369 @@ msgstr "一般公告"
 msgid "No notices available."
 msgstr "目前沒有公告。"
 
+#: .\study_brain\apps.py:9
+msgid "AI 教材大腦"
+msgstr ""
+
+#: .\study_brain\models.py:9
+msgid "分類名稱"
+msgstr ""
+
+#: .\study_brain\models.py:10
+msgid "分類描述"
+msgstr ""
+
+#: .\study_brain\models.py:14 .\study_brain\models.py:15
+msgid "教材分類"
+msgstr ""
+
+#: .\study_brain\models.py:25
+msgid "所屬分類"
+msgstr ""
+
+#: .\study_brain\models.py:27
+msgid "上傳者"
+msgstr ""
+
+#: .\study_brain\models.py:29
+msgid "收藏的使用者"
+msgstr ""
+
+#: .\study_brain\models.py:31
+msgid "教材標題"
+msgstr ""
+
+#: .\study_brain\models.py:32 .\study_brain\models.py:36
+#: .\study_brain\models.py:37
+msgid "教材檔案"
+msgstr ""
+
+#: .\study_brain\models.py:33
+msgid "上傳時間"
+msgstr ""
+
+#: .\study_brain\models.py:47
+msgid "關聯教材"
+msgstr ""
+
+#: .\study_brain\models.py:49
+msgid "重點整理"
+msgstr ""
+
+#: .\study_brain\models.py:50
+msgid "練習題資料"
+msgstr ""
+
+#: .\study_brain\models.py:51
+msgid "產出時間"
+msgstr ""
+
+#: .\study_brain\models.py:54 .\study_brain\models.py:55
+msgid "AI 分析結果"
+msgstr ""
+
+#: .\study_brain\models.py:66
+msgid "閱讀教材"
+msgstr ""
+
+#: .\study_brain\models.py:67
+msgid "閱讀時間"
+msgstr ""
+
+#: .\study_brain\models.py:70 .\study_brain\models.py:71
+msgid "閱讀紀錄"
+msgstr ""
+
+#: .\study_brain\models.py:82
+msgid "測驗來源"
+msgstr ""
+
+#: .\study_brain\models.py:83
+msgid "總題數"
+msgstr ""
+
+#: .\study_brain\models.py:84
+msgid "答對題數"
+msgstr ""
+
+#: .\study_brain\models.py:85
+msgid "錯誤率"
+msgstr ""
+
+#: .\study_brain\models.py:86
+msgid "測驗時間"
+msgstr ""
+
+#: .\study_brain\models.py:89 .\study_brain\models.py:90
+msgid "測驗紀錄"
+msgstr ""
+
+#: .\study_brain\models.py:101
+msgid "所屬測驗紀錄"
+msgstr ""
+
+#: .\study_brain\models.py:103
+msgid "題目內容"
+msgstr ""
+
+#: .\study_brain\models.py:104
+msgid "使用者答案"
+msgstr ""
+
+#: .\study_brain\models.py:105
+msgid "正確答案"
+msgstr ""
+
+#: .\study_brain\models.py:108 .\study_brain\models.py:109
+msgid "錯題明細"
+msgstr ""
+
+# * 針對教材上傳儀表板與 AI 學習室介面的繁體中文翻譯檔
+#: .\study_brain\templates\study_brain\dashboard.html:4
+msgid "AI Study Brain Dashboard"
+msgstr "AI 教材大腦儀表板"
+
+#: .\study_brain\templates\study_brain\dashboard.html:14
+#: .\templates\includes\navbar.html:54
+msgid "AI Study Brain"
+msgstr "AI 教材大腦"
+
+#: .\study_brain\templates\study_brain\dashboard.html:15
+msgid "Upload materials to train your personal AI tutor."
+msgstr "上傳教材來訓練您的專屬 AI 導師。"
+
+#: .\study_brain\templates\study_brain\dashboard.html:19
+#: .\study_brain\templates\study_brain\quiz_history.html:4
+#: .\study_brain\templates\study_brain\quiz_history.html:14
+msgid "My Quiz History"
+msgstr "我的測驗紀錄"
+
+#: .\study_brain\templates\study_brain\dashboard.html:28
+msgid "Upload Material"
+msgstr "上傳教材"
+
+#: .\study_brain\templates\study_brain\dashboard.html:34
+msgid "Category"
+msgstr "分類"
+
+#: .\study_brain\templates\study_brain\dashboard.html:36
+msgid "Select Category..."
+msgstr "選擇分類..."
+
+#: .\study_brain\templates\study_brain\dashboard.html:43
+msgid "Material Title"
+msgstr "教材標題"
+
+#: .\study_brain\templates\study_brain\dashboard.html:44
+msgid "Enter a descriptive title"
+msgstr "請輸入描述性標題"
+
+#: .\study_brain\templates\study_brain\dashboard.html:47
+msgid "File (PDF/Word)"
+msgstr "檔案 (PDF/Word)"
+
+#: .\study_brain\templates\study_brain\dashboard.html:51
+msgid "Click or drag file here"
+msgstr "點擊或將檔案拖曳至此"
+
+#: .\study_brain\templates\study_brain\dashboard.html:55
+msgid "Upload & Process"
+msgstr "上傳並開始分析"
+
+#: .\study_brain\templates\study_brain\dashboard.html:70
+msgid "My Library"
+msgstr "我的教材庫"
+
+#: .\study_brain\templates\study_brain\dashboard.html:76
+msgid "Explore Public Materials"
+msgstr "探索公開教材"
+
+#: .\study_brain\templates\study_brain\dashboard.html:94
+msgid "Remove from My Library"
+msgstr "從我的教材庫移除"
+
+#: .\study_brain\templates\study_brain\dashboard.html:99
+#: .\study_brain\templates\study_brain\dashboard.html:147
+msgid "Uploaded by"
+msgstr "上傳者："
+
+#: .\study_brain\templates\study_brain\dashboard.html:99
+#: .\study_brain\templates\study_brain\dashboard.html:147
+msgid "System"
+msgstr "系統"
+
+#: .\study_brain\templates\study_brain\dashboard.html:102
+#: .\study_brain\templates\study_brain\study_room.html:28
+msgid "View Original File"
+msgstr "檢視原始檔案"
+
+#: .\study_brain\templates\study_brain\dashboard.html:110
+msgid "Train AI"
+msgstr "訓練 AI"
+
+#: .\study_brain\templates\study_brain\dashboard.html:115
+#: .\study_brain\templates\study_brain\study_room.html:4
+msgid "Study Room"
+msgstr "學習室"
+
+#: .\study_brain\templates\study_brain\dashboard.html:119
+msgid "No Data Yet"
+msgstr "暫無資料"
+
+#: .\study_brain\templates\study_brain\dashboard.html:129
+msgid "Your library is empty. Upload or explore materials to begin!"
+msgstr "您的教材庫是空的。上傳教材或探索公開資源來開始吧！"
+
+#: .\study_brain\templates\study_brain\dashboard.html:152
+msgid "Add to My Library"
+msgstr "加入我的教材庫"
+
+#: .\study_brain\templates\study_brain\dashboard.html:161
+msgid "No public materials available at the moment."
+msgstr "目前尚無公開教材。"
+
+#: .\study_brain\templates\study_brain\dashboard.html:177
+msgid "Training..."
+msgstr "訓練中..."
+
+#: .\study_brain\templates\study_brain\quiz_history.html:15
+msgid "Review your past quiz records and mistakes to improve your learning."
+msgstr "回顧過往的測驗紀錄與錯題，幫助您提升學習成效。"
+
+#: .\study_brain\templates\study_brain\quiz_history.html:27
+msgid "Material"
+msgstr "教材"
+
+#: .\study_brain\templates\study_brain\quiz_history.html:28
+msgid "Score"
+msgstr "分數"
+
+#: .\study_brain\templates\study_brain\quiz_history.html:29
+#: .\study_brain\templates\study_brain\quiz_result.html:31
+msgid "Error Rate"
+msgstr "錯誤率"
+
+#: .\study_brain\templates\study_brain\quiz_history.html:30
+msgid "Action"
+msgstr "操作"
+
+#: .\study_brain\templates\study_brain\quiz_history.html:57
+msgid "Review Mistakes"
+msgstr "查看錯題"
+
+#: .\study_brain\templates\study_brain\quiz_history.html:65
+msgid "You have no quiz records yet. Go practice some materials!"
+msgstr "您目前尚無測驗紀錄。趕快挑選教材進行練習吧！"
+
+#: .\study_brain\templates\study_brain\quiz_result.html:4
+#: .\study_brain\templates\study_brain\quiz_result.html:16
+msgid "Quiz Result Report"
+msgstr "測驗結果報告"
+
+#: .\study_brain\templates\study_brain\quiz_result.html:25
+msgid "Correct Answers"
+msgstr "答對題數"
+
+#: .\study_brain\templates\study_brain\quiz_result.html:41
+msgid "Mistakes Analysis"
+msgstr "錯題分析"
+
+#: .\study_brain\templates\study_brain\quiz_result.html:54
+msgid "Your Answer"
+msgstr "您的答案"
+
+#: .\study_brain\templates\study_brain\quiz_result.html:56
+msgid "(No answer provided)"
+msgstr "(未提供答案)"
+
+#: .\study_brain\templates\study_brain\quiz_result.html:60
+msgid "Correct Answer"
+msgstr "正確答案"
+
+#: .\study_brain\templates\study_brain\quiz_result.html:74
+msgid "Perfect Score! Excellent Job!"
+msgstr "滿分！表現太棒了！"
+
+#: .\study_brain\templates\study_brain\quiz_result.html:75
+msgid "You have fully mastered the content of this material."
+msgstr "您已經完全掌握了這份教材的內容。"
+
+#: .\study_brain\templates\study_brain\quiz_result.html:82
+msgid "Review Material"
+msgstr "複習教材"
+
+#: .\study_brain\templates\study_brain\study_room.html:15
+msgid "Back to Library"
+msgstr "返回教材庫"
+
+#: .\study_brain\templates\study_brain\study_room.html:22
+msgid "Last Generated:"
+msgstr "最後產出時間："
+
+#: .\study_brain\templates\study_brain\study_room.html:38
+msgid "Key Summaries"
+msgstr "重點整理"
+
+#: .\study_brain\templates\study_brain\study_room.html:43
+msgid "Practice Quiz"
+msgstr "練習測驗"
+
+#: .\study_brain\templates\study_brain\study_room.html:68
+msgid "Quiz Progress"
+msgstr "測驗進度"
+
+#: .\study_brain\templates\study_brain\study_room.html:70
+msgid "Total"
+msgstr "總題數"
+
+#: .\study_brain\templates\study_brain\study_room.html:71
+msgid "Answered"
+msgstr "已答"
+
+#: .\study_brain\templates\study_brain\study_room.html:72
+msgid "Unanswered"
+msgstr "未答"
+
+#: .\study_brain\templates\study_brain\study_room.html:105
+msgid "Submit Answers"
+msgstr "提交答案"
+
+#: .\study_brain\utils.py:115
+msgid "AI 忙碌中，請稍後再試！"
+msgstr ""
+
+#: .\study_brain\utils.py:117
+msgid "AI 產出解析發生錯誤，請稍後再試。"
+msgstr ""
+
+#: .\study_brain\views.py:41
+msgid "教材上傳成功！您可以開始進行 AI 訓練。"
+msgstr ""
+
+#: .\study_brain\views.py:43
+msgid "請填寫完整資訊並上傳檔案。"
+msgstr ""
+
+#: .\study_brain\views.py:65
+msgid "檔案解析失敗或內容為空，無法進行訓練。"
+msgstr ""
+
+#: .\study_brain\views.py:83
+msgid "AI 首次分析完成！已產生重點摘要與初始練習題。"
+msgstr ""
+
+#: .\study_brain\views.py:85
+msgid "AI 產出過程發生未知錯誤，請稍後再試。"
+msgstr ""
+
+#: .\study_brain\views.py:97
+msgid "該教材尚未產生分析資料。"
+msgstr ""
+
+#: .\study_brain\views.py:182
+msgid "檔案不存在或已遺失"
+msgstr ""
+
 #: .\templates\account\email_confirm.html:5
 #: .\templates\account\email_confirm.html:18
 msgid "Confirm Email Address"
@@ -1613,8 +1977,10 @@ msgstr "確認電子郵件地址"
 #, python-format
 msgid ""
 "\n"
-"                                請確認您要為帳號 <strong class=\"text-dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
-"                                <span class=\"badge bg-light text-primary fs-6 mt-2 border border-primary-subtle\">%(email)s</span>\n"
+"                                請確認您要為帳號 <strong class=\"text-"
+"dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
+"                                <span class=\"badge bg-light text-primary "
+"fs-6 mt-2 border border-primary-subtle\">%(email)s</span>\n"
 "                            "
 msgstr ""
 
@@ -1622,7 +1988,8 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                此電子郵件確認連結已過期或無效。請嘗試 <a href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
+"                                此電子郵件確認連結已過期或無效。請嘗試 <a "
+"href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
 "                            "
 msgstr ""
 
@@ -1649,7 +2016,8 @@ msgstr "或使用電子郵件"
 #, python-format
 msgid ""
 "\n"
-"                                還沒有帳號嗎？ <a href=\"%(signup_url)s\" class=\"fw-bold text-decoration-none\">立即註冊</a>\n"
+"                                還沒有帳號嗎？ <a href=\"%(signup_url)s\" "
+"class=\"fw-bold text-decoration-none\">立即註冊</a>\n"
 "                            "
 msgstr ""
 
@@ -1671,7 +2039,9 @@ msgid "Sign Up"
 msgstr "註冊"
 
 #: .\templates\account\signup.html:18
-msgid "Welcome to CSI Portal, please fill in the information below to complete registration."
+msgid ""
+"Welcome to CSI Portal, please fill in the information below to complete "
+"registration."
 msgstr "歡迎來到 CSI Portal，請填寫下方資訊以完成註冊。"
 
 #: .\templates\account\signup.html:24
@@ -1686,7 +2056,8 @@ msgstr "或填寫詳細資料"
 #, python-format
 msgid ""
 "\n"
-"                                已經有帳號了嗎？ <a href=\"%(login_url)s\" class=\"fw-bold text-decoration-none\">立即登入</a>\n"
+"                                已經有帳號了嗎？ <a href=\"%(login_url)s\" "
+"class=\"fw-bold text-decoration-none\">立即登入</a>\n"
 "                            "
 msgstr ""
 
@@ -1698,12 +2069,15 @@ msgstr "驗證您的電子郵件地址"
 #: .\templates\account\verification_sent.html:23
 msgid ""
 "\n"
-"                            我們已向您發送了一封電子郵件，請點擊信中的連結以完成註冊。\n"
+"                            我們已向您發送了一封電子郵件，請點擊信中的連結以"
+"完成註冊。\n"
 "                        "
 msgstr ""
 
 #: .\templates\account\verification_sent.html:32
-msgid "If you haven't received the email, please check your spam folder or try again later."
+msgid ""
+"If you haven't received the email, please check your spam folder or try "
+"again later."
 msgstr "如果您沒有收到郵件，請檢查垃圾郵件箱或稍後再試。"
 
 #: .\templates\account\verification_sent.html:49
@@ -1754,35 +2128,35 @@ msgstr "首頁"
 msgid "Investment"
 msgstr "投資理財"
 
-#: .\templates\includes\navbar.html:56
+#: .\templates\includes\navbar.html:62
 msgid "Tester Zone"
 msgstr "測試員專區"
 
-#: .\templates\includes\navbar.html:59
+#: .\templates\includes\navbar.html:65
 msgid "Test Management System"
 msgstr "測試管理系統"
 
-#: .\templates\includes\navbar.html:67
+#: .\templates\includes\navbar.html:73
 msgid "No tools available"
 msgstr "目前無可用工具"
 
-#: .\templates\includes\navbar.html:100
+#: .\templates\includes\navbar.html:106
 msgid "Admin"
 msgstr "管理者後台"
 
-#: .\templates\includes\navbar.html:120
+#: .\templates\includes\navbar.html:126
 msgid "Profile"
 msgstr "個人檔案"
 
-#: .\templates\includes\navbar.html:125
+#: .\templates\includes\navbar.html:131
 msgid "Logout"
 msgstr "登出"
 
-#: .\templates\includes\navbar.html:132
+#: .\templates\includes\navbar.html:138
 msgid "Login"
 msgstr "登入"
 
-#: .\templates\includes\navbar.html:135
+#: .\templates\includes\navbar.html:141
 msgid "Register"
 msgstr "註冊"
 
@@ -1798,11 +2172,13 @@ msgstr "這是一個使用 Django 6.0 與 Google OAuth 構建的系統。"
 #, python-format
 msgid ""
 "\n"
-"                            Hello, <strong class=\"text-success\">%(name)s</strong>! Authorization Granted.\n"
+"                            Hello, <strong class=\"text-success\">%(name)s</"
+"strong>! Authorization Granted.\n"
 "                        "
 msgstr ""
 "\n"
-"                            您好，<strong class=\"text-success\">%(name)s</strong>！系統授權已通過。\n"
+"                            您好，<strong class=\"text-success\">%(name)s</"
+"strong>！系統授權已通過。\n"
 "                        "
 
 #: .\templates\index.html:43
@@ -1820,7 +2196,8 @@ msgstr "前往登入頁面"
 #: .\templates\socialaccount\login.html:21
 msgid ""
 "\n"
-"                        您即將使用 Google 帳號進行驗證。系統將導向 Google 授權頁面，請確認是否繼續？\n"
+"                        您即將使用 Google 帳號進行驗證。系統將導向 Google 授"
+"權頁面，請確認是否繼續？\n"
 "                        "
 msgstr ""
 
@@ -1867,6 +2244,9 @@ msgstr ""
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr "您沒有權限，已導向首頁。"
+
+#~ msgid "No portfolio data available"
+#~ msgstr "無可用投資數據"
 
 #, python-format
 #~ msgid "Total %(count)s notices"

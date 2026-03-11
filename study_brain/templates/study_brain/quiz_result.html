@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block head_title %}{% trans "Quiz Result Report" %} - CSI Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quiz_result.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {# 頂部導航 #}
+            <div class="mb-4 text-center">
+                <h2 class="fw-bold"><i class="fas fa-clipboard-check text-success me-2"></i>{% trans "Quiz Result Report" %}</h2>
+                <p class="text-muted">{{ record.analysis_result.material.title }}</p>
+            </div>
+
+            {# 總分與錯誤率看板 #}
+            <div class="card score-card shadow-sm mb-5">
+                <div class="card-body p-5 text-center">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 border-end border-secondary border-opacity-25">
+                            <h6 class="text-muted text-uppercase fw-bold tracking-wide mb-3">{% trans "Correct Answers" %}</h6>
+                            <div class="score-display text-primary">
+                                {{ record.correct_count }}<span class="fs-3 text-muted fw-normal"> / {{ record.total_questions }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mt-4 mt-md-0">
+                            <h6 class="text-muted text-uppercase fw-bold tracking-wide mb-3">{% trans "Error Rate" %}</h6>
+                            <div class="display-4 fw-bold {% if record.error_rate > 50 %}text-danger{% elif record.error_rate > 0 %}text-warning{% else %}text-success{% endif %}">
+                                {{ record.error_rate }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# 錯題解析區塊 #}
+            <h4 class="fw-bold mb-4"><i class="fas fa-search-plus text-primary me-2"></i>{% trans "Mistakes Analysis" %}</h4>
+
+            {% if mistakes %}
+                <div class="d-flex flex-column gap-3">
+                    {% for mistake in mistakes %}
+                    <div class="card mistake-card shadow-sm">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-4">
+                                <span class="text-danger me-2">Q.</span>{{ mistake.question_text }}
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="small text-muted fw-bold mb-1">{% trans "Your Answer" %}</div>
+                                    <div class="answer-badge answer-wrong w-100">
+                                        <i class="fas fa-times me-1"></i> {{ mistake.user_answer|default:_("(No answer provided)") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="small text-muted fw-bold mb-1">{% trans "Correct Answer" %}</div>
+                                    <div class="answer-badge answer-correct w-100">
+                                        <i class="fas fa-check me-1"></i> {{ mistake.correct_answer }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {# 滿分全對狀態 #}
+                <div class="perfect-score-banner p-5 text-center shadow-sm">
+                    <i class="fas fa-trophy fa-4x mb-3 text-success opacity-75"></i>
+                    <h3 class="fw-bold mb-2">{% trans "Perfect Score! Excellent Job!" %}</h3>
+                    <p class="mb-0 opacity-75">{% trans "You have fully mastered the content of this material." %}</p>
+                </div>
+            {% endif %}
+
+            {# 底部操作按鈕 #}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-5">
+                <a href="{% url 'study_brain:study_room' record.analysis_result.material.id %}" class="btn btn-outline-primary px-4 rounded-pill fw-bold">
+                    <i class="fas fa-redo-alt me-1"></i>{% trans "Review Material" %}
+                </a>
+                <a href="{% url 'study_brain:dashboard' %}" class="btn btn-primary px-4 rounded-pill fw-bold shadow-sm">
+                    <i class="fas fa-home me-1"></i>{% trans "Back to Dashboard" %}
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

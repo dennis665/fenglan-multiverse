@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block head_title %}{% trans "AI Study Brain Dashboard" %} - CSI Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/study_brain.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold"><i class="fas fa-brain text-primary me-2"></i>{% trans "AI Study Brain" %}</h2>
+            <p class="text-muted mb-0">{% trans "Upload materials to train your personal AI tutor." %}</p>
+        </div>
+        {# 歷史紀錄入口按鈕 #}
+        <a href="{% url 'study_brain:quiz_history' %}" class="btn btn-outline-primary fw-bold rounded-pill shadow-sm">
+            <i class="fas fa-history me-2"></i>{% trans "My Quiz History" %}
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {# 左側：上傳新教材區塊 #}
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 fw-bold">
+                    <i class="fas fa-cloud-upload-alt me-2 text-info"></i>{% trans "Upload Material" %}
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{% url 'study_brain:upload' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">{% trans "Category" %}</label>
+                            <select name="category" class="form-select" required>
+                                <option value="">{% trans "Select Category..." %}</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">{% trans "Material Title" %}</label>
+                            <input type="text" name="title" class="form-control" placeholder="{% trans 'Enter a descriptive title' %}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">{% trans "File (PDF/Word)" %}</label>
+                            <input type="file" name="file" id="materialFile" class="d-none" accept=".pdf,.doc,.docx" required>
+                            <div class="upload-zone text-center p-4" id="uploadZone">
+                                <i class="fas fa-file-upload fa-2x text-muted mb-2"></i>
+                                <p class="mb-0 small text-muted" id="fileNameDisplay">{% trans "Click or drag file here" %}</p>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">
+                            {% trans "Upload & Process" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {# 右側：教材庫切換區塊 #}
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3">
+                    {# 頁籤按鈕 #}
+                    <ul class="nav nav-tabs card-header-tabs fw-bold" id="materialTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active text-primary" id="my-library-tab" data-bs-toggle="tab" data-bs-target="#my-library" type="button" role="tab">
+                                <i class="fas fa-book-reader me-2"></i>{% trans "My Library" %}
+                                <span class="badge bg-primary ms-1">{{ my_materials|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-success" id="explore-tab" data-bs-toggle="tab" data-bs-target="#explore" type="button" role="tab">
+                                <i class="fas fa-globe me-2"></i>{% trans "Explore Public Materials" %}
+                                <span class="badge bg-success ms-1">{{ explore_materials|length }}</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body p-4 tab-content">
+                    {# 頁籤 1：我的教材庫 #}
+                    <div class="tab-pane fade show active" id="my-library" role="tabpanel">
+                        <div class="row g-3">
+                            {% for material in my_materials %}
+                            <div class="col-md-6">
+                                <div class="card material-card border h-100 border-start border-4 border-primary">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge bg-secondary rounded-pill">{{ material.category.name }}</span>
+                                            {# 移除按鈕 #}
+                                            <a href="{% url 'study_brain:toggle_save' material.id 'remove' %}" class="text-danger small text-decoration-none" title="{% trans 'Remove from My Library' %}">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        </div>
+                                        <h5 class="fw-bold mb-1">{{ material.title }}</h5>
+                                        <p class="small text-muted mb-3">{% trans "Uploaded by" %}: {{ material.uploader.username|default:_("System") }}</p>
+
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'study_brain:view_material' material.id %}" target="_blank" class="btn btn-outline-secondary btn-sm" title="{% trans 'View Original File' %}">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <form method="POST" action="{% url 'study_brain:generate' material.id %}" class="flex-grow-1 train-ai-form">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-outline-primary btn-sm w-100 train-btn">
+                                                    <span class="btn-icon"><i class="fas fa-magic me-1"></i></span>
+                                                    <span class="btn-spinner spinner-border spinner-border-sm me-1 d-none" role="status" aria-hidden="true"></span>
+                                                    <span class="btn-text">{% trans "Train AI" %}</span>
+                                                </button>
+                                            </form>
+                                            {% if material.analysis_results.exists %}
+                                            <a href="{% url 'study_brain:study_room' material.id %}" class="btn btn-success btn-sm flex-grow-1">
+                                                <i class="fas fa-graduation-cap me-1"></i>{% trans "Study Room" %}
+                                            </a>
+                                            {% else %}
+                                            <button class="btn btn-light btn-sm flex-grow-1 disabled text-muted">
+                                                {% trans "No Data Yet" %}
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12 text-center py-5 text-muted">
+                                <i class="fas fa-folder-open fa-3x mb-3 opacity-25"></i>
+                                <p>{% trans "Your library is empty. Upload or explore materials to begin!" %}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {# 頁籤 2：探索公開教材 #}
+                    <div class="tab-pane fade" id="explore" role="tabpanel">
+                        <div class="row g-3">
+                            {% for material in explore_materials %}
+                            <div class="col-md-6">
+                                <div class="card material-card border h-100 border-start border-4 border-success bg-light">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge bg-secondary rounded-pill">{{ material.category.name }}</span>
+                                            <small class="text-muted">{{ material.uploaded_at|date:"Y/m/d" }}</small>
+                                        </div>
+                                        <h5 class="fw-bold mb-1">{{ material.title }}</h5>
+                                        <p class="small text-muted mb-3">{% trans "Uploaded by" %}: {{ material.uploader.username|default:_("System") }}</p>
+                                        
+                                        <div class="d-grid gap-2 mt-auto">
+                                            {# 加入教材庫按鈕 #}
+                                            <a href="{% url 'study_brain:toggle_save' material.id 'add' %}" class="btn btn-success btn-sm fw-bold rounded-pill">
+                                                <i class="fas fa-plus-circle me-1"></i>{% trans "Add to My Library" %}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12 text-center py-5 text-muted">
+                                <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                                <p>{% trans "No public materials available at the moment." %}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{# 傳遞翻譯文字給外部 JS #}
+<script>
+    const STUDY_BRAIN_I18N = {
+        trainingText: '{% trans "Training..." %}'
+    };
+</script>
+<script src="{% static 'js/study_brain.js' %}"></script>
+
+{# 後端錯誤訊息的跳窗顯示 #}
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 延遲一點點執行，確保畫面已經渲染完畢才跳窗
+    setTimeout(function() {
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                alert("⚠️ {{ message|escapejs }}");
+            {% elif message.tags == 'success' %}
+                // 如果您成功時也想要跳窗，可以取消這行的註解
+                alert("✅ {{ message|escapejs }}");
+            {% endif %}
+        {% endfor %}
+    }, 100);
+});
+</script>
+{% endif %}
+{% endblock %}

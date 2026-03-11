@@ -1,0 +1,97 @@
+/*! AI 教材大腦專屬樣式 */
+
+/*! 檔案上傳區塊拖曳提示 */
+.upload-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 1rem;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: #0d6efd;
+    background-color: #e9ecef;
+}
+
+/*! 教材卡片樣式 */
+.material-card {
+    border-radius: 0.75rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.material-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+}
+
+/*! 測驗選項按鈕樣式 */
+.quiz-option {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quiz-option:hover {
+    background-color: #f1f3f5;
+}
+
+.quiz-option.selected {
+    border-color: #0d6efd;
+    background-color: #e7f1ff;
+}
+
+/*! 答對與答錯樣式 **/
+.quiz-option.correct {
+    border-color: #198754;
+    background-color: #d1e7dd;
+}
+
+.quiz-option.incorrect {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+/*! Markdown 渲染內容美化 */
+.markdown-body h3 {
+    font-weight: bold;
+    color: #0d6efd;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.markdown-body ul {
+    margin-bottom: 1.5rem;
+}
+
+.markdown-body li {
+    margin-bottom: 0.5rem;
+}
+
+.markdown-body strong {
+    color: #212529;
+}
+
+/*! 測驗進度條懸浮置頂特效 */
+.quiz-progress-sticky {
+    position: sticky;
+    /*! 如果您的網站有固定的導覽列(Navbar)，請把 top 數值調大，例如 top: 80px; */
+    top: 20px;
+    z-index: 1020;
+    /** 確保它會壓在題目和選項的上方 */
+
+    /*! 毛玻璃特效，讓底下的文字透過去時會有模糊的高級感 */
+    background-color: rgba(248, 249, 250, 0.9) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    /*! 增加一點外距與陰影讓它更有立體感 */
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+}

@@ -1,0 +1,48 @@
+/*! 測驗結果報表專屬樣式 */
+
+.score-card {
+    border-radius: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: none;
+}
+
+.score-display {
+    font-size: 4rem;
+    font-weight: 900;
+    letter-spacing: -2px;
+}
+
+/*! 錯題卡片樣式 */
+.mistake-card {
+    border-radius: 1rem;
+    border-left: 5px solid #dc3545;
+    transition: transform 0.2s ease;
+}
+
+.mistake-card:hover {
+    transform: translateX(5px);
+}
+
+.perfect-score-banner {
+    background: linear-gradient(135deg, #d1e7dd 0%, #a3cfbb 100%);
+    border-radius: 1rem;
+    color: #0f5132;
+}
+
+.answer-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.answer-wrong {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.answer-correct {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}

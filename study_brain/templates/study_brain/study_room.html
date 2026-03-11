@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block head_title %}{{ material.title }} - {% trans "Study Room" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/study_brain.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    {# 頁首導航與標題 #}
+    <div class="mb-4">
+        <a href="{% url 'study_brain:dashboard' %}" class="text-decoration-none text-muted small mb-2 d-inline-block">
+            <i class="fas fa-arrow-left me-1"></i>{% trans "Back to Library" %}
+        </a>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-1">{{ material.title }}</h2>
+                <span class="badge bg-primary rounded-pill">{{ material.category.name }}</span>
+                <span class="text-muted small ms-2">{% trans "Last Generated:" %} {{ latest_analysis.created_at|date:"Y-m-d H:i" }}</span>
+            </div>
+
+            {# 在學習室右上方加入預覽按鈕 #}
+            <div>
+                <a href="{% url 'study_brain:view_material' material.id %}" target="_blank" class="btn btn-outline-dark rounded-pill fw-bold shadow-sm">
+                    <i class="fas fa-file-alt me-2"></i>{% trans "View Original File" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# 學習模式頁籤 #}
+    <ul class="nav nav-tabs mb-4" id="studyTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">
+                <i class="fas fa-book-reader me-2"></i>{% trans "Key Summaries" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="quiz-tab" data-bs-toggle="tab" data-bs-target="#quiz" type="button" role="tab">
+                <i class="fas fa-pen-nib me-2"></i>{% trans "Practice Quiz" %}
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="studyTabsContent">
+        {# 重點整理區塊 #}
+        <div class="tab-pane fade show active" id="summary" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5 lh-lg markdown-body" id="summary-content" style="font-size: 1.1rem;">
+                    {{ latest_analysis.summary }}
+                </div>
+
+                {# 將 AI 原始的 Markdown 藏在 textarea 中，避免跳脫字元干擾 #}
+                <textarea id="raw-markdown" style="display: none;">{{ latest_analysis.summary }}</textarea>
+            </div>
+        </div>
+
+        {# 互動測驗區塊 #}
+        <div class="tab-pane fade" id="quiz" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+
+                    {# 測驗進度統計條 (加入 quiz-progress-sticky 讓它置頂) #}
+                    <div class="quiz-progress-sticky d-flex justify-content-between align-items-center p-3 rounded border-start border-4 border-primary">
+                        <div class="fw-bold text-secondary"><i class="fas fa-tasks text-primary me-2"></i>{% trans "Quiz Progress" %}</div>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-secondary px-3 py-2 fs-6 shadow-sm">{% trans "Total" %}: <span id="total-q">{{ latest_analysis.questions_data|length }}</span></span>
+                            <span class="badge bg-success px-3 py-2 fs-6 shadow-sm">{% trans "Answered" %}: <span id="answered-q">0</span></span>
+                            <span class="badge bg-warning text-dark px-3 py-2 fs-6 shadow-sm">{% trans "Unanswered" %}: <span id="unanswered-q">{{ latest_analysis.questions_data|length }}</span></span>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{% url 'study_brain:submit_quiz' latest_analysis.id %}">
+                        {% csrf_token %}
+
+                        {% for q in latest_analysis.questions_data %}
+                        <div class="mb-5 pb-3 border-bottom">
+                            <h5 class="fw-bold mb-4 lh-base">
+                                <span class="text-primary me-2 fs-4">Q{{ forloop.counter }}.</span>{{ q.question }}
+                            </h5>
+
+                            {# 隱藏的 input 用來記錄使用者選擇的值 #}
+                            <input type="hidden" name="question_{{ forloop.counter0 }}" id="input-q-{{ forloop.counter0 }}" required>
+
+                            <div class="row g-3">
+                                {% for option in q.options %}
+                                <div class="col-12">
+                                    <div class="quiz-option q-opt-{{ forloop.parentloop.counter0 }} shadow-sm" data-value="{{ option }}" onclick="selectOption('{{ forloop.parentloop.counter0 }}', this)">
+                                        {# 使用 cycle 輪替輸出 A B C D E F #}
+                                        <span class="fw-bold me-3 fs-5 text-primary">{% cycle 'A' 'B' 'C' 'D' 'E' 'F' %}.</span> 
+                                        {# 加入 opt-text 類別，交由 JS 清理空白 #}
+                                        <span class="opt-text">{{ option }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow">
+                                <i class="fas fa-paper-plane me-2"></i>{% trans "Submit Answers" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="{% static 'js/study_brain.js' %}"></script>
+
+<script>
+// 啟動 Markdown 解析
+document.addEventListener('DOMContentLoaded', function() {
+    const rawMarkdown = document.getElementById('raw-markdown').value;
+    const contentDiv = document.getElementById('summary-content');
+
+    if (contentDiv && rawMarkdown) {
+        //* 移除 AI 可能因為 Prompt 縮排而產生的過多前綴空白 (避免被誤判為程式碼區塊)
+        const cleanedText = rawMarkdown.replace(/^[ \t]{4,}/gm, ''); 
+
+        //* 將 Markdown 轉換為 HTML 並注入
+        contentDiv.innerHTML = marked.parse(cleanedText);
+    }
+});
+</script>
+{% endblock %}

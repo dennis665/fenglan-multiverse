@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-10 09:06+0800\n"
+"POT-Creation-Date: 2026-03-10 14:56+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -12,11 +12,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\config\settings.py:278
+#: .\config\settings.py:279
 msgid "繁體中文"
 msgstr "Traditional Chinese"
 
-#: .\config\settings.py:279
+#: .\config\settings.py:280
 msgid "English"
 msgstr ""
 
@@ -146,6 +146,7 @@ msgstr ""
 
 #: .\core\models.py:8 .\finance\models.py:38 .\finance\models.py:76
 #: .\finance\models.py:149 .\invest\models.py:58 .\invest\models.py:93
+#: .\study_brain\models.py:11
 msgid "建立時間"
 msgstr "Created At"
 
@@ -455,6 +456,7 @@ msgstr ""
 
 #: .\core\templates\core\profile.html:93
 #: .\core\templates\core\ticket_pull.html:40
+#: .\study_brain\templates\study_brain\quiz_history.html:26
 msgid "Date"
 msgstr ""
 
@@ -681,7 +683,8 @@ msgid "財務與商城"
 msgstr "Finance & Mall"
 
 #: .\finance\models.py:9 .\finance\models.py:31 .\finance\models.py:60
-#: .\finance\models.py:133 .\users\models.py:16
+#: .\finance\models.py:133 .\study_brain\models.py:65
+#: .\study_brain\models.py:81 .\users\models.py:16
 msgid "使用者"
 msgstr "User"
 
@@ -1226,6 +1229,8 @@ msgid "Recommended ETF Allocation List"
 msgstr ""
 
 #: .\invest\templates\invest\ai_plan_result.html:54
+#: .\study_brain\templates\study_brain\quiz_history.html:12
+#: .\study_brain\templates\study_brain\quiz_result.html:85
 msgid "Back to Dashboard"
 msgstr ""
 
@@ -1341,70 +1346,68 @@ msgstr ""
 msgid "Market Data & Analysis"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:232
+#: .\invest\templates\invest\dashboard.html:234
 msgid "Asset Allocation"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:237
-msgid "No portfolio data available"
-msgstr ""
-
-#: .\invest\templates\invest\dashboard.html:245
+#: .\invest\templates\invest\dashboard.html:243
+#: .\invest\templates\invest\dashboard.html:258
 #, python-format
 msgid "Top 10 Gainers (%%)"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:252
+#: .\invest\templates\invest\dashboard.html:250
+#: .\invest\templates\invest\dashboard.html:265
 #, python-format
 msgid "Top 10 Losers (%%)"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:259
+#: .\invest\templates\invest\dashboard.html:273
 msgid "Highest Priced Stocks Top 10"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:266
+#: .\invest\templates\invest\dashboard.html:280
 msgid "Penny Stocks Top 10"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:279
+#: .\invest\templates\invest\dashboard.html:293
 msgid "Loading..."
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:293
+#: .\invest\templates\invest\dashboard.html:307
 msgid "AI is planning for you, please wait..."
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:294
+#: .\invest\templates\invest\dashboard.html:308
 #, python-format
 msgid "Change (%%)"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:295
+#: .\invest\templates\invest\dashboard.html:309
 msgid "Price"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:296
+#: .\invest\templates\invest\dashboard.html:310
 msgid "Loading data for"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:297
+#: .\invest\templates\invest\dashboard.html:311
 msgid "Failed to load data:"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:298
+#: .\invest\templates\invest\dashboard.html:312
 msgid "6-Month Trend"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:299
+#: .\invest\templates\invest\dashboard.html:313
 msgid "Close Price"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:300
+#: .\invest\templates\invest\dashboard.html:314
 msgid "Network Error"
 msgstr ""
 
-#: .\invest\templates\invest\dashboard.html:301
+#: .\invest\templates\invest\dashboard.html:315
 msgid "Please enter a stock symbol first!"
 msgstr ""
 
@@ -1616,6 +1619,368 @@ msgstr ""
 msgid "No notices available."
 msgstr ""
 
+#: .\study_brain\apps.py:9
+msgid "AI 教材大腦"
+msgstr "AI Study Brain"
+
+#: .\study_brain\models.py:9
+msgid "分類名稱"
+msgstr "Category Name"
+
+#: .\study_brain\models.py:10
+msgid "分類描述"
+msgstr "Category Description"
+
+#: .\study_brain\models.py:14 .\study_brain\models.py:15
+msgid "教材分類"
+msgstr "Material Category"
+
+#: .\study_brain\models.py:25
+msgid "所屬分類"
+msgstr "Belongs to Category"
+
+#: .\study_brain\models.py:27
+msgid "上傳者"
+msgstr "Uploader"
+
+#: .\study_brain\models.py:29
+msgid "收藏的使用者"
+msgstr "Users who favorited"
+
+#: .\study_brain\models.py:31
+msgid "教材標題"
+msgstr "Material Title"
+
+#: .\study_brain\models.py:32 .\study_brain\models.py:36
+#: .\study_brain\models.py:37
+msgid "教材檔案"
+msgstr "Material File"
+
+#: .\study_brain\models.py:33
+msgid "上傳時間"
+msgstr "Upload Time"
+
+#: .\study_brain\models.py:47
+msgid "關聯教材"
+msgstr "Related Material"
+
+#: .\study_brain\models.py:49
+msgid "重點整理"
+msgstr "Key Points Summary"
+
+#: .\study_brain\models.py:50
+msgid "練習題資料"
+msgstr "Practice Questions Data"
+
+#: .\study_brain\models.py:51
+msgid "產出時間"
+msgstr "Generation Time"
+
+#: .\study_brain\models.py:54 .\study_brain\models.py:55
+msgid "AI 分析結果"
+msgstr "AI Analysis Results"
+
+#: .\study_brain\models.py:66
+msgid "閱讀教材"
+msgstr "Read Material"
+
+#: .\study_brain\models.py:67
+msgid "閱讀時間"
+msgstr "Read Time"
+
+#: .\study_brain\models.py:70 .\study_brain\models.py:71
+msgid "閱讀紀錄"
+msgstr "Reading Log"
+
+#: .\study_brain\models.py:82
+msgid "測驗來源"
+msgstr "Quiz Source"
+
+#: .\study_brain\models.py:83
+msgid "總題數"
+msgstr "Total Questions"
+
+#: .\study_brain\models.py:84
+msgid "答對題數"
+msgstr "Correct Answers"
+
+#: .\study_brain\models.py:85
+msgid "錯誤率"
+msgstr "Error Rate"
+
+#: .\study_brain\models.py:86
+msgid "測驗時間"
+msgstr "Quiz Time"
+
+#: .\study_brain\models.py:89 .\study_brain\models.py:90
+msgid "測驗紀錄"
+msgstr "Quiz Record"
+
+#: .\study_brain\models.py:101
+msgid "所屬測驗紀錄"
+msgstr "Belongs to Quiz Record"
+
+#: .\study_brain\models.py:103
+msgid "題目內容"
+msgstr "Question Content"
+
+#: .\study_brain\models.py:104
+msgid "使用者答案"
+msgstr "User Answer"
+
+#: .\study_brain\models.py:105
+msgid "正確答案"
+msgstr "Correct Answer"
+
+#: .\study_brain\models.py:108 .\study_brain\models.py:109
+msgid "錯題明細"
+msgstr "Incorrect Question Details"
+
+#: .\study_brain\templates\study_brain\dashboard.html:4
+msgid "AI Study Brain Dashboard"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:14
+#: .\templates\includes\navbar.html:54
+msgid "AI Study Brain"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:15
+msgid "Upload materials to train your personal AI tutor."
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:19
+#: .\study_brain\templates\study_brain\quiz_history.html:4
+#: .\study_brain\templates\study_brain\quiz_history.html:14
+msgid "My Quiz History"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:28
+msgid "Upload Material"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:34
+msgid "Category"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:36
+msgid "Select Category..."
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:43
+msgid "Material Title"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:44
+msgid "Enter a descriptive title"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:47
+msgid "File (PDF/Word)"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:51
+msgid "Click or drag file here"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:55
+msgid "Upload & Process"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:70
+msgid "My Library"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:76
+msgid "Explore Public Materials"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:94
+msgid "Remove from My Library"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:99
+#: .\study_brain\templates\study_brain\dashboard.html:147
+msgid "Uploaded by"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:99
+#: .\study_brain\templates\study_brain\dashboard.html:147
+msgid "System"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:102
+#: .\study_brain\templates\study_brain\study_room.html:28
+msgid "View Original File"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:110
+msgid "Train AI"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:115
+#: .\study_brain\templates\study_brain\study_room.html:4
+msgid "Study Room"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:119
+msgid "No Data Yet"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:129
+msgid "Your library is empty. Upload or explore materials to begin!"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:152
+msgid "Add to My Library"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:161
+msgid "No public materials available at the moment."
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:177
+msgid "Training..."
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_history.html:15
+msgid "Review your past quiz records and mistakes to improve your learning."
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_history.html:27
+msgid "Material"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_history.html:28
+msgid "Score"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_history.html:29
+#: .\study_brain\templates\study_brain\quiz_result.html:31
+msgid "Error Rate"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_history.html:30
+msgid "Action"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_history.html:57
+msgid "Review Mistakes"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_history.html:65
+msgid "You have no quiz records yet. Go practice some materials!"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:4
+#: .\study_brain\templates\study_brain\quiz_result.html:16
+msgid "Quiz Result Report"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:25
+msgid "Correct Answers"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:41
+msgid "Mistakes Analysis"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:54
+msgid "Your Answer"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:56
+msgid "(No answer provided)"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:60
+msgid "Correct Answer"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:74
+msgid "Perfect Score! Excellent Job!"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:75
+msgid "You have fully mastered the content of this material."
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:82
+msgid "Review Material"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\study_room.html:15
+msgid "Back to Library"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\study_room.html:22
+msgid "Last Generated:"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\study_room.html:38
+msgid "Key Summaries"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\study_room.html:43
+msgid "Practice Quiz"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\study_room.html:68
+msgid "Quiz Progress"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\study_room.html:70
+msgid "Total"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\study_room.html:71
+msgid "Answered"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\study_room.html:72
+msgid "Unanswered"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\study_room.html:105
+msgid "Submit Answers"
+msgstr ""
+
+#: .\study_brain\utils.py:115
+msgid "AI 忙碌中，請稍後再試！"
+msgstr "AI is busy, please try again later!"
+
+#: .\study_brain\utils.py:117
+msgid "AI 產出解析發生錯誤，請稍後再試。"
+msgstr "An error occurred while parsing AI output. Please try again later."
+
+#: .\study_brain\views.py:41
+msgid "教材上傳成功！您可以開始進行 AI 訓練。"
+msgstr "Material uploaded successfully! You can now start AI training."
+
+#: .\study_brain\views.py:43
+msgid "請填寫完整資訊並上傳檔案。"
+msgstr "Please fill in all information and upload the file."
+
+#: .\study_brain\views.py:65
+msgid "檔案解析失敗或內容為空，無法進行訓練。"
+msgstr "File parsing failed or content is empty; training cannot proceed."
+
+#: .\study_brain\views.py:83
+msgid "AI 首次分析完成！已產生重點摘要與初始練習題。"
+msgstr "Initial AI analysis complete! Key summaries and practice questions have been generated."
+
+#: .\study_brain\views.py:85
+msgid "AI 產出過程發生未知錯誤，請稍後再試。"
+msgstr "An unknown error occurred during AI generation. Please try again later."
+
+#: .\study_brain\views.py:97
+msgid "該教材尚未產生分析資料。"
+msgstr "No analysis data has been generated for this material yet."
+
+#: .\study_brain\views.py:182
+msgid "檔案不存在或已遺失"
+msgstr "File does not exist or has been lost."
+
 #: .\templates\account\email_confirm.html:5
 #: .\templates\account\email_confirm.html:18
 msgid "Confirm Email Address"
@@ -1801,35 +2166,35 @@ msgstr ""
 msgid "Investment"
 msgstr ""
 
-#: .\templates\includes\navbar.html:56
+#: .\templates\includes\navbar.html:62
 msgid "Tester Zone"
 msgstr ""
 
-#: .\templates\includes\navbar.html:59
+#: .\templates\includes\navbar.html:65
 msgid "Test Management System"
 msgstr ""
 
-#: .\templates\includes\navbar.html:67
+#: .\templates\includes\navbar.html:73
 msgid "No tools available"
 msgstr ""
 
-#: .\templates\includes\navbar.html:100
+#: .\templates\includes\navbar.html:106
 msgid "Admin"
 msgstr ""
 
-#: .\templates\includes\navbar.html:120
+#: .\templates\includes\navbar.html:126
 msgid "Profile"
 msgstr ""
 
-#: .\templates\includes\navbar.html:125
+#: .\templates\includes\navbar.html:131
 msgid "Logout"
 msgstr ""
 
-#: .\templates\includes\navbar.html:132
+#: .\templates\includes\navbar.html:138
 msgid "Login"
 msgstr ""
 
-#: .\templates\includes\navbar.html:135
+#: .\templates\includes\navbar.html:141
 msgid "Register"
 msgstr ""
 
@@ -1917,6 +2282,13 @@ msgstr "User Profile"
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr ""
+
+# * 針對教材解析、上傳狀態與 AI 分析回饋的翻譯檔
+#~ msgid "AI 產出解析失敗，請重新嘗試。"
+#~ msgstr "Failed to parse AI output. Please try again."
+
+#~ msgid "AI 分析完成！請進入學習室查看。"
+#~ msgstr "AI analysis complete! Please visit the study room to view results."
 
 #~ msgid "點數儲值中心"
 #~ msgstr "Point Recharge Center"
