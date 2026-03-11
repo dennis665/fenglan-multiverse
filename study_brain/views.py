@@ -90,7 +90,7 @@ def generate_analysis(request, material_id):
 @login_required
 def study_room(request, material_id):
     """專屬學習室視圖"""
-    material = get_object_or_404(Material, id=material_id, uploader=request.user)
+    material = get_object_or_404(Material, id=material_id)
     latest_analysis = AnalysisResult.objects.filter(material=material).first()
 
     if not latest_analysis:
@@ -176,7 +176,7 @@ def quiz_result(request, record_id):
 @login_required
 def view_material(request, material_id):
     """線上觀看原始教材檔案"""
-    material = get_object_or_404(Material, id=material_id, uploader=request.user)
+    material = get_object_or_404(Material, id=material_id)
 
     if not material.file or not material.file.storage.exists(material.file.name):
         raise Http404(_("檔案不存在或已遺失"))
