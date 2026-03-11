@@ -48,21 +48,40 @@
                             <h5 class="fw-bold mb-4">
                                 <span class="text-danger me-2">Q.</span>{{ mistake.question_text }}
                             </h5>
-                            
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="small text-muted fw-bold mb-1">{% trans "Your Answer" %}</div>
-                                    <div class="answer-badge answer-wrong w-100">
-                                        <i class="fas fa-times me-1"></i> {{ mistake.user_answer|default:_("(No answer provided)") }}
+
+                            {# 加入 align-items-stretch 確保左右兩欄等高 #}
+                            <div class="row g-3 align-items-stretch">
+
+                                {# 使用者的答案 #}
+                                {# 在欄位加上 d-flex flex-column #}
+                                <div class="col-md-6 d-flex flex-column">
+                                    <div class="small text-muted mb-2">{% trans "Your Answer" %}</div>
+                                    {# 把原本的 h-100 拿掉，換成 flex-grow-1，它會自動填滿剩餘空間而不溢出 #}
+                                    <div class="p-3 bg-danger bg-opacity-10 rounded text-danger border border-danger-subtle flex-grow-1 fw-bold">
+                                        <i class="fas fa-times me-2"></i>{{ mistake.user_answer }}
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="small text-muted fw-bold mb-1">{% trans "Correct Answer" %}</div>
-                                    <div class="answer-badge answer-correct w-100">
-                                        <i class="fas fa-check me-1"></i> {{ mistake.correct_answer }}
+
+                                {# 正確答案 #}
+                                {# 在欄位加上 d-flex flex-column #}
+                                <div class="col-md-6 d-flex flex-column">
+                                    <div class="small text-muted mb-2">{% trans "Correct Answer" %}</div>
+                                    {# 把原本的 h-100 拿掉，換成 flex-grow-1 #}
+                                    <div class="p-3 bg-success bg-opacity-10 rounded text-success border border-success-subtle flex-grow-1 fw-bold">
+                                        <i class="fas fa-check me-2"></i>{{ mistake.correct_answer }}
                                     </div>
                                 </div>
                             </div>
+
+                            {# AI 解析區塊 #}
+                            {% if mistake.explanation %}
+                            <div class="mt-3 p-4 bg-light border rounded shadow-sm">
+                                <div class="small text-muted mb-2 fw-bold">
+                                    <i class="fas fa-lightbulb text-warning me-2 fs-5 align-middle"></i>{% trans "AI Explanation" %}
+                                </div>
+                                <div class="text-dark lh-lg" style="white-space: pre-wrap;">{{ mistake.explanation }}</div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}

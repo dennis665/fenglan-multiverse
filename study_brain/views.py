@@ -1,4 +1,5 @@
 import mimetypes
+import re
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -117,18 +118,56 @@ def submit_quiz(request, analysis_id):
 
         #! 核對答案
         for i, q_data in enumerate(questions):
-            #! 前端傳來的 name 是 question_0, question_1...
-            user_answer = request.POST.get(f"question_{i}", "")
-            correct_answer = q_data.get("answer", "")
+            user_answer = request.POST.get(f"question_{i}", "").strip()
+            correct_answer_raw = str(q_data.get("answer", "")).strip()
 
-            if user_answer == correct_answer:
+            #! 確保 options 乾淨無前後空白
+            options = [str(opt).strip() for opt in q_data.get("options", [])]
+
+            #! --- 找出正確答案的「字母」與「完整文字」 ---
+            correct_text = correct_answer_raw
+            correct_letter = "?"
+
+            #! 判斷 AI 過去是否只回傳了 "選項B"、"B" 這種短格式
+            match = re.match(r"^(選項|Option\s*)?([A-Z])\.?$", correct_answer_raw, re.IGNORECASE)
+            if match:
+                letter = match.group(2).upper()
+                idx = ord(letter) - ord("A")
+                if 0 <= idx < len(options):
+                    correct_text = options[idx]
+                    correct_letter = letter
+            else:
+                #! AI 回傳了完整文字，我們反推字母
+                if correct_text in options:
+                    correct_letter = chr(ord("A") + options.index(correct_text))
+                else:
+                    #! 模糊比對防呆機制
+                    for idx, opt in enumerate(options):
+                        if correct_text in opt or opt in correct_text:
+                            correct_text = opt
+                            correct_letter = chr(ord("A") + idx)
+                            break
+
+            #! --- 找出使用者答案的「字母」 ---
+            user_letter = "?"
+            if user_answer in options:
+                user_letter = chr(ord("A") + options.index(user_answer))
+
+            #! --- 比對與紀錄 ---
+            if user_answer == correct_text:
                 correct_count += 1
             else:
+                #! 直接把字母跟文字綁在一起存入資料庫，例如 "B. 選項內容"
+                formatted_user_ans = f"{user_letter}. {user_answer}" if user_answer else str(_("未作答"))
+                formatted_correct_ans = f"{correct_letter}. {correct_text}"
+                original_q_number = i + 1
+
                 mistakes.append(
                     {
-                        "question": q_data.get("question", ""),
-                        "user_answer": user_answer,
-                        "correct_answer": correct_answer,
+                        "question": f"Q{original_q_number}. {q_data.get('question', '')}",
+                        "user_answer": formatted_user_ans,
+                        "correct_answer": formatted_correct_ans,
+                        "explanation": q_data.get("explanation", _("此為舊版題目，無提供解析。")),
                     }
                 )
 
@@ -152,9 +191,10 @@ def submit_quiz(request, analysis_id):
                 question_text=mist["question"],
                 user_answer=mist["user_answer"],
                 correct_answer=mist["correct_answer"],
+                explanation=mist["explanation"],
             )
 
-        messages.success(request, _(f"測驗提交成功！您的正確率為 {correct_count}/{total_q}。"))
+        messages.success(request, str(_(f"測驗提交成功！您的正確率為 {correct_count}/{total_q}。")))
         return redirect("study_brain:quiz_result", record_id=quiz_record.pk)
 
     return redirect("study_brain:dashboard")

@@ -50,7 +50,7 @@ def generate_ai_content(text_content, existing_summary=None, existing_questions=
 
     #! 要求產出進階題目
     prompt += """
-    任務 2：請出 5 題單選練習題，必須以純 JSON 陣列格式回傳。
+    任務 2：請出 15 題單選練習題，必須以純 JSON 陣列格式回傳。
     【難度與多樣性要求】：請出具備深度的「情境應用題」或「觀念變化題」，不要只考死背名詞。
     """
 
@@ -65,10 +65,14 @@ def generate_ai_content(text_content, existing_summary=None, existing_questions=
     [
         {
             "question": "題目內容",
-            "options": ["選項A", "選項B", "選項C", "選項D"],
-            "answer": "選項B"
+            "options": ["選項A的完整內容", "選項B的完整內容", "選項C的完整內容", "選項D的完整內容"],
+            "answer": "選項B的完整內容",
+            "explanation": "請詳細說明正確答案為何正確，並逐一解釋其他選項為何錯誤。"
         }
     ]
+    
+    【極度重要】："answer" 欄位必須填寫「正確選項的完整文字內容」，請絕對不要只填寫「選項B」或「B」。
+    【極度重要】："explanation" 欄位必須包含詳盡的解析，幫助學生理解所有選項的對錯原因。
     
     請嚴格遵守以下輸出格式（請使用特定分隔符號以便程式解析）：
     """

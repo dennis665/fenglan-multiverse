@@ -33,29 +33,40 @@
                 </li>
 
                 {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link {% if 'finance/recharge' in request.path %}active{% endif %}" href="{% url 'finance:recharge_store' %}">
-                        <i class="fas fa-gem me-1 text-info"></i>{% trans "Point Recharge" %}
+                {# 會員專區下拉選單 #}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {% if 'finance' in request.path or 'invest' in request.path or 'study_brain' in request.path %}active{% endif %}" href="#" id="memberZoneDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-crown me-1 text-warning"></i>{% trans "Member Zone" %}
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if 'finance/shop' in request.path %}active{% endif %}" href="{% url 'finance:shop' %}">
-                        <i class="fas fa-store me-1 text-success"></i>{% trans "Point Shop" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if 'invest' in request.path %}active{% endif %}" href="{% url 'invest:dashboard' %}">
-                        <i class="fas fa-chart-line me-1 text-warning"></i>{% trans "Investment" %}
-                    </a>
-                </li>
-                {# AI 教材大腦入口 #}
-                <li class="nav-item">
-                    <a class="nav-link {% if 'study_brain' in request.path %}active{% endif %}" href="{% url 'study_brain:dashboard' %}">
-                        <i class="fas fa-brain me-1 text-primary"></i>{% trans "AI Study Brain" %}
-                    </a>
+                    <ul class="dropdown-menu shadow border-0" aria-labelledby="memberZoneDropdown">
+                        <li>
+                            <a class="dropdown-item {% if 'finance/recharge' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'finance:recharge_store' %}">
+                                <i class="fas fa-gem fa-fw me-2 {% if 'finance/recharge' not in request.path %}text-info{% endif %}"></i>{% trans "Point Recharge" %}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {% if 'finance/shop' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'finance:shop' %}">
+                                <i class="fas fa-store fa-fw me-2 {% if 'finance/shop' not in request.path %}text-success{% endif %}"></i>{% trans "Point Shop" %}
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item {% if 'invest' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'invest:dashboard' %}">
+                                <i class="fas fa-chart-line fa-fw me-2 {% if 'invest' not in request.path %}text-warning{% endif %}"></i>{% trans "Investment" %}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {% if 'study_brain' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'study_brain:dashboard' %}">
+                                <i class="fas fa-brain fa-fw me-2 {% if 'study_brain' not in request.path %}text-primary{% endif %}"></i>{% trans "AI Study Brain" %}
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 {% endif %}
 
+                {# 測試員專區 (保持原樣，獨立於會員專區之外) #}
                 {% if user.is_staff or user.is_superuser %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-info fw-bold" href="#" id="testerDropdown" role="button" data-bs-toggle="dropdown">

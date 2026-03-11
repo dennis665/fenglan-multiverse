@@ -90,7 +90,7 @@
                                 <div class="col-12">
                                     <div class="quiz-option q-opt-{{ forloop.parentloop.counter0 }} shadow-sm" data-value="{{ option }}" onclick="selectOption('{{ forloop.parentloop.counter0 }}', this)">
                                         {# 使用 cycle 輪替輸出 A B C D E F #}
-                                        <span class="fw-bold me-3 fs-5 text-primary">{% cycle 'A' 'B' 'C' 'D' 'E' 'F' %}.</span> 
+                                        <span class="fw-bold me-3 fs-5 text-primary">{% cycle 'A' 'B' 'C' 'D' %}.</span> 
                                         {# 加入 opt-text 類別，交由 JS 清理空白 #}
                                         <span class="opt-text">{{ option }}</span>
                                     </div>

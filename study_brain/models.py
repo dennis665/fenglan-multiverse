@@ -103,6 +103,7 @@ class QuizMistake(models.Model):
     question_text = models.TextField(verbose_name=_("題目內容"))
     user_answer = models.TextField(verbose_name=_("使用者答案"))
     correct_answer = models.TextField(verbose_name=_("正確答案"))
+    explanation = models.TextField(verbose_name=_("解析說明"), blank=True, null=True)
 
     class Meta:
         verbose_name = _("錯題明細")

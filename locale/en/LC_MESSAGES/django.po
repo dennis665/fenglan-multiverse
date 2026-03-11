@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-10 14:56+0800\n"
+"POT-Creation-Date: 2026-03-11 11:26+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -869,7 +869,7 @@ msgid "點數購物訂單"
 msgstr "Point Purchase Order"
 
 #: .\finance\templates\finance\recharge_store.html:4
-#: .\templates\includes\navbar.html:38
+#: .\templates\includes\navbar.html:44
 msgid "Point Recharge"
 msgstr ""
 
@@ -917,7 +917,7 @@ msgstr ""
 msgid "No recharge packages available at the moment."
 msgstr ""
 
-#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:43
+#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:49
 msgid "Point Shop"
 msgstr ""
 
@@ -1230,7 +1230,7 @@ msgstr ""
 
 #: .\invest\templates\invest\ai_plan_result.html:54
 #: .\study_brain\templates\study_brain\quiz_history.html:12
-#: .\study_brain\templates\study_brain\quiz_result.html:85
+#: .\study_brain\templates\study_brain\quiz_result.html:104
 msgid "Back to Dashboard"
 msgstr ""
 
@@ -1732,7 +1732,11 @@ msgstr "User Answer"
 msgid "正確答案"
 msgstr "Correct Answer"
 
-#: .\study_brain\models.py:108 .\study_brain\models.py:109
+#: .\study_brain\models.py:106
+msgid "解析說明"
+msgstr "Explanation"
+
+#: .\study_brain\models.py:109 .\study_brain\models.py:110
 msgid "錯題明細"
 msgstr "Incorrect Question Details"
 
@@ -1741,7 +1745,7 @@ msgid "AI Study Brain Dashboard"
 msgstr ""
 
 #: .\study_brain\templates\study_brain\dashboard.html:14
-#: .\templates\includes\navbar.html:54
+#: .\templates\includes\navbar.html:62
 msgid "AI Study Brain"
 msgstr ""
 
@@ -1885,27 +1889,27 @@ msgstr ""
 msgid "Mistakes Analysis"
 msgstr ""
 
-#: .\study_brain\templates\study_brain\quiz_result.html:54
+#: .\study_brain\templates\study_brain\quiz_result.html:58
 msgid "Your Answer"
 msgstr ""
 
-#: .\study_brain\templates\study_brain\quiz_result.html:56
-msgid "(No answer provided)"
-msgstr ""
-
-#: .\study_brain\templates\study_brain\quiz_result.html:60
+#: .\study_brain\templates\study_brain\quiz_result.html:68
 msgid "Correct Answer"
 msgstr ""
 
-#: .\study_brain\templates\study_brain\quiz_result.html:74
+#: .\study_brain\templates\study_brain\quiz_result.html:80
+msgid "AI Explanation"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\quiz_result.html:93
 msgid "Perfect Score! Excellent Job!"
 msgstr ""
 
-#: .\study_brain\templates\study_brain\quiz_result.html:75
+#: .\study_brain\templates\study_brain\quiz_result.html:94
 msgid "You have fully mastered the content of this material."
 msgstr ""
 
-#: .\study_brain\templates\study_brain\quiz_result.html:82
+#: .\study_brain\templates\study_brain\quiz_result.html:101
 msgid "Review Material"
 msgstr ""
 
@@ -1945,39 +1949,50 @@ msgstr ""
 msgid "Submit Answers"
 msgstr ""
 
-#: .\study_brain\utils.py:115
+#: .\study_brain\utils.py:119
 msgid "AI 忙碌中，請稍後再試！"
 msgstr "AI is busy, please try again later!"
 
-#: .\study_brain\utils.py:117
+#: .\study_brain\utils.py:121
 msgid "AI 產出解析發生錯誤，請稍後再試。"
 msgstr "An error occurred while parsing AI output. Please try again later."
 
-#: .\study_brain\views.py:41
+#: .\study_brain\views.py:42
 msgid "教材上傳成功！您可以開始進行 AI 訓練。"
 msgstr "Material uploaded successfully! You can now start AI training."
 
-#: .\study_brain\views.py:43
+#: .\study_brain\views.py:44
 msgid "請填寫完整資訊並上傳檔案。"
 msgstr "Please fill in all information and upload the file."
 
-#: .\study_brain\views.py:65
+#: .\study_brain\views.py:66
 msgid "檔案解析失敗或內容為空，無法進行訓練。"
 msgstr "File parsing failed or content is empty; training cannot proceed."
 
-#: .\study_brain\views.py:83
+#: .\study_brain\views.py:84
 msgid "AI 首次分析完成！已產生重點摘要與初始練習題。"
-msgstr "Initial AI analysis complete! Key summaries and practice questions have been generated."
+msgstr ""
+"Initial AI analysis complete! Key summaries and practice questions have been "
+"generated."
 
-#: .\study_brain\views.py:85
+#: .\study_brain\views.py:86
 msgid "AI 產出過程發生未知錯誤，請稍後再試。"
-msgstr "An unknown error occurred during AI generation. Please try again later."
+msgstr ""
+"An unknown error occurred during AI generation. Please try again later."
 
-#: .\study_brain\views.py:97
+#: .\study_brain\views.py:98
 msgid "該教材尚未產生分析資料。"
 msgstr "No analysis data has been generated for this material yet."
 
-#: .\study_brain\views.py:182
+#: .\study_brain\views.py:161
+msgid "未作答"
+msgstr "Not Answered"
+
+#: .\study_brain\views.py:170
+msgid "此為舊版題目，無提供解析。"
+msgstr "This is a legacy question; no explanation is provided."
+
+#: .\study_brain\views.py:222
 msgid "檔案不存在或已遺失"
 msgstr "File does not exist or has been lost."
 
@@ -2162,39 +2177,43 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: .\templates\includes\navbar.html:48
+#: .\templates\includes\navbar.html:39
+msgid "Member Zone"
+msgstr ""
+
+#: .\templates\includes\navbar.html:57
 msgid "Investment"
 msgstr ""
 
-#: .\templates\includes\navbar.html:62
+#: .\templates\includes\navbar.html:73
 msgid "Tester Zone"
 msgstr ""
 
-#: .\templates\includes\navbar.html:65
+#: .\templates\includes\navbar.html:76
 msgid "Test Management System"
 msgstr ""
 
-#: .\templates\includes\navbar.html:73
+#: .\templates\includes\navbar.html:84
 msgid "No tools available"
 msgstr ""
 
-#: .\templates\includes\navbar.html:106
+#: .\templates\includes\navbar.html:117
 msgid "Admin"
 msgstr ""
 
-#: .\templates\includes\navbar.html:126
+#: .\templates\includes\navbar.html:137
 msgid "Profile"
 msgstr ""
 
-#: .\templates\includes\navbar.html:131
+#: .\templates\includes\navbar.html:142
 msgid "Logout"
 msgstr ""
 
-#: .\templates\includes\navbar.html:138
+#: .\templates\includes\navbar.html:149
 msgid "Login"
 msgstr ""
 
-#: .\templates\includes\navbar.html:141
+#: .\templates\includes\navbar.html:152
 msgid "Register"
 msgstr ""
 
