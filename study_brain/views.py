@@ -33,10 +33,18 @@ def upload_material(request):
         category_id = request.POST.get("category")
         title = request.POST.get("title")
         file_obj = request.FILES.get("file")
+        #! 取得前端 checkbox 的值，如果有勾選，值會是 'on'
+        is_exam_paper = request.POST.get("is_exam_paper") == "on"
 
         if category_id and title and file_obj:
             category = get_object_or_404(Category, id=category_id)
-            material = Material.objects.create(category=category, uploader=request.user, title=title, file=file_obj)
+            material = Material.objects.create(
+                category=category,
+                uploader=request.user,
+                title=title,
+                file=file_obj,
+                is_exam_paper=is_exam_paper,  # * 存入資料庫
+            )
             #! 上傳者自動將該教材加入「我的教材庫」
             material.saved_by.add(request.user)
             messages.success(request, _("教材上傳成功！您可以開始進行 AI 訓練。"))
@@ -48,7 +56,7 @@ def upload_material(request):
 
 @login_required
 def generate_analysis(request, material_id):
-    """觸發 AI 訓練與解析 (支援題庫無限擴充)"""
+    """觸發 AI 訓練與解析"""
     if request.method == "POST":
         #! 現在是公開教材，所以任何人都可以對該教材按下「訓練 AI」來擴充題庫
         material = get_object_or_404(Material, id=material_id)
@@ -62,12 +70,18 @@ def generate_analysis(request, material_id):
         file_path = material.file.path
         text_content = extract_text_from_file(file_path)
 
-        if not text_content:
+        if not text_content and not file_path.lower().endswith((".pdf", ".mp4", ".mov", ".avi")):
             messages.error(request, _("檔案解析失敗或內容為空，無法進行訓練。"))
             return redirect("study_brain:dashboard")
 
         #! 呼叫 AI 產生內容 (傳入歷史資料以避免重複)
-        new_summary, new_quiz_data, error_msg = generate_ai_content(text_content, existing_summary, existing_questions)
+        new_summary, new_quiz_data, error_msg = generate_ai_content(
+            file_path=file_path,
+            text_content=text_content,
+            existing_summary=existing_summary,
+            existing_questions=existing_questions,
+            is_exam_paper=material.is_exam_paper,
+        )
 
         #! 如果有明確的錯誤訊息，直接發送給前端
         if error_msg:

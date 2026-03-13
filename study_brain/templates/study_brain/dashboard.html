@@ -51,9 +51,23 @@
                                 <p class="mb-0 small text-muted" id="fileNameDisplay">{% trans "Click or drag file here" %}</p>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">
-                            {% trans "Upload & Process" %}
-                        </button>
+
+                        {# 歷屆考題切換選項 #}
+                        <div class="form-check mb-4 bg-light p-3 rounded border border-warning">
+                            <input class="form-check-input ms-1" type="checkbox" name="is_exam_paper" id="isExamPaper">
+                            <label class="form-check-label ms-2 fw-bold text-dark" for="isExamPaper">
+                                <i class="fas fa-file-signature text-warning me-1"></i>{% trans "這是歷屆考題" %}
+                            </label>
+                            <div class="small text-muted ms-2 mt-1">
+                                {% trans "打勾後，AI 將不會產生重點摘要，而是直接萃取檔案中的考題並自動為您生成詳解。" %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
+                                <i class="fas fa-cloud-upload-alt me-2"></i>{% trans "Upload & Prepare" %}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

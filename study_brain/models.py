@@ -28,6 +28,8 @@ class Material(models.Model):
     #! 記錄有哪些使用者把這份教材加入了「我的教材庫」
     saved_by = models.ManyToManyField(User, related_name="saved_materials", blank=True, verbose_name=_("收藏的使用者"))
 
+    is_exam_paper = models.BooleanField(default=False, verbose_name=_("是否為歷屆考題"))
+
     title = models.CharField(max_length=255, verbose_name=_("教材標題"))
     file = models.FileField(upload_to="study_materials/%Y/%m/", verbose_name=_("教材檔案"))  # * 預計存放 PDF 或 Word
     uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name=_("上傳時間"))

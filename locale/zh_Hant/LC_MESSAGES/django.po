@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-11 11:26+0800\n"
+"POT-Creation-Date: 2026-03-13 16:44+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -679,8 +679,8 @@ msgid "財務與商城"
 msgstr ""
 
 #: .\finance\models.py:9 .\finance\models.py:31 .\finance\models.py:60
-#: .\finance\models.py:133 .\study_brain\models.py:65
-#: .\study_brain\models.py:81 .\users\models.py:16
+#: .\finance\models.py:133 .\study_brain\models.py:67
+#: .\study_brain\models.py:83 .\users\models.py:16
 msgid "使用者"
 msgstr ""
 
@@ -1634,95 +1634,99 @@ msgid "收藏的使用者"
 msgstr ""
 
 #: .\study_brain\models.py:31
-msgid "教材標題"
-msgstr ""
-
-#: .\study_brain\models.py:32 .\study_brain\models.py:36
-#: .\study_brain\models.py:37
-msgid "教材檔案"
+msgid "是否為歷屆考題"
 msgstr ""
 
 #: .\study_brain\models.py:33
+msgid "教材標題"
+msgstr ""
+
+#: .\study_brain\models.py:34 .\study_brain\models.py:38
+#: .\study_brain\models.py:39
+msgid "教材檔案"
+msgstr ""
+
+#: .\study_brain\models.py:35
 msgid "上傳時間"
 msgstr ""
 
-#: .\study_brain\models.py:47
+#: .\study_brain\models.py:49
 msgid "關聯教材"
 msgstr ""
 
-#: .\study_brain\models.py:49
+#: .\study_brain\models.py:51
 msgid "重點整理"
 msgstr ""
 
-#: .\study_brain\models.py:50
+#: .\study_brain\models.py:52
 msgid "練習題資料"
 msgstr ""
 
-#: .\study_brain\models.py:51
+#: .\study_brain\models.py:53
 msgid "產出時間"
 msgstr ""
 
-#: .\study_brain\models.py:54 .\study_brain\models.py:55
+#: .\study_brain\models.py:56 .\study_brain\models.py:57
 msgid "AI 分析結果"
 msgstr ""
 
-#: .\study_brain\models.py:66
+#: .\study_brain\models.py:68
 msgid "閱讀教材"
 msgstr ""
 
-#: .\study_brain\models.py:67
+#: .\study_brain\models.py:69
 msgid "閱讀時間"
 msgstr ""
 
-#: .\study_brain\models.py:70 .\study_brain\models.py:71
+#: .\study_brain\models.py:72 .\study_brain\models.py:73
 msgid "閱讀紀錄"
 msgstr ""
 
-#: .\study_brain\models.py:82
+#: .\study_brain\models.py:84
 msgid "測驗來源"
 msgstr ""
 
-#: .\study_brain\models.py:83
+#: .\study_brain\models.py:85
 msgid "總題數"
 msgstr ""
 
-#: .\study_brain\models.py:84
+#: .\study_brain\models.py:86
 msgid "答對題數"
 msgstr ""
 
-#: .\study_brain\models.py:85
+#: .\study_brain\models.py:87
 msgid "錯誤率"
 msgstr ""
 
-#: .\study_brain\models.py:86
+#: .\study_brain\models.py:88
 msgid "測驗時間"
 msgstr ""
 
-#: .\study_brain\models.py:89 .\study_brain\models.py:90
+#: .\study_brain\models.py:91 .\study_brain\models.py:92
 msgid "測驗紀錄"
 msgstr ""
 
-#: .\study_brain\models.py:101
+#: .\study_brain\models.py:103
 msgid "所屬測驗紀錄"
 msgstr ""
 
-#: .\study_brain\models.py:103
+#: .\study_brain\models.py:105
 msgid "題目內容"
 msgstr ""
 
-#: .\study_brain\models.py:104
+#: .\study_brain\models.py:106
 msgid "使用者答案"
 msgstr ""
 
-#: .\study_brain\models.py:105
+#: .\study_brain\models.py:107
 msgid "正確答案"
 msgstr ""
 
-#: .\study_brain\models.py:106
+#: .\study_brain\models.py:108
 msgid "解析說明"
 msgstr ""
 
-#: .\study_brain\models.py:109 .\study_brain\models.py:110
+#: .\study_brain\models.py:111 .\study_brain\models.py:112
 msgid "錯題明細"
 msgstr ""
 
@@ -1774,63 +1778,72 @@ msgstr "檔案 (PDF/Word)"
 msgid "Click or drag file here"
 msgstr "點擊或將檔案拖曳至此"
 
-#: .\study_brain\templates\study_brain\dashboard.html:55
-msgid "Upload & Process"
-msgstr "上傳並開始分析"
+#: .\study_brain\templates\study_brain\dashboard.html:59
+msgid "這是歷屆考題"
+msgstr ""
 
-#: .\study_brain\templates\study_brain\dashboard.html:70
+#: .\study_brain\templates\study_brain\dashboard.html:62
+msgid ""
+"打勾後，AI 將不會產生重點摘要，而是直接萃取檔案中的考題並自動為您生成詳解。"
+msgstr ""
+
+#: .\study_brain\templates\study_brain\dashboard.html:68
+msgid "Upload & Prepare"
+msgstr "上傳並開始預處理"
+
+#: .\study_brain\templates\study_brain\dashboard.html:84
 msgid "My Library"
 msgstr "我的教材庫"
 
-#: .\study_brain\templates\study_brain\dashboard.html:76
+#: .\study_brain\templates\study_brain\dashboard.html:90
 msgid "Explore Public Materials"
 msgstr "探索公開教材"
 
-#: .\study_brain\templates\study_brain\dashboard.html:94
+#: .\study_brain\templates\study_brain\dashboard.html:108
 msgid "Remove from My Library"
 msgstr "從我的教材庫移除"
 
-#: .\study_brain\templates\study_brain\dashboard.html:99
-#: .\study_brain\templates\study_brain\dashboard.html:147
+#: .\study_brain\templates\study_brain\dashboard.html:113
+#: .\study_brain\templates\study_brain\dashboard.html:161
 msgid "Uploaded by"
 msgstr "上傳者："
 
-#: .\study_brain\templates\study_brain\dashboard.html:99
-#: .\study_brain\templates\study_brain\dashboard.html:147
+#: .\study_brain\templates\study_brain\dashboard.html:113
+#: .\study_brain\templates\study_brain\dashboard.html:161
 msgid "System"
 msgstr "系統"
 
-#: .\study_brain\templates\study_brain\dashboard.html:102
+#: .\study_brain\templates\study_brain\dashboard.html:116
 #: .\study_brain\templates\study_brain\study_room.html:28
 msgid "View Original File"
 msgstr "檢視原始檔案"
 
-#: .\study_brain\templates\study_brain\dashboard.html:110
+#: .\study_brain\templates\study_brain\dashboard.html:124
 msgid "Train AI"
 msgstr "訓練 AI"
 
-#: .\study_brain\templates\study_brain\dashboard.html:115
+#: .\study_brain\templates\study_brain\dashboard.html:129
 #: .\study_brain\templates\study_brain\study_room.html:4
 msgid "Study Room"
 msgstr "學習室"
 
-#: .\study_brain\templates\study_brain\dashboard.html:119
+#: .\study_brain\templates\study_brain\dashboard.html:133
 msgid "No Data Yet"
 msgstr "暫無資料"
 
-#: .\study_brain\templates\study_brain\dashboard.html:129
+#: .\study_brain\templates\study_brain\dashboard.html:143
 msgid "Your library is empty. Upload or explore materials to begin!"
 msgstr "您的教材庫是空的。上傳教材或探索公開資源來開始吧！"
 
-#: .\study_brain\templates\study_brain\dashboard.html:152
+#: .\study_brain\templates\study_brain\dashboard.html:166
 msgid "Add to My Library"
 msgstr "加入我的教材庫"
 
-#: .\study_brain\templates\study_brain\dashboard.html:161
+#: .\study_brain\templates\study_brain\dashboard.html:175
 msgid "No public materials available at the moment."
 msgstr "目前尚無公開教材。"
 
-#: .\study_brain\templates\study_brain\dashboard.html:177
+#: .\study_brain\templates\study_brain\dashboard.html:191
 msgid "Training..."
 msgstr "訓練中..."
 
@@ -1936,47 +1949,47 @@ msgstr "未答"
 msgid "Submit Answers"
 msgstr "提交答案"
 
-#: .\study_brain\utils.py:119
-msgid "AI 忙碌中，請稍後再試！"
+#: .\study_brain\utils.py:168
+msgid "此為歷屆考題匯入，無重點摘要。請直接前往「測驗練習」進行刷題！"
 msgstr ""
 
-#: .\study_brain\utils.py:121
-msgid "AI 產出解析發生錯誤，請稍後再試。"
+#: .\study_brain\utils.py:177
+msgid "AI 忙碌中或檔案解析發生錯誤，請稍後再試！"
 msgstr ""
 
-#: .\study_brain\views.py:42
+#: .\study_brain\views.py:50
 msgid "教材上傳成功！您可以開始進行 AI 訓練。"
 msgstr ""
 
-#: .\study_brain\views.py:44
+#: .\study_brain\views.py:52
 msgid "請填寫完整資訊並上傳檔案。"
 msgstr ""
 
-#: .\study_brain\views.py:66
+#: .\study_brain\views.py:74
 msgid "檔案解析失敗或內容為空，無法進行訓練。"
 msgstr ""
 
-#: .\study_brain\views.py:84
+#: .\study_brain\views.py:98
 msgid "AI 首次分析完成！已產生重點摘要與初始練習題。"
 msgstr ""
 
-#: .\study_brain\views.py:86
+#: .\study_brain\views.py:100
 msgid "AI 產出過程發生未知錯誤，請稍後再試。"
 msgstr ""
 
-#: .\study_brain\views.py:98
+#: .\study_brain\views.py:112
 msgid "該教材尚未產生分析資料。"
 msgstr ""
 
-#: .\study_brain\views.py:161
+#: .\study_brain\views.py:175
 msgid "未作答"
 msgstr ""
 
-#: .\study_brain\views.py:170
+#: .\study_brain\views.py:184
 msgid "此為舊版題目，無提供解析。"
 msgstr ""
 
-#: .\study_brain\views.py:222
+#: .\study_brain\views.py:236
 msgid "檔案不存在或已遺失"
 msgstr ""
 

@@ -40,6 +40,9 @@ bandit -r . -x ./.venv,./venv,./tests -f txt -o bandit_report.txt
 #! Django 專用安全性分析：Safety & Djade
 safety check
 
+#! 下載 OCR
+winget install UB-Mannheim.TesseractOCR
+
 
 -------docker 相關-------
 #! 建立並啟動所有容器，改 Dockerfile、裝新套件
