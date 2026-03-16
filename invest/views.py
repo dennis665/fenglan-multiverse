@@ -13,6 +13,13 @@ from google import genai
 from .forms import AIRoboAdvisorForm, TransactionForm
 from .models import Holding, Portfolio, Stock, StockPrice, Transaction
 
+FALLBACK_MODELS = [
+    "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
+    "gemini-2.5-flash",  # * 備援 1：前代主力 (每天額外 20 次)
+    "gemini-3.1-flash-lite-preview",  # * 備援 2：超級救星！(每天 500 次，不再 404)
+    "gemini-flash-lite-latest",  # * 備援 3：官方動態 Lite 捷徑
+    "gemini-2.0-flash",  # * 備援 4：老將壓陣
+]
 
 @login_required
 def portfolio_dashboard(request):
@@ -231,32 +238,39 @@ def generate_ai_plan(request):
     - 風險承受度：{risk_str}型
     """
 
-    try:
-        #! 套用你的新版 API 呼叫格式
-        response = client.models.generate_content(
-            model="gemini-flash-latest",
-            config={"system_instruction": dynamic_instruction},
-            contents=user_query,
-        )
+    for model_name in FALLBACK_MODELS:
+        try:
+            print(f"🤖 正在嘗試使用模型: {model_name}...")
+            response = client.models.generate_content(
+                model=model_name,
+                config={"system_instruction": dynamic_instruction},
+                contents=user_query,
+            )
 
-        #! 清洗可能帶有 Markdown 標記的回傳字串並解析 JSON
-        raw_text = response.text.strip() if response.text else ""
-        if raw_text.startswith("```json"):
-            raw_text = raw_text[7:]
-        if raw_text.endswith("```"):
-            raw_text = raw_text[:-3]
+            #! 清洗可能帶有 Markdown 標記的回傳字串並解析 JSON
+            raw_text = response.text.strip() if response.text else ""
+            if raw_text.startswith("```json"):
+                raw_text = raw_text[7:]
+            if raw_text.endswith("```"):
+                raw_text = raw_text[:-3]
 
-        ai_result = json.loads(raw_text.strip())
+            ai_result = json.loads(raw_text.strip())
 
-        #! 渲染結果頁面
-        return render(request, "invest/ai_plan_result.html", {"plan": ai_result, "user_data": data})
+            #! 渲染結果頁面
+            return render(request, "invest/ai_plan_result.html", {"plan": ai_result, "user_data": data})
+        except Exception as e:
+            error_msg = str(e)
+            #! 檢查是否為 429 額度耗盡錯誤
+            if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                print(f"⚠️ 模型 {model_name} 額度已滿 (429)，準備切換下一個備援模型...")
+                continue  # * 忽略錯誤，進入下一次迴圈換模型
+            else:
+                #! 如果是其他錯誤 (例如 JSON 解析失敗、系統斷線)，就不換模型，直接報錯
+                print(f"❌ 發生非額度相關錯誤: {error_msg}")
+                return None
 
-    except json.JSONDecodeError:
-        messages.error(request, "AI 產生的格式異常，請再試一次。")
-        return redirect("invest:dashboard")
-    except Exception as e:
-        messages.error(request, f"AI 顧問目前正在休息，請稍後再試。({str(e)})")
-        return redirect("invest:dashboard")
+    messages.error(request, "AI 顧問目前正在休息，請稍後再試。")
+    return redirect("invest:dashboard")
 
 
 @login_required

@@ -16,6 +16,13 @@ from utils.decorators import staff_required
 
 from .models import FeatureStatus
 
+FALLBACK_MODELS = [
+    "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
+    "gemini-2.5-flash",  # * 備援 1：前代主力 (每天額外 20 次)
+    "gemini-3.1-flash-lite-preview",  # * 備援 2：超級救星！(每天 500 次，不再 404)
+    "gemini-flash-lite-latest",  # * 備援 3：官方動態 Lite 捷徑
+    "gemini-2.0-flash",  # * 備援 4：老將壓陣
+]
 
 @login_required
 def profile_view(request):
@@ -109,17 +116,29 @@ def portal_ai_bot(request):
         - Current time: {now().strftime("%Y-%m-%d %H:%M")}
         """
 
-        try:
-            response = client.models.generate_content(
-                model="gemini-flash-latest",
-                config={"system_instruction": dynamic_instruction},
-                contents=user_query,
-            )
-            return JsonResponse({"reply": response.text})
-        except Exception:
-            return JsonResponse({"error": _("AI is currently resting, please try again later.")}, status=500)
+        for model_name in FALLBACK_MODELS:
+            try:
+                print(f"🤖 正在嘗試使用模型: {model_name}...")
+                response = client.models.generate_content(
+                    model=model_name,
+                    config={"system_instruction": dynamic_instruction},
+                    contents=user_query,
+                )
+                return JsonResponse({"reply": response.text})
 
-    return JsonResponse({"error": _("Invalid request")}, status=400)
+            except Exception as e:
+                error_msg = str(e)
+                #! 檢查是否為 429 額度耗盡錯誤
+                if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                    print(f"⚠️ 模型 {model_name} 額度已滿 (429)，準備切換下一個備援模型...")
+                    continue  # * 忽略錯誤，進入下一次迴圈換模型
+                else:
+                    #! 如果是其他錯誤 (例如 JSON 解析失敗、系統斷線)，就不換模型，直接報錯
+                    print(f"❌ 發生非額度相關錯誤: {error_msg}")
+                    return JsonResponse({"error": _("AI is currently resting, please try again later.")}, status=500)
+
+    print("🚨 所有備援模型的免費額度皆已耗盡！")
+    return JsonResponse({"error": _("AI is currently resting, please try again later.")}, status=500)
 
 
 def lucky_draw(request):

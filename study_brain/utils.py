@@ -14,6 +14,13 @@ from google.genai import types
 #! 建立 Gemini 官方最新版 Client
 client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
+FALLBACK_MODELS = [
+    "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
+    "gemini-2.5-flash",  # * 備援 1：前代主力 (每天額外 20 次)
+    "gemini-3.1-flash-lite-preview",  # * 備援 2：超級救星！(每天 500 次，不再 404)
+    "gemini-flash-lite-latest",  # * 備援 3：官方動態 Lite 捷徑
+    "gemini-2.0-flash",  # * 備援 4：老將壓陣
+]
 
 def extract_text_from_file(file_path):
     """根據檔案副檔名萃取文字內容"""
@@ -154,44 +161,52 @@ def generate_ai_content(file_path, text_content, existing_summary=None, existing
     quiz_data = []
     error_msg = None
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-flash-latest",
-            config=types.GenerateContentConfig(temperature=0.3),
-            contents=contents_payload,
-        )
-        result_text = response.text
+    for model_name in FALLBACK_MODELS:
+        try:
+            print(f"🤖 正在嘗試使用模型: {model_name}...")
+            response = client.models.generate_content(
+                model=model_name,
+                config=types.GenerateContentConfig(temperature=0.3),
+                contents=contents_payload,
+            )
+            result_text = response.text
 
-        if result_text and not is_exam_paper and not existing_summary and "===SUMMARY_START===" in result_text:
-            summary = result_text.split("===SUMMARY_START===")[1].split("===SUMMARY_END===")[0].strip()
-        elif is_exam_paper:
-            summary = str(_("此為歷屆考題匯入，無重點摘要。請直接前往「測驗練習」進行刷題！"))
+            if result_text and not is_exam_paper and not existing_summary and "===SUMMARY_START===" in result_text:
+                summary = result_text.split("===SUMMARY_START===")[1].split("===SUMMARY_END===")[0].strip()
+            elif is_exam_paper:
+                summary = str(_("此為歷屆考題匯入，無重點摘要。請直接前往「測驗練習」進行刷題！"))
 
-        if result_text and "===QUIZ_START===" in result_text and "===QUIZ_END===" in result_text:
-            quiz_json_str = result_text.split("===QUIZ_START===")[1].split("===QUIZ_END===")[0].strip()
-            quiz_json_str = quiz_json_str.replace("```json", "").replace("```", "").strip()
-            quiz_data = json.loads(quiz_json_str)
-
-    except Exception as e:
-        print(f"AI API Error: {e}")
+            if result_text and "===QUIZ_START===" in result_text and "===QUIZ_END===" in result_text:
+                quiz_json_str = result_text.split("===QUIZ_START===")[1].split("===QUIZ_END===")[0].strip()
+                quiz_json_str = quiz_json_str.replace("```json", "").replace("```", "").strip()
+                quiz_data = json.loads(quiz_json_str)
+            break
+        except Exception as e:
+            error_msg = str(e)
+            #! 檢查是否為 429 額度耗盡錯誤
+            if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                print(f"⚠️ 模型 {model_name} 額度已滿 (429)，準備切換下一個備援模型...")
+                continue  # * 忽略錯誤，進入下一次迴圈換模型
+            else:
+                #! 如果是其他錯誤 (例如 JSON 解析失敗、系統斷線)，就不換模型，直接報錯
+                print(f"❌ 發生非額度相關錯誤: {error_msg}")
         error_msg = _("AI 忙碌中或檔案解析發生錯誤，請稍後再試！")
 
-    finally:
-        #! ======== 雙重閱後即焚機制 ========
-        #! 清理 Google 伺服器上的遠端檔案
-        if uploaded_gemini_file and uploaded_gemini_file.name:
-            try:
-                print("清理 Google 伺服器上的暫存檔案...")
-                client.files.delete(name=uploaded_gemini_file.name)
-            except Exception as e:
-                print(f"清理遠端檔案失敗: {e}")
+    #! ======== 雙重閱後即焚機制 ========
+    #! 清理 Google 伺服器上的遠端檔案
+    if uploaded_gemini_file and uploaded_gemini_file.name:
+        try:
+            print("清理 Google 伺服器上的暫存檔案...")
+            client.files.delete(name=uploaded_gemini_file.name)
+        except Exception as e:
+            print(f"清理遠端檔案失敗: {e}")
 
-        #! 清理剛剛在本機端產生的純英文暫存檔
-        if temp_file_path and os.path.exists(temp_file_path):
-            try:
-                os.remove(temp_file_path)
-            except Exception as e:
-                print(f"清理本機暫存檔失敗: {e}")
+    #! 清理剛剛在本機端產生的純英文暫存檔
+    if temp_file_path and os.path.exists(temp_file_path):
+        try:
+            os.remove(temp_file_path)
+        except Exception as e:
+            print(f"清理本機暫存檔失敗: {e}")
 
     return summary, quiz_data, error_msg
 
@@ -230,7 +245,7 @@ def generate_question_deep_analysis(question_text, options, answer, explanation)
 
     try:
         response = client.models.generate_content(
-            model="gemini-flash-latest",
+            model="gemini-3.1-flash-lite-preview",
             config=types.GenerateContentConfig(temperature=0.4),
             contents=[prompt],
         )
