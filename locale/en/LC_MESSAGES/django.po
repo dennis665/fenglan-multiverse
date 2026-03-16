@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-16 10:40+0800\n"
+"POT-Creation-Date: 2026-03-16 14:02+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -1748,6 +1748,30 @@ msgstr "Explanation"
 msgid "錯題明細"
 msgstr "Incorrect Question Details"
 
+#: .\study_brain\models.py:122
+msgid "對應測驗卷"
+msgstr "Corresponding Quiz"
+
+#: .\study_brain\models.py:124
+msgid "題目索引(原題號)"
+msgstr "Question Index (Original Number)"
+
+#: .\study_brain\models.py:126
+msgid "觀念深度解析(Markdown)"
+msgstr "In-depth Concept Analysis (Markdown)"
+
+#: .\study_brain\models.py:127
+msgid "3題相關練習題"
+msgstr "3 Related Practice Questions"
+
+#: .\study_brain\models.py:129
+msgid "生成時間"
+msgstr "Generation Time"
+
+#: .\study_brain\models.py:134 .\study_brain\models.py:135
+msgid "AI 深度解析"
+msgstr "AI In-depth Analysis"
+
 #: .\study_brain\templates\study_brain\dashboard.html:4
 msgid "AI Study Brain Dashboard"
 msgstr ""
@@ -1950,11 +1974,11 @@ msgstr ""
 msgid "Practice Quiz"
 msgstr ""
 
-#: .\study_brain\templates\study_brain\study_room.html:114
+#: .\study_brain\templates\study_brain\study_room.html:127
 msgid "Quiz Progress"
 msgstr ""
 
-#: .\study_brain\templates\study_brain\study_room.html:158
+#: .\study_brain\templates\study_brain\study_room.html:185
 msgid "Submit Answers"
 msgstr ""
 
@@ -1976,38 +2000,44 @@ msgstr "Material uploaded successfully! You can now start AI training."
 msgid "請填寫完整資訊並上傳檔案。"
 msgstr "Please fill in all information and upload the file."
 
-#: .\study_brain\views.py:74
+#: .\study_brain\views.py:66
+msgid "此為歷屆考題，題目內容固定，無法重複呼叫 AI 擴充新題！"
+msgstr ""
+"This is a past paper with fixed content; cannot call AI to expand new "
+"questions repeatedly!"
+
+#: .\study_brain\views.py:78
 msgid "檔案解析失敗或內容為空，無法進行訓練。"
 msgstr "File parsing failed or content is empty; training cannot proceed."
 
-#: .\study_brain\views.py:98
+#: .\study_brain\views.py:104
 msgid "AI 首次分析完成！已產生重點摘要與初始練習題。"
 msgstr ""
 "Initial AI analysis complete! Key summaries and practice questions have been "
 "generated."
 
-#: .\study_brain\views.py:100
+#: .\study_brain\views.py:106
 msgid "AI 產出過程發生未知錯誤，請稍後再試。"
 msgstr ""
 "An unknown error occurred during AI generation. Please try again later."
 
-#: .\study_brain\views.py:116
+#: .\study_brain\views.py:122
 msgid "該教材尚未產生分析資料。"
 msgstr "No analysis data has been generated for this material yet."
 
-#: .\study_brain\views.py:217
+#: .\study_brain\views.py:229
 msgid "未作答"
 msgstr "Not Answered"
 
-#: .\study_brain\views.py:226
+#: .\study_brain\views.py:238
 msgid "此為舊版題目，無提供解析。"
 msgstr "This is a legacy question; no explanation is provided."
 
-#: .\study_brain\views.py:232
+#: .\study_brain\views.py:244
 msgid "沒有送出任何有效答案！"
 msgstr "No valid answers were submitted!"
 
-#: .\study_brain\views.py:282
+#: .\study_brain\views.py:294
 msgid "檔案不存在或已遺失"
 msgstr "File does not exist or has been lost."
 

@@ -1,6 +1,8 @@
 // AI 教材大腦前端互動邏輯
 
-// 檔案上傳區塊互動與頁面初始化
+// ==========================================
+// 頁面初始化與基礎互動 (檔案上傳、Markdown 等)
+// ==========================================
 document.addEventListener('DOMContentLoaded', function () {
     const uploadZone = document.getElementById('uploadZone');
     const fileInput = document.getElementById('materialFile');
@@ -74,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 💡 [新增整合] 啟動 Markdown 解析 (針對 study_room 的重點整理)
+    // 啟動 Markdown 解析 (針對 study_room 的重點整理)
     const rawMarkdownInput = document.getElementById('raw-markdown');
     const contentDiv = document.getElementById('summary-content');
 
@@ -90,7 +92,16 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error("Marked.js is not loaded. Cannot parse markdown.");
         }
     }
+
+    // 初始化 AI 深度解析的 Modal 實例
+    if (document.getElementById('deepAnalysisModal')) {
+        deepAnalysisModal = new bootstrap.Modal(document.getElementById('deepAnalysisModal'));
+    }
 });
+
+// ==========================================
+// 測驗互動邏輯 (選項點擊、進度條更新、表單提交)
+// ==========================================
 
 // 測驗選項點擊與提交邏輯
 function selectOption(questionId, optionElement) {
@@ -146,7 +157,7 @@ function updateQuizProgress() {
     }
 }
 
-// [新增整合] 鎖定按鈕並顯示載入中動畫 (防連點機制，針對呼叫 AI 擴充題目)
+// 鎖定按鈕並顯示載入中動畫 (防連點機制，針對呼叫 AI 擴充題目)
 function showLoadingState(form) {
     const generateBtn = document.getElementById('generate-btn');
     const backBtn = document.getElementById('back-btn');
@@ -164,4 +175,122 @@ function showLoadingState(form) {
         }, 0);
     }
     return true;
+}
+
+// ==========================================
+// AI 深度解析與不計分練習邏輯
+// ==========================================
+
+let deepAnalysisModal;
+
+function openDeepAnalysis(analysisId, questionIndex, btnElement) {
+    if (!deepAnalysisModal) return;
+
+    deepAnalysisModal.show();
+
+    const loadingZone = document.getElementById('da-loading');
+    const contentZone = document.getElementById('da-content');
+    const expZone = document.getElementById('da-explanation');
+    const practiceZone = document.getElementById('da-practice-zone');
+
+    // 重置 Modal 狀態
+    loadingZone.classList.remove('d-none');
+    contentZone.classList.add('d-none');
+    expZone.innerHTML = '';
+    practiceZone.innerHTML = '';
+
+    // 發送 API 請求
+    fetch(`/study_brain/api/analysis/${analysisId}/deep_analysis/${questionIndex}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // 如果是新生成的，把外面的按鈕偷換成 "AI 教學" 樣式
+                if (data.is_new && btnElement) {
+                    btnElement.className = 'btn btn-sm btn-info rounded-pill fw-bold text-white shadow-sm';
+                    btnElement.innerHTML = '<i class="fas fa-chalkboard-teacher me-1"></i>AI 教學';
+                }
+
+                // 渲染 Markdown 解析
+                expZone.innerHTML = typeof marked !== 'undefined' ? marked.parse(data.concept_explanation) : data.concept_explanation;
+
+                // 渲染 3 題練習題
+                let practiceHtml = '';
+                data.practice_questions.forEach((q, idx) => {
+                    practiceHtml += `
+                    <div class="card shadow-sm mb-4 border-0 bg-light">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold text-dark mb-3"><span class="text-success me-1">練習 ${idx + 1}.</span> ${q.question}</h6>
+                            <div class="row g-2">
+                    `;
+
+                    const letters = ['A', 'B', 'C', 'D'];
+                    q.options.forEach((opt, optIdx) => {
+                        // 判斷這個選項是否為正確答案 (簡單比對字串)
+                        const isCorrect = (q.answer.includes(opt) || opt.includes(q.answer)) ? 'true' : 'false';
+
+                        practiceHtml += `
+                                <div class="col-12">
+                                    <div class="p-3 border rounded bg-white mini-opt" style="cursor: pointer; transition: 0.2s;" 
+                                         onclick="checkMiniAnswer(this, ${isCorrect}, 'mini-exp-${idx}')">
+                                        <span class="fw-bold text-success me-2">${letters[optIdx]}.</span> ${opt}
+                                    </div>
+                                </div>
+                        `;
+                    });
+
+                    practiceHtml += `
+                            </div>
+                            <div id="mini-exp-${idx}" class="mt-3 p-3 bg-white border-start border-4 border-success rounded d-none shadow-sm">
+                                <span class="badge bg-success mb-2">正確解答</span>
+                                <p class="mb-0 fw-bold">${q.answer}</p>
+                                <hr class="my-2">
+                                <span class="badge bg-secondary mb-2">AI 解析</span>
+                                <p class="mb-0 small text-muted">${q.explanation}</p>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                });
+
+                practiceZone.innerHTML = practiceHtml;
+
+                // 切換顯示
+                loadingZone.classList.add('d-none');
+                contentZone.classList.remove('d-none');
+            } else {
+                alert('載入失敗：' + data.message);
+                deepAnalysisModal.hide();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('系統連線異常，請稍後再試！');
+            deepAnalysisModal.hide();
+        });
+}
+
+// 跳窗內的不計分測驗對答案邏輯
+function checkMiniAnswer(element, isCorrect, expId) {
+    // 找到同題目的所有選項，鎖定不給點，並取消樣式
+    const siblings = element.parentElement.parentElement.querySelectorAll('.mini-opt');
+    siblings.forEach(el => {
+        el.style.pointerEvents = 'none'; // 鎖定
+        el.classList.remove('border-primary', 'bg-white');
+    });
+
+    // 依據對錯給予顏色回饋
+    if (isCorrect) {
+        element.classList.add('bg-success', 'text-white', 'border-success');
+    } else {
+        element.classList.add('bg-danger', 'text-white', 'border-danger');
+    }
+
+    // 展開解析
+    const expDiv = document.getElementById(expId);
+    if (expDiv) {
+        expDiv.classList.remove('d-none');
+        // 用一點動畫效果展現
+        expDiv.style.opacity = 0;
+        setTimeout(() => expDiv.style.opacity = 1, 50);
+    }
 }

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-16 10:40+0800\n"
+"POT-Creation-Date: 2026-03-16 14:02+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -1734,6 +1734,30 @@ msgstr ""
 msgid "錯題明細"
 msgstr ""
 
+#: .\study_brain\models.py:122
+msgid "對應測驗卷"
+msgstr ""
+
+#: .\study_brain\models.py:124
+msgid "題目索引(原題號)"
+msgstr ""
+
+#: .\study_brain\models.py:126
+msgid "觀念深度解析(Markdown)"
+msgstr ""
+
+#: .\study_brain\models.py:127
+msgid "3題相關練習題"
+msgstr ""
+
+#: .\study_brain\models.py:129
+msgid "生成時間"
+msgstr ""
+
+#: .\study_brain\models.py:134 .\study_brain\models.py:135
+msgid "AI 深度解析"
+msgstr ""
+
 # * 針對教材上傳儀表板與 AI 學習室介面的繁體中文翻譯檔
 #: .\study_brain\templates\study_brain\dashboard.html:4
 msgid "AI Study Brain Dashboard"
@@ -1934,11 +1958,11 @@ msgstr "重點整理"
 msgid "Practice Quiz"
 msgstr "練習測驗"
 
-#: .\study_brain\templates\study_brain\study_room.html:114
+#: .\study_brain\templates\study_brain\study_room.html:127
 msgid "Quiz Progress"
 msgstr "測驗進度"
 
-#: .\study_brain\templates\study_brain\study_room.html:158
+#: .\study_brain\templates\study_brain\study_room.html:185
 msgid "Submit Answers"
 msgstr "提交答案"
 
@@ -1958,35 +1982,39 @@ msgstr ""
 msgid "請填寫完整資訊並上傳檔案。"
 msgstr ""
 
-#: .\study_brain\views.py:74
+#: .\study_brain\views.py:66
+msgid "此為歷屆考題，題目內容固定，無法重複呼叫 AI 擴充新題！"
+msgstr ""
+
+#: .\study_brain\views.py:78
 msgid "檔案解析失敗或內容為空，無法進行訓練。"
 msgstr ""
 
-#: .\study_brain\views.py:98
+#: .\study_brain\views.py:104
 msgid "AI 首次分析完成！已產生重點摘要與初始練習題。"
 msgstr ""
 
-#: .\study_brain\views.py:100
+#: .\study_brain\views.py:106
 msgid "AI 產出過程發生未知錯誤，請稍後再試。"
 msgstr ""
 
-#: .\study_brain\views.py:116
+#: .\study_brain\views.py:122
 msgid "該教材尚未產生分析資料。"
 msgstr ""
 
-#: .\study_brain\views.py:217
+#: .\study_brain\views.py:229
 msgid "未作答"
 msgstr ""
 
-#: .\study_brain\views.py:226
+#: .\study_brain\views.py:238
 msgid "此為舊版題目，無提供解析。"
 msgstr ""
 
-#: .\study_brain\views.py:232
+#: .\study_brain\views.py:244
 msgid "沒有送出任何有效答案！"
 msgstr ""
 
-#: .\study_brain\views.py:282
+#: .\study_brain\views.py:294
 msgid "檔案不存在或已遺失"
 msgstr ""
 

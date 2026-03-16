@@ -194,3 +194,54 @@ def generate_ai_content(file_path, text_content, existing_summary=None, existing
                 print(f"清理本機暫存檔失敗: {e}")
 
     return summary, quiz_data, error_msg
+
+def generate_question_deep_analysis(question_text, options, answer, explanation):
+    """針對單一題目呼叫 AI 產生深度解析與 3 題延伸練習"""
+    prompt = f"""
+    請扮演專業的 AI 導師。學生遇到了一道難題，請針對這道題目進行「深度觀念解析」，並出 3 題「相關觀念的單選練習題」來幫助他確認是否真的懂了。
+
+    【原始題目資訊】：
+    - 題目：{question_text}
+    - 選項：{", ".join(options)}
+    - 正確答案：{answer}
+    - 原本的簡易解析：{explanation}
+
+    【任務 1：深度觀念解析 (concept_explanation)】
+    請使用流暢、易懂的語氣，詳細解釋這題背後的核心觀念、公式或歷史背景。可以使用 Markdown 語法（粗體、條列式）來排版。
+
+    【任務 2：產出 3 題練習題 (practice_questions)】
+    請基於上述核心觀念，變化情境或換個角度，出 3 題難度相近的單選題。
+
+    【輸出格式要求】：
+    請嚴格遵守以下純 JSON 格式輸出（不要加上 ```json 標籤）：
+    {{
+        "concept_explanation": "此處填入 Markdown 格式的深度解析",
+        "practice_questions": [
+            {{
+                "question": "練習題 1 題目",
+                "options": ["選項A", "選項B", "選項C", "選項D"],
+                "answer": "正確選項的完整內容",
+                "explanation": "為什麼這題答案是這個"
+            }},
+            // ... 練習題 2 與 3
+        ]
+    }}
+    """
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-flash-latest",
+            config=types.GenerateContentConfig(temperature=0.4),
+            contents=[prompt],
+        )
+        if response.text:
+            result_text = response.text.strip()
+            result_text = result_text.replace("```json", "").replace("```", "").strip()
+
+        #! 確保解析成功
+        analysis_data = json.loads(result_text)
+        return analysis_data
+
+    except Exception as e:
+        print(f"Deep Analysis API Error: {e}")
+        return None

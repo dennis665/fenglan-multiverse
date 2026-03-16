@@ -14,4 +14,9 @@ urlpatterns = [
     path("material/<int:material_id>/view/", views.view_material, name="view_material"),
     path("material/<int:material_id>/toggle/<str:action>/", views.toggle_save_material, name="toggle_save"),
     path("history/", views.quiz_history_list, name="quiz_history"),
+    path(
+        "api/analysis/<int:analysis_id>/deep_analysis/<int:q_index>/",
+        views.api_get_deep_analysis,
+        name="api_deep_analysis",
+    ),
 ]

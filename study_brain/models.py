@@ -114,3 +114,22 @@ class QuizMistake(models.Model):
 
     def __str__(self):
         return f"錯題: {self.question_text[:20]}..."
+
+class QuestionDeepAnalysis(models.Model):
+    """紀錄單一題目的 AI 深度解析與延伸練習題"""
+
+    analysis_result = models.ForeignKey(
+        AnalysisResult, on_delete=models.CASCADE, related_name="deep_analyses", verbose_name=_("對應測驗卷")
+    )
+    question_index = models.IntegerField(verbose_name=_("題目索引(原題號)"))
+
+    concept_explanation = models.TextField(verbose_name=_("觀念深度解析(Markdown)"))
+    practice_questions = models.JSONField(default=list, verbose_name=_("3題相關練習題"))
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("生成時間"))
+
+    class Meta:
+        # 確保同一份考卷的同一題，只會生成一次解析
+        unique_together = ("analysis_result", "question_index")
+        verbose_name = _("AI 深度解析")
+        verbose_name_plural = _("AI 深度解析")

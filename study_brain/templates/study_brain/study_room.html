@@ -83,33 +83,46 @@
                     </div>
 
                     {% if all_done %}
-                        {# 🎉 狀態：所有題目都已經刷完了 (只有在隱藏舊題時才會出現) 🎉 #}
+                        {# 所有題目都已經刷完了 (只有在隱藏舊題時才會出現) #}
                         <div class="alert alert-success text-center shadow-sm p-5 border-0 rounded-4 my-5 bg-success bg-opacity-10">
                             <i class="fas fa-medal fa-4x text-warning mb-4"></i>
                             <h3 class="fw-bold text-dark mb-3">太棒了！您已經破關這份教材！</h3>
                             <p class="text-muted fs-5 mb-5">目前的 {{ total_bank_size }} 道題目您已全數挑戰完畢。</p>
+                            
+                            {# 如果「不是」歷屆考題，才顯示擴充新題目按鈕 #}
+                            {% if not material.is_exam_paper %}
+                                <form method="post" action="{% url 'study_brain:generate' material.id %}" onsubmit="return showLoadingState(this);">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next_url" value="{% url 'study_brain:study_room' material.id %}?tab=quiz">
+                                    
+                                    <button type="submit" id="generate-btn" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-5 py-3 me-2">
+                                        <i class="fas fa-brain me-2"></i>呼叫 AI 擴充新題目
+                                    </button>
+                                    <a href="{% url 'study_brain:dashboard' %}" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold px-5 py-3" id="back-btn">
+                                        返回儀表板
+                                    </a>
+                                </form>
+                            {% else %}
+                                {# 如果「是」歷屆考題，顯示專屬的複習按鈕 #}
+                                <div class="mt-4">
+                                    <span class="badge bg-secondary mb-4 fs-6 px-3 py-2"><i class="fas fa-lock me-1"></i>此為歷屆考題，題目已全數固定</span><br>
 
-                            {# 加上 onsubmit 攔截事件防連點 #}
-                            <form method="post" action="{% url 'study_brain:generate' material.id %}" onsubmit="return showLoadingState(this);">
-                                {% csrf_token %}
-
-                                {# 塞入回程車票，並帶上 ?tab=quiz 參數 #}
-                                <input type="hidden" name="next_url" value="{% url 'study_brain:study_room' material.id %}?tab=quiz">
-
-                                <button type="submit" id="generate-btn" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-5 py-3 me-2">
-                                    <i class="fas fa-brain me-2"></i>呼叫 AI 擴充新題目
-                                </button>
-                                <a href="{% url 'study_brain:dashboard' %}" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold px-5 py-3" id="back-btn">
-                                    返回儀表板
-                                </a>
-                            </form>
+                                    {# 點擊後帶上 show_all=true 參數，直接展開整份考卷讓他重寫 #}
+                                    <a href="{% url 'study_brain:study_room' material.id %}?show_all=true&tab=quiz" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-5 py-3 me-2">
+                                        <i class="fas fa-redo me-2"></i>全卷重新複習
+                                    </a>
+                                    <a href="{% url 'study_brain:dashboard' %}" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold px-5 py-3">
+                                        返回儀表板
+                                    </a>
+                                </div>
+                            {% endif %}
                         </div>
                     {% else %}
-                        {# 📝 狀態：顯示測驗題目 📝 #}
+                        {# 狀態：顯示測驗題目 #}
                         <form id="quizForm" method="POST" action="{% url 'study_brain:submit_quiz' latest_analysis.id %}">
                             {% csrf_token %}
 
-                            {# 💡 恢復並升級：懸浮置頂的進度條 #}
+                            {# 恢復並升級：懸浮置頂的進度條 #}
                             <div class="quiz-progress-sticky d-flex flex-column flex-md-row justify-content-between align-items-md-center p-3 mb-5 rounded border-start border-4 border-primary bg-white shadow-sm" style="position: sticky; top: 1rem; z-index: 1020;">
                                 <div class="fw-bold text-secondary mb-2 mb-md-0"><i class="fas fa-tasks text-primary me-2"></i>{% trans "Quiz Progress" %}</div>
                                 <div class="d-flex gap-2 flex-wrap">
@@ -122,13 +135,27 @@
                             {# 迴圈改跑過濾後的 quiz_questions #}
                             {% for q in quiz_questions %}
                             <div class="mb-5 pb-3 border-bottom">
-                                <h5 class="fw-bold mb-4 lh-base d-flex align-items-start">
-                                    <span class="text-primary me-2 fs-4">Q{{ forloop.counter }}.</span>
-                                    <div>
-                                        {{ q.question }}
-                                        {# 如果是看過的舊題目，給它一個灰色小標籤 #}
-                                        {% if q.is_seen %}
-                                            <span class="badge bg-secondary ms-2 fw-normal opacity-75 align-middle" style="font-size: 0.75rem;"><i class="fas fa-history me-1"></i>已作答</span>
+                                <h5 class="fw-bold mb-4 lh-base d-flex align-items-start justify-content-between">
+                                    <div class="d-flex align-items-start">
+                                        <span class="text-primary me-2 fs-4">Q{{ forloop.counter }}.</span>
+                                        <div>
+                                            {{ q.question }}
+                                            {% if q.is_seen %}
+                                                <span class="badge bg-secondary ms-2 fw-normal opacity-75"><i class="fas fa-history me-1"></i>已作答</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    {# AI 解析按鈕 (判斷是否已被解析過) #}
+                                    <div class="ms-3 flex-shrink-0">
+                                        {% if q.original_index in analyzed_indices %}
+                                            <button type="button" class="btn btn-sm btn-info rounded-pill fw-bold text-white shadow-sm" onclick="openDeepAnalysis({{ latest_analysis.id }}, {{ q.original_index }}, this)">
+                                                <i class="fas fa-chalkboard-teacher me-1"></i>AI 教學
+                                            </button>
+                                        {% else %}
+                                            <button type="button" class="btn btn-sm btn-outline-info rounded-pill fw-bold shadow-sm" onclick="openDeepAnalysis({{ latest_analysis.id }}, {{ q.original_index }}, this)">
+                                                <i class="fas fa-robot me-1"></i>問 AI
+                                            </button>
                                         {% endif %}
                                     </div>
                                 </h5>
@@ -165,6 +192,35 @@
                         </form>
                     {% endif %}
 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# AI 深度解析跳窗 (Modal) #}
+<div class="modal fade" id="deepAnalysisModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-info text-white border-0 py-3">
+                <h5 class="modal-title fw-bold"><i class="fas fa-chalkboard-teacher me-2"></i>AI 深度解析與挑戰</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 p-md-5 position-relative" id="deepAnalysisBody">
+                {# 載入中動畫 #}
+                <div id="da-loading" class="text-center py-5">
+                    <div class="spinner-border text-info mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+                    <h5 class="fw-bold text-muted">AI 正在深度思考中，請稍候...</h5>
+                    <p class="text-secondary small">這題之前沒人問過，AI 正在為您量身打造專屬解析！</p>
+                </div>
+
+                {# 解析內容區 #}
+                <div id="da-content" class="d-none">
+                    <h5 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-lightbulb text-warning me-2"></i>核心觀念解析</h5>
+                    <div id="da-explanation" class="markdown-body lh-lg mb-5" style="font-size: 1.05rem;"></div>
+
+                    <h5 class="fw-bold text-dark border-bottom pb-2 mb-4"><i class="fas fa-dumbbell text-success me-2"></i>觀念驗證 (不計分練習)</h5>
+                    <div id="da-practice-zone"></div>
                 </div>
             </div>
         </div>

@@ -201,7 +201,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         {% for message in messages %}
             {% if message.tags == 'error' %}
-                alert("⚠️ {{ message|escapejs }}");
+                alert("❌ 錯誤：{{ message|escapejs }}");
+            {% elif message.tags == 'warning' %}
+                // 攔截 warning 等級的訊息 (用來顯示歷屆考題的防呆提示)
+                alert("⚠️ 提示：{{ message|escapejs }}");
             {% elif message.tags == 'success' %}
                 // 如果您成功時也想要跳窗，可以取消這行的註解
                 alert("✅ {{ message|escapejs }}");

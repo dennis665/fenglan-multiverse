@@ -3,12 +3,12 @@ import re
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
 
-from .models import AnalysisResult, Category, Material, QuizMistake, QuizRecord, ReadingRecord
-from .utils import extract_text_from_file, generate_ai_content
+from .models import AnalysisResult, Category, Material, QuestionDeepAnalysis, QuizMistake, QuizRecord, ReadingRecord
+from .utils import extract_text_from_file, generate_ai_content, generate_question_deep_analysis
 
 
 @login_required
@@ -61,43 +61,49 @@ def generate_analysis(request, material_id):
         #! 現在是公開教材，所以任何人都可以對該教材按下「訓練 AI」來擴充題庫
         material = get_object_or_404(Material, id=material_id)
 
-        #! 檢查是否已經有歷史分析紀錄
-        existing_analysis = AnalysisResult.objects.filter(material=material).first()
-        existing_summary = existing_analysis.summary if existing_analysis else None
-        existing_questions = existing_analysis.questions_data if existing_analysis else []
-
-        #! 讀取實體檔案路徑並萃取文字
-        file_path = material.file.path
-        text_content = extract_text_from_file(file_path)
-
-        if not text_content and not file_path.lower().endswith((".pdf", ".mp4", ".mov", ".avi")):
-            messages.error(request, _("檔案解析失敗或內容為空，無法進行訓練。"))
-            return redirect("study_brain:dashboard")
-
-        #! 呼叫 AI 產生內容 (傳入歷史資料以避免重複)
-        new_summary, new_quiz_data, error_msg = generate_ai_content(
-            file_path=file_path,
-            text_content=text_content,
-            existing_summary=existing_summary,
-            existing_questions=existing_questions,
-            is_exam_paper=material.is_exam_paper,
-        )
-
-        #! 如果有明確的錯誤訊息，直接發送給前端
-        if error_msg:
-            messages.error(request, error_msg)
-        elif new_quiz_data:
-            combined_questions = existing_questions + new_quiz_data
-
-            if existing_analysis:
-                existing_analysis.questions_data = combined_questions
-                existing_analysis.save()
-                messages.success(request, _(f"AI 進階訓練完成！已為教材新增 {len(new_quiz_data)} 題情境題。"))
-            else:
-                AnalysisResult.objects.create(material=material, summary=new_summary, questions_data=combined_questions)
-                messages.success(request, _("AI 首次分析完成！已產生重點摘要與初始練習題。"))
+        #! 歷屆考題防呆機制 (只能訓練一次)
+        if material.is_exam_paper and AnalysisResult.objects.filter(material=material).exists():
+            messages.warning(request, _("此為歷屆考題，題目內容固定，無法重複呼叫 AI 擴充新題！"))
         else:
-            messages.error(request, _("AI 產出過程發生未知錯誤，請稍後再試。"))
+            #! 檢查是否已經有歷史分析紀錄
+            existing_analysis = AnalysisResult.objects.filter(material=material).first()
+            existing_summary = existing_analysis.summary if existing_analysis else None
+            existing_questions = existing_analysis.questions_data if existing_analysis else []
+
+            #! 讀取實體檔案路徑並萃取文字
+            file_path = material.file.path
+            text_content = extract_text_from_file(file_path)
+
+            if not text_content and not file_path.lower().endswith((".pdf", ".mp4", ".mov", ".avi")):
+                messages.error(request, _("檔案解析失敗或內容為空，無法進行訓練。"))
+                return redirect("study_brain:dashboard")
+
+            #! 呼叫 AI 產生內容 (傳入歷史資料以避免重複)
+            new_summary, new_quiz_data, error_msg = generate_ai_content(
+                file_path=file_path,
+                text_content=text_content,
+                existing_summary=existing_summary,
+                existing_questions=existing_questions,
+                is_exam_paper=material.is_exam_paper,
+            )
+
+            #! 如果有明確的錯誤訊息，直接發送給前端
+            if error_msg:
+                messages.error(request, error_msg)
+            elif new_quiz_data:
+                combined_questions = existing_questions + new_quiz_data
+
+                if existing_analysis:
+                    existing_analysis.questions_data = combined_questions
+                    existing_analysis.save()
+                    messages.success(request, _(f"AI 進階訓練完成！已為教材新增 {len(new_quiz_data)} 題情境題。"))
+                else:
+                    AnalysisResult.objects.create(
+                        material=material, summary=new_summary, questions_data=combined_questions
+                    )
+                    messages.success(request, _("AI 首次分析完成！已產生重點摘要與初始練習題。"))
+            else:
+                messages.error(request, _("AI 產出過程發生未知錯誤，請稍後再試。"))
 
         next_url = request.POST.get("next_url")
         if next_url:
@@ -149,6 +155,11 @@ def study_room(request, material_id):
 
     ReadingRecord.objects.create(user=request.user, material=material)
 
+    #! 取得這份教材「已經生成過深度解析」的題目索引清單 (Set 加速查詢)
+    analyzed_indices = set(
+        QuestionDeepAnalysis.objects.filter(analysis_result=latest_analysis).values_list("question_index", flat=True)
+    )
+
     context = {
         "material": material,
         "latest_analysis": latest_analysis,
@@ -157,6 +168,7 @@ def study_room(request, material_id):
         "total_bank_size": len(latest_analysis.questions_data),
         "seen_count": len(seen_questions),
         "show_all": show_all,  # * 把開關狀態傳給前端
+        "analyzed_indices": analyzed_indices,
     }
     return render(request, "study_brain/study_room.html", context)
 
@@ -321,3 +333,55 @@ def quiz_history_list(request):
 
     context = {"records": records}
     return render(request, "study_brain/quiz_history.html", context)
+
+
+@login_required
+def api_get_deep_analysis(request, analysis_id, q_index):
+    """處理前端請求：取得或生成深度解析"""
+    analysis_result = get_object_or_404(AnalysisResult, id=analysis_id)
+
+    #! 檢查 DB 是否已經有前人生成過這題的解析
+    deep_analysis = QuestionDeepAnalysis.objects.filter(analysis_result=analysis_result, question_index=q_index).first()
+
+    if deep_analysis:
+        return JsonResponse(
+            {
+                "status": "success",
+                "is_new": False,
+                "concept_explanation": deep_analysis.concept_explanation,
+                "practice_questions": deep_analysis.practice_questions,
+            }
+        )
+
+    #! 如果沒有，就立刻去查題庫，並呼叫 AI
+    try:
+        q_data = analysis_result.questions_data[q_index]
+    except IndexError:
+        return JsonResponse({"status": "error", "message": "找不到該題目"}, status=404)
+
+    ai_result = generate_question_deep_analysis(
+        question_text=q_data.get("question", ""),
+        options=q_data.get("options", []),
+        answer=q_data.get("answer", ""),
+        explanation=q_data.get("explanation", ""),
+    )
+
+    if not ai_result:
+        return JsonResponse({"status": "error", "message": "AI 解析失敗，請稍後再試"}, status=500)
+
+    #! 儲存進 DB 造福後人
+    deep_analysis = QuestionDeepAnalysis.objects.create(
+        analysis_result=analysis_result,
+        question_index=q_index,
+        concept_explanation=ai_result.get("concept_explanation", ""),
+        practice_questions=ai_result.get("practice_questions", []),
+    )
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "is_new": True,
+            "concept_explanation": deep_analysis.concept_explanation,
+            "practice_questions": deep_analysis.practice_questions,
+        }
+    )
