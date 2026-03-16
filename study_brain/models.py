@@ -85,6 +85,7 @@ class QuizRecord(models.Model):
     total_questions = models.IntegerField(verbose_name=_("總題數"))
     correct_count = models.IntegerField(verbose_name=_("答對題數"))
     error_rate = models.FloatField(verbose_name=_("錯誤率"))  # * 儲存 0.0 到 100.0 的百分比
+    attempted_questions = models.JSONField(default=list, blank=True, verbose_name=_("已作答題目"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("測驗時間"))
 
     class Meta:

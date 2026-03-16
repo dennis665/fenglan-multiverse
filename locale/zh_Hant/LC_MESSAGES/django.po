@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-13 16:44+0800\n"
+"POT-Creation-Date: 2026-03-16 10:40+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -1699,34 +1699,38 @@ msgid "錯誤率"
 msgstr ""
 
 #: .\study_brain\models.py:88
+msgid "已作答題目"
+msgstr ""
+
+#: .\study_brain\models.py:89
 msgid "測驗時間"
 msgstr ""
 
-#: .\study_brain\models.py:91 .\study_brain\models.py:92
+#: .\study_brain\models.py:92 .\study_brain\models.py:93
 msgid "測驗紀錄"
 msgstr ""
 
-#: .\study_brain\models.py:103
+#: .\study_brain\models.py:104
 msgid "所屬測驗紀錄"
 msgstr ""
 
-#: .\study_brain\models.py:105
+#: .\study_brain\models.py:106
 msgid "題目內容"
 msgstr ""
 
-#: .\study_brain\models.py:106
+#: .\study_brain\models.py:107
 msgid "使用者答案"
 msgstr ""
 
-#: .\study_brain\models.py:107
+#: .\study_brain\models.py:108
 msgid "正確答案"
 msgstr ""
 
-#: .\study_brain\models.py:108
+#: .\study_brain\models.py:109
 msgid "解析說明"
 msgstr ""
 
-#: .\study_brain\models.py:111 .\study_brain\models.py:112
+#: .\study_brain\models.py:112 .\study_brain\models.py:113
 msgid "錯題明細"
 msgstr ""
 
@@ -1926,26 +1930,15 @@ msgid "Key Summaries"
 msgstr "重點整理"
 
 #: .\study_brain\templates\study_brain\study_room.html:43
+#: .\study_brain\templates\study_brain\study_room.html:68
 msgid "Practice Quiz"
 msgstr "練習測驗"
 
-#: .\study_brain\templates\study_brain\study_room.html:68
+#: .\study_brain\templates\study_brain\study_room.html:114
 msgid "Quiz Progress"
 msgstr "測驗進度"
 
-#: .\study_brain\templates\study_brain\study_room.html:70
-msgid "Total"
-msgstr "總題數"
-
-#: .\study_brain\templates\study_brain\study_room.html:71
-msgid "Answered"
-msgstr "已答"
-
-#: .\study_brain\templates\study_brain\study_room.html:72
-msgid "Unanswered"
-msgstr "未答"
-
-#: .\study_brain\templates\study_brain\study_room.html:105
+#: .\study_brain\templates\study_brain\study_room.html:158
 msgid "Submit Answers"
 msgstr "提交答案"
 
@@ -1977,19 +1970,23 @@ msgstr ""
 msgid "AI 產出過程發生未知錯誤，請稍後再試。"
 msgstr ""
 
-#: .\study_brain\views.py:112
+#: .\study_brain\views.py:116
 msgid "該教材尚未產生分析資料。"
 msgstr ""
 
-#: .\study_brain\views.py:175
+#: .\study_brain\views.py:217
 msgid "未作答"
 msgstr ""
 
-#: .\study_brain\views.py:184
+#: .\study_brain\views.py:226
 msgid "此為舊版題目，無提供解析。"
 msgstr ""
 
-#: .\study_brain\views.py:236
+#: .\study_brain\views.py:232
+msgid "沒有送出任何有效答案！"
+msgstr ""
+
+#: .\study_brain\views.py:282
 msgid "檔案不存在或已遺失"
 msgstr ""
 
@@ -2273,6 +2270,15 @@ msgstr ""
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr "您沒有權限，已導向首頁。"
+
+#~ msgid "Total"
+#~ msgstr "總題數"
+
+#~ msgid "Answered"
+#~ msgstr "已答"
+
+#~ msgid "Unanswered"
+#~ msgstr "未答"
 
 #~ msgid "(No answer provided)"
 #~ msgstr "(未提供答案)"

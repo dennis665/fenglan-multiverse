@@ -99,12 +99,16 @@ def generate_analysis(request, material_id):
         else:
             messages.error(request, _("AI 產出過程發生未知錯誤，請稍後再試。"))
 
+        next_url = request.POST.get("next_url")
+        if next_url:
+            return redirect(next_url)
+
     return redirect("study_brain:dashboard")
 
 
 @login_required
 def study_room(request, material_id):
-    """專屬學習室視圖"""
+    """專屬學習室視圖 (支援自由切換是否顯示已作答題目)"""
     material = get_object_or_404(Material, id=material_id)
     latest_analysis = AnalysisResult.objects.filter(material=material).first()
 
@@ -112,82 +116,123 @@ def study_room(request, material_id):
         messages.warning(request, _("該教材尚未產生分析資料。"))
         return redirect("study_brain:dashboard")
 
-    #! 寫入閱讀紀錄
+    #! 取得前端的開關狀態 (預設為 False，也就是隱藏舊題)
+    show_all = request.GET.get("show_all") == "true"
+
+    #! 抓取該使用者過去作答過的紀錄
+    past_records = QuizRecord.objects.filter(user=request.user, analysis_result=latest_analysis)
+    seen_questions = set()
+    for record in past_records:
+        if isinstance(record.attempted_questions, list):
+            seen_questions.update(record.attempted_questions)
+
+    #! 決定要顯示哪些題目
+    display_questions = []
+    unseen_count = 0
+
+    for i, q in enumerate(latest_analysis.questions_data):
+        q_text = q.get("question")
+        is_seen = q_text in seen_questions
+
+        if not is_seen:
+            unseen_count += 1
+
+        #! 如果開啟了「顯示全部」，或是這題「還沒看過」，就加入顯示清單
+        if show_all or not is_seen:
+            q_copy = dict(q)
+            q_copy["original_index"] = i
+            q_copy["is_seen"] = is_seen  # * 標記這題是否做過，讓前端可以加上小標籤
+            display_questions.append(q_copy)
+
+    #! 只有在「沒有新題目」且「未開啟顯示全部」時，才顯示恭喜破關畫面
+    all_done = (unseen_count == 0) and not show_all
+
     ReadingRecord.objects.create(user=request.user, material=material)
 
-    context = {"material": material, "latest_analysis": latest_analysis}
+    context = {
+        "material": material,
+        "latest_analysis": latest_analysis,
+        "quiz_questions": display_questions,
+        "all_done": all_done,
+        "total_bank_size": len(latest_analysis.questions_data),
+        "seen_count": len(seen_questions),
+        "show_all": show_all,  # * 把開關狀態傳給前端
+    }
     return render(request, "study_brain/study_room.html", context)
 
 
 @login_required
 def submit_quiz(request, analysis_id):
-    """處理測驗批改與紀錄錯題"""
+    """處理測驗批改與紀錄錯題 (支援動態題數)"""
     if request.method == "POST":
         analysis = get_object_or_404(AnalysisResult, id=analysis_id)
         questions = analysis.questions_data
 
-        total_q = len(questions)
+        total_q = 0
         correct_count = 0
         mistakes = []
+        attempted_list = []
 
         #! 核對答案
         for i, q_data in enumerate(questions):
-            user_answer = request.POST.get(f"question_{i}", "").strip()
-            correct_answer_raw = str(q_data.get("answer", "")).strip()
+            ans_key = f"question_{i}"
 
-            #! 確保 options 乾淨無前後空白
-            options = [str(opt).strip() for opt in q_data.get("options", [])]
+            #! 只有出現在前端表單裡的題目 (也就是還沒做過的) 才計分
+            if ans_key in request.POST:
+                total_q += 1
+                user_answer = request.POST.get(ans_key, "").strip()
+                attempted_list.append(q_data.get("question", ""))  # * 把這題加進「已作答」清單
 
-            #! --- 找出正確答案的「字母」與「完整文字」 ---
-            correct_text = correct_answer_raw
-            correct_letter = "?"
+                #! --- 以下為您原本的智慧批改邏輯 ---
+                correct_answer_raw = str(q_data.get("answer", "")).strip()
+                options = [str(opt).strip() for opt in q_data.get("options", [])]
 
-            #! 判斷 AI 過去是否只回傳了 "選項B"、"B" 這種短格式
-            match = re.match(r"^(選項|Option\s*)?([A-Z])\.?$", correct_answer_raw, re.IGNORECASE)
-            if match:
-                letter = match.group(2).upper()
-                idx = ord(letter) - ord("A")
-                if 0 <= idx < len(options):
-                    correct_text = options[idx]
-                    correct_letter = letter
-            else:
-                #! AI 回傳了完整文字，我們反推字母
-                if correct_text in options:
-                    correct_letter = chr(ord("A") + options.index(correct_text))
+                correct_text = correct_answer_raw
+                correct_letter = "?"
+
+                match = re.match(r"^(選項|Option\s*)?([A-Z])\.?$", correct_answer_raw, re.IGNORECASE)
+                if match:
+                    letter = match.group(2).upper()
+                    idx = ord(letter) - ord("A")
+                    if 0 <= idx < len(options):
+                        correct_text = options[idx]
+                        correct_letter = letter
                 else:
-                    #! 模糊比對防呆機制
-                    for idx, opt in enumerate(options):
-                        if correct_text in opt or opt in correct_text:
-                            correct_text = opt
-                            correct_letter = chr(ord("A") + idx)
-                            break
+                    if correct_text in options:
+                        correct_letter = chr(ord("A") + options.index(correct_text))
+                    else:
+                        for idx, opt in enumerate(options):
+                            if correct_text in opt or opt in correct_text:
+                                correct_text = opt
+                                correct_letter = chr(ord("A") + idx)
+                                break
 
-            #! --- 找出使用者答案的「字母」 ---
-            user_letter = "?"
-            if user_answer in options:
-                user_letter = chr(ord("A") + options.index(user_answer))
+                user_letter = "?"
+                if user_answer in options:
+                    user_letter = chr(ord("A") + options.index(user_answer))
 
-            #! --- 比對與紀錄 ---
-            if user_answer == correct_text:
-                correct_count += 1
-            else:
-                #! 直接把字母跟文字綁在一起存入資料庫，例如 "B. 選項內容"
-                formatted_user_ans = f"{user_letter}. {user_answer}" if user_answer else str(_("未作答"))
-                formatted_correct_ans = f"{correct_letter}. {correct_text}"
-                original_q_number = i + 1
+                if user_answer == correct_text:
+                    correct_count += 1
+                else:
+                    formatted_user_ans = f"{user_letter}. {user_answer}" if user_answer else str(_("未作答"))
+                    formatted_correct_ans = f"{correct_letter}. {correct_text}"
+                    original_q_number = i + 1
 
-                mistakes.append(
-                    {
-                        "question": f"Q{original_q_number}. {q_data.get('question', '')}",
-                        "user_answer": formatted_user_ans,
-                        "correct_answer": formatted_correct_ans,
-                        "explanation": q_data.get("explanation", _("此為舊版題目，無提供解析。")),
-                    }
-                )
+                    mistakes.append(
+                        {
+                            "question": f"Q{original_q_number}. {q_data.get('question', '')}",
+                            "user_answer": formatted_user_ans,
+                            "correct_answer": formatted_correct_ans,
+                            "explanation": q_data.get("explanation", _("此為舊版題目，無提供解析。")),
+                        }
+                    )
 
-        error_rate = 0.0
-        if total_q > 0:
-            error_rate = round(((total_q - correct_count) / total_q) * 100, 2)
+        #! 如果交了白卷或沒題目，擋下來
+        if total_q == 0:
+            messages.warning(request, _("沒有送出任何有效答案！"))
+            return redirect("study_brain:study_room", material_id=analysis.material.pk)
+
+        error_rate = round(((total_q - correct_count) / total_q) * 100, 2)
 
         #! 寫入測驗總紀錄
         quiz_record = QuizRecord.objects.create(
@@ -196,6 +241,7 @@ def submit_quiz(request, analysis_id):
             total_questions=total_q,
             correct_count=correct_count,
             error_rate=error_rate,
+            attempted_questions=attempted_list,  # * 存入剛才收集的作答清單
         )
 
         #! 寫入詳細錯題紀錄

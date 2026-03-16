@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-13 16:44+0800\n"
+"POT-Creation-Date: 2026-03-16 10:40+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -1713,34 +1713,38 @@ msgid "錯誤率"
 msgstr "Error Rate"
 
 #: .\study_brain\models.py:88
+msgid "已作答題目"
+msgstr "Questions Answered"
+
+#: .\study_brain\models.py:89
 msgid "測驗時間"
 msgstr "Quiz Time"
 
-#: .\study_brain\models.py:91 .\study_brain\models.py:92
+#: .\study_brain\models.py:92 .\study_brain\models.py:93
 msgid "測驗紀錄"
 msgstr "Quiz Record"
 
-#: .\study_brain\models.py:103
+#: .\study_brain\models.py:104
 msgid "所屬測驗紀錄"
 msgstr "Belongs to Quiz Record"
 
-#: .\study_brain\models.py:105
+#: .\study_brain\models.py:106
 msgid "題目內容"
 msgstr "Question Content"
 
-#: .\study_brain\models.py:106
+#: .\study_brain\models.py:107
 msgid "使用者答案"
 msgstr "User Answer"
 
-#: .\study_brain\models.py:107
+#: .\study_brain\models.py:108
 msgid "正確答案"
 msgstr "Correct Answer"
 
-#: .\study_brain\models.py:108
+#: .\study_brain\models.py:109
 msgid "解析說明"
 msgstr "Explanation"
 
-#: .\study_brain\models.py:111 .\study_brain\models.py:112
+#: .\study_brain\models.py:112 .\study_brain\models.py:113
 msgid "錯題明細"
 msgstr "Incorrect Question Details"
 
@@ -1942,26 +1946,15 @@ msgid "Key Summaries"
 msgstr ""
 
 #: .\study_brain\templates\study_brain\study_room.html:43
+#: .\study_brain\templates\study_brain\study_room.html:68
 msgid "Practice Quiz"
 msgstr ""
 
-#: .\study_brain\templates\study_brain\study_room.html:68
+#: .\study_brain\templates\study_brain\study_room.html:114
 msgid "Quiz Progress"
 msgstr ""
 
-#: .\study_brain\templates\study_brain\study_room.html:70
-msgid "Total"
-msgstr ""
-
-#: .\study_brain\templates\study_brain\study_room.html:71
-msgid "Answered"
-msgstr ""
-
-#: .\study_brain\templates\study_brain\study_room.html:72
-msgid "Unanswered"
-msgstr ""
-
-#: .\study_brain\templates\study_brain\study_room.html:105
+#: .\study_brain\templates\study_brain\study_room.html:158
 msgid "Submit Answers"
 msgstr ""
 
@@ -1973,8 +1966,7 @@ msgstr ""
 
 #: .\study_brain\utils.py:177
 msgid "AI 忙碌中或檔案解析發生錯誤，請稍後再試！"
-msgstr ""
-"AI is busy or a file parsing error occurred. Please try again later!"
+msgstr "AI is busy or a file parsing error occurred. Please try again later!"
 
 #: .\study_brain\views.py:50
 msgid "教材上傳成功！您可以開始進行 AI 訓練。"
@@ -1999,19 +1991,23 @@ msgid "AI 產出過程發生未知錯誤，請稍後再試。"
 msgstr ""
 "An unknown error occurred during AI generation. Please try again later."
 
-#: .\study_brain\views.py:112
+#: .\study_brain\views.py:116
 msgid "該教材尚未產生分析資料。"
 msgstr "No analysis data has been generated for this material yet."
 
-#: .\study_brain\views.py:175
+#: .\study_brain\views.py:217
 msgid "未作答"
 msgstr "Not Answered"
 
-#: .\study_brain\views.py:184
+#: .\study_brain\views.py:226
 msgid "此為舊版題目，無提供解析。"
 msgstr "This is a legacy question; no explanation is provided."
 
-#: .\study_brain\views.py:236
+#: .\study_brain\views.py:232
+msgid "沒有送出任何有效答案！"
+msgstr "No valid answers were submitted!"
+
+#: .\study_brain\views.py:282
 msgid "檔案不存在或已遺失"
 msgstr "File does not exist or has been lost."
 

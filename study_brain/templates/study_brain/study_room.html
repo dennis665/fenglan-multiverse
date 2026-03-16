@@ -31,15 +31,15 @@
         </div>
     </div>
 
-    {# 學習模式頁籤 #}
+    {# 學習模式頁籤 (已支援 show_all 與 tab=quiz 參數) #}
     <ul class="nav nav-tabs mb-4" id="studyTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">
+            <button class="nav-link {% if not request.GET.show_all and request.GET.tab != 'quiz' %}active{% endif %} fw-bold" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">
                 <i class="fas fa-book-reader me-2"></i>{% trans "Key Summaries" %}
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold" id="quiz-tab" data-bs-toggle="tab" data-bs-target="#quiz" type="button" role="tab">
+            <button class="nav-link {% if request.GET.show_all or request.GET.tab == 'quiz' %}active{% endif %} fw-bold" id="quiz-tab" data-bs-toggle="tab" data-bs-target="#quiz" type="button" role="tab">
                 <i class="fas fa-pen-nib me-2"></i>{% trans "Practice Quiz" %}
             </button>
         </li>
@@ -47,65 +47,124 @@
 
     <div class="tab-content" id="studyTabsContent">
         {# 重點整理區塊 #}
-        <div class="tab-pane fade show active" id="summary" role="tabpanel">
+        <div class="tab-pane fade {% if not request.GET.show_all and request.GET.tab != 'quiz' %}show active{% endif %}" id="summary" role="tabpanel">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-5 lh-lg markdown-body" id="summary-content" style="font-size: 1.1rem;">
                     {{ latest_analysis.summary }}
                 </div>
-
                 {# 將 AI 原始的 Markdown 藏在 textarea 中，避免跳脫字元干擾 #}
                 <textarea id="raw-markdown" style="display: none;">{{ latest_analysis.summary }}</textarea>
             </div>
         </div>
 
         {# 互動測驗區塊 #}
-        <div class="tab-pane fade" id="quiz" role="tabpanel">
+        <div class="tab-pane fade {% if request.GET.show_all or request.GET.tab == 'quiz' %}show active{% endif %}" id="quiz" role="tabpanel">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4 p-md-5">
 
-                    {# 測驗進度統計條 (加入 quiz-progress-sticky 讓它置頂) #}
-                    <div class="quiz-progress-sticky d-flex justify-content-between align-items-center p-3 rounded border-start border-4 border-primary">
-                        <div class="fw-bold text-secondary"><i class="fas fa-tasks text-primary me-2"></i>{% trans "Quiz Progress" %}</div>
-                        <div class="d-flex gap-2">
-                            <span class="badge bg-secondary px-3 py-2 fs-6 shadow-sm">{% trans "Total" %}: <span id="total-q">{{ latest_analysis.questions_data|length }}</span></span>
-                            <span class="badge bg-success px-3 py-2 fs-6 shadow-sm">{% trans "Answered" %}: <span id="answered-q">0</span></span>
-                            <span class="badge bg-warning text-dark px-3 py-2 fs-6 shadow-sm">{% trans "Unanswered" %}: <span id="unanswered-q">{{ latest_analysis.questions_data|length }}</span></span>
+                    {# 測驗標題列與切換開關 #}
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 pb-3 border-bottom">
+                        <div class="mb-3 mb-md-0">
+                            <h4 class="fw-bold mb-2"><i class="fas fa-tasks text-primary me-2"></i>{% trans "Practice Quiz" %}</h4>
+                            <span class="badge bg-primary rounded-pill px-3 py-2 fs-6 shadow-sm">
+                                已作答: {{ seen_count }} / 題庫總數: {{ total_bank_size }}
+                            </span>
+                        </div>
+
+                        {# 顯示/隱藏已作答題目的 Switch 開關 #}
+                        <div class="form-check form-switch fs-5 bg-light px-4 py-2 rounded-pill border shadow-sm">
+                            <input class="form-check-input" type="checkbox" role="switch" id="showAllSwitch" style="cursor: pointer;"
+                                   {% if show_all %}checked{% endif %} 
+                                   onchange="window.location.href='?show_all=' + this.checked + '&tab=quiz'">
+                            <label class="form-check-label text-dark fw-bold ms-2 mt-1" for="showAllSwitch" style="cursor: pointer; font-size: 0.95rem;">
+                                顯示已作答題目
+                            </label>
                         </div>
                     </div>
 
-                    <form method="POST" action="{% url 'study_brain:submit_quiz' latest_analysis.id %}">
-                        {% csrf_token %}
+                    {% if all_done %}
+                        {# 🎉 狀態：所有題目都已經刷完了 (只有在隱藏舊題時才會出現) 🎉 #}
+                        <div class="alert alert-success text-center shadow-sm p-5 border-0 rounded-4 my-5 bg-success bg-opacity-10">
+                            <i class="fas fa-medal fa-4x text-warning mb-4"></i>
+                            <h3 class="fw-bold text-dark mb-3">太棒了！您已經破關這份教材！</h3>
+                            <p class="text-muted fs-5 mb-5">目前的 {{ total_bank_size }} 道題目您已全數挑戰完畢。</p>
 
-                        {% for q in latest_analysis.questions_data %}
-                        <div class="mb-5 pb-3 border-bottom">
-                            <h5 class="fw-bold mb-4 lh-base">
-                                <span class="text-primary me-2 fs-4">Q{{ forloop.counter }}.</span>{{ q.question }}
-                            </h5>
+                            {# 加上 onsubmit 攔截事件防連點 #}
+                            <form method="post" action="{% url 'study_brain:generate' material.id %}" onsubmit="return showLoadingState(this);">
+                                {% csrf_token %}
 
-                            {# 隱藏的 input 用來記錄使用者選擇的值 #}
-                            <input type="hidden" name="question_{{ forloop.counter0 }}" id="input-q-{{ forloop.counter0 }}" required>
+                                {# 塞入回程車票，並帶上 ?tab=quiz 參數 #}
+                                <input type="hidden" name="next_url" value="{% url 'study_brain:study_room' material.id %}?tab=quiz">
 
-                            <div class="row g-3">
-                                {% for option in q.options %}
-                                <div class="col-12">
-                                    <div class="quiz-option q-opt-{{ forloop.parentloop.counter0 }} shadow-sm" data-value="{{ option }}" onclick="selectOption('{{ forloop.parentloop.counter0 }}', this)">
-                                        {# 使用 cycle 輪替輸出 A B C D E F #}
-                                        <span class="fw-bold me-3 fs-5 text-primary">{% cycle 'A' 'B' 'C' 'D' %}.</span> 
-                                        {# 加入 opt-text 類別，交由 JS 清理空白 #}
-                                        <span class="opt-text">{{ option }}</span>
-                                    </div>
+                                <button type="submit" id="generate-btn" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-5 py-3 me-2">
+                                    <i class="fas fa-brain me-2"></i>呼叫 AI 擴充新題目
+                                </button>
+                                <a href="{% url 'study_brain:dashboard' %}" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold px-5 py-3" id="back-btn">
+                                    返回儀表板
+                                </a>
+                            </form>
+                        </div>
+                    {% else %}
+                        {# 📝 狀態：顯示測驗題目 📝 #}
+                        <form id="quizForm" method="POST" action="{% url 'study_brain:submit_quiz' latest_analysis.id %}">
+                            {% csrf_token %}
+
+                            {# 💡 恢復並升級：懸浮置頂的進度條 #}
+                            <div class="quiz-progress-sticky d-flex flex-column flex-md-row justify-content-between align-items-md-center p-3 mb-5 rounded border-start border-4 border-primary bg-white shadow-sm" style="position: sticky; top: 1rem; z-index: 1020;">
+                                <div class="fw-bold text-secondary mb-2 mb-md-0"><i class="fas fa-tasks text-primary me-2"></i>{% trans "Quiz Progress" %}</div>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span class="badge bg-secondary px-3 py-2 fs-6 shadow-sm">目前總題數: <span id="total-q">{{ quiz_questions|length }}</span></span>
+                                    <span class="badge bg-success px-3 py-2 fs-6 shadow-sm">已答: <span id="answered-q">0</span></span>
+                                    <span class="badge bg-warning text-dark px-3 py-2 fs-6 shadow-sm">未答: <span id="unanswered-q">{{ quiz_questions|length }}</span></span>
                                 </div>
-                                {% endfor %}
                             </div>
-                        </div>
-                        {% endfor %}
 
-                        <div class="text-end mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow">
-                                <i class="fas fa-paper-plane me-2"></i>{% trans "Submit Answers" %}
-                            </button>
-                        </div>
-                    </form>
+                            {# 迴圈改跑過濾後的 quiz_questions #}
+                            {% for q in quiz_questions %}
+                            <div class="mb-5 pb-3 border-bottom">
+                                <h5 class="fw-bold mb-4 lh-base d-flex align-items-start">
+                                    <span class="text-primary me-2 fs-4">Q{{ forloop.counter }}.</span>
+                                    <div>
+                                        {{ q.question }}
+                                        {# 如果是看過的舊題目，給它一個灰色小標籤 #}
+                                        {% if q.is_seen %}
+                                            <span class="badge bg-secondary ms-2 fw-normal opacity-75 align-middle" style="font-size: 0.75rem;"><i class="fas fa-history me-1"></i>已作答</span>
+                                        {% endif %}
+                                    </div>
+                                </h5>
+
+                                {# 隱藏的 input 用來記錄使用者選擇的值 (改用 original_index) #}
+                                <input type="hidden" name="question_{{ q.original_index }}" id="input-q-{{ q.original_index }}">
+
+                                <div class="row g-3">
+                                    {# 重置選項字母，避免跑出 E、F #}
+                                    {% for option in q.options %}
+                                    <div class="col-12">
+                                        {# id 與點擊事件綁定 original_index #}
+                                        <div class="quiz-option q-opt-{{ q.original_index }} shadow-sm" data-value="{{ option }}" onclick="selectOption('{{ q.original_index }}', this)">
+                                            <span class="fw-bold me-3 fs-5 text-primary">{% cycle 'A' 'B' 'C' 'D' 'E' 'F' %}.</span> 
+                                            <span class="opt-text">{{ option }}</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% resetcycle %}
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <div class="text-end mt-5">
+                                {# 鎖定按鈕：預設加上 disabled 屬性與 class #}
+                                <button type="submit" id="submit-quiz-btn" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow disabled" disabled>
+                                    <i class="fas fa-paper-plane me-2"></i>{% trans "Submit Answers" %}
+                                </button>
+                                {# 提示文字：提醒使用者還沒做完 #}
+                                <div id="submit-warning" class="text-danger small mt-2 fw-bold">
+                                    <i class="fas fa-exclamation-circle me-1"></i>請完成所有題目後即可送出
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
+
                 </div>
             </div>
         </div>
@@ -116,20 +175,4 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{% static 'js/study_brain.js' %}"></script>
-
-<script>
-// 啟動 Markdown 解析
-document.addEventListener('DOMContentLoaded', function() {
-    const rawMarkdown = document.getElementById('raw-markdown').value;
-    const contentDiv = document.getElementById('summary-content');
-
-    if (contentDiv && rawMarkdown) {
-        //* 移除 AI 可能因為 Prompt 縮排而產生的過多前綴空白 (避免被誤判為程式碼區塊)
-        const cleanedText = rawMarkdown.replace(/^[ \t]{4,}/gm, ''); 
-
-        //* 將 Markdown 轉換為 HTML 並注入
-        contentDiv.innerHTML = marked.parse(cleanedText);
-    }
-});
-</script>
 {% endblock %}
