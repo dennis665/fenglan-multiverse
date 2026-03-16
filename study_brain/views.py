@@ -367,7 +367,9 @@ def api_get_deep_analysis(request, analysis_id, q_index):
     )
 
     if not ai_result:
-        return JsonResponse({"status": "error", "message": "AI 解析失敗，請稍後再試"}, status=500)
+        return JsonResponse(
+            {"status": "error", "message": "AI 目前請求量過大需要喘口氣 🥵，請等待約 60 秒後再點擊一次！"}, status=429
+        )
 
     #! 儲存進 DB 造福後人
     deep_analysis = QuestionDeepAnalysis.objects.create(
