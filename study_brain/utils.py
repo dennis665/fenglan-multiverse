@@ -229,6 +229,8 @@ def generate_question_deep_analysis(question_text, options, answer, explanation)
 
     【輸出格式要求】：
     請嚴格遵守以下純 JSON 格式輸出（不要加上 ```json 標籤）：
+    ⚠️ 致命錯誤警告：如果內容包含數學公式 (LaTeX) 或任何反斜線，請務必進行 JSON 跳脫！例如數學的 \pi 必須寫成 \\\\pi，分數 \frac 必須寫成 \\\\frac，否則系統會崩潰！
+
     {{
         "concept_explanation": "此處填入 Markdown 格式的深度解析",
         "practice_questions": [
@@ -254,7 +256,14 @@ def generate_question_deep_analysis(question_text, options, answer, explanation)
             result_text = result_text.replace("```json", "").replace("```", "").strip()
 
         #! 確保解析成功
-        analysis_data = json.loads(result_text)
+        try:
+            analysis_data = json.loads(result_text)
+        except json.JSONDecodeError:
+            print("⚠️ 發現 Invalid escape，啟動 Python 暴力修復...")
+            #! 將單一反斜線替換為雙反斜線，並保留正確的換行(\n)與雙引號(\")
+            cleaned_text = result_text.replace("\\", "\\\\").replace("\\\\n", "\\n").replace('\\\\"', '\\"')
+            analysis_data = json.loads(cleaned_text)
+            print("✅ JSON 自動修復成功！")
         return analysis_data
 
     except Exception as e:
