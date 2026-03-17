@@ -14,10 +14,18 @@
             <h2 class="fw-bold"><i class="fas fa-brain text-primary me-2"></i>{% trans "AI Study Brain" %}</h2>
             <p class="text-muted mb-0">{% trans "Upload materials to train your personal AI tutor." %}</p>
         </div>
-        {# 歷史紀錄入口按鈕 #}
-        <a href="{% url 'study_brain:quiz_history' %}" class="btn btn-outline-primary fw-bold rounded-pill shadow-sm">
-            <i class="fas fa-history me-2"></i>{% trans "My Quiz History" %}
-        </a>
+
+        <div class="d-flex gap-2">
+            {# 錯題本入口按鈕 #}
+            <a href="{% url 'study_brain:mistake_book' %}" class="btn btn-outline-danger fw-bold rounded-pill shadow-sm">
+                <i class="fas fa-book-dead me-2"></i>我的錯題本
+            </a>
+
+            {# 歷史紀錄入口按鈕 #}
+            <a href="{% url 'study_brain:quiz_history' %}" class="btn btn-outline-primary fw-bold rounded-pill shadow-sm">
+                <i class="fas fa-history me-2"></i>{% trans "My Quiz History" %}
+            </a>
+        </div>
     </div>
 
     <div class="row g-4">

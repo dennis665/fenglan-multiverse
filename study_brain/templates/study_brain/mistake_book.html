@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block head_title %}{% trans "我的專屬錯題本" %} - AI 教材大腦{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/mistake_book.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    {# 頁首與操作按鈕區 (列印時隱藏) #}
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print border-bottom pb-3">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-book-dead text-danger me-2"></i>我的專屬錯題本</h2>
+            <p class="text-muted mb-0">收錄您所有曾經答錯的題目與 AI 深度解析，複習好幫手！</p>
+        </div>
+        <div>
+            <a href="{% url 'study_brain:dashboard' %}" class="btn btn-outline-secondary rounded-pill me-2">
+                <i class="fas fa-arrow-left me-1"></i>返回儀表板
+            </a>
+            {# 呼叫瀏覽器原生列印功能 #}
+            <button onclick="window.print()" class="btn btn-primary rounded-pill fw-bold shadow-sm">
+                <i class="fas fa-print me-2"></i>列印 / 匯出 PDF
+            </button>
+        </div>
+    </div>
+
+    {# 只有列印時才會顯示的大標題 #}
+    <div class="d-none d-print-block text-center mb-4">
+        <h2 class="fw-bold">專屬錯題與解析總覽</h2>
+        <p class="text-muted">匯出時間：{% now "Y-m-d H:i" %}</p>
+        <hr>
+    </div>
+
+    {# 錯題列表區塊 #}
+    <div class="row g-4">
+        {% for mistake in mistakes %}
+        <div class="col-12">
+            <div class="card mistake-card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 d-flex justify-content-between">
+                    <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
+                        <i class="fas fa-folder-open me-1"></i> {{ mistake.quiz_record.analysis_result.material.title }}
+                    </span>
+                    <small class="text-muted">{{ mistake.quiz_record.created_at|date:"Y/m/d" }}</small>
+                </div>
+
+                <div class="card-body p-4">
+                    {# 題目 #}
+                    <h5 class="fw-bold mb-4 lh-base text-dark">
+                        <span class="text-danger me-2">Q.</span>{{ mistake.question_text }}
+                    </h5>
+
+                    {# 答題狀況比對 #}
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-danger bg-opacity-10 border-danger">
+                                <div class="text-danger fw-bold small mb-1"><i class="fas fa-times-circle me-1"></i>您的錯誤作答</div>
+                                <div class="fs-6">{{ mistake.user_answer }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-success bg-opacity-10 border-success">
+                                <div class="text-success fw-bold small mb-1"><i class="fas fa-check-circle me-1"></i>正確解答</div>
+                                <div class="fs-6">{{ mistake.correct_answer }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# AI 解析 #}
+                    {% if mistake.explanation %}
+                    <div class="bg-light p-4 rounded-3 border-start border-4 border-warning">
+                        <h6 class="fw-bold text-dark mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>AI 深度解析</h6>
+                        <p class="mb-0 text-secondary lh-lg">{{ mistake.explanation }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        {# 如果沒有錯題 #}
+        <div class="col-12 text-center py-5 no-print">
+            <i class="fas fa-award fa-4x text-warning mb-3"></i>
+            <h4 class="fw-bold">太神啦！您目前沒有任何錯題紀錄</h4>
+            <p class="text-muted">繼續保持這個完美的狀態吧！</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

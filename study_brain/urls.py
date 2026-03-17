@@ -19,4 +19,5 @@ urlpatterns = [
         views.api_get_deep_analysis,
         name="api_deep_analysis",
     ),
+    path("mistakes/", views.mistake_book, name="mistake_book"),
 ]

@@ -229,7 +229,7 @@ def generate_question_deep_analysis(question_text, options, answer, explanation)
 
     【輸出格式要求】：
     請嚴格遵守以下純 JSON 格式輸出（不要加上 ```json 標籤）：
-    ⚠️ 致命錯誤警告：如果內容包含數學公式 (LaTeX) 或任何反斜線，請務必進行 JSON 跳脫！例如數學的 \pi 必須寫成 \\\\pi，分數 \frac 必須寫成 \\\\frac，否則系統會崩潰！
+    ⚠️ 致命錯誤警告：如果內容包含數學公式 (LaTeX) 或任何反斜線，請務必進行 JSON 跳脫！例如數學的 \\pi 必須寫成 \\\\pi，分數 \\frac 必須寫成 \\\\frac，否則系統會崩潰！
 
     {{
         "concept_explanation": "此處填入 Markdown 格式的深度解析",

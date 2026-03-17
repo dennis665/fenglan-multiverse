@@ -387,3 +387,20 @@ def api_get_deep_analysis(request, analysis_id, q_index):
             "practice_questions": deep_analysis.practice_questions,
         }
     )
+
+
+@login_required
+def mistake_book(request):
+    """
+    專屬錯題本：顯示使用者曾經答錯的所有題目與 AI 解析
+    """
+    mistakes = (
+        QuizMistake.objects.filter(quiz_record__user=request.user)
+        .select_related("quiz_record__analysis_result__material")
+        .order_by("-quiz_record__created_at")
+    )
+
+    context = {
+        "mistakes": mistakes,
+    }
+    return render(request, "study_brain/mistake_book.html", context)
