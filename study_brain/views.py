@@ -389,16 +389,34 @@ def api_get_deep_analysis(request, analysis_id, q_index):
     )
 
 
+#! 定義 Python 專屬的「自然排序」邏輯
+def natural_sort_key(mistake):
+    #! 利用正規表達式，抓出題目字串裡面的「第一個數字」
+    #! 例如從 "Q10. 請問..." 抓出數字 10。如果沒數字就給個預設值 9999
+    match = re.search(r"\d+", mistake.question_text)
+    q_num = int(match.group()) if match else 9999
+
+    #! 回傳一個 Tuple，Python 會依序比較這三個值來決定順序：
+    return (
+        #! 教材 ID (-號代表由大到小，越新的教材在越上面)
+        -mistake.quiz_record.analysis_result.material.id,
+        #! 題號數字 (正常的整數排序，1, 2, 3... 10，完美解決字串問題！)
+        q_num,
+        #! 測驗時間 (-號代表越近期的錯題紀錄排在越上面)
+        -mistake.quiz_record.created_at.timestamp(),
+    )
+
+
 @login_required
 def mistake_book(request):
     """
     專屬錯題本：顯示使用者曾經答錯的所有題目與 AI 解析
     """
-    mistakes = (
-        QuizMistake.objects.filter(quiz_record__user=request.user)
-        .select_related("quiz_record__analysis_result__material")
-        .order_by("-quiz_record__analysis_result__material__id", "-quiz_record__created_at")
+    mistakes_qs = QuizMistake.objects.filter(quiz_record__user=request.user).select_related(
+        "quiz_record__analysis_result__material"
     )
+    #! 執行排序，並轉成 List 傳給前端的 {% regroup %} 使用
+    mistakes = sorted(mistakes_qs, key=natural_sort_key)
 
     context = {
         "mistakes": mistakes,
