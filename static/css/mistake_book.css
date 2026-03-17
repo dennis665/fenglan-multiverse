@@ -8,45 +8,122 @@
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
 }
 
-/*! 專屬列印樣式 (匯出 PDF 時會自動套用) */
+/*! 🖨️ 專屬列印樣式：極致壓縮防擠壓版 (匯出 PDF 時自動套用) */
 @media print {
-
-    /*! 隱藏不需要列印的元素 (導覽列、按鈕、頁尾) */
-    .navbar,
-    footer,
-    .no-print,
-    .btn {
+    /*! 隱藏不需要列印的元素 */
+        .navbar,
+        footer,
+        .no-print,
+        .btn {
         display: none !important;
     }
 
-    /*! 調整版面為白底黑字，節省墨水 */
+        /*! 基礎排版：白底黑字、縮小字體，並給予合理的行距防重疊 */
     body {
         background-color: #fff !important;
         color: #000 !important;
         margin: 0;
         padding: 0;
+        font-size: 11pt !important;
+            /** 整體字體縮小 */
+            line-height: 1.5 !important;
+            /** 確保文字有呼吸空間，不會上下疊字 */
     }
 
-    /*! 讓容器佔滿整個 A4 寬度 */
     .container {
         width: 100% !important;
         max-width: 100% !important;
         padding: 0 !important;
     }
 
-    /*! 錯題卡片去背、去陰影，加上細邊框 */
+        /*! 強制推翻 Bootstrap 網頁版的超大留白，節省紙張空間 */
+        .p-4 {
+            padding: 12px !important;
+        }
+    
+        .p-3 {
+            padding: 8px !important;
+        }
+    
+        .mb-4 {
+            margin-bottom: 12px !important;
+        }
+    
+        .mt-5 {
+            margin-top: 15px !important;
+        }
+    
+        /** 縮小教材標題上方的空白 */
+    
+        /*! 縮小錯題卡片之間的距離 (Grid Gutter) */
+        .row.g-4 {
+            --bs-gutter-y: 12px !important;
+        }
+    
+        .row.g-3 {
+            --bs-gutter-y: 8px !important;
+            --bs-gutter-x: 10px !important;
+        }
+    
+        /*! 標題字體等比例縮小 */
+        h4 {
+            font-size: 14pt !important;
+            margin-bottom: 8px !important;
+        }
+    
+        h5 {
+            font-size: 12pt !important;
+            margin-bottom: 6px !important;
+        }
+    
+        h6 {
+            font-size: 11pt !important;
+            margin-bottom: 4px !important;
+        }
+    
+        /*! 致命關鍵：解除 Bootstrap h-100 與高度封印，防內容被截斷 */
+        /*! 讓卡片與左右兩欄的答案區塊，能根據文字多寡自由往下長高 */
+        .mistake-card,
+        .h-100,
+        .card-body,
+        .row>div {
+            height: auto !important;
+            min-height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+        }
+    
+        /*! 防止過長的單字、網址或 LaTeX 數學公式超出邊界 */
+        * {
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            white-space: normal !important;
+            /*! 列印時強制顯示背景顏色 (如標籤的綠色、紅色) */
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+    
+        /*! 如果解析內有圖片，強制縮放避免撐破 A4 版面 */
+        img {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+    
+        /*! 錯題卡片緊湊化與防斷頁 */
     .mistake-card {
         box-shadow: none !important;
         border: 1px solid #ccc !important;
-        margin-bottom: 20px !important;
-        /*! 避免卡片被切成兩半跨頁列印 */
+        border-radius: 6px !important;
+            margin-bottom: 15px !important;
+            /** 稍微留一點點下緣間距，避免卡片全部黏死 */
+            /*! 避免整張卡片被切成兩半跨頁列印 */
         page-break-inside: avoid;
         break-inside: avoid;
     }
 
-    /*! 列印時強制顯示背景顏色 (如標籤的綠色、紅色) */
-    * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        /*! AI 解析區塊壓縮 */
+        .markdown-content p {
+            margin-bottom: 6px !important;
+            /** 壓縮解析內文的段落間距 */
     }
 }

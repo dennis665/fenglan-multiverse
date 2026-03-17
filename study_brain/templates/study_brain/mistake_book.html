@@ -35,55 +35,71 @@
 
     {# 錯題列表區塊 #}
     <div class="row g-4">
-        {% for mistake in mistakes %}
-        <div class="col-12">
-            <div class="card mistake-card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 d-flex justify-content-between">
-                    <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
-                        <i class="fas fa-folder-open me-1"></i> {{ mistake.quiz_record.analysis_result.material.title }}
+        {# 💡 核心魔法：依照教材物件進行分組，產生名為 grouped_mistakes 的結構 #}
+        {% regroup mistakes by quiz_record.analysis_result.material as grouped_mistakes %}
+
+        {% for group in grouped_mistakes %}
+            {# 📌 每個教材的獨立大標題 #}
+            <div class="col-12 mt-5">
+                <div class="d-flex align-items-center border-bottom pb-2 mb-2">
+                    <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 40px; height: 40px;">
+                        <i class="fas fa-folder-open"></i>
                     </span>
-                    <small class="text-muted">{{ mistake.quiz_record.created_at|date:"Y/m/d" }}</small>
-                </div>
-
-                <div class="card-body p-4">
-                    {# 題目 #}
-                    <h5 class="fw-bold mb-4 lh-base text-dark">
-                        <span class="text-danger me-2">Q.</span>{{ mistake.question_text }}
-                    </h5>
-
-                    {# 答題狀況比對 #}
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <div class="p-3 border rounded-3 bg-danger bg-opacity-10 border-danger">
-                                <div class="text-danger fw-bold small mb-1"><i class="fas fa-times-circle me-1"></i>您的錯誤作答</div>
-                                <div class="fs-6">{{ mistake.user_answer }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 border rounded-3 bg-success bg-opacity-10 border-success">
-                                <div class="text-success fw-bold small mb-1"><i class="fas fa-check-circle me-1"></i>正確解答</div>
-                                <div class="fs-6">{{ mistake.correct_answer }}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {# AI 解析 #}
-                    {% if mistake.explanation %}
-                    <div class="bg-light p-4 rounded-3 border-start border-4 border-warning">
-                        <h6 class="fw-bold text-dark mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>AI 深度解析</h6>
-                        <p class="mb-0 text-secondary lh-lg">{{ mistake.explanation }}</p>
-                    </div>
-                    {% endif %}
+                    <h4 class="fw-bold text-dark mb-0 lh-base">{{ group.grouper.title }}</h4>
+                    <span class="badge bg-secondary ms-auto rounded-pill">{{ group.list|length }} 題</span>
                 </div>
             </div>
-        </div>
+
+            {# 📌 該教材底下的所有錯題迴圈 #}
+            {% for mistake in group.list %}
+            <div class="col-12">
+                <div class="card mistake-card border-0 shadow-sm rounded-4 h-100">
+                    {# 因為外面已經有教材標題了，這裡就只顯示測驗日期 #}
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 text-end">
+                        <small class="text-muted fw-bold"><i class="fas fa-clock me-1"></i>測驗時間：{{ mistake.quiz_record.created_at|date:"Y/m/d H:i" }}</small>
+                    </div>
+
+                    <div class="card-body p-4">
+                        {# 題目 #}
+                        <h5 class="fw-bold mb-4 lh-base text-dark">
+                            <span class="text-danger me-2">Q.</span>{{ mistake.question_text }}
+                        </h5>
+
+                        {# 答題狀況比對 #}
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-danger bg-opacity-10 border-danger h-100">
+                                    <div class="text-danger fw-bold small mb-2"><i class="fas fa-times-circle me-1"></i>您的錯誤作答</div>
+                                    <div class="fs-6">{{ mistake.user_answer }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-success bg-opacity-10 border-success h-100">
+                                    <div class="text-success fw-bold small mb-2"><i class="fas fa-check-circle me-1"></i>正確解答</div>
+                                    <div class="fs-6">{{ mistake.correct_answer }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# AI 解析 #}
+                        {% if mistake.explanation %}
+                        <div class="bg-light p-4 rounded-3 border-start border-4 border-warning mt-2">
+                            <h6 class="fw-bold text-dark mb-3"><i class="fas fa-lightbulb text-warning me-2"></i>AI 深度解析</h6>
+                            <div class="text-secondary lh-lg markdown-content">{{ mistake.explanation }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
         {% empty %}
-        {# 如果沒有錯題 #}
-        <div class="col-12 text-center py-5 no-print">
-            <i class="fas fa-award fa-4x text-warning mb-3"></i>
-            <h4 class="fw-bold">太神啦！您目前沒有任何錯題紀錄</h4>
-            <p class="text-muted">繼續保持這個完美的狀態吧！</p>
-        </div>
+            {# 如果完全沒有任何錯題 #}
+            <div class="col-12 text-center py-5 no-print mt-4">
+                <i class="fas fa-award fa-4x text-warning mb-3"></i>
+                <h4 class="fw-bold">太神啦！您目前沒有任何錯題紀錄</h4>
+                <p class="text-muted">繼續保持這個完美的狀態吧！</p>
+            </div>
         {% endfor %}
     </div>
 </div>

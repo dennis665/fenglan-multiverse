@@ -397,7 +397,7 @@ def mistake_book(request):
     mistakes = (
         QuizMistake.objects.filter(quiz_record__user=request.user)
         .select_related("quiz_record__analysis_result__material")
-        .order_by("-quiz_record__created_at")
+        .order_by("-quiz_record__analysis_result__material__id", "-quiz_record__created_at")
     )
 
     context = {
