@@ -179,14 +179,21 @@
                             </div>
                             {% endfor %}
 
-                            <div class="text-end mt-5">
-                                {# 鎖定按鈕：預設加上 disabled 屬性與 class #}
-                                <button type="submit" id="submit-quiz-btn" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow disabled" disabled>
-                                    <i class="fas fa-paper-plane me-2"></i>{% trans "Submit Answers" %}
+                            <div class="d-flex justify-content-end align-items-center mt-5 gap-3">
+                                {# 清除紀錄按鈕 #}
+                                <button type="button" id="clearProgressBtn" class="btn btn-outline-danger btn-lg rounded-pill px-4 py-3 fw-bold shadow-sm">
+                                    <i class="fas fa-trash-restore-alt me-2"></i>清除暫存並重寫
                                 </button>
-                                {# 提示文字：提醒使用者還沒做完 #}
-                                <div id="submit-warning" class="text-danger small mt-2 fw-bold">
-                                    <i class="fas fa-exclamation-circle me-1"></i>請完成所有題目後即可送出
+
+                                <div class="text-end">
+                                    {# 鎖定按鈕：預設加上 disabled 屬性與 class #}
+                                    <button type="submit" id="submit-quiz-btn" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow disabled" disabled>
+                                        <i class="fas fa-paper-plane me-2"></i>{% trans "Submit Answers" %}
+                                    </button>
+                                    {# 提示文字：提醒使用者還沒做完 #}
+                                    <div id="submit-warning" class="text-danger small mt-2 fw-bold text-center">
+                                        <i class="fas fa-exclamation-circle me-1"></i>請完成所有題目後即可送出
+                                    </div>
                                 </div>
                             </div>
                         </form>

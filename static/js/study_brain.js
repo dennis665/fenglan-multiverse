@@ -8,18 +8,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('materialFile');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
 
+    // ... [保留原本上傳檔案區塊的邏輯不變] ...
     if (uploadZone && fileInput) {
         uploadZone.addEventListener('click', () => fileInput.click());
-
         uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadZone.classList.add('dragover');
         });
-
         uploadZone.addEventListener('dragleave', () => {
             uploadZone.classList.remove('dragover');
         });
-
         uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadZone.classList.remove('dragover');
@@ -28,10 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateFileName();
             }
         });
-
         fileInput.addEventListener('change', updateFileName);
     }
-
     function updateFileName() {
         if (fileInput.files.length > 0) {
             fileNameDisplay.textContent = fileInput.files[0].name;
@@ -39,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 清除 AI 產生的選項前綴空白 (解決每題第一個選項空一格的問題)
+    // 清除 AI 產生的選項前綴空白
     document.querySelectorAll('.opt-text').forEach(el => {
         el.textContent = el.textContent.trim();
     });
@@ -49,53 +45,112 @@ document.addEventListener('DOMContentLoaded', function () {
         updateQuizProgress();
     }
 
-    // 處理「訓練 AI」按鈕的防呆與 Loading 狀態 (針對 dashboard)
+    // 處理「訓練 AI」按鈕的防呆與 Loading 狀態
     const trainForms = document.querySelectorAll('.train-ai-form');
     trainForms.forEach(form => {
         form.addEventListener('submit', function (e) {
             const btn = this.querySelector('.train-btn');
-
-            if (btn.disabled) {
-                e.preventDefault();
-                return;
-            }
-
+            if (btn.disabled) { e.preventDefault(); return; }
             const icon = btn.querySelector('.btn-icon');
             const spinner = btn.querySelector('.btn-spinner');
             const text = btn.querySelector('.btn-text');
-
             btn.disabled = true;
             btn.classList.replace('btn-outline-primary', 'btn-primary');
-
             if (icon) icon.classList.add('d-none');
             if (spinner) spinner.classList.remove('d-none');
-
             if (text && typeof STUDY_BRAIN_I18N !== 'undefined') {
                 text.textContent = STUDY_BRAIN_I18N.trainingText;
             }
         });
     });
 
-    // 啟動 Markdown 解析 (針對 study_room 的重點整理)
+    // 啟動 Markdown 解析
     const rawMarkdownInput = document.getElementById('raw-markdown');
     const contentDiv = document.getElementById('summary-content');
-
     if (contentDiv && rawMarkdownInput && rawMarkdownInput.value) {
         const rawMarkdown = rawMarkdownInput.value;
-        // 移除 AI 可能因為 Prompt 縮排而產生的過多前綴空白
         const cleanedText = rawMarkdown.replace(/^[ \t]{4,}/gm, '');
-
-        // 確保 marked.js 有被正確載入才執行轉換
         if (typeof marked !== 'undefined') {
             contentDiv.innerHTML = marked.parse(cleanedText);
         } else {
-            console.error("Marked.js is not loaded. Cannot parse markdown.");
+            console.error("Marked.js is not loaded.");
         }
     }
 
     // 初始化 AI 深度解析的 Modal 實例
     if (document.getElementById('deepAnalysisModal')) {
         deepAnalysisModal = new bootstrap.Modal(document.getElementById('deepAnalysisModal'));
+    }
+
+    // ==========================================
+    // 🌟 新增：測驗自動存檔與還原系統 (LocalStorage)
+    // ==========================================
+    const quizForm = document.getElementById('quizForm');
+    const clearBtn = document.getElementById('clearProgressBtn');
+
+    // 從網址列或隱藏欄位中取得 Material ID 當作存檔 Key
+    // 我們抓 form 的 action URL 裡面的 ID 來用，這樣最穩
+    let storageKey = 'quiz_progress_unknown';
+    if (quizForm && quizForm.action) {
+        const urlParts = quizForm.action.split('/');
+        // 假設 URL 格式為 /study_brain/api/submit_quiz/15/
+        const idPart = urlParts[urlParts.length - 2];
+        if (!isNaN(idPart)) storageKey = `quiz_progress_record_${idPart}`;
+    }
+
+    if (quizForm) {
+        // --- 還原上次作答進度 ---
+        const savedProgress = localStorage.getItem(storageKey);
+        if (savedProgress) {
+            try {
+                const answers = JSON.parse(savedProgress);
+                for (const [qName, qValue] of Object.entries(answers)) {
+                    const qIndex = qName.split('_')[1];
+                    if (!qIndex) continue;
+
+                    // 尋找畫面上對應的那一題選項並模擬點擊
+                    const optionDiv = document.querySelector(`.q-opt-${qIndex}[data-value="${CSS.escape(qValue)}"]`);
+                    if (optionDiv) {
+                        optionDiv.click(); // 這會觸發下方的 selectOption()
+                    }
+                }
+            } catch (e) {
+                console.error("讀取存檔失敗", e);
+            }
+        }
+
+        // --- 使用者每次點擊選項時，自動存檔 ---
+        quizForm.addEventListener('click', function (e) {
+            const clickedOption = e.target.closest('.quiz-option');
+            if (clickedOption) {
+                // 延遲一點點，等 hidden input 被寫入後再抓取
+                setTimeout(() => {
+                    const currentAnswers = {};
+                    const hiddenInputs = quizForm.querySelectorAll('input[type="hidden"][name^="question_"]');
+                    hiddenInputs.forEach(input => {
+                        if (input.value) {
+                            currentAnswers[input.name] = input.value;
+                        }
+                    });
+                    localStorage.setItem(storageKey, JSON.stringify(currentAnswers));
+                }, 50);
+            }
+        });
+
+        // --- 送出考卷時清空存檔 ---
+        quizForm.addEventListener('submit', function () {
+            localStorage.removeItem(storageKey);
+        });
+    }
+
+    // --- 清除按鈕邏輯 ---
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            if (confirm('🚨 確定要清除目前所有已點選的答案，並重新開始作答嗎？')) {
+                localStorage.removeItem(storageKey);
+                window.location.reload();
+            }
+        });
     }
 });
 
