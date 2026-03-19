@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import yfinance as yf
 from django.core.management.base import BaseCommand
+from django.db import connection
 
 from invest.models import Stock, StockPrice
 
@@ -11,6 +12,9 @@ class Command(BaseCommand):
     help = "從 Yahoo Finance 批量更新「所有」標的之最新股價"
 
     def handle(self, *args, **kwargs):
+        #! 在向資料庫索取任何資料之前，強制斷開並清理已經失效的舊連線！
+        connection.close_old_connections()
+
         #! 轉成 list 以便取得總數與迴圈處理
         stocks_to_update = list(Stock.objects.filter(is_active=True))
         total_stocks = len(stocks_to_update)
