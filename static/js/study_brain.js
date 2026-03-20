@@ -69,7 +69,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const contentDiv = document.getElementById('summary-content');
     if (contentDiv && rawMarkdownInput && rawMarkdownInput.value) {
         const rawMarkdown = rawMarkdownInput.value;
-        const cleanedText = rawMarkdown.replace(/^[ \t]{4,}/gm, '');
+        let cleanedText = rawMarkdown.trimStart();
+        cleanedText = cleanedText.replace(/\u00A0/g, " ");
         if (typeof marked !== 'undefined') {
             contentDiv.innerHTML = marked.parse(cleanedText);
         } else {
