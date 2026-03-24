@@ -35,7 +35,8 @@
                 {% if user.is_authenticated %}
                 {# 會員專區下拉選單 #}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle {% if 'finance' in request.path or 'invest' in request.path or 'study_brain' in request.path %}active{% endif %}" href="#" id="memberZoneDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {# 在 if 判斷式中加入 'vision_brain' in request.path #}
+                    <a class="nav-link dropdown-toggle {% if 'finance' in request.path or 'invest' in request.path or 'study_brain' in request.path or 'vision_brain' in request.path %}active{% endif %}" href="#" id="memberZoneDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-crown me-1 text-warning"></i>{% trans "Member Zone" %}
                     </a>
                     <ul class="dropdown-menu shadow border-0" aria-labelledby="memberZoneDropdown">
@@ -60,6 +61,12 @@
                         <li>
                             <a class="dropdown-item {% if 'study_brain' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'study_brain:dashboard' %}">
                                 <i class="fas fa-brain fa-fw me-2 {% if 'study_brain' not in request.path %}text-primary{% endif %}"></i>{% trans "AI Study Brain" %}
+                            </a>
+                        </li>
+                        {# 新增 Vision Brain 連結 #}
+                        <li>
+                            <a class="dropdown-item {% if 'vision_brain' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'vision_brain:recognize' %}">
+                                <i class="fas fa-camera fa-fw me-2 {% if 'vision_brain' not in request.path %}text-info{% endif %}"></i>{% trans "Vision Brain" %}
                             </a>
                         </li>
                     </ul>
@@ -118,7 +125,7 @@
                     </a>
                 </li>
                 {% endif %}
-                
+
                 {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">

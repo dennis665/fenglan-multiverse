@@ -30,11 +30,11 @@ async function sendToAI(csrfToken) {
             chatBody.innerHTML += `<div class="msg msg-ai">${formattedReply}</div>`;
         } else {
             // 錯誤訊息套用翻譯
-            chatBody.innerHTML += `<div class="msg msg-ai text-danger">{% trans "Sorry, the system cannot respond at the moment." %}</div>`;
+            chatBody.innerHTML += `<div class="msg msg-ai text-danger">${CSI_CONFIG.trans.systemError}</div>`;
         }
     } catch (error) {
         // 連線訊息套用翻譯
-        chatBody.innerHTML += `<div class="msg msg-ai text-danger">{% trans "Connection failed, please check your network." %}</div>`;
+        chatBody.innerHTML += `<div class="msg msg-ai text-danger">${CSI_CONFIG.trans.netError}</div>`;
     }
     chatBody.scrollTop = chatBody.scrollHeight;
 }
@@ -45,7 +45,7 @@ function toggleAIChat() {
 }
 
 function handleChatKey(e) {
-    if (e.key === 'Enter') sendToAI();
+    if (e.key === 'Enter') sendToAI(CSI_CONFIG.csrfToken);
 }
 
 function createParticles() {

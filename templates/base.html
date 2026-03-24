@@ -44,7 +44,7 @@
     </div>
     <div class="chat-footer">
         <input type="text" id="ai-user-input" class="form-control form-control-sm" placeholder="{% trans 'Type a message...' %}" onkeypress="handleChatKey(event)">
-        <button class="btn btn-primary btn-sm" onclick="sendToAI()"><i class="fas fa-paper-plane"></i></button>
+        <button class="btn btn-primary btn-sm" onclick="sendToAI(CSI_CONFIG.csrfToken)"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 

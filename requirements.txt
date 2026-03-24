@@ -1,44 +1,41 @@
 #! 基礎環境與資料庫
-django==6.0.1
-mysqlclient==2.2.7
-django-environ==0.12.0
+django==6.0.3
+mysqlclient==2.2.8
+django-environ==0.13.0
 pyodbc==5.3.0
 
 #! OAuth 2.0 與認證 (Google 登入核心)
-django-allauth==65.14.0
+django-allauth==65.15.0
 requests==2.32.5
-PyJWT==2.10.1
-cryptography==46.0.3
+PyJWT==2.12.1
+cryptography==46.0.5
 
 #! 靜態檔案與生產環境伺服器
-gunicorn==24.0.0
-whitenoise==6.11.0
+gunicorn==25.1.0
+whitenoise==6.12.0
 
 #! 圖片處理
-Pillow==12.1.0
+Pillow==12.1.1
 
 #! 前端 UI 快速開發
-django-crispy-forms==2.5
-crispy-bootstrap5==2025.6
+django-crispy-forms==2.6
+crispy-bootstrap5==2026.3
 
 #! 開發工具 (僅建議開發階段使用)，提供 shell_plus 等強大除錯工具
 django-extensions==4.1
 
-#! 自動化處理 static 檔
-whitenoise==6.11.0
-
 #! 串接 gemini ai
-google-genai==1.60.0
+google-genai==1.68.0
 
 #! 處理 log
-concurrent-log-handler==0.9.28
+concurrent-log-handler==0.9.29
 
 #! 處理 Excel 資料
-pandas==3.0.0
+pandas==3.0.1
 openpyxl==3.1.5
 
 #! 安全性檢查套件
-bandit==1.9.3
+bandit==1.9.4
 safety==3.7.0
 
 #! 金融資訊
@@ -50,3 +47,10 @@ django-apscheduler==0.7.0
 #! 處理 PDF 和 WORD 文件
 pdfplumber==0.11.9
 python-docx==1.2.0
+
+#! 物件偵測用
+ultralytics==8.4.26
+
+#! OCR 辨識
+paddlepaddle==3.3.0
+paddleocr==3.4.0

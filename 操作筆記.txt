@@ -43,6 +43,8 @@ safety check
 #! 下載 OCR
 winget install UB-Mannheim.TesseractOCR
 
+#! requests 問題
+pip install urllib3==1.26.18 charset-normalizer==3.3.2 chardet==5.2.0 --force-reinstall
 
 -------docker 相關-------
 #! 建立並啟動所有容器，改 Dockerfile、裝新套件

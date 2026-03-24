@@ -83,6 +83,7 @@ LOCAL_APPS = [
     "finance",
     "invest",
     "study_brain",
+    "vision_brain",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

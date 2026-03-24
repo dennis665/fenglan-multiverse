@@ -67,6 +67,8 @@ urlpatterns = [
     path("invest/", include("invest.urls")),
     #! AI 教材學習
     path("study_brain/", include("study_brain.urls")),
+    #! 視覺頭腦
+    path("vision_brain/", include("vision_brain.urls")),
 ]
 
 if settings.DEBUG:

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-17 11:06+0800\n"
+"POT-Creation-Date: 2026-03-24 15:41+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\config\settings.py:279
+#: .\config\settings.py:280
 msgid "繁體中文"
 msgstr ""
 
-#: .\config\settings.py:280
+#: .\config\settings.py:281
 msgid "English"
 msgstr "英文"
 
@@ -861,7 +861,7 @@ msgid "點數購物訂單"
 msgstr ""
 
 #: .\finance\templates\finance\recharge_store.html:4
-#: .\templates\includes\navbar.html:44
+#: .\templates\includes\navbar.html:45
 msgid "Point Recharge"
 msgstr "點數儲值"
 
@@ -909,7 +909,7 @@ msgstr "無額外贈點"
 msgid "No recharge packages available at the moment."
 msgstr "目前尚無可用的儲值方案。"
 
-#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:49
+#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:50
 msgid "Point Shop"
 msgstr "點數商城"
 
@@ -1760,7 +1760,7 @@ msgid "AI Study Brain Dashboard"
 msgstr "AI 教材大腦儀表板"
 
 #: .\study_brain\templates\study_brain\dashboard.html:14
-#: .\templates\includes\navbar.html:62
+#: .\templates\includes\navbar.html:63
 msgid "AI Study Brain"
 msgstr "AI 教材大腦"
 
@@ -1962,15 +1962,15 @@ msgstr "練習測驗"
 msgid "Quiz Progress"
 msgstr "測驗進度"
 
-#: .\study_brain\templates\study_brain\study_room.html:185
+#: .\study_brain\templates\study_brain\study_room.html:191
 msgid "Submit Answers"
 msgstr "提交答案"
 
-#: .\study_brain\utils.py:177
+#: .\study_brain\utils.py:179
 msgid "此為歷屆考題匯入，無重點摘要。請直接前往「測驗練習」進行刷題！"
 msgstr ""
 
-#: .\study_brain\utils.py:193
+#: .\study_brain\utils.py:195
 msgid "AI 忙碌中或檔案解析發生錯誤，請稍後再試！"
 msgstr ""
 
@@ -2174,43 +2174,47 @@ msgstr "累計造訪"
 msgid "Home"
 msgstr "首頁"
 
-#: .\templates\includes\navbar.html:39
+#: .\templates\includes\navbar.html:40
 msgid "Member Zone"
 msgstr "會員專區"
 
-#: .\templates\includes\navbar.html:57
+#: .\templates\includes\navbar.html:58
 msgid "Investment"
 msgstr "投資理財"
 
-#: .\templates\includes\navbar.html:73
+#: .\templates\includes\navbar.html:69
+msgid "Vision Brain"
+msgstr "影像辨識大腦"
+
+#: .\templates\includes\navbar.html:80
 msgid "Tester Zone"
 msgstr "測試員專區"
 
-#: .\templates\includes\navbar.html:76
+#: .\templates\includes\navbar.html:83
 msgid "Test Management System"
 msgstr "測試管理系統"
 
-#: .\templates\includes\navbar.html:84
+#: .\templates\includes\navbar.html:91
 msgid "No tools available"
 msgstr "目前無可用工具"
 
-#: .\templates\includes\navbar.html:117
+#: .\templates\includes\navbar.html:124
 msgid "Admin"
 msgstr "管理者後台"
 
-#: .\templates\includes\navbar.html:137
+#: .\templates\includes\navbar.html:144
 msgid "Profile"
 msgstr "個人檔案"
 
-#: .\templates\includes\navbar.html:142
+#: .\templates\includes\navbar.html:149
 msgid "Logout"
 msgstr "登出"
 
-#: .\templates\includes\navbar.html:149
+#: .\templates\includes\navbar.html:156
 msgid "Login"
 msgstr "登入"
 
-#: .\templates\includes\navbar.html:152
+#: .\templates\includes\navbar.html:159
 msgid "Register"
 msgstr "註冊"
 
