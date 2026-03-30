@@ -1,14 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
-    // 0. 全螢幕自適應縮放機制 (完美融入各種螢幕)
+    // 0. 全螢幕自適應縮放 (解決畫面太小問題)
     // ==========================================
-    const container = document.getElementById('game-container');
     function resizeGame() {
-        // 計算寬高比縮放率，讓 800x600 塞進螢幕
-        const scale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
+        const container = document.getElementById('game-container');
+        if (!container) return;
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const gameWidth = 800;
+        const gameHeight = 600;
+
+        // 計算縮放比例，取寬或高能填滿螢幕的最小值，確保不變形且完整顯示
+        const scale = Math.min(windowWidth / gameWidth, windowHeight / gameHeight);
+
+        // 透過 CSS Transform 達成滿版效果
         container.style.transform = `scale(${scale})`;
     }
+
+    // 監聽視窗變化（包含手機轉向）
     window.addEventListener('resize', resizeGame);
+    window.addEventListener('orientationchange', () => setTimeout(resizeGame, 100));
     resizeGame(); // 初始化執行
 
     // ==========================================
@@ -605,9 +617,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btn-return-lobby').addEventListener('click', () => location.reload());
 
-    // 暫停按鈕事件綁定
+    // ==========================================
+    // 處理暫停選單按鈕 (支援手機與桌機)
+    // ==========================================
     const btnPause = document.getElementById('btn-pause');
     const btnResume = document.getElementById('btn-resume');
-    if (btnPause) btnPause.addEventListener('click', togglePause);
-    if (btnResume) btnResume.addEventListener('click', togglePause);
+    const btnQuit = document.getElementById('btn-quit');
+
+    // * 定義統一的按鈕綁定工具，解決重複撰寫與事件衝突
+    const bindMenuButton = (element, callback) => {
+        if (!element) return;
+
+        const execute = (e) => {
+            e.preventDefault();  //* 阻止瀏覽器預設行為 (例如縮放)
+            e.stopPropagation(); //* 防止事件穿透到下層畫布
+            callback();
+        };
+
+        // * 同時監聽 click 與 touchend
+        element.addEventListener('click', execute);
+        element.addEventListener('touchend', execute);
+    };
+
+    // 右上角暫停/播放按鈕
+    bindMenuButton(btnPause, () => {
+        togglePause();
+    });
+
+    // 暫停畫面中的「繼續遊戲」按鈕
+    bindMenuButton(btnResume, () => {
+        togglePause();
+    });
+
+    // 暫停畫面中的「放棄返回大廳」按鈕
+    bindMenuButton(btnQuit, () => {
+        gameState = 'stopped';
+        window.location.reload(); //* 強制重新整理返回大廳
+    });
 });

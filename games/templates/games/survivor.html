@@ -76,15 +76,16 @@
                 </div>
 
                 <!-- 暫停按鈕 (絕對定位於右上角) -->
-                <button id="btn-pause" class="btn btn-dark border border-secondary rounded-circle shadow" style="position: absolute; top: 15px; right: 15px; width: 45px; height: 45px; z-index: 2500; display: flex; justify-content: center; align-items: center;">
-                    <i class="fas fa-pause fs-6"></i>
+                <button id="btn-pause" class="btn btn-dark border-secondary rounded-circle shadow" 
+                    style="position: absolute; top: 20px; right: 20px; width: 60px; height: 60px; z-index: 5001; display: flex; justify-content: center; align-items: center; touch-action: auto;">
+                    <i class="fas fa-pause fs-4 text-white"></i>
                 </button>
 
                 <!-- 暫停覆蓋畫面 -->
                 <div id="pause-screen" class="screen-overlay">
                     <h1 class="text-white display-4 fw-bold mb-4">遊戲暫停</h1>
                     <button id="btn-resume" class="btn btn-lg btn-success fw-bold px-5 shadow-lg"><i class="fas fa-play me-2"></i>繼續遊戲</button>
-                    <button class="btn btn-outline-light mt-4" onclick="location.reload()"><i class="fas fa-sign-out-alt me-2"></i>放棄並返回大廳</button>
+                    <button id="btn-quit" class="btn btn-outline-light mt-4" onclick="location.reload()"><i class="fas fa-sign-out-alt me-2"></i>放棄並返回大廳</button>
                 </div>
             </div>
 

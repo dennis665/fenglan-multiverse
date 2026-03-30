@@ -16,21 +16,21 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    overflow: hidden;
 }
 
 /*! 遊戲實體大小絕對鎖定 800x600 */
 #game-container {
     position: relative;
-    width: 800px;
-    height: 600px;
+    width: 800px;  /* 遊戲原始邏輯寬度 */
+    height: 600px; /* 遊戲原始邏輯高度 */
     background-color: #2b2b2b;
-    border: 2px solid #555;
-    border-radius: 10px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-    overflow: hidden; /* 關鍵：禁止任何子元素超出畫布 */
-    transform-origin: center center; /* 讓 JS 從中心點進行等比例縮放 */
+    /* 確保縮放時不會歪掉 */
+    transform-origin: center center; 
+    flex-shrink: 0;
 }
 
 canvas {
