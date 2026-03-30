@@ -30,7 +30,7 @@
 {% include "includes/footer.html" %}
 
 {# --- AI 客服介面 --- #}
-<div class="ai-chat-launcher" onclick="toggleAIChat()">
+<div class="ai-chat-launcher" id="ai-chat-launcher">
     <i class="fas fa-robot"></i>
 </div>
 
@@ -51,6 +51,7 @@
 <script>
     const CSI_CONFIG = {
         csrfToken: '{{ csrf_token }}',
+        survivorUrl: '{% url "games:survivor_index" %}',
         trans: {
             systemError: '{% trans "Sorry, the system cannot respond at the moment." %}',
             netError: '{% trans "Connection failed, please check your network." %}'

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-24 15:41+0800\n"
+"POT-Creation-Date: 2026-03-30 13:57+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -12,11 +12,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\config\settings.py:280
+#: .\config\settings.py:281
 msgid "繁體中文"
 msgstr "Traditional Chinese"
 
-#: .\config\settings.py:281
+#: .\config\settings.py:282
 msgid "English"
 msgstr ""
 
@@ -865,7 +865,7 @@ msgid "點數購物訂單"
 msgstr "Point Purchase Order"
 
 #: .\finance\templates\finance\recharge_store.html:4
-#: .\templates\includes\navbar.html:45
+#: .\templates\includes\navbar.html:46
 msgid "Point Recharge"
 msgstr ""
 
@@ -913,7 +913,7 @@ msgstr ""
 msgid "No recharge packages available at the moment."
 msgstr ""
 
-#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:50
+#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:51
 msgid "Point Shop"
 msgstr ""
 
@@ -1006,6 +1006,159 @@ msgstr ""
 #: .\finance\templates\finance\shop.html:156
 msgid "Click anywhere to close"
 msgstr ""
+
+#: .\games\admin.py:19
+msgid "基本資訊"
+msgstr "Basic Information"
+
+#: .\games\admin.py:20
+msgid "倖存者生存 - 遊戲紀錄"
+msgstr "Survivor - Game Records"
+
+#: .\games\admin.py:21
+msgid "倖存者生存 - 局外成長等級"
+msgstr "Survivor - Meta-Progression Levels"
+
+#: .\games\admin.py:55
+msgid "圖片預覽"
+msgstr "Image Preview"
+
+#: .\games\apps.py:7
+msgid "遊戲中心"
+msgstr "Game Center"
+
+#: .\games\models.py:10
+msgid "玩家"
+msgstr "Player"
+
+#: .\games\models.py:13
+msgid "總遊戲幣"
+msgstr "Total Coins"
+
+#: .\games\models.py:16
+msgid "倖存者-最高存活秒數"
+msgstr "Survivor - Max Survival Time (Sec)"
+
+#: .\games\models.py:17
+msgid "倖存者-最高擊殺數"
+msgstr "Survivor - Max Kills"
+
+#: .\games\models.py:20
+msgid "倖存者-血量等級"
+msgstr "Survivor - HP Level"
+
+#: .\games\models.py:21
+msgid "倖存者-攻擊等級"
+msgstr "Survivor - ATK Level"
+
+#: .\games\models.py:22
+msgid "倖存者-移速等級"
+msgstr "Survivor - Speed Level"
+
+#: .\games\models.py:28 .\games\models.py:29
+msgid "玩家遊戲存檔"
+msgstr "Player Save Data"
+
+#: .\games\models.py:38
+msgid "關卡名稱"
+msgstr "Stage Name"
+
+#: .\games\models.py:39
+msgid "通關時間(秒)"
+msgstr "Clear Time (Sec)"
+
+#: .\games\models.py:40
+msgid "出怪頻率倍率(越高越快)"
+msgstr "Spawn Rate Multiplier (Higher = Faster)"
+
+#: .\games\models.py:41
+msgid "怪物屬性倍率(難度)"
+msgstr "Mob Stat Multiplier (Difficulty)"
+
+#: .\games\models.py:42
+msgid "通關獎勵金幣"
+msgstr "Clear Reward Coins"
+
+#: .\games\models.py:45 .\games\models.py:46
+msgid "倖存者-關卡設定"
+msgstr "Survivor - Stage Settings"
+
+#: .\games\models.py:55
+msgid "怪物名稱"
+msgstr "Monster Name"
+
+#: .\games\models.py:56
+msgid "怪物圖片"
+msgstr "Monster Image"
+
+#: .\games\models.py:57
+msgid "基礎血量"
+msgstr "Base HP"
+
+#: .\games\models.py:58
+msgid "基礎攻擊力"
+msgstr "Base ATK"
+
+#: .\games\models.py:59
+msgid "基礎跑速"
+msgstr "Base Move Speed"
+
+#: .\games\models.py:60
+msgid "碰撞體積(半徑)"
+msgstr "Collision Size (Radius)"
+
+#: .\games\models.py:63 .\games\models.py:64
+msgid "倖存者-怪物圖鑑"
+msgstr "Survivor - Bestiary"
+
+#: .\games\templates\games\survivor.html:8
+#: .\games\templates\games\survivor.html:30
+msgid "倖存者生存"
+msgstr "Survivor Survival"
+
+#: .\games\templates\games\survivor.html:33
+msgid "最高存活"
+msgstr "Best Survival"
+
+#: .\games\templates\games\survivor.html:33
+msgid "最高擊殺"
+msgstr "Best Kills"
+
+#: .\games\templates\games\survivor.html:34
+msgid "擁有金幣"
+msgstr "Coins Owned"
+
+#: .\games\templates\games\survivor.html:39
+msgid "選擇挑戰關卡"
+msgstr "Select Challenge Stage"
+
+#: .\games\templates\games\survivor.html:46
+msgid "強化初始血量"
+msgstr "Upgrade Starting HP"
+
+#: .\games\templates\games\survivor.html:47
+#: .\games\templates\games\survivor.html:52
+#: .\games\templates\games\survivor.html:57
+msgid "Lv."
+msgstr ""
+
+#: .\games\templates\games\survivor.html:48
+#: .\games\templates\games\survivor.html:53
+#: .\games\templates\games\survivor.html:58
+msgid "升級"
+msgstr "Upgrade"
+
+#: .\games\templates\games\survivor.html:51
+msgid "強化初始攻擊"
+msgstr "Enhance Starting ATK"
+
+#: .\games\templates\games\survivor.html:56
+msgid "強化初始移速"
+msgstr "Enhance Starting SPD"
+
+#: .\games\templates\games\survivor.html:62
+msgid "開始生存"
+msgstr "Start Survival"
 
 #: .\invest\apps.py:7
 msgid "投資理財"
@@ -1773,7 +1926,7 @@ msgid "AI Study Brain Dashboard"
 msgstr ""
 
 #: .\study_brain\templates\study_brain\dashboard.html:14
-#: .\templates\includes\navbar.html:63
+#: .\templates\includes\navbar.html:65
 msgid "AI Study Brain"
 msgstr ""
 
@@ -2198,11 +2351,11 @@ msgstr ""
 msgid "Type a message..."
 msgstr ""
 
-#: .\templates\base.html:55
+#: .\templates\base.html:56
 msgid "Sorry, the system cannot respond at the moment."
 msgstr ""
 
-#: .\templates\base.html:56
+#: .\templates\base.html:57
 msgid "Connection failed, please check your network."
 msgstr ""
 
@@ -2226,43 +2379,43 @@ msgstr ""
 msgid "Member Zone"
 msgstr ""
 
-#: .\templates\includes\navbar.html:58
+#: .\templates\includes\navbar.html:60
 msgid "Investment"
 msgstr ""
 
-#: .\templates\includes\navbar.html:69
+#: .\templates\includes\navbar.html:70
 msgid "Vision Brain"
 msgstr ""
 
-#: .\templates\includes\navbar.html:80
+#: .\templates\includes\navbar.html:83
 msgid "Tester Zone"
 msgstr ""
 
-#: .\templates\includes\navbar.html:83
+#: .\templates\includes\navbar.html:86
 msgid "Test Management System"
 msgstr ""
 
-#: .\templates\includes\navbar.html:91
+#: .\templates\includes\navbar.html:94
 msgid "No tools available"
 msgstr ""
 
-#: .\templates\includes\navbar.html:124
+#: .\templates\includes\navbar.html:127
 msgid "Admin"
 msgstr ""
 
-#: .\templates\includes\navbar.html:144
+#: .\templates\includes\navbar.html:147
 msgid "Profile"
 msgstr ""
 
-#: .\templates\includes\navbar.html:149
+#: .\templates\includes\navbar.html:152
 msgid "Logout"
 msgstr ""
 
-#: .\templates\includes\navbar.html:156
+#: .\templates\includes\navbar.html:159
 msgid "Login"
 msgstr ""
 
-#: .\templates\includes\navbar.html:159
+#: .\templates\includes\navbar.html:162
 msgid "Register"
 msgstr ""
 

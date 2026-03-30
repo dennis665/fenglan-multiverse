@@ -1,0 +1,109 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <!-- 嚴格鎖定視口，禁止使用者縮放與滑動 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>{% trans "倖存者生存" %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/survivor.css' %}">
+</head>
+<body>
+    {# --- 隱藏資料傳遞區 --- #}
+    <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+    <input type="hidden" id="baseHpLevel" value="{{ profile.survivor_hp_lv }}">
+    <input type="hidden" id="baseAtkLevel" value="{{ profile.survivor_atk_lv }}">
+    <input type="hidden" id="baseSpeedLevel" value="{{ profile.survivor_speed_lv }}">
+    <input type="hidden" id="playerAvatarUrl" value="{{ avatar_url }}">
+    <script id="levelsData" type="application/json">{{ levels_json|safe }}</script>
+    <script id="monstersData" type="application/json">{{ monsters_json|safe }}</script>
+
+    {# --- 遊戲全螢幕外框 --- #}
+    <div id="app-wrapper">
+        <div id="game-container">
+
+            <!-- 1. 大廳畫面 -->
+            <div id="lobby-screen" class="screen-overlay active">
+                <h1 class="text-warning fw-bold mb-4">{% trans "倖存者生存" %}</h1>
+
+                <div class="stats-board text-white mb-3 text-center">
+                    <p class="fs-5">🏆 {% trans "最高存活" %}: <span class="text-info">{{ profile.survivor_max_time }}</span> 秒 | 💀 {% trans "最高擊殺" %}: <span class="text-danger">{{ profile.survivor_max_kills }}</span></p>
+                    <h4 class="text-warning mt-2"><i class="fas fa-coins me-2"></i>{% trans "擁有金幣" %}: <span id="display-coins" class="fw-bold">{{ profile.total_coins }}</span></h4>
+                </div>
+
+                <!-- 🌟 關卡選擇區 (修復消失的問題) -->
+                <div class="mb-4 text-center">
+                    <h5 class="text-white mb-2"><i class="fas fa-map-marker-alt me-2 text-danger"></i>{% trans "選擇挑戰關卡" %}</h5>
+                    <select id="levelSelect" class="form-select bg-dark text-white border-secondary mx-auto shadow" style="max-width: 300px; cursor: pointer;"></select>
+                </div>
+
+                <!-- 🌟 局外強化面板 -->
+                <div class="upgrade-panel d-flex gap-3 mb-4">
+                    <div class="upgrade-card bg-dark text-white p-3 border border-secondary rounded text-center shadow">
+                        <h5 class="text-success">{% trans "強化初始血量" %}</h5>
+                        <p>{% trans "Lv." %} <span id="lbl-hp-lvl">{{ profile.survivor_hp_lv }}</span></p>
+                        <button class="btn btn-sm btn-outline-success btn-buy" data-type="hp">{% trans "升級" %} (<span id="cost-hp"></span> G)</button>
+                    </div>
+                    <div class="upgrade-card bg-dark text-white p-3 border border-secondary rounded text-center shadow">
+                        <h5 class="text-danger">{% trans "強化初始攻擊" %}</h5>
+                        <p>{% trans "Lv." %} <span id="lbl-atk-lvl">{{ profile.survivor_atk_lv }}</span></p>
+                        <button class="btn btn-sm btn-outline-danger btn-buy" data-type="atk">{% trans "升級" %} (<span id="cost-atk"></span> G)</button>
+                    </div>
+                    <div class="upgrade-card bg-dark text-white p-3 border border-secondary rounded text-center shadow">
+                        <h5 class="text-info">{% trans "強化初始移速" %}</h5>
+                        <p>{% trans "Lv." %} <span id="lbl-speed-lvl">{{ profile.survivor_speed_lv }}</span></p>
+                        <button class="btn btn-sm btn-outline-info btn-buy" data-type="speed">{% trans "升級" %} (<span id="cost-speed"></span> G)</button>
+                    </div>
+                </div>
+
+                <button id="btn-start-game" class="btn btn-lg btn-primary fw-bold px-5 mt-2 shadow-lg"><i class="fas fa-play me-2"></i>{% trans "開始生存" %}</button>
+                <button class="btn btn-sm btn-outline-light mt-3" onclick="window.location.href='/'">離開遊戲</button>
+            </div>
+
+            <!-- 2. 遊戲畫布與 UI (血條/經驗條/搖桿/暫停) -->
+            <div id="game-ui-layer" class="d-none">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+                <div id="ui-layer">
+                    <div class="bar-container"><div id="hp-bar" class="hp-fill"></div></div>
+                    <div class="bar-container"><div id="xp-bar" class="xp-fill"></div></div>
+                    <div id="stats-text" class="text-white">
+                        ⭐ <span id="level-val">1</span> | ⏳ <span id="time-val">00:00</span> | 💀 <span id="kill-val">0</span>
+                    </div>
+                </div>
+
+                <!-- 暫停按鈕 (絕對定位於右上角) -->
+                <button id="btn-pause" class="btn btn-dark border border-secondary rounded-circle shadow" style="position: absolute; top: 15px; right: 15px; width: 45px; height: 45px; z-index: 2500; display: flex; justify-content: center; align-items: center;">
+                    <i class="fas fa-pause fs-6"></i>
+                </button>
+
+                <!-- 暫停覆蓋畫面 -->
+                <div id="pause-screen" class="screen-overlay">
+                    <h1 class="text-white display-4 fw-bold mb-4">遊戲暫停</h1>
+                    <button id="btn-resume" class="btn btn-lg btn-success fw-bold px-5 shadow-lg"><i class="fas fa-play me-2"></i>繼續遊戲</button>
+                    <button class="btn btn-outline-light mt-4" onclick="location.reload()"><i class="fas fa-sign-out-alt me-2"></i>放棄並返回大廳</button>
+                </div>
+            </div>
+
+            <!-- 3. 局內隨機升級畫面 -->
+            <div id="upgrade-screen" class="screen-overlay">
+                <div id="upgrade-options-container" class="d-flex flex-wrap justify-content-center gap-3 px-3"></div>
+            </div>
+
+            <!-- 4. 死亡/破關結算畫面 -->
+            <div id="gameover-screen" class="screen-overlay">
+                <h1 class="text-danger display-3 fw-bold mb-3">存活失敗</h1>
+                <div id="final-stats" class="text-white fs-4 my-2"></div>
+                <div id="reward-stats" class="text-warning fs-4 mb-5 fw-bold"></div>
+                <button id="btn-return-lobby" class="btn btn-lg btn-light fw-bold px-5 shadow">返回大廳</button>
+            </div>
+            
+        </div>
+    </div>
+
+    <script src="{% static 'js/survivor.js' %}"></script>
+</body>
+</html>

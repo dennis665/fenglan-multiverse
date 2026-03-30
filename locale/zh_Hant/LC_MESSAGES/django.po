@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-24 15:41+0800\n"
+"POT-Creation-Date: 2026-03-30 13:57+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\config\settings.py:280
+#: .\config\settings.py:281
 msgid "繁體中文"
 msgstr ""
 
-#: .\config\settings.py:281
+#: .\config\settings.py:282
 msgid "English"
 msgstr "英文"
 
@@ -861,7 +861,7 @@ msgid "點數購物訂單"
 msgstr ""
 
 #: .\finance\templates\finance\recharge_store.html:4
-#: .\templates\includes\navbar.html:45
+#: .\templates\includes\navbar.html:46
 msgid "Point Recharge"
 msgstr "點數儲值"
 
@@ -909,7 +909,7 @@ msgstr "無額外贈點"
 msgid "No recharge packages available at the moment."
 msgstr "目前尚無可用的儲值方案。"
 
-#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:50
+#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:51
 msgid "Point Shop"
 msgstr "點數商城"
 
@@ -998,6 +998,159 @@ msgstr "兌換成功！"
 #: .\finance\templates\finance\shop.html:156
 msgid "Click anywhere to close"
 msgstr "點擊任意處關閉"
+
+#: .\games\admin.py:19
+msgid "基本資訊"
+msgstr ""
+
+#: .\games\admin.py:20
+msgid "倖存者生存 - 遊戲紀錄"
+msgstr ""
+
+#: .\games\admin.py:21
+msgid "倖存者生存 - 局外成長等級"
+msgstr ""
+
+#: .\games\admin.py:55
+msgid "圖片預覽"
+msgstr ""
+
+#: .\games\apps.py:7
+msgid "遊戲中心"
+msgstr ""
+
+#: .\games\models.py:10
+msgid "玩家"
+msgstr ""
+
+#: .\games\models.py:13
+msgid "總遊戲幣"
+msgstr ""
+
+#: .\games\models.py:16
+msgid "倖存者-最高存活秒數"
+msgstr ""
+
+#: .\games\models.py:17
+msgid "倖存者-最高擊殺數"
+msgstr ""
+
+#: .\games\models.py:20
+msgid "倖存者-血量等級"
+msgstr ""
+
+#: .\games\models.py:21
+msgid "倖存者-攻擊等級"
+msgstr ""
+
+#: .\games\models.py:22
+msgid "倖存者-移速等級"
+msgstr ""
+
+#: .\games\models.py:28 .\games\models.py:29
+msgid "玩家遊戲存檔"
+msgstr ""
+
+#: .\games\models.py:38
+msgid "關卡名稱"
+msgstr ""
+
+#: .\games\models.py:39
+msgid "通關時間(秒)"
+msgstr ""
+
+#: .\games\models.py:40
+msgid "出怪頻率倍率(越高越快)"
+msgstr ""
+
+#: .\games\models.py:41
+msgid "怪物屬性倍率(難度)"
+msgstr ""
+
+#: .\games\models.py:42
+msgid "通關獎勵金幣"
+msgstr ""
+
+#: .\games\models.py:45 .\games\models.py:46
+msgid "倖存者-關卡設定"
+msgstr ""
+
+#: .\games\models.py:55
+msgid "怪物名稱"
+msgstr ""
+
+#: .\games\models.py:56
+msgid "怪物圖片"
+msgstr ""
+
+#: .\games\models.py:57
+msgid "基礎血量"
+msgstr ""
+
+#: .\games\models.py:58
+msgid "基礎攻擊力"
+msgstr ""
+
+#: .\games\models.py:59
+msgid "基礎跑速"
+msgstr ""
+
+#: .\games\models.py:60
+msgid "碰撞體積(半徑)"
+msgstr ""
+
+#: .\games\models.py:63 .\games\models.py:64
+msgid "倖存者-怪物圖鑑"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:8
+#: .\games\templates\games\survivor.html:30
+msgid "倖存者生存"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:33
+msgid "最高存活"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:33
+msgid "最高擊殺"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:34
+msgid "擁有金幣"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:39
+msgid "選擇挑戰關卡"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:46
+msgid "強化初始血量"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:47
+#: .\games\templates\games\survivor.html:52
+#: .\games\templates\games\survivor.html:57
+msgid "Lv."
+msgstr ""
+
+#: .\games\templates\games\survivor.html:48
+#: .\games\templates\games\survivor.html:53
+#: .\games\templates\games\survivor.html:58
+msgid "升級"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:51
+msgid "強化初始攻擊"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:56
+msgid "強化初始移速"
+msgstr ""
+
+#: .\games\templates\games\survivor.html:62
+msgid "開始生存"
+msgstr ""
 
 #: .\invest\apps.py:7
 msgid "投資理財"
@@ -1760,7 +1913,7 @@ msgid "AI Study Brain Dashboard"
 msgstr "AI 教材大腦儀表板"
 
 #: .\study_brain\templates\study_brain\dashboard.html:14
-#: .\templates\includes\navbar.html:63
+#: .\templates\includes\navbar.html:65
 msgid "AI Study Brain"
 msgstr "AI 教材大腦"
 
@@ -2150,11 +2303,11 @@ msgstr "您好！我是 CSI Portal 助手，今天有什麼可以幫您的嗎？
 msgid "Type a message..."
 msgstr "輸入訊息..."
 
-#: .\templates\base.html:55
+#: .\templates\base.html:56
 msgid "Sorry, the system cannot respond at the moment."
 msgstr "抱歉，系統目前無法回應。"
 
-#: .\templates\base.html:56
+#: .\templates\base.html:57
 msgid "Connection failed, please check your network."
 msgstr "連線失敗，請檢查您的網路。"
 
@@ -2178,43 +2331,43 @@ msgstr "首頁"
 msgid "Member Zone"
 msgstr "會員專區"
 
-#: .\templates\includes\navbar.html:58
+#: .\templates\includes\navbar.html:60
 msgid "Investment"
 msgstr "投資理財"
 
-#: .\templates\includes\navbar.html:69
+#: .\templates\includes\navbar.html:70
 msgid "Vision Brain"
 msgstr "影像辨識大腦"
 
-#: .\templates\includes\navbar.html:80
+#: .\templates\includes\navbar.html:83
 msgid "Tester Zone"
 msgstr "測試員專區"
 
-#: .\templates\includes\navbar.html:83
+#: .\templates\includes\navbar.html:86
 msgid "Test Management System"
 msgstr "測試管理系統"
 
-#: .\templates\includes\navbar.html:91
+#: .\templates\includes\navbar.html:94
 msgid "No tools available"
 msgstr "目前無可用工具"
 
-#: .\templates\includes\navbar.html:124
+#: .\templates\includes\navbar.html:127
 msgid "Admin"
 msgstr "管理者後台"
 
-#: .\templates\includes\navbar.html:144
+#: .\templates\includes\navbar.html:147
 msgid "Profile"
 msgstr "個人檔案"
 
-#: .\templates\includes\navbar.html:149
+#: .\templates\includes\navbar.html:152
 msgid "Logout"
 msgstr "登出"
 
-#: .\templates\includes\navbar.html:156
+#: .\templates\includes\navbar.html:159
 msgid "Login"
 msgstr "登入"
 
-#: .\templates\includes\navbar.html:159
+#: .\templates\includes\navbar.html:162
 msgid "Register"
 msgstr "註冊"
 

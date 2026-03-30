@@ -69,6 +69,8 @@ urlpatterns = [
     path("study_brain/", include("study_brain.urls")),
     #! 視覺頭腦
     path("vision_brain/", include("vision_brain.urls")),
+    #! 遊戲中心
+    path("games/", include("games.urls")),
 ]
 
 if settings.DEBUG:

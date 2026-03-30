@@ -1,0 +1,115 @@
+/*! 徹底鎖死視窗與基礎設定 (App化核心) */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000; /* 背景全黑，營造沉浸感 */
+    overflow: hidden; /* 絕對禁止滾動 */
+    touch-action: none; /* 禁用所有預設手勢 (下拉重整、雙擊放大等) */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/*! 外層容器，用來完美置中遊戲 */
+#app-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+/*! 遊戲實體大小絕對鎖定 800x600 */
+#game-container {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    background-color: #2b2b2b;
+    border: 2px solid #555;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    overflow: hidden; /* 關鍵：禁止任何子元素超出畫布 */
+    transform-origin: center center; /* 讓 JS 從中心點進行等比例縮放 */
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/*! 覆蓋層 (大廳/升級/死亡畫面) */
+.screen-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: none !important; /* 預設絕對隱藏 */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+}
+
+.screen-overlay.active {
+    display: flex !important; /* 掛上 active 才會顯示 */
+}
+
+/*! 局內 UI 介面 (血條與經驗條) */
+#ui-layer {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 2000;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+.bar-container {
+    width: 200px;
+    height: 12px;
+    background-color: #111;
+    border: 1px solid #444;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+#hp-bar,
+#xp-bar {
+    height: 100%;
+    transition: width 0.2s ease-out;
+}
+
+#hp-bar {
+    width: 100%;
+    background: linear-gradient(90deg, #ff4d4d, #b30000);
+}
+
+#xp-bar {
+    width: 0%;
+    background: linear-gradient(90deg, #4da6ff, #0052a3);
+}
+
+#stats-text {
+    font-family: 'Consolas', monospace;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/*! 卡片互動特效 */
+.upgrade-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.upgrade-card:hover {
+    transform: translateY(-5px);
+    border-color: #ffd700 !important;
+    box-shadow: 0 10px 20px rgba(255, 215, 0, 0.2) !important;
+}

@@ -35,11 +35,12 @@
                 {% if user.is_authenticated %}
                 {# 會員專區下拉選單 #}
                 <li class="nav-item dropdown">
-                    {# 在 if 判斷式中加入 'vision_brain' in request.path #}
+                    {# 這裡同步更新了 active 判斷，加入 'games' 以確保進入遊戲時父選單會亮起 #}
                     <a class="nav-link dropdown-toggle {% if 'finance' in request.path or 'invest' in request.path or 'study_brain' in request.path or 'vision_brain' in request.path %}active{% endif %}" href="#" id="memberZoneDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-crown me-1 text-warning"></i>{% trans "Member Zone" %}
                     </a>
                     <ul class="dropdown-menu shadow border-0" aria-labelledby="memberZoneDropdown">
+                        {# --- 財務相關 --- #}
                         <li>
                             <a class="dropdown-item {% if 'finance/recharge' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'finance:recharge_store' %}">
                                 <i class="fas fa-gem fa-fw me-2 {% if 'finance/recharge' not in request.path %}text-info{% endif %}"></i>{% trans "Point Recharge" %}
@@ -53,6 +54,7 @@
 
                         <li><hr class="dropdown-divider"></li>
 
+                        {# --- 投資與 AI 腦 --- #}
                         <li>
                             <a class="dropdown-item {% if 'invest' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'invest:dashboard' %}">
                                 <i class="fas fa-chart-line fa-fw me-2 {% if 'invest' not in request.path %}text-warning{% endif %}"></i>{% trans "Investment" %}
@@ -63,12 +65,13 @@
                                 <i class="fas fa-brain fa-fw me-2 {% if 'study_brain' not in request.path %}text-primary{% endif %}"></i>{% trans "AI Study Brain" %}
                             </a>
                         </li>
-                        {# 新增 Vision Brain 連結 #}
                         <li>
                             <a class="dropdown-item {% if 'vision_brain' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'vision_brain:recognize' %}">
                                 <i class="fas fa-camera fa-fw me-2 {% if 'vision_brain' not in request.path %}text-info{% endif %}"></i>{% trans "Vision Brain" %}
                             </a>
                         </li>
+
+                        <li><hr class="dropdown-divider"></li>
                     </ul>
                 </li>
                 {% endif %}
