@@ -24,18 +24,20 @@
                     <div class="col-md-3">
                         <label class="form-label fw-bold">選擇 AI 引擎</label>
                         <select name="ocr_engine" id="engineSelect" class="form-select" required>
-                            <option value="paddle" {% if selected_engine == 'paddle' %}selected{% endif %}>🚀 PaddleOCR (文字精準)</option>
-                            <option value="tesseract" {% if selected_engine == 'tesseract' %}selected{% endif %}>🐢 Tesseract (文字經典)</option>
-                            <option value="yolo" {% if selected_engine == 'yolo' %}selected{% endif %}>👁️ YOLOv11 (物件統計)</option>
+                            <option value="paddle" selected>🚀 PaddleOCR</option>
+                            <option value="tesseract">🐢 Tesseract</option>
+                            <option value="yolo">👁️ YOLOv11</option>
                         </select>
+                        <!-- 動態說明的放置處 -->
+                        <small id="engineHelperText" class="text-muted mt-1 d-block"></small>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label fw-bold">選擇語言</label>
                         <select name="language" id="langSelect" class="form-select" required>
-                            <option value="mix" {% if selected_lang == 'mix' %}selected{% endif %}>🇹🇼+🇺🇸 中英混合</option>
-                            <option value="cht" {% if selected_lang == 'cht' %}selected{% endif %}>🇹🇼 純繁體中文</option>
-                            <option value="en" {% if selected_lang == 'en' %}selected{% endif %}>🇺🇸 純英文</option>
+                            <option value="mix" {% if selected_lang == 'mix' %}selected{% endif %}>中英混合</option>
+                            <option value="cht" {% if selected_lang == 'cht' %}selected{% endif %}>純繁體中文</option>
+                            <option value="en" {% if selected_lang == 'en' %}selected{% endif %}>純英文</option>
                         </select>
                     </div>
 
@@ -100,30 +102,33 @@
 {% block extra_js %}
 <script src="{% static 'js/ocr_processor.js' %}"></script>
 <script>
-    // * 防呆設計：當選擇 YOLO 時，禁用語言選單
     document.addEventListener("DOMContentLoaded", function() {
         const engineSelect = document.getElementById("engineSelect");
-        const langSelect = document.getElementById("langSelect");
+        const engineHelper = document.getElementById("engineHelperText");
 
-        function toggleLanguageSelect() {
-            if (engineSelect.value === "yolo") {
+        // 定義每個引擎的完整說明
+        const engineDescriptions = {
+            "paddle": "最高精準度，擅長中英混合與複雜排版文字。",
+            "tesseract": "經典開源 OCR，辨識速度快，適合乾淨背景。",
+            "yolo": "非文字辨識。自動框出並統計畫面中的物件數量。"
+        };
+
+        function updateEngineDescription() {
+            const selected = engineSelect.value;
+            engineHelper.innerText = engineDescriptions[selected] || "";
+
+            // 保留您原本的 YOLO 禁用語言邏輯
+            const langSelect = document.getElementById("langSelect");
+            if (selected === "yolo") {
                 langSelect.disabled = true;
-                langSelect.title = "物件偵測不需選擇語言";
             } else {
                 langSelect.disabled = false;
-                langSelect.title = "";
             }
         }
 
-        engineSelect.addEventListener("change", toggleLanguageSelect);
-        toggleLanguageSelect(); // 初始化檢查
+        // 監聽變更並初始化
+        engineSelect.addEventListener("change", updateEngineDescription);
+        updateEngineDescription(); 
     });
-
-    function copyToClipboard() {
-        const copyText = document.getElementById("ocrResultText");
-        copyText.select();
-        document.execCommand("copy");
-        alert("已複製到剪貼簿！");
-    }
 </script>
 {% endblock %}
