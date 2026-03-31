@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-30 13:57+0800\n"
+"POT-Creation-Date: 2026-03-31 10:37+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -1111,54 +1111,18 @@ msgstr "Collision Size (Radius)"
 msgid "倖存者-怪物圖鑑"
 msgstr "Survivor - Bestiary"
 
-#: .\games\templates\games\survivor.html:8
+#: .\games\templates\games\survivor.html:7
 #: .\games\templates\games\survivor.html:30
 msgid "倖存者生存"
 msgstr "Survivor Survival"
 
-#: .\games\templates\games\survivor.html:33
-msgid "最高存活"
-msgstr "Best Survival"
-
-#: .\games\templates\games\survivor.html:33
-msgid "最高擊殺"
-msgstr "Best Kills"
-
 #: .\games\templates\games\survivor.html:34
-msgid "擁有金幣"
-msgstr "Coins Owned"
+msgid "金幣"
+msgstr "Coins"
 
-#: .\games\templates\games\survivor.html:39
+#: .\games\templates\games\survivor.html:38
 msgid "選擇挑戰關卡"
 msgstr "Select Challenge Stage"
-
-#: .\games\templates\games\survivor.html:46
-msgid "強化初始血量"
-msgstr "Upgrade Starting HP"
-
-#: .\games\templates\games\survivor.html:47
-#: .\games\templates\games\survivor.html:52
-#: .\games\templates\games\survivor.html:57
-msgid "Lv."
-msgstr ""
-
-#: .\games\templates\games\survivor.html:48
-#: .\games\templates\games\survivor.html:53
-#: .\games\templates\games\survivor.html:58
-msgid "升級"
-msgstr "Upgrade"
-
-#: .\games\templates\games\survivor.html:51
-msgid "強化初始攻擊"
-msgstr "Enhance Starting ATK"
-
-#: .\games\templates\games\survivor.html:56
-msgid "強化初始移速"
-msgstr "Enhance Starting SPD"
-
-#: .\games\templates\games\survivor.html:62
-msgid "開始生存"
-msgstr "Start Survival"
 
 #: .\invest\apps.py:7
 msgid "投資理財"
@@ -2503,6 +2467,27 @@ msgstr "User Profile"
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr ""
+
+#~ msgid "最高存活"
+#~ msgstr "Best Survival"
+
+#~ msgid "最高擊殺"
+#~ msgstr "Best Kills"
+
+#~ msgid "強化初始血量"
+#~ msgstr "Upgrade Starting HP"
+
+#~ msgid "升級"
+#~ msgstr "Upgrade"
+
+#~ msgid "強化初始攻擊"
+#~ msgstr "Enhance Starting ATK"
+
+#~ msgid "強化初始移速"
+#~ msgstr "Enhance Starting SPD"
+
+#~ msgid "開始生存"
+#~ msgstr "Start Survival"
 
 #~ msgid "AI 忙碌中，請稍後再試！"
 #~ msgstr "AI is busy, please try again later!"

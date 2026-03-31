@@ -3,7 +3,6 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <!-- 嚴格鎖定視口，禁止使用者縮放與滑動 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>{% trans "倖存者生存" %}</title>
 
@@ -26,80 +25,135 @@
         <div id="game-container">
 
             <!-- 1. 大廳畫面 -->
-            <div id="lobby-screen" class="screen-overlay active">
-                <h1 class="text-warning fw-bold mb-4">{% trans "倖存者生存" %}</h1>
+            <div id="lobby-screen" class="screen-overlay active custom-scrollbar">
+                <div class="container py-4 d-flex flex-column align-items-center">
+                    <h1 class="text-warning fw-bold mb-4">{% trans "倖存者生存" %}</h1>
 
-                <div class="stats-board text-white mb-3 text-center">
-                    <p class="fs-5">🏆 {% trans "最高存活" %}: <span class="text-info">{{ profile.survivor_max_time }}</span> 秒 | 💀 {% trans "最高擊殺" %}: <span class="text-danger">{{ profile.survivor_max_kills }}</span></p>
-                    <h4 class="text-warning mt-2"><i class="fas fa-coins me-2"></i>{% trans "擁有金幣" %}: <span id="display-coins" class="fw-bold">{{ profile.total_coins }}</span></h4>
-                </div>
-
-                <!-- 🌟 關卡選擇區 (修復消失的問題) -->
-                <div class="mb-4 text-center">
-                    <h5 class="text-white mb-2"><i class="fas fa-map-marker-alt me-2 text-danger"></i>{% trans "選擇挑戰關卡" %}</h5>
-                    <select id="levelSelect" class="form-select bg-dark text-white border-secondary mx-auto shadow" style="max-width: 300px; cursor: pointer;"></select>
-                </div>
-
-                <!-- 🌟 局外強化面板 -->
-                <div class="upgrade-panel d-flex gap-3 mb-4">
-                    <div class="upgrade-card bg-dark text-white p-3 border border-secondary rounded text-center shadow">
-                        <h5 class="text-success">{% trans "強化初始血量" %}</h5>
-                        <p>{% trans "Lv." %} <span id="lbl-hp-lvl">{{ profile.survivor_hp_lv }}</span></p>
-                        <button class="btn btn-sm btn-outline-success btn-buy" data-type="hp">{% trans "升級" %} (<span id="cost-hp"></span> G)</button>
+                    <div class="stats-board text-white mb-4 text-center w-100">
+                        <p class="fs-6 mb-2">🏆 最高存活: <span class="text-info">{{ profile.survivor_max_time }}</span> 秒 | 💀 最高擊殺: <span class="text-danger">{{ profile.survivor_max_kills }}</span></p>
+                        <h4 class="text-warning"><i class="fas fa-coins me-2"></i>{% trans "金幣" %}: <span id="display-coins" class="fw-bold">{{ profile.total_coins }}</span></h4>
                     </div>
-                    <div class="upgrade-card bg-dark text-white p-3 border border-secondary rounded text-center shadow">
-                        <h5 class="text-danger">{% trans "強化初始攻擊" %}</h5>
-                        <p>{% trans "Lv." %} <span id="lbl-atk-lvl">{{ profile.survivor_atk_lv }}</span></p>
-                        <button class="btn btn-sm btn-outline-danger btn-buy" data-type="atk">{% trans "升級" %} (<span id="cost-atk"></span> G)</button>
-                    </div>
-                    <div class="upgrade-card bg-dark text-white p-3 border border-secondary rounded text-center shadow">
-                        <h5 class="text-info">{% trans "強化初始移速" %}</h5>
-                        <p>{% trans "Lv." %} <span id="lbl-speed-lvl">{{ profile.survivor_speed_lv }}</span></p>
-                        <button class="btn btn-sm btn-outline-info btn-buy" data-type="speed">{% trans "升級" %} (<span id="cost-speed"></span> G)</button>
-                    </div>
-                </div>
 
-                <button id="btn-start-game" class="btn btn-lg btn-primary fw-bold px-5 mt-2 shadow-lg"><i class="fas fa-play me-2"></i>{% trans "開始生存" %}</button>
-                <button class="btn btn-sm btn-outline-light mt-3" onclick="window.location.href='/'">離開遊戲</button>
+                    <div class="mb-4 text-center w-100 px-3">
+                        <h6 class="text-white mb-2"><i class="fas fa-map-marker-alt me-2 text-danger"></i>{% trans "選擇挑戰關卡" %}</h6>
+                        <select id="levelSelect" class="form-select bg-dark text-white border-secondary mx-auto shadow-sm"></select>
+                    </div>
+
+                    <!-- 🌟 局外強化面板 -->
+                    <div class="upgrade-panel row g-3 justify-content-center w-100 px-2 mb-4">
+                        <div class="col-12 col-md-4">
+                            <div class="upgrade-card bg-dark text-white p-3 border border-secondary rounded text-center shadow">
+                                <h6 class="text-success mb-2">❤️ 初始血量</h6>
+                                <p class="small mb-2">Lv. <span id="lbl-hp-lvl">{{ profile.survivor_hp_lv }}</span></p>
+                                <button class="btn btn-sm btn-outline-success btn-buy w-100" data-type="hp">升級 (<span id="cost-hp"></span> G)</button>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="upgrade-card bg-dark text-white p-3 border border-secondary rounded text-center shadow">
+                                <h6 class="text-danger mb-2">⚔️ 初始攻擊</h6>
+                                <p class="small mb-2">Lv. <span id="lbl-atk-lvl">{{ profile.survivor_atk_lv }}</span></p>
+                                <button class="btn btn-sm btn-outline-danger btn-buy w-100" data-type="atk">升級 (<span id="cost-atk"></span> G)</button>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="upgrade-card bg-dark text-white p-3 border border-secondary rounded text-center shadow">
+                                <h6 class="text-info mb-2">👟 初始移速</h6>
+                                <p class="small mb-2">Lv. <span id="lbl-speed-lvl">{{ profile.survivor_speed_lv }}</span></p>
+                                <button class="btn btn-sm btn-outline-info btn-buy w-100" data-type="speed">升級 (<span id="cost-speed"></span> G)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="btn-start-game" class="btn btn-lg btn-primary fw-bold px-5 mt-2 shadow-lg w-75 rounded-pill"><i class="fas fa-play me-2"></i>開始生存</button>
+                    <button class="btn btn-sm btn-link text-secondary mt-3 text-decoration-none" onclick="window.location.href='/'">離開遊戲</button>
+                </div>
             </div>
 
-            <!-- 2. 遊戲畫布與 UI (血條/經驗條/搖桿/暫停) -->
+            <!-- 2. 遊戲畫布與 UI -->
             <div id="game-ui-layer" class="d-none">
-                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <canvas id="gameCanvas"></canvas>
 
                 <div id="ui-layer">
                     <div class="bar-container"><div id="hp-bar" class="hp-fill"></div></div>
-                    <div class="bar-container"><div id="xp-bar" class="xp-fill"></div></div>
-                    <div id="stats-text" class="text-white">
+                    <div class="bar-container mb-2"><div id="xp-bar" class="xp-fill"></div></div>
+                    <div id="stats-text" class="text-white small">
                         ⭐ <span id="level-val">1</span> | ⏳ <span id="time-val">00:00</span> | 💀 <span id="kill-val">0</span>
                     </div>
                 </div>
 
-                <!-- 暫停按鈕 (絕對定位於右上角) -->
+                <!-- 暫停按鈕 -->
                 <button id="btn-pause" class="btn btn-dark border-secondary rounded-circle shadow" 
-                    style="position: absolute; top: 20px; right: 20px; width: 60px; height: 60px; z-index: 5001; display: flex; justify-content: center; align-items: center; touch-action: auto;">
-                    <i class="fas fa-pause fs-4 text-white"></i>
+                    style="position: absolute; top: 15px; right: 15px; width: 50px; height: 50px; z-index: 5001; display: flex; justify-content: center; align-items: center; touch-action: manipulation;">
+                    <i class="fas fa-pause fs-5 text-white"></i>
                 </button>
 
-                <!-- 暫停覆蓋畫面 -->
-                <div id="pause-screen" class="screen-overlay">
-                    <h1 class="text-white display-4 fw-bold mb-4">遊戲暫停</h1>
-                    <button id="btn-resume" class="btn btn-lg btn-success fw-bold px-5 shadow-lg"><i class="fas fa-play me-2"></i>繼續遊戲</button>
-                    <button id="btn-quit" class="btn btn-outline-light mt-4" onclick="location.reload()"><i class="fas fa-sign-out-alt me-2"></i>放棄並返回大廳</button>
+                <!-- ⏸️ 暫停覆蓋畫面與詳細數值表 -->
+                <div id="pause-screen" class="screen-overlay custom-scrollbar">
+                    <div class="container text-center py-4">
+                        <h2 class="text-white fw-bold mb-4">遊戲暫停</h2>
+                        
+                        <!-- 📊 疊加數值明細表 -->
+                        <div class="table-responsive bg-dark border border-secondary rounded p-3 mb-4 shadow-lg mx-auto" style="max-width: 400px; background: rgba(20,20,20,0.85) !important;">
+                            <h6 class="text-warning border-bottom border-secondary pb-2 mb-3"><i class="fas fa-chart-line me-2"></i>戰力組成明細</h6>
+                            <table class="table table-dark table-sm table-borderless align-middle m-0 text-center" style="font-size: 0.85rem;">
+                                <thead>
+                                    <tr class="text-secondary border-bottom border-secondary">
+                                        <th class="text-start">屬性</th>
+                                        <th>基礎</th>
+                                        <th>局外</th>
+                                        <th>局內</th>
+                                        <th class="text-warning">總和</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-start text-success">❤️ 血量</td>
+                                        <td id="d-base-hp"></td><td id="d-out-hp"></td><td id="d-in-hp" class="text-info"></td><td id="d-total-hp" class="text-warning fw-bold"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-start text-danger">⚔️ 攻擊</td>
+                                        <td id="d-base-atk"></td><td id="d-out-atk"></td><td id="d-in-atk" class="text-info"></td><td id="d-total-atk" class="text-warning fw-bold"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-start text-info">👟 移速</td>
+                                        <td id="d-base-spd"></td><td id="d-out-spd"></td><td id="d-in-spd" class="text-info"></td><td id="d-total-spd" class="text-warning fw-bold"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-start text-light">⚡ 攻速</td>
+                                        <td id="d-base-atkspd"></td><td id="d-out-atkspd"></td><td id="d-in-atkspd" class="text-info"></td><td id="d-total-atkspd" class="text-warning fw-bold"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-start text-primary">🔥 連射</td>
+                                        <td id="d-base-multi"></td><td id="d-out-multi"></td><td id="d-in-multi" class="text-info"></td><td id="d-total-multi" class="text-warning fw-bold"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex flex-column gap-3 align-items-center">
+                            <button id="btn-resume" class="btn btn-success fw-bold px-5 py-2 shadow-lg w-75 rounded-pill"><i class="fas fa-play me-2"></i>繼續遊戲</button>
+                            <button id="btn-quit" class="btn btn-outline-light px-4 py-2 w-75 rounded-pill"><i class="fas fa-sign-out-alt me-2"></i>放棄回大廳</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- 3. 局內隨機升級畫面 -->
-            <div id="upgrade-screen" class="screen-overlay">
-                <div id="upgrade-options-container" class="d-flex flex-wrap justify-content-center gap-3 px-3"></div>
+            <div id="upgrade-screen" class="screen-overlay custom-scrollbar">
+                <div class="container text-center">
+                    <h3 class="text-warning fw-bold mb-4">✨ 選擇能力升級 ✨</h3>
+                    <div id="upgrade-options-container" class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3 px-2"></div>
+                </div>
             </div>
 
             <!-- 4. 死亡/破關結算畫面 -->
             <div id="gameover-screen" class="screen-overlay">
-                <h1 class="text-danger display-3 fw-bold mb-3">存活失敗</h1>
-                <div id="final-stats" class="text-white fs-4 my-2"></div>
-                <div id="reward-stats" class="text-warning fs-4 mb-5 fw-bold"></div>
-                <button id="btn-return-lobby" class="btn btn-lg btn-light fw-bold px-5 shadow">返回大廳</button>
+                <div class="container text-center">
+                    <h1 class="text-danger display-4 fw-bold mb-3">存活失敗</h1>
+                    <div id="final-stats" class="text-white fs-5 my-3"></div>
+                    <div id="reward-stats" class="text-warning fs-5 mb-5 fw-bold"></div>
+                    <button id="btn-return-lobby" class="btn btn-lg btn-light fw-bold px-5 shadow rounded-pill">返回大廳</button>
+                </div>
             </div>
             
         </div>

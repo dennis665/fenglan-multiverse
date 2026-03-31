@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-30 13:57+0800\n"
+"POT-Creation-Date: 2026-03-31 10:37+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -1103,53 +1103,17 @@ msgstr ""
 msgid "倖存者-怪物圖鑑"
 msgstr ""
 
-#: .\games\templates\games\survivor.html:8
+#: .\games\templates\games\survivor.html:7
 #: .\games\templates\games\survivor.html:30
 msgid "倖存者生存"
 msgstr ""
 
-#: .\games\templates\games\survivor.html:33
-msgid "最高存活"
-msgstr ""
-
-#: .\games\templates\games\survivor.html:33
-msgid "最高擊殺"
-msgstr ""
-
 #: .\games\templates\games\survivor.html:34
-msgid "擁有金幣"
+msgid "金幣"
 msgstr ""
 
-#: .\games\templates\games\survivor.html:39
+#: .\games\templates\games\survivor.html:38
 msgid "選擇挑戰關卡"
-msgstr ""
-
-#: .\games\templates\games\survivor.html:46
-msgid "強化初始血量"
-msgstr ""
-
-#: .\games\templates\games\survivor.html:47
-#: .\games\templates\games\survivor.html:52
-#: .\games\templates\games\survivor.html:57
-msgid "Lv."
-msgstr ""
-
-#: .\games\templates\games\survivor.html:48
-#: .\games\templates\games\survivor.html:53
-#: .\games\templates\games\survivor.html:58
-msgid "升級"
-msgstr ""
-
-#: .\games\templates\games\survivor.html:51
-msgid "強化初始攻擊"
-msgstr ""
-
-#: .\games\templates\games\survivor.html:56
-msgid "強化初始移速"
-msgstr ""
-
-#: .\games\templates\games\survivor.html:62
-msgid "開始生存"
 msgstr ""
 
 #: .\invest\apps.py:7

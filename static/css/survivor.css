@@ -1,36 +1,23 @@
-/*! 徹底鎖死視窗與基礎設定 (App化核心) */
+/*! 徹底鎖死視窗與基礎設定 (原生滿版核心) */
 html, body {
     margin: 0;
     padding: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #000; /* 背景全黑，營造沉浸感 */
-    overflow: hidden; /* 絕對禁止滾動 */
-    touch-action: none; /* 禁用所有預設手勢 (下拉重整、雙擊放大等) */
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    overflow: hidden; /* 絕對禁止整體滾動 */
+    touch-action: none; 
     user-select: none;
     -webkit-user-select: none;
 }
 
-/*! 外層容器，用來完美置中遊戲 */
-#app-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 100vh;
-    background-color: #000;
-    overflow: hidden;
-}
-
-/*! 遊戲實體大小絕對鎖定 800x600 */
-#game-container {
+/*! 外層容器撐滿全螢幕 */
+#app-wrapper, #game-container {
+    width: 100%;
+    height: 100%;
+    background-color: #1a1a1a;
     position: relative;
-    width: 800px;  /* 遊戲原始邏輯寬度 */
-    height: 600px; /* 遊戲原始邏輯高度 */
-    background-color: #2b2b2b;
-    /* 確保縮放時不會歪掉 */
-    transform-origin: center center; 
-    flex-shrink: 0;
+    overflow: hidden;
 }
 
 canvas {
@@ -39,77 +26,82 @@ canvas {
     height: 100%;
 }
 
-/*! 覆蓋層 (大廳/升級/死亡畫面) */
+/*! 覆蓋層 (大廳/升級/死亡/暫停畫面) */
 .screen-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    display: none !important; /* 預設絕對隱藏 */
+    background-color: rgba(0, 0, 0, 0.92);
+    display: none !important; 
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 3000;
+    z-index: 6000;
+    pointer-events: auto;
 }
 
 .screen-overlay.active {
-    display: flex !important; /* 掛上 active 才會顯示 */
+    display: flex !important;
 }
 
-/*! 局內 UI 介面 (血條與經驗條) */
+/*! 支援手機版選單過長時可垂直滑動 */
+.custom-scrollbar {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+/*! 局內 UI 介面 (自適應寬度) */
 #ui-layer {
     position: absolute;
     top: 15px;
     left: 15px;
     z-index: 2000;
     pointer-events: none;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 10px 15px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px;
     border-radius: 8px;
+    max-width: 60vw; /* 避免在手機上擋住太多畫面 */
 }
 
 .bar-container {
-    width: 200px;
-    height: 12px;
+    width: 100%;
+    min-width: 150px;
+    height: 10px;
     background-color: #111;
     border: 1px solid #444;
-    margin-bottom: 8px;
-    border-radius: 6px;
+    border-radius: 5px;
     overflow: hidden;
 }
 
-#hp-bar,
-#xp-bar {
+#hp-bar, #xp-bar {
     height: 100%;
     transition: width 0.2s ease-out;
 }
 
-#hp-bar {
-    width: 100%;
-    background: linear-gradient(90deg, #ff4d4d, #b30000);
-}
-
-#xp-bar {
-    width: 0%;
-    background: linear-gradient(90deg, #4da6ff, #0052a3);
-}
+#hp-bar { background: linear-gradient(90deg, #ff4d4d, #b30000); }
+#xp-bar { background: linear-gradient(90deg, #4da6ff, #0052a3); }
 
 #stats-text {
     font-family: 'Consolas', monospace;
     font-weight: bold;
-    font-size: 1.1rem;
+    letter-spacing: 0.5px;
 }
 
-/*! 卡片互動特效 */
+/*! 卡片互動特效與手機自適應 */
 .upgrade-card {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
 }
 
 .upgrade-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     border-color: #ffd700 !important;
-    box-shadow: 0 10px 20px rgba(255, 215, 0, 0.2) !important;
+    box-shadow: 0 8px 15px rgba(255, 215, 0, 0.2) !important;
 }
