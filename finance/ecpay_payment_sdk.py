@@ -1,12 +1,12 @@
 # coding: utf-8
 import collections
-import hashlib
 import copy
-import requests
+import hashlib
 import json
-import pprint
 from decimal import Decimal
-from urllib.parse import quote_plus, parse_qsl, parse_qs
+from urllib.parse import parse_qsl, quote_plus
+
+import requests
 
 """
 付款方式
@@ -304,7 +304,7 @@ class BasePayment(object):
                 encoding_str.encode('utf-8')).hexdigest().upper()
         elif encrypt_type == 0:
             check_mac_value = hashlib.md5(
-                encoding_str.encode('utf-8')).hexdigest().upper()
+                encoding_str.encode('utf-8'), usedforsecurity=False).hexdigest().upper()
 
         return check_mac_value
 
@@ -320,7 +320,7 @@ class BasePayment(object):
         return parameters
 
     def send_post(self, url, params):
-        response = requests.post(url, data=params)
+        response = requests.post(url, data=params, timeout=30)
         return response
 
 

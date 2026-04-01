@@ -1,0 +1,23 @@
+/*! tube_hub 通用樣式表 */
+.custom-scrollbar {
+    overflow-y: auto;
+    max-height: 80vh;
+}
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #495057;
+    border-radius: 10px;
+}
+
+.content-text {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    letter-spacing: 0.5px;
+}
+
+.list-group-item-action:hover {
+    background-color: #343a40 !important;
+    cursor: pointer;
+}

@@ -6,12 +6,12 @@ pyodbc==5.3.0
 
 #! OAuth 2.0 與認證 (Google 登入核心)
 django-allauth==65.15.0
-requests==2.32.5
+requests==2.33.1
 PyJWT==2.12.1
-cryptography==46.0.5
+cryptography==46.0.6
 
 #! 靜態檔案與生產環境伺服器
-gunicorn==25.1.0
+gunicorn==25.3.0
 whitenoise==6.12.0
 
 #! 圖片處理
@@ -25,13 +25,13 @@ crispy-bootstrap5==2026.3
 django-extensions==4.1
 
 #! 串接 gemini ai
-google-genai==1.68.0
+google-genai==1.69.0
 
 #! 處理 log
 concurrent-log-handler==0.9.29
 
 #! 處理 Excel 資料
-pandas==3.0.1
+pandas==3.0.2
 openpyxl==3.1.5
 
 #! 安全性檢查套件
@@ -49,9 +49,30 @@ pdfplumber==0.11.9
 python-docx==1.2.0
 
 #! 物件偵測用
-ultralytics==8.4.26
+ultralytics==8.4.33
 
 #! OCR 辨識
-paddlepaddle==3.3.0
+paddlepaddle==3.3.1
 paddleocr==3.4.0
 pytesseract==0.3.13
+
+#! requests 憑證
+certifi==2026.2.25
+
+#! 遞迴深度計算缺失導致的 DoS 漏洞
+protobuf>=5.29.6,<6.0.0
+
+#! 下載器解壓縮時的「路徑穿越」漏洞（Zip Slip）
+nltk==3.9.4
+
+#! 套件指定舊版不然會有衝突
+urllib3==2.6.3
+charset-normalizer==3.3.2
+chardet==5.2.0
+
+#! youtube 相關
+yt-dlp==2026.3.17
+youtube-transcript-api==1.2.4
+
+#! 語音轉文字
+openai-whisper==20250625

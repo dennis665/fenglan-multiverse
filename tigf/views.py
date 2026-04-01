@@ -9,6 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 from utils.decorators import staff_required
+from utils.logger_utils import jinfo
 
 
 def get_all_files(uploaded_files):
@@ -245,7 +246,7 @@ def tigf_dashboard(request):
                                             if relative_error < 1e-5:
                                                 continue
                                     except Exception:
-                                        pass
+                                        jinfo(f"處理 {val_r}-{val_db} 數值錯誤略過")
 
                                     diff_list.append(
                                         {
@@ -269,7 +270,7 @@ def tigf_dashboard(request):
 
                     except Exception as e:
                         # jinfo_error(e) # 原本你的錯誤紀錄
-                        print(f"處理 {cno}-{fid} 時發生錯誤: {e}")
+                        jinfo(f"處理 {cno}-{fid} 時發生錯誤: {e}")
 
             return JsonResponse({"action": "compare_results", "diff_results": diff_summary})
 

@@ -1,0 +1,115 @@
+{% load i18n %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ resource.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/tube_hub.css' %}">
+</head>
+<body class="bg-black text-light">
+    <div class="container-fluid py-4 px-md-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="text-info mb-0">{{ resource.title }} <span class="badge bg-secondary ms-2 fs-6">{{ resource.get_category_display }}</span></h4>
+            <a href="{% url 'tube_hub:search' %}" class="btn btn-outline-light btn-sm">{% trans "返回清單" %}</a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                {# 媒體播放容器 #}
+                <div class="media-container bg-dark rounded shadow p-3 mb-3 text-center position-relative" style="min-height: 300px;">
+                    {# 影片播放器 #}
+                    <video id="videoPlayer" class="w-100 rounded {% if resource.category == 'ktv' %}d-none{% endif %}" controls>
+                        <source src="{{ resource.video_file.url }}" type="video/mp4">
+                    </video>
+                    {# 音訊播放器 #}
+                    <div id="audioWrapper" class="py-5 {% if resource.category == 'course' %}d-none{% endif %}">
+                        <div class="mb-3"><i class="fas fa-music fa-4x text-info"></i></div>
+                        <audio id="audioPlayer" class="w-100" controls>
+                            <source src="{{ resource.audio_file.url }}" type="audio/mpeg">
+                        </audio>
+                    </div>
+                </div>
+
+                {# 控制面板 #}
+                <div class="control-panel bg-secondary rounded p-3 shadow-sm mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-dark pb-2">
+                        <h6 class="text-light mb-0">{% trans "播放控制" %}</h6>
+                        {% if resource.category == 'ktv' %}
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="modeSwitch">
+                            <label class="form-check-label text-white small" for="modeSwitch">{% trans "切換影片模式" %}</label>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {# 語速與快進退按鈕 #}
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="speedSlider" class="small text-light mb-1 d-block">
+                                {% trans "語速" %}: <span id="speedValue" class="text-info fw-bold">1.0</span>x
+                            </label>
+                            <input type="range" class="form-range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0" list="speedMarks">
+                            <datalist id="speedMarks">
+                                <option value="0.5"></option><option value="1.0"></option><option value="1.5"></option><option value="2.0"></option>
+                            </datalist>
+                        </div>
+                        <div class="col-md-8 text-end">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-dark btn-skip" data-seconds="-10">10s ⏪</button>
+                                <button class="btn btn-dark btn-skip" data-seconds="-5">5s ⏪</button>
+                                <button class="btn btn-dark btn-skip" data-seconds="5">⏩ 5s</button>
+                                <button class="btn btn-dark btn-skip" data-seconds="10">⏩ 10s</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# A-B 段落重複播放 (練唱專用) #}
+                    <div class="ab-loop-control mt-4 p-3 bg-dark rounded shadow-inner">
+                        <h6 class="text-info small mb-3">{% trans "A-B 段落重複播放" %}</h6>
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <button id="btnSetA" class="btn btn-outline-info btn-sm">{% trans "設定 A 點 (起始)" %}</button>
+                            <button id="btnSetB" class="btn btn-outline-info btn-sm">{% trans "設定 B 點 (結束)" %}</button>
+                            <button id="btnClearAB" class="btn btn-outline-secondary btn-sm">{% trans "清除" %}</button>
+                            <div class="form-check form-switch ms-auto">
+                                <input class="form-check-input" type="checkbox" id="abLoopToggle">
+                                <label class="form-check-label text-white small" for="abLoopToggle">{% trans "開啟重複播放" %}</label>
+                            </div>
+                        </div>
+                        <div class="mt-2 small text-muted">
+                            <span id="labelA">A: --:--</span> | <span id="labelB">B: --:--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                {# 字幕與筆記面板 #}
+                <div class="content-panel bg-dark rounded p-4 h-100 shadow custom-scrollbar">
+                    <ul class="nav nav-tabs border-0 mb-3" id="contentTabs">
+                        <li class="nav-item">
+                            <button class="nav-link active bg-transparent text-info border-0 border-bottom border-2" data-bs-toggle="tab" data-bs-target="#primary">{% trans "原生字幕 / 歌詞" %}</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link bg-transparent text-success border-0" data-bs-toggle="tab" data-bs-target="#secondary">{% trans "AI 解析重點" %}</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content text-light">
+                        <div class="tab-pane fade show active" id="primary">
+                            <div class="p-3 bg-black rounded content-text">{{ resource.primary_content|linebreaksbr }}</div>
+                        </div>
+                        <div class="tab-pane fade" id="secondary">
+                            <div class="p-3 bg-black rounded content-text">{% if resource.secondary_content %}{{ resource.secondary_content|linebreaksbr }}{% else %}{% trans "尚無 AI 解析資料" %}{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# 引入播放器控制腳本 #}
+    <script src="{% static 'js/tube_hub_player.js' %}"></script>
+</body>
+</html>

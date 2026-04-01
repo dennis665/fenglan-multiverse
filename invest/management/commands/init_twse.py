@@ -1,3 +1,4 @@
+import certifi
 import requests
 import urllib3
 from django.core.management.base import BaseCommand
@@ -19,7 +20,11 @@ class Command(BaseCommand):
 
         try:
             #! 加上 verify=False 略過憑證檢查
-            response = requests.get(url, timeout=10, verify=False)
+            response = requests.get(
+                url, 
+                timeout=15, 
+                verify=certifi.where() 
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -54,7 +59,7 @@ class Command(BaseCommand):
 
             self.stdout.write(self.style.SUCCESS(f"✅ 匯入完成！新增: {created_count} 筆, 更新: {updated_count} 筆"))
 
-        except requests.exceptions.RequestException as e:
-            self.stdout.write(self.style.ERROR(f"連線失敗，請檢查網路狀態：{e}"))
+        except requests.exceptions.SSLError as e:
+            self.stdout.write(self.style.ERROR(f"❌ SSL 憑證驗證失敗: {e}"))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"發生未預期的錯誤：{e}"))

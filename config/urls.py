@@ -71,6 +71,8 @@ urlpatterns = [
     path("vision_brain/", include("vision_brain.urls")),
     #! 遊戲中心
     path("games/", include("games.urls")),
+    #! yt 應用
+    path("tube_hub/", include("tube_hub.urls")),
 ]
 
 if settings.DEBUG:

@@ -95,7 +95,7 @@ python manage.py makemessages -l zh_Hant -l en -i ".venv" -i "*.txt"
 python manage.py compilemessages -l zh_Hant -l en -i .venv
 
 
-------- 執行排程相關-------
+------- 執行排程相關 -------
 #! 匯入股票清單
 python manage.py init_twse
 
@@ -104,3 +104,9 @@ python manage.py update_prices
 
 #! 開一個新的終端機專跑排程
 python manage.py start_scheduler
+
+
+------- yt 相關 -------
+winget install Gyan.FFmpeg
+
+winget install OpenJS.NodeJS

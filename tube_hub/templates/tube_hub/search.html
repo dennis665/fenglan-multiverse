@@ -1,0 +1,71 @@
+{% load i18n %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "影音資源庫 - 搜尋與下載" %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/tube_hub.css' %}">
+</head>
+<body class="bg-dark text-light">
+    <div class="container py-5">
+        <h2 class="text-center text-info fw-bold mb-4">{% trans "Tube Hub 影音中心" %}</h2>
+
+        {# 下載過的資源清單 #}
+        <div class="row mb-5">
+            <div class="col-12">
+                <h5 class="text-warning border-bottom pb-2 mb-3">{% trans "已儲存資源清單" %}</h5>
+                <div class="list-group">
+                    {% for res in resources %}
+                        <a href="{% url 'tube_hub:player' res.id %}" class="list-group-item list-group-item-action bg-secondary text-white border-dark">
+                            <span class="badge bg-primary me-2">{{ res.get_category_display }}</span>
+                            {{ res.title }}
+                            <small class="float-end text-muted">{{ res.created_at|date:"Y-m-d" }}</small>
+                        </a>
+                    {% empty %}
+                        <p class="text-muted text-center">{% trans "尚無資源，請從下方搜尋下載" %}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# 搜尋區塊 #}
+        <div class="input-group mb-4 shadow-sm">
+            <input type="text" id="searchInput" class="form-control form-control-lg bg-secondary text-white border-0" placeholder="{% trans '輸入關鍵字搜尋 YouTube...' %}">
+            <button class="btn btn-info px-4 fw-bold text-dark" id="btnSearch">{% trans "搜尋" %}</button>
+        </div>
+
+        <div id="searchResults" class="list-group mb-5 shadow-sm"></div>
+
+        {# 下載設定表單 (精簡版) #}
+        <div id="downloadFormContainer" class="card bg-secondary border-0 d-none shadow">
+            <div class="card-body p-4">
+                <h5 class="text-info border-bottom border-dark pb-2 mb-3">{% trans "下載設定" %}</h5>
+                <form id="downloadForm">
+                    <input type="hidden" id="selectedUrl">
+                    <input type="hidden" id="selectedTitle">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "資源分類" %}</label>
+                            <select id="category" class="form-select bg-dark text-white border-0">
+                                <option value="course">{% trans "課堂學習 (預設顯示影片)" %}</option>
+                                <option value="ktv">{% trans "練唱歌 (支援影音切換)" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "個人學習筆記" %}</label>
+                            <input type="text" id="personalNotes" class="form-control bg-dark text-white border-0">
+                        </div>
+                    </div>
+
+                    <button type="button" id="btnDownload" class="btn btn-primary btn-lg w-100 fw-bold mt-4">{% trans "確認下載並自動分析字幕" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/tube_hub_search.js' %}"></script>
+</body>
+</html>

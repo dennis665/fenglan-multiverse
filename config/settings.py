@@ -85,6 +85,7 @@ LOCAL_APPS = [
     "study_brain",
     "vision_brain",
     "games",
+    "tube_hub",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

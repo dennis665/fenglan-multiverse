@@ -44,3 +44,6 @@ bandit_report.txt
 
 #! 模型
 yolo11n.pt
+
+#! 雜物
+5.29.6
