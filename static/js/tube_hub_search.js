@@ -19,10 +19,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.status === 'success') {
                 data.data.forEach(item => {
                     const div = document.createElement('div');
-                    //* 調整外框 padding 讓內容有呼吸空間
+                    // 調整外框 padding 讓內容有呼吸空間
                     div.className = 'list-group-item bg-dark text-white border-secondary list-group-item-action p-3';
 
-                    //* 加入預覽圖、時間標籤與標題排版
+                    // 新增：處理字幕標籤的顯示邏輯
+                    let subBadgeHTML = '';
+                    if (item.subtitles && item.subtitles.length > 0) {
+                        const displayLangs = item.subtitles.slice(0, 3).join(', '); // 只顯示前三個
+                        const hasMore = item.subtitles.length > 3 ? ', ...' : '';
+                        const allLangs = item.subtitles.join(', '); // 完整語言清單供 title 提示用
+
+                        subBadgeHTML = `
+                            <span class="badge bg-success ms-2" title="可用字幕: ${allLangs}">
+                                <i class="fas fa-closed-captioning"></i> ${displayLangs}${hasMore}
+                            </span>
+                        `;
+                    } else {
+                        subBadgeHTML = `
+                            <span class="badge bg-secondary ms-2" title="無提供字幕">
+                                <i class="fas fa-closed-captioning text-muted"></i> 無字幕
+                            </span>
+                        `;
+                    }
+
+                    // 加入預覽圖、時間標籤、標題排版與字幕標籤
                     div.innerHTML = `
                         <div class="row align-items-center g-3">
                             <div class="col-auto position-relative">
@@ -30,8 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <span class="badge bg-black text-white position-absolute bottom-0 end-0 mb-1 me-3 opacity-75">${item.duration}</span>
                             </div>
                             <div class="col text-truncate">
-                                <h6 class="text-truncate fw-bold mb-1 text-info" title="${item.title}">${item.title}</h6>
-                                <small class="text-muted text-truncate d-block">${item.url}</small>
+                                <h6 class="text-truncate fw-bold mb-1 text-info" title="${item.title}">
+                                    ${item.title}
+                                </h6>
+                                <div class="d-flex align-items-center mt-1">
+                                    <small class="text-muted text-truncate" style="max-width: 200px;">${item.url}</small>
+                                    ${subBadgeHTML} 
+                                </div>
                             </div>
                             <div class="col-auto">
                                 <button class="btn btn-info btn-select px-4 fw-bold text-dark rounded-pill" data-url="${item.url}" data-title="${item.title}">選取</button>
