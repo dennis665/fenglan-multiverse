@@ -60,39 +60,197 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('btnDownload').addEventListener('click', async () => {
-        const btnDownload = document.getElementById('btnDownload'); //* 取得下載按鈕
-        btnDownload.disabled = true; //* 防止重複點擊
-        btnDownload.innerText = '處理中，這可能需要幾分鐘...'; //* 更新按鈕文字狀態
+    // 下載表單送出邏輯升級
+    const btnDownload = document.getElementById('btnDownload');
+    if (btnDownload) {
+        btnDownload.addEventListener('click', async () => {
+            btnDownload.disabled = true;
+            btnDownload.innerText = '處理中，這可能需要幾分鐘...';
 
-        const formData = new URLSearchParams(); //* 建立表單資料物件
+            const formData = new URLSearchParams();
 
-        try {
-            // 將取值動作移入 try 區塊內，避免未預期的錯誤導致按鈕卡死
-            formData.append('url', document.getElementById('selectedUrl').value);
-            formData.append('title', document.getElementById('selectedTitle').value);
-            // 修改這裡：對應 HTML 上的 category，並移除不存在的元素
-            formData.append('category', document.getElementById('category').value);
-            formData.append('personal_notes', document.getElementById('personalNotes').value);
+            try {
+                formData.append('url', document.getElementById('selectedUrl').value);
+                formData.append('title', document.getElementById('selectedTitle').value);
+                formData.append('category', document.getElementById('category').value);
+                formData.append('personal_notes', document.getElementById('personalNotes').value);
 
-            const response = await fetch('/tube_hub/download/', { //* 發送下載 POST 請求
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData.toString()
-            });
-            const data = await response.json(); //* 解析回傳資料
+                //* 傳遞資料夾與公開狀態
+                formData.append('folder_name', document.getElementById('folderName').value);
+                formData.append('is_public', document.getElementById('isPublic').checked);
 
-            if (data.status === 'success') {
-                window.location.href = `/tube_hub/player/${data.resource_id}/`; //* 成功後跳轉至播放頁
-            } else {
-                alert('處理失敗: ' + data.message); //* 失敗提示
+                const response = await fetch('/tube_hub/download/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    window.location.href = `/tube_hub/player/${data.resource_id}/`;
+                } else {
+                    alert('處理失敗: ' + data.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('發生系統錯誤，請查看 Console。');
+            } finally {
+                btnDownload.disabled = false;
+                btnDownload.innerText = '確認下載並自動分析字幕';
             }
-        } catch (error) {
-            console.error(error); //* 捕捉並列印錯誤
-            alert('發生系統錯誤，請查看 Console。');
-        } finally {
-            btnDownload.disabled = false; //* 恢復按鈕狀態
-            btnDownload.innerText = '確認下載並自動分析字幕'; //* 恢復按鈕文字 (建議與 HTML 統一)
-        }
+        });
+    }
+
+    // 處理社群公開資源的一鍵收藏
+    document.querySelectorAll('.btn-collect').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const resourceId = e.currentTarget.dataset.id;
+            e.currentTarget.disabled = true;
+            e.currentTarget.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 處理中...';
+
+            const formData = new URLSearchParams();
+            formData.append('resource_id', resourceId);
+
+            try {
+                const response = await fetch('/tube_hub/collect_public_resource/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    window.location.href = `/tube_hub/player/${data.resource_id}/`;
+                } else {
+                    alert('收藏失敗: ' + (data.message || '未知錯誤'));
+                    e.currentTarget.disabled = false;
+                    e.currentTarget.innerHTML = '<i class="fas fa-bookmark"></i> 收藏';
+                }
+            } catch (error) {
+                console.error(error);
+                alert('系統發生錯誤。');
+                e.currentTarget.disabled = false;
+            }
+        });
+    });
+
+    // 處理「我的收藏」移除邏輯 (含垃圾回收)
+    document.querySelectorAll('.btn-delete-resource').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            // 避免點擊事件冒泡觸發其他動作 (例如點到外層的 <a> 標籤)
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!confirm('確定要從您的收藏中移除此資源嗎？\n(若無其他人收藏，伺服器將會清除該檔案以釋放空間)')) {
+                return;
+            }
+
+            const resourceId = e.currentTarget.dataset.id;
+            const listItem = e.currentTarget.closest('.list-group-item'); //* 取得整列元素
+            const originalHtml = e.currentTarget.innerHTML;
+
+            e.currentTarget.disabled = true;
+            e.currentTarget.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            const formData = new URLSearchParams();
+            formData.append('resource_id', resourceId);
+
+            try {
+                const response = await fetch('/tube_hub/delete_resource/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    // 畫面動畫移除該列
+                    listItem.style.transition = 'opacity 0.3s ease';
+                    listItem.style.opacity = '0';
+                    setTimeout(() => {
+                        listItem.remove();
+
+                        //* 如果清單空了，顯示提示訊息
+                        const listGroup = document.querySelector('.col-md-6 .list-group');
+                        if (listGroup && listGroup.children.length === 0) {
+                            listGroup.innerHTML = '<p class="text-muted text-center py-3 bg-secondary rounded" id="emptyCollectionMsg">尚無個人收藏</p>';
+                        }
+                    }, 300);
+                } else {
+                    alert('移除失敗: ' + (data.message || '未知錯誤'));
+                    e.currentTarget.disabled = false;
+                    e.currentTarget.innerHTML = originalHtml;
+                }
+            } catch (error) {
+                console.error(error);
+                alert('系統發生錯誤。');
+                e.currentTarget.disabled = false;
+                e.currentTarget.innerHTML = originalHtml;
+            }
+        });
+    });
+
+    // 處理事後設定「公開/私有」狀態
+    document.querySelectorAll('.public-toggle-switch').forEach(switchBtn => {
+        switchBtn.addEventListener('change', async (e) => {
+            const resourceId = e.target.dataset.id;
+            const isPublic = e.target.checked;
+
+            const formData = new URLSearchParams();
+            formData.append('resource_id', resourceId);
+            formData.append('is_public', isPublic);
+
+            try {
+                const response = await fetch('/tube_hub/toggle_public/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+                const data = await response.json();
+
+                if (data.status !== 'success') {
+                    alert('狀態更新失敗: ' + (data.message || '未知錯誤'));
+                    // 失敗時把開關切回原本的狀態
+                    e.target.checked = !isPublic;
+                }
+            } catch (error) {
+                console.error(error);
+                alert('系統發生錯誤。');
+                // 失敗時把開關切回原本的狀態
+                e.target.checked = !isPublic;
+            }
+        });
+    });
+
+    // 處理「移動資源到指定資料夾」邏輯
+    document.querySelectorAll('.btn-move-to-folder').forEach(item => {
+        item.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const resourceId = e.currentTarget.dataset.resourceId;
+            const folderId = e.currentTarget.dataset.folderId; // 如果是空的，代表移回根目錄
+
+            const formData = new URLSearchParams();
+            formData.append('resource_id', resourceId);
+            formData.append('folder_id', folderId);
+
+            try {
+                const response = await fetch('/tube_hub/move_resource/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    // 移動成功後重新整理頁面，以更新折疊清單的顯示狀態
+                    window.location.reload();
+                } else {
+                    alert('移動失敗: ' + (data.message || '未知錯誤'));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('系統發生錯誤。');
+            }
+        });
     });
 });

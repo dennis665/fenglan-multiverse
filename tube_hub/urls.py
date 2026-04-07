@@ -11,4 +11,8 @@ urlpatterns = [
     path("download/", views.download_resource, name="download"),
     #! 3. 影音播放與學習面板 (網址: /tube_hub/player/<id>/)
     path("player/<int:resource_id>/", views.player_room, name="player"),
+    path("collect_public_resource/", views.collect_public_resource, name="collect_public_resource"),
+    path("toggle_public/", views.toggle_public_status, name="toggle_public_status"),
+    path("move_resource/", views.move_resource, name="move_resource"),
+    path("delete_resource/", views.delete_resource, name="delete_resource"),
 ]

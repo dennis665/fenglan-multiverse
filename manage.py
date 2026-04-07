@@ -5,6 +5,12 @@ import re
 import sys
 from datetime import datetime
 
+#! 強制清除環境變數，讓 Python 回去抓預設路徑
+if "TCL_LIBRARY" in os.environ:
+    del os.environ["TCL_LIBRARY"]
+if "TK_LIBRARY" in os.environ:
+    del os.environ["TK_LIBRARY"]
+
 
 #! 啟動訊息調整
 class DjangoTranslator:

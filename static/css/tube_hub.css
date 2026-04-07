@@ -21,3 +21,30 @@
     background-color: #343a40 !important;
     cursor: pointer;
 }
+/*! 收藏按鈕高對比特效 */
+.btn-collect {
+    transition: all 0.3s ease;
+}
+
+.btn-collect:hover {
+    transform: translateY(-2px) scale(1.05);
+    /*! 滑鼠移過去時產生金黃色光暈 */
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4) !important;
+    filter: brightness(1.1);
+}
+
+.btn-collect:active {
+    transform: translateY(0) scale(1);
+}
+
+/*! 標題點擊特效 */
+.hover-bright {
+    transition: all 0.2s ease;
+}
+
+.hover-bright:hover {
+    color: #fff !important;
+    /* 滑鼠移上去變白色，更有點擊感 */
+    text-shadow: 0 0 8px rgba(13, 202, 240, 0.6);
+    /* 增加一點點 info 藍色的發光感 */
+}

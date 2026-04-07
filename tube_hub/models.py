@@ -1,23 +1,48 @@
-#! Tube Hub 模型定義
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+
+class TubeFolder(models.Model):
+    """使用者自訂的收藏資料夾"""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("擁有者")
+    )
+    name = models.CharField(max_length=100, verbose_name=_("資料夾名稱"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
+
+    class Meta:
+        verbose_name = _("收藏資料夾")
+        verbose_name_plural = _("收藏資料夾")
+        unique_together = ("user", "name")
+
+    def __str__(self):
+        return self.name
 
 
 class TubeResource(models.Model):
     """影音資源庫資料表"""
 
     CATEGORY_CHOICES = [
-        ("course", _("課堂學習")),
-        ("ktv", _("練唱歌")),
+        ("course", _("影片")),
+        ("ktv", _("音樂")),
     ]
 
-    url = models.URLField(verbose_name=_("來源網址"), unique=True)
+    #! 綁定使用者、資料夾、與是否公開
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("擁有者"), null=True
+    )
+    folder = models.ForeignKey(
+        TubeFolder, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("所屬資料夾")
+    )
+    is_public = models.BooleanField(default=False, verbose_name=_("公開分享給他人"))
+
+    #! 移除 unique=True，允許不同使用者收藏相同的 URL
+    url = models.URLField(verbose_name=_("來源網址"))
     title = models.CharField(verbose_name=_("資源標題"), max_length=255)
     category = models.CharField(
-        verbose_name=_("資源分類"),
-        max_length=10,
-        choices=CATEGORY_CHOICES,
-        default="course",
+        verbose_name=_("資源分類"), max_length=10, choices=CATEGORY_CHOICES, default="course"
     )
     video_file = models.FileField(
         verbose_name=_("影片檔"), upload_to="tube_hub/videos/", blank=True, null=True
@@ -31,7 +56,7 @@ class TubeResource(models.Model):
     secondary_content = models.TextField(
         verbose_name=_("副內容 (AI 處理結果)"), blank=True, null=True
     )
-    personal_notes = models.TextField(verbose_name=_("個人學習筆記"), blank=True, null=True)
+    personal_notes = models.TextField(verbose_name=_("個人筆記"), blank=True, null=True)
     created_at = models.DateTimeField(verbose_name=_("建立時間"), auto_now_add=True)
 
     class Meta:

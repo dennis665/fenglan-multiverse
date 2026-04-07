@@ -1,75 +1,40 @@
-#! tube_hub 後台管理設定
 from django.contrib import admin
 
-from .models import TubeResource
+from .models import TubeFolder, TubeResource
+
+
+@admin.register(TubeFolder)
+class TubeFolderAdmin(admin.ModelAdmin):
+    """設定收藏資料夾在後台的顯示與管理選項"""
+
+    list_display = ("name", "user", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("name", "user__username")
+    raw_id_fields = ("user",)
 
 
 @admin.register(TubeResource)
 class TubeResourceAdmin(admin.ModelAdmin):
-    """影音資源庫的後台管理設定"""
+    """設定影音資源在後台的顯示與分區管理選項"""
 
-    #! 列表頁面顯示的欄位 (加入 category 讓分類更清楚)
     list_display = (
         "title",
+        "user",
         "category",
-        "url",
+        "folder",
+        "is_public",
         "created_at",
     )
-
-    #! 列表頁面右側的過濾器 (可以快速篩選是課程還是 KTV)
-    list_filter = (
-        "category",
-        "created_at",
-    )
-
-    #! 提供搜尋的欄位
-    search_fields = (
-        "title",
-        "url",
-        "primary_content",
-        "secondary_content",
-        "personal_notes",
-    )
-
-    #! 設定唯讀欄位，避免修改建立時間發生錯誤
+    list_filter = ("category", "is_public", "created_at", "folder")
+    search_fields = ("title", "url", "user__username", "personal_notes")
+    raw_id_fields = ("user", "folder")
     readonly_fields = ("created_at",)
 
-    #! 詳細頁面的欄位分區顯示設定
+    #! 將後台編輯表單分區顯示，提高可讀性
     fieldsets = (
-        (
-            None,
-            {
-                "fields": (
-                    "url",
-                    "title",
-                    "category",
-                ),
-            },
-        ),
-        (
-            "實體檔案",
-            {
-                "fields": (
-                    "video_file",
-                    "audio_file",
-                ),
-            },
-        ),
-        (
-            "學習與 AI 內容",
-            {
-                "fields": (
-                    "primary_content",
-                    "secondary_content",
-                    "personal_notes",
-                ),
-            },
-        ),
-        (
-            "系統資訊",
-            {
-                "fields": ("created_at",),
-                "classes": ("collapse",),
-            },
-        ),
+        (None, {"fields": ("url", "title", "category")}),
+        ("權限與分類", {"fields": ("user", "folder", "is_public")}),
+        ("實體檔案", {"fields": ("video_file", "audio_file")}),
+        ("內容與筆記", {"fields": ("primary_content", "secondary_content", "personal_notes")}),
+        ("系統資訊", {"fields": ("created_at",)}),
     )
