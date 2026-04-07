@@ -8,6 +8,12 @@
     <title>{{ resource.title }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/tube_hub.css' %}">
+    <style>
+        /* 標籤頁選中效果 */
+        .nav-tabs .nav-link { color: #6c757d; border-bottom: 2px solid transparent; }
+        .nav-tabs .nav-link:hover { color: #0dcaf0; }
+        .nav-tabs .nav-link.active { color: #0dcaf0 !important; border-bottom: 2px solid #0dcaf0 !important; font-weight: bold; }
+    </style>
 </head>
 <body class="bg-black text-light position-relative">
     {# --- 背景動畫容器 --- #}
@@ -122,21 +128,36 @@
 
             <div class="col-lg-6">
                 {# 字幕與筆記面板 #}
-                <div class="content-panel bg-dark rounded p-4 h-100 shadow custom-scrollbar">
-                    <ul class="nav nav-tabs border-0 mb-3" id="contentTabs">
-                        <li class="nav-item">
-                            <button class="nav-link active bg-transparent text-info border-0 border-bottom border-2" data-bs-toggle="tab" data-bs-target="#primary">{% trans "原生字幕 / 歌詞" %}</button>
+                <div class="content-panel bg-dark rounded p-4 h-100 shadow custom-scrollbar d-flex flex-column">
+                    <ul class="nav nav-tabs border-0 mb-3" id="contentTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active bg-transparent border-0" id="primary-tab" data-bs-toggle="tab" data-bs-target="#primary" type="button" role="tab">{% trans "原生字幕 / 歌詞" %}</button>
                         </li>
-                        <li class="nav-item">
-                            <button class="nav-link bg-transparent text-success border-0" data-bs-toggle="tab" data-bs-target="#secondary">{% trans "個人筆記資料" %}</button>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link bg-transparent border-0" id="secondary-tab" data-bs-toggle="tab" data-bs-target="#secondary" type="button" role="tab">{% trans "個人筆記資料" %}</button>
                         </li>
                     </ul>
-                    <div class="tab-content text-light">
-                        <div class="tab-pane fade show active" id="primary">
-                            <div class="p-3 bg-black rounded content-text">{{ resource.primary_content|linebreaksbr }}</div>
+
+                    <div class="tab-content text-light flex-grow-1 d-flex flex-column" id="myTabContent">
+                        <div class="tab-pane fade show active h-100" id="primary" role="tabpanel">
+                            <div class="p-3 bg-black rounded content-text h-100 overflow-auto">{{ resource.primary_content|linebreaksbr }}</div>
                         </div>
-                        <div class="tab-pane fade" id="secondary">
-                            <div class="p-3 bg-black rounded content-text">{% if resource.personal_notes %}{{ resource.personal_notes|linebreaksbr }}{% else %}{% trans "無個人筆記資料" %}{% endif %}</div>
+                        <div class="tab-pane fade h-100" id="secondary" role="tabpanel">
+                            <div class="d-flex flex-column h-100">
+                                {# 隱藏欄位用來傳遞 resource ID #}
+                                <input type="hidden" id="resourceId" value="{{ resource.id }}">
+                                
+                                {# 筆記編輯區 #}
+                                <textarea id="personalNotesInput" class="form-control bg-black text-white border-secondary content-text flex-grow-1 p-3 mb-3 custom-scrollbar" placeholder="{% trans '在這裡輸入您的學習筆記、歌詞段落或是重點摘要...' %}" style="resize: none;">{{ resource.personal_notes|default_if_none:"" }}</textarea>
+                                
+                                {# 儲存按鈕 #}
+                                <div class="text-end">
+                                    <span id="saveStatusMsg" class="text-success small me-3 d-none"><i class="fas fa-check-circle"></i> {% trans "已儲存" %}</span>
+                                    <button type="button" id="btnSaveNotes" class="btn btn-outline-info px-4">
+                                        <i class="fas fa-save me-1"></i> {% trans "儲存筆記" %}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -145,7 +166,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {# 引入 Tone.js 以支援音效運算 #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="{% static 'js/tube_hub_player.js' %}"></script>

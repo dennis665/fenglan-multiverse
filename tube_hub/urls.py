@@ -14,5 +14,6 @@ urlpatterns = [
     path("collect_public_resource/", views.collect_public_resource, name="collect_public_resource"),
     path("toggle_public/", views.toggle_public_status, name="toggle_public_status"),
     path("move_resource/", views.move_resource, name="move_resource"),
+    path("update_notes/", views.update_notes, name="update_notes"),
     path("delete_resource/", views.delete_resource, name="delete_resource"),
 ]

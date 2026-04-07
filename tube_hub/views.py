@@ -311,6 +311,26 @@ def move_resource(request):
     return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
 
 
+@csrf_exempt
+@login_required
+def update_notes(request):
+    """更新使用者的個人筆記"""
+    if request.method == "POST":
+        resource_id = request.POST.get("resource_id")
+        notes_content = request.POST.get("notes_content", "")
+
+        #! 確保只能修改自己的資源
+        resource = get_object_or_404(TubeResource, id=resource_id, user=request.user)
+
+        #! 更新並儲存
+        resource.personal_notes = notes_content
+        resource.save()
+
+        return JsonResponse({"status": "success", "message": "筆記已儲存"})
+
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+
 @login_required
 def player_room(request, resource_id):
     """影音播放與學習頁面"""

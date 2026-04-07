@@ -305,3 +305,48 @@ const handleTimeUpdate = (e) => {
 
 if (videoPlayer) videoPlayer.addEventListener('timeupdate', handleTimeUpdate);
 if (audioPlayer) audioPlayer.addEventListener('timeupdate', handleTimeUpdate);
+
+// ======= 儲存個人筆記邏輯 =======
+const btnSaveNotes = document.getElementById('btnSaveNotes');
+const personalNotesInput = document.getElementById('personalNotesInput');
+const saveStatusMsg = document.getElementById('saveStatusMsg');
+const resourceIdInput = document.getElementById('resourceId');
+
+if (btnSaveNotes && personalNotesInput && resourceIdInput) {
+    btnSaveNotes.addEventListener('click', async () => {
+        // 改變按鈕狀態，避免重複點擊
+        const originalText = btnSaveNotes.innerHTML;
+        btnSaveNotes.disabled = true;
+        btnSaveNotes.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> 儲存中...';
+
+        const formData = new URLSearchParams();
+        formData.append('resource_id', resourceIdInput.value);
+        formData.append('notes_content', personalNotesInput.value);
+
+        try {
+            const response = await fetch('/tube_hub/update_notes/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            });
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                // 顯示儲存成功的提示訊息，2.5 秒後消失
+                saveStatusMsg.classList.remove('d-none');
+                setTimeout(() => {
+                    saveStatusMsg.classList.add('d-none');
+                }, 2500);
+            } else {
+                alert('儲存失敗: ' + (data.message || '未知錯誤'));
+            }
+        } catch (error) {
+            console.error('儲存筆記發生錯誤:', error);
+            alert('系統發生錯誤，無法儲存筆記。');
+        } finally {
+            // 恢復按鈕狀態
+            btnSaveNotes.disabled = false;
+            btnSaveNotes.innerHTML = originalText;
+        }
+    });
+}
