@@ -1,7 +1,7 @@
 import io
 import warnings
 import zipfile
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 import pandas as pd
 from django.core.cache import cache
@@ -9,7 +9,6 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 from utils.decorators import staff_required
-from utils.logger_utils import jinfo
 
 
 def get_all_files(uploaded_files):
@@ -70,6 +69,31 @@ def smart_read_excel(file_obj, **kwargs):
         #! 確保指標在開頭
         file_obj.seek(0)
         return pd.read_excel(file_obj, **kwargs)
+
+
+#! 獨立的數值比對函式：處理 0.0 == "" 以及浮點數誤差
+def is_value_matched(val_r, val_db):
+    #! 基礎清理與正規化
+    str_r = str(val_r).strip().replace("nan", "").replace("None", "")
+    str_db = str(val_db).strip().replace("nan", "").replace("None", "")
+
+    #! 字串完全相同 (包含兩者皆為空字串)
+    if str_r == str_db:
+        return True
+
+    #! 數值比對：將空字串視為 0 進行 Decimal 轉換
+    try:
+        dec_r = Decimal(str_r) if str_r else Decimal("0")
+        dec_db = Decimal(str_db) if str_db else Decimal("0")
+
+        #! 誤差小於 1e-5 視為相同
+        if abs(dec_r - dec_db) < 1e-5:
+            return True
+    except InvalidOperation:
+        #! 若無法轉為數值 (例如純文字與空字串比對)，則回傳不匹配
+        pass
+
+    return False
 
 
 @staff_required
@@ -156,98 +180,116 @@ def tigf_dashboard(request):
                         df_schema = smart_read_excel(global_templates[fid], sheet_name="schema", skiprows=7)
                         mapping = dict(zip(df_schema["中文欄位名稱"], df_schema["COLUMN_NAME"]))
 
-                        #! 讀取申報檔
+                        #! 讀取申報檔並處理雙層標題
                         df_r = smart_read_excel(report_obj, header=None)
-                        #! 提取兩列標題列
-                        row_upper = df_r.iloc[start_row - 4]  # * 上層標題 (例如：大分類)
-                        row_lower = df_r.iloc[start_row - 3]  # * 下層標題 (例如：細目)
-                        #! 判斷是不是有雙層標題
+                        row_upper = df_r.iloc[start_row - 4]
+                        row_lower = df_r.iloc[start_row - 3]
+
                         if row_upper.astype(str).str.strip().replace(["nan", "None"], "").eq("").all():
                             df_r.columns = row_lower
                         else:
-                            #! 定義合併邏輯：處理 NaN 並組合名稱
                             new_columns = []
                             top_l = ""
                             for upper, lower in zip(row_upper, row_lower):
-                                #! 轉為字串並去除前後空白，如果是 NaN 則變成空字串
                                 top = str(upper).strip() if pd.notna(upper) else ""
                                 bottom = str(lower).strip() if pd.notna(lower) else ""
-
                                 if top and bottom:
-                                    #! 兩行都有值：組合在一起
                                     new_columns.append(f"{top}_{bottom}")
                                     top_l = top
                                 elif top:
-                                    #! 只有上層有值 (下層空)
                                     new_columns.append(top)
                                 else:
-                                    #! 只有下層有值，或兩者皆無 (取下層，若下層也空則會是空字串)
                                     new_columns.append(f"{top_l}_{bottom}")
-
-                            #! 正式設定回 DataFrame
                             df_r.columns = new_columns
 
                         #! 讀取共用 DB 檔，並進行過濾
                         df_db_full = smart_read_csv(global_dbs[fid])
                         df_db_full["Cno"] = df_db_full["Cno"].astype(str).str.strip()
-
-                        #! 公司編號相符
                         df_db = df_db_full[df_db_full["Cno"] == str(cno)]
 
-                        #! isdel 是空的 (處理 NaN, None 或空字串)
                         if "isdel" in df_db.columns:
                             df_db = df_db[df_db["isdel"].isna() | (df_db["isdel"].astype(str).str.strip() == "")]
 
-                        #! 重新重置 index，否則跑迴圈時 index 會對不上
-                        df_db = df_db.reset_index(drop=True)
+                        #! 取得目標比對欄位
+                        target_cols = [c for c in df_r.columns if c in mapping]
+                        if not target_cols:
+                            continue
+
+                        #! === 核心優化：建立 DB 字典 (支援重複主鍵) ===
+                        pk_ch = target_cols[0]
+                        pk_en = mapping[pk_ch]
+
+                        #! 將字典的值改為 List，用來存放相同 Key 的多筆資料，並加入 used 標記
+                        db_lookup = {}
+                        for _, row in df_db.iterrows():
+                            k = str(row[pk_en]).strip().replace("nan", "").replace("None", "")
+                            if k:
+                                if k not in db_lookup:
+                                    db_lookup[k] = []
+                                #! 將資料與使用狀態打包存入
+                                db_lookup[k].append({"data": row, "used": False})
 
                         #! 開始比對
                         diff_list = []
-                        target_cols = [c for c in df_r.columns if c in mapping]
-                        db_i = -1
 
                         for i in range(len(df_r)):
                             if (i + 1) < start_row or (i + 1) in ignore_rows:
                                 continue
-                            db_i += 1
 
-                            #! 防護：如果申報檔資料列數 > 資料庫篩出的列數
-                            if db_i >= len(df_db):
+                            row_r = df_r.iloc[i]
+                            r_key_val = (
+                                str(row_r[pk_ch]).strip().replace("nan", "").replace("None", "")
+                            )
+
+                            if not r_key_val:
+                                continue
+
+                            #! 檢查主鍵是否存在於 DB
+                            if r_key_val not in db_lookup:
                                 diff_list.append(
                                     {
                                         "行號": i + 1,
-                                        "中文欄位": "系統提示",
-                                        "英文欄位": "N/A",
-                                        "申報值": "有資料",
-                                        "DB值": "無此筆資料 (DB列數不足)",
+                                        "中文欄位": pk_ch,
+                                        "英文欄位": pk_en,
+                                        "申報值": r_key_val,
+                                        "DB值": "DB 查無此主鍵",
                                     }
                                 )
                                 continue
 
+                            #! 找出 DB 中該主鍵「尚未被比對過」的資料
+                            available_db_items = [
+                                item for item in db_lookup[r_key_val] if not item["used"]
+                            ]
+
+                            if not available_db_items:
+                                #! 代表申報檔裡該主鍵的數量，比 DB 裡的還要多
+                                diff_list.append(
+                                    {
+                                        "行號": i + 1,
+                                        "中文欄位": pk_ch,
+                                        "英文欄位": pk_en,
+                                        "申報值": r_key_val,
+                                        "DB值": "DB 中無多餘的此主鍵資料可供比對 (DB筆數不足)",
+                                    }
+                                )
+                                continue
+
+                            #! 取出第一筆可用的 DB 資料，並標記為已使用
+                            db_item = available_db_items[0]
+                            row_db = db_item["data"]
+                            db_item["used"] = True  # * 關鍵：上鎖，下一行申報檔就不會再比對到同一筆
+
+                            #! 逐欄比對 (保持原本的邏輯)
                             for ch_col in target_cols:
                                 en_col = mapping[ch_col]
-                                if en_col not in df_db.columns:
+                                if en_col not in row_db:
                                     continue
 
-                                val_r = normalize_val(df_r.iloc[i][ch_col])
-                                val_db = normalize_val(df_db.iloc[db_i][en_col])
+                                val_r = row_r[ch_col]
+                                val_db = row_db[en_col]
 
-                                if val_r != val_db:
-                                    try:
-                                        #! 嘗試將兩者都轉為 Decimal 進行數值比對
-                                        dec_r = Decimal(val_r)
-                                        dec_db = Decimal(val_db)
-                                        if dec_r == dec_db:
-                                            continue
-                                        else:
-                                            #! 💡 核心邏輯：計算相對誤差
-                                            #! 如果誤差小於 0.00001 (1e-5)，視為相同 (因為科學符號四捨五入產生的誤差)
-                                            relative_error = abs(dec_r - dec_db)
-                                            if relative_error < 1e-5:
-                                                continue
-                                    except Exception:
-                                        jinfo(f"處理 {val_r}-{val_db} 數值錯誤略過")
-
+                                if not is_value_matched(val_r, val_db):
                                     diff_list.append(
                                         {
                                             "行號": i + 1,
@@ -263,14 +305,12 @@ def tigf_dashboard(request):
                             df_diff = pd.DataFrame(diff_list)
                             csv_buf = io.StringIO()
                             df_diff.to_csv(csv_buf, index=False, encoding="utf-8-sig")
-                            #! 加上 cno 作為 cache key 的一部分，避免不同公司同報表互相覆蓋
                             cache.set(f"diff_{session_key}_{cno}_{fid}", csv_buf.getvalue(), 3600)
 
                         diff_summary.append({"cno": cno, "fid": fid, "diff_count": diff_count})
 
                     except Exception as e:
-                        # jinfo_error(e) # 原本你的錯誤紀錄
-                        jinfo(f"處理 {cno}-{fid} 時發生錯誤: {e}")
+                        print(f"處理 {cno}-{fid} 時發生錯誤: {e}")
 
             return JsonResponse({"action": "compare_results", "diff_results": diff_summary})
 
