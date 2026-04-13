@@ -30,7 +30,14 @@ from django.views.generic.base import RedirectView
 from django.views.static import serve
 from ranged_response import RangedFileResponse
 
-from core.views import feature_permission, lucky_draw, portal_ai_bot, profile_view, ticket_pull
+from core.views import (
+    csi_info_list,
+    feature_permission,
+    lucky_draw,
+    portal_ai_bot,
+    profile_view,
+    ticket_pull,
+)
 from tigf.views import download_diff_csv, tigf_dashboard
 
 
@@ -99,6 +106,8 @@ urlpatterns = [
     path("games/", include("games.urls")),
     #! yt 應用
     path("tube_hub/", include("tube_hub.urls")),
+    #! CSI 資訊
+    path("csi-info/", csi_info_list, name="csi_info_list"),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/csi_info.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{% trans "CSI 企業內部資訊" %}</h1>
+    {# 移除原本的左右佈局，改為全寬度的網格文件列表 #}
+    <div class="doc-grid">
+        {% for doc in docs %}
+        {# 觸發新的 JS 函式開新分頁 #}
+        <div class="doc-card" onclick="openPDFInNewTab('{{ doc.file.url }}')">
+            <div class="doc-info">
+                <h3>{{ doc.title }}</h3>
+                <p>{{ doc.created_at|date:"Y-m-d" }} | {{ doc.uploader.username }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/csi_info.js' %}"></script>
+{% endblock %}

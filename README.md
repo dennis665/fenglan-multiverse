@@ -2,10 +2,10 @@
 
 ![Django Version](https://img.shields.io/badge/Django-6.0.1-green) ![Python Version](https://img.shields.io/badge/Python-3.13+-blue) ![Docker](https://img.shields.io/badge/Docker-Supported-blue)
 
-這是一個基於 **Django 6.0.1** 與 **MySQL 8.0.45** 構建的入口網站專案，支援 **Google OAuth 2.0** 登入、**Docker** 容器化部署。
+這是一個基於 **Django 6.0.4** 與 **MySQL 8.0.45** 構建的入口網站專案，支援 **Google OAuth 2.0** 登入、**Docker** 容器化部署。
 
 ## 🚀 快速導覽
-* **最新版本**：`v1.11.0`
+* **最新版本**：`v1.12.0`
 * **更新摘要**：[點此查看完整更新歷程 (CHANGELOG)](CHANGELOG.md)
 * **AI 引擎**：Gemini 3 Flash
 

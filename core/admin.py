@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django_apscheduler.admin import DjangoJobAdmin, DjangoJobExecutionAdmin
 from django_apscheduler.models import DjangoJob, DjangoJobExecution
 
-from .models import FeatureStatus
+from .models import EnterpriseInfo, FeatureStatus
 
 
 #! admin.py
@@ -67,3 +67,29 @@ class CustomDjangoJobExecutionAdmin(DjangoJobExecutionAdmin):
         return super().duration_text(obj)
 
     duration_text.short_description = _("實際耗時")
+
+
+@admin.register(EnterpriseInfo)
+class EnterpriseInfoAdmin(admin.ModelAdmin):
+    """設定 EnterpriseInfo 在 Django Admin 中的顯示與操作行為"""
+
+    #! 列表頁面顯示的欄位
+    list_display = ("title", "uploader", "created_at")  # * 顯示標題、上傳者與建立時間
+
+    #! 右側過濾器
+    list_filter = ("created_at", "uploader")  # * 允許依據時間與上傳者進行資料篩選
+
+    #! 搜尋列設定
+    # * title 採模糊搜尋，uploader__username 則透過關聯尋找上傳者的帳號名稱
+    search_fields = ("title", "uploader__username")
+
+    #! 唯讀欄位設定
+    readonly_fields = ("created_at",)  # * 建立日期由系統自動產生，不可在後台手動修改
+
+    def save_model(self, request, obj, form, change):
+        """
+        覆寫儲存邏輯：新增資料時自動綁定上傳者
+        """
+        if not obj.pk:  # * 若 obj.pk 為空，代表這是一筆全新的紀錄
+            obj.uploader = request.user  # * 自動將當前登入的後台使用者設為上傳者
+        super().save_model(request, obj, form, change)

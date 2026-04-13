@@ -1,0 +1,38 @@
+/*! 企業資訊頁面專用網格樣式 */
+.doc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/*! 卡片基礎設計 */
+.doc-card {
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/*! 滑鼠懸停的浮動效果 */
+.doc-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-color: #0d6efd;
+    /** 藍色邊框強調，可依專案主色調整 */
+}
+
+.doc-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.doc-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6c757d;
+}

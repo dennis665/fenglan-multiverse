@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -14,7 +14,7 @@ from finance.models import PointTransaction, UserPoints
 from notices.models import AISystemSetting, Announcement, TicketRecord
 from utils.decorators import staff_required
 
-from .models import FeatureStatus
+from .models import EnterpriseInfo, FeatureStatus
 
 FALLBACK_MODELS = [
     "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
@@ -191,3 +191,17 @@ def ticket_pull(request):
 def feature_permission(request):
     features = FeatureStatus.objects.all().order_by("sort_order", "id")
     return render(request, "core/feature_list.html", {"features": features})
+
+
+#! 定義權限檢查函數
+def is_employee(user):
+    #! 檢查使用者是否有 profile 且 is_employee 為 True
+    return hasattr(user, "profile") and user.profile.is_employee
+
+
+@login_required
+@user_passes_test(is_employee, login_url="/access-denied/")
+def csi_info_list(request):
+    #! 取得所有企業資訊
+    docs = EnterpriseInfo.objects.all().order_by("-created_at")
+    return render(request, "csi_info/csi_info.html", {"docs": docs})

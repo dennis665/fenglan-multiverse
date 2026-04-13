@@ -88,11 +88,11 @@ ngrok http 8000 --domain=kiwi-loved-slug.ngrok-free.app
 #! gettext 下載連結，解壓縮後把 D:\gettext\bin 路徑加至 path 裡
 https://github.com/vslavik/gettext-tools-windows/releases
 
-#! 產生繁中、英文翻譯檔(裡面要自填)
-python manage.py makemessages -l zh_Hant -l en -i ".venv" -i "*.txt"
+#! 產生繁中、英文、日文翻譯檔(裡面要自填)
+python manage.py makemessages -l zh_Hant -l en -l ja -i ".venv" -i "*.txt"
 
-#! 執行
-python manage.py compilemessages -l zh_Hant -l en -i .venv
+#! 執行編譯（包含繁中、英文、日文）
+python manage.py compilemessages -l zh_Hant -l en -l ja -i .venv
 
 
 ------- 執行排程相關 -------
@@ -110,3 +110,7 @@ python manage.py start_scheduler
 winget install Gyan.FFmpeg
 
 winget install OpenJS.NodeJS
+
+
+------- llm 相關 -------
+pip install llama-cpp-python --prefer-binary --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu

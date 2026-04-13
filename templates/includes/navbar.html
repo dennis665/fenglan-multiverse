@@ -76,6 +76,23 @@
                 </li>
                 {% endif %}
 
+                {# CSI 專屬選單 (僅限 is_employee 為 True 的使用者) #}
+                {% if user.is_authenticated and user.profile.is_employee %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-success fw-bold {% if 'csi-info' in request.path %}active{% endif %}" href="#" id="csiZoneDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-building me-1"></i>{% trans "CSI 專屬" %}
+                    </a>
+                    <ul class="dropdown-menu shadow border-0" aria-labelledby="csiZoneDropdown">
+                        <li><h6 class="dropdown-header">{% trans "企業資源" %}</h6></li>
+                        <li>
+                            <a class="dropdown-item {% if 'csi-info' in request.path %}active bg-success text-white{% endif %}" href="{% url 'csi_info_list' %}">
+                                <i class="fas fa-file-pdf fa-fw me-2 {% if 'csi-info' not in request.path %}text-danger{% endif %}"></i>{% trans "企業內部資訊" %}
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %}
+
                 {# 測試員專區 (保持原樣，獨立於會員專區之外) #}
                 {% if user.is_staff or user.is_superuser %}
                 <li class="nav-item dropdown">

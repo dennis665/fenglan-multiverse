@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -44,3 +45,22 @@ class FeatureStatus(models.Model):
         status = "🟢" if self.is_active else "🔴"
         #! get_name_display() 會自動回傳翻譯後的選項
         return f"{status} {self.get_name_display()}"  # pyright: ignore[reportAttributeAccessIssue]
+
+
+class EnterpriseInfo(models.Model):
+    #! 檔案儲存路徑：media/csi_info/
+    title = models.CharField(("標題"), max_length=255)  # * 文件的標題名稱
+    file = models.FileField(("PDF檔案"), upload_to="csi_info/")  # * 儲存於 media/csi_info/
+    uploader = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, verbose_name=("上傳者")
+    )  # * 關聯上傳的使用者
+    created_at = models.DateTimeField(("建立日期"), auto_now_add=True)  # * 自動記錄建立時間
+
+
+class Meta:
+    verbose_name = _("企業資訊")
+    verbose_name_plural = _("企業資訊管理")
+
+
+def __str__(self):
+    return self.title

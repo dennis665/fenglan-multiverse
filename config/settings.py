@@ -280,7 +280,8 @@ SOCIALACCOUNT_PROVIDERS = {
 LANGUAGE_CODE = "zh-hant"
 LANGUAGES = [
     ("zh-hant", _("繁體中文")),
-    ("en", _("English")),
+    ("en", _("英文")),
+    ("ja", _("日文")),
 ]
 TIME_ZONE = "Asia/Taipei"
 USE_I18N = True

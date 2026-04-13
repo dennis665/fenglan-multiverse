@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-31 10:37+0800\n"
+"POT-Creation-Date: 2026-04-13 09:34+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -12,13 +12,17 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\config\settings.py:281
+#: .\config\settings.py:282
 msgid "繁體中文"
 msgstr "Traditional Chinese"
 
-#: .\config\settings.py:282
-msgid "English"
-msgstr ""
+#: .\config\settings.py:283
+msgid "英文"
+msgstr "English"
+
+#: .\config\settings.py:284
+msgid "日文"
+msgstr "Japanese"
 
 #: .\core\admin.py:40
 msgid "平均耗時 (秒)"
@@ -144,80 +148,88 @@ msgstr ""
 "The traceback record of an exception that occurred during task execution (if "
 "any)."
 
-#: .\core\models.py:8 .\finance\models.py:38 .\finance\models.py:76
+#: .\core\models.py:9 .\finance\models.py:38 .\finance\models.py:76
 #: .\finance\models.py:149 .\invest\models.py:58 .\invest\models.py:93
-#: .\study_brain\models.py:11
+#: .\study_brain\models.py:11 .\tube_hub\models.py:13 .\tube_hub\models.py:60
 msgid "建立時間"
 msgstr "Created At"
 
-#: .\core\models.py:9 .\finance\models.py:12 .\invest\models.py:37
+#: .\core\models.py:10 .\finance\models.py:12 .\invest\models.py:37
 #: .\notices\models.py:57
 msgid "更新時間"
 msgstr "Updated At"
 
-#: .\core\models.py:17
+#: .\core\models.py:18
 msgid "幸運大轉盤"
 msgstr "Lucky Spin"
 
-#: .\core\models.py:18
+#: .\core\models.py:19
 msgid "發文簿系統"
 msgstr "Post Registry System"
 
-#: .\core\models.py:19
+#: .\core\models.py:20
 msgid "個人化大頭貼"
 msgstr "Personalized Avatar"
 
-#: .\core\models.py:20
+#: .\core\models.py:21
 msgid "AI 智能客服"
 msgstr "AI Smart Customer Service"
 
-#: .\core\models.py:21
+#: .\core\models.py:22
 msgid "公告系統"
 msgstr "Announcement System"
 
-#: .\core\models.py:22
+#: .\core\models.py:23
 msgid "管理後台"
 msgstr "Admin Dashboard"
 
-#: .\core\models.py:23
+#: .\core\models.py:24
 msgid "安定系統"
 msgstr "Stability System"
 
-#: .\core\models.py:26
+#: .\core\models.py:27
 msgid "功能名稱"
 msgstr "Feature Name"
 
-#: .\core\models.py:27
+#: .\core\models.py:28
 msgid "全局啟用狀態"
 msgstr "Global Active Status"
 
-#: .\core\models.py:30
+#: .\core\models.py:31
 msgid "訪客可用"
 msgstr "Available for Guests"
 
-#: .\core\models.py:31
+#: .\core\models.py:32
 msgid "一般用戶可用"
 msgstr "Available for General Users"
 
-#: .\core\models.py:32
+#: .\core\models.py:33
 msgid "工作人員可用"
 msgstr "Available for Staff"
 
-#: .\core\models.py:33
+#: .\core\models.py:34
 msgid "管理員可用"
 msgstr "Available for Administrators"
 
-#: .\core\models.py:35
+#: .\core\models.py:36
 msgid "功能簡介"
 msgstr "Feature Description"
 
-#: .\core\models.py:36
+#: .\core\models.py:37
 msgid "顯示順序"
 msgstr "Display Order"
 
-#: .\core\models.py:39 .\core\models.py:40
+#: .\core\models.py:40 .\core\models.py:41
 msgid "功能權限管理"
 msgstr "Feature Permission Management"
+
+#: .\core\models.py:61
+msgid "企業資訊"
+msgstr "Corporate Information"
+
+#: .\core\models.py:62
+msgid "企業資訊管理"
+msgstr "Corporate Information Management"
 
 #: .\core\templates\core\feature_list.html:5
 #: .\core\templates\core\feature_list.html:11
@@ -665,6 +677,10 @@ msgstr ""
 #: .\core\templates\core\tigf_dashboard.html:129
 msgid "Fully Matched"
 msgstr ""
+
+#: .\core\templates\csi_info\csi_info.html:11
+msgid "CSI 企業內部資訊"
+msgstr "CSI Corporate Internal Information"
 
 #: .\core\views.py:36
 msgid "Avatar updated successfully!"
@@ -2352,34 +2368,46 @@ msgid "Vision Brain"
 msgstr ""
 
 #: .\templates\includes\navbar.html:83
+msgid "CSI 專屬"
+msgstr "CSI Exclusive"
+
+#: .\templates\includes\navbar.html:86
+msgid "企業資源"
+msgstr "Corporate Resources"
+
+#: .\templates\includes\navbar.html:89
+msgid "企業內部資訊"
+msgstr "Corporate Internal Information"
+
+#: .\templates\includes\navbar.html:100
 msgid "Tester Zone"
 msgstr ""
 
-#: .\templates\includes\navbar.html:86
+#: .\templates\includes\navbar.html:103
 msgid "Test Management System"
 msgstr ""
 
-#: .\templates\includes\navbar.html:94
+#: .\templates\includes\navbar.html:111
 msgid "No tools available"
 msgstr ""
 
-#: .\templates\includes\navbar.html:127
+#: .\templates\includes\navbar.html:144
 msgid "Admin"
 msgstr ""
 
-#: .\templates\includes\navbar.html:147
+#: .\templates\includes\navbar.html:164
 msgid "Profile"
 msgstr ""
 
-#: .\templates\includes\navbar.html:152
+#: .\templates\includes\navbar.html:169
 msgid "Logout"
 msgstr ""
 
-#: .\templates\includes\navbar.html:159
+#: .\templates\includes\navbar.html:176
 msgid "Login"
 msgstr ""
 
-#: .\templates\includes\navbar.html:162
+#: .\templates\includes\navbar.html:179
 msgid "Register"
 msgstr ""
 
@@ -2439,6 +2467,230 @@ msgstr ""
 #: .\tigf\apps.py:7
 msgid "安定基金"
 msgstr "TIGF"
+
+#: .\tube_hub\models.py:10 .\tube_hub\models.py:34
+msgid "擁有者"
+msgstr "Owner"
+
+#: .\tube_hub\models.py:12
+msgid "資料夾名稱"
+msgstr "Folder Name"
+
+#: .\tube_hub\models.py:16 .\tube_hub\models.py:17
+msgid "收藏資料夾"
+msgstr "Collection Folder"
+
+#: .\tube_hub\models.py:28
+msgid "影片"
+msgstr "Video"
+
+#: .\tube_hub\models.py:29
+msgid "音樂"
+msgstr "Music"
+
+#: .\tube_hub\models.py:37
+msgid "所屬資料夾"
+msgstr "Assigned Folder"
+
+#: .\tube_hub\models.py:39
+msgid "公開分享給他人"
+msgstr "Publicly Share with Others"
+
+#: .\tube_hub\models.py:42
+msgid "來源網址"
+msgstr "Source URL"
+
+#: .\tube_hub\models.py:43
+msgid "資源標題"
+msgstr "Resource Title"
+
+#: .\tube_hub\models.py:45 .\tube_hub\templates\tube_hub\search.html:177
+msgid "資源分類"
+msgstr "Resource Category"
+
+#: .\tube_hub\models.py:48
+msgid "影片檔"
+msgstr "Video File"
+
+#: .\tube_hub\models.py:51
+msgid "音檔"
+msgstr "Audio File"
+
+#: .\tube_hub\models.py:54
+msgid "主內容 (原生字幕/歌詞)"
+msgstr "Primary Content (Original Subtitles/Lyrics)"
+
+#: .\tube_hub\models.py:57
+msgid "副內容 (AI 處理結果)"
+msgstr "Secondary Content (AI Processed Result)"
+
+#: .\tube_hub\models.py:59
+msgid "個人筆記"
+msgstr "Personal Notes"
+
+#: .\tube_hub\models.py:63 .\tube_hub\models.py:64
+msgid "影音資源"
+msgstr "Media Resource"
+
+#: .\tube_hub\templates\tube_hub\player.html:26
+msgid "前往 YouTube 查看"
+msgstr "View on YouTube"
+
+#: .\tube_hub\templates\tube_hub\player.html:33
+msgid "返回清單"
+msgstr "Back to List"
+
+#: .\tube_hub\templates\tube_hub\player.html:58
+msgid "播放控制"
+msgstr "Playback Control"
+
+#: .\tube_hub\templates\tube_hub\player.html:63
+msgid "全曲循環"
+msgstr "Repeat Track"
+
+#: .\tube_hub\templates\tube_hub\player.html:68
+msgid "切換影片模式"
+msgstr "Switch to Video Mode"
+
+#: .\tube_hub\templates\tube_hub\player.html:78
+msgid "語速"
+msgstr "Playback Speed"
+
+#: .\tube_hub\templates\tube_hub\player.html:89
+msgid "升降 Key"
+msgstr "Pitch Adjustment (Key)"
+
+#: .\tube_hub\templates\tube_hub\player.html:112
+msgid "A-B 段落重複播放"
+msgstr "A-B Repeat"
+
+#: .\tube_hub\templates\tube_hub\player.html:114
+msgid "設定 A 點 (起始)"
+msgstr "Set Point A (Start)"
+
+#: .\tube_hub\templates\tube_hub\player.html:115
+msgid "設定 B 點 (結束)"
+msgstr "Set Point B (End)"
+
+#: .\tube_hub\templates\tube_hub\player.html:116
+msgid "清除"
+msgstr "Clear"
+
+#: .\tube_hub\templates\tube_hub\player.html:119
+msgid "開啟重複播放"
+msgstr "Enable Repeat"
+
+#: .\tube_hub\templates\tube_hub\player.html:134
+msgid "原生字幕 / 歌詞"
+msgstr "Original Subtitles / Lyrics"
+
+#: .\tube_hub\templates\tube_hub\player.html:137
+msgid "個人筆記資料"
+msgstr "Personal Note Data"
+
+#: .\tube_hub\templates\tube_hub\player.html:151
+msgid "在這裡輸入您的學習筆記、歌詞段落或是重點摘要..."
+msgstr "Enter your learning notes, lyric segments, or key summaries here..."
+
+#: .\tube_hub\templates\tube_hub\player.html:155
+msgid "已儲存"
+msgstr "Saved"
+
+#: .\tube_hub\templates\tube_hub\player.html:157
+msgid "儲存筆記"
+msgstr "Save Note"
+
+#: .\tube_hub\templates\tube_hub\search.html:8
+msgid "影音資源庫 - 搜尋與下載"
+msgstr "Media Library - Search & Download"
+
+#: .\tube_hub\templates\tube_hub\search.html:15
+msgid "Tube Hub 影音中心"
+msgstr "Tube Hub Media Center"
+
+#: .\tube_hub\templates\tube_hub\search.html:21
+msgid "我的收藏"
+msgstr "My Collection"
+
+#: .\tube_hub\templates\tube_hub\search.html:37
+#: .\tube_hub\templates\tube_hub\search.html:93
+msgid "公開"
+msgstr "Public"
+
+#: .\tube_hub\templates\tube_hub\search.html:40
+#: .\tube_hub\templates\tube_hub\search.html:96
+msgid "移除"
+msgstr "Remove"
+
+#: .\tube_hub\templates\tube_hub\search.html:45
+#: .\tube_hub\templates\tube_hub\search.html:101
+msgid "移動至..."
+msgstr "Move to..."
+
+#: .\tube_hub\templates\tube_hub\search.html:50
+#: .\tube_hub\templates\tube_hub\search.html:106
+msgid "移出資料夾 (最外層)"
+msgstr "Move out of Folder (Root)"
+
+#: .\tube_hub\templates\tube_hub\search.html:132
+msgid "尚無個人收藏"
+msgstr "No personal collections yet."
+
+#: .\tube_hub\templates\tube_hub\search.html:138
+msgid "社群公開分享"
+msgstr "Community Public Shares"
+
+#: .\tube_hub\templates\tube_hub\search.html:146
+msgid "提供者:"
+msgstr "Contributor:"
+
+#: .\tube_hub\templates\tube_hub\search.html:149
+msgid "收藏"
+msgstr "Favorite"
+
+#: .\tube_hub\templates\tube_hub\search.html:153
+msgid "目前沒有其他人公開的資源"
+msgstr "No public resources from others at the moment."
+
+#: .\tube_hub\templates\tube_hub\search.html:161
+msgid "輸入關鍵字搜尋 YouTube..."
+msgstr "Enter keywords to search YouTube..."
+
+#: .\tube_hub\templates\tube_hub\search.html:162
+msgid "搜尋"
+msgstr "Search"
+
+#: .\tube_hub\templates\tube_hub\search.html:170
+msgid "下載設定"
+msgstr "Download Settings"
+
+#: .\tube_hub\templates\tube_hub\search.html:179
+msgid "影片類型"
+msgstr "Video Type"
+
+#: .\tube_hub\templates\tube_hub\search.html:180
+msgid "音樂類型"
+msgstr "Music Type"
+
+#: .\tube_hub\templates\tube_hub\search.html:184
+msgid "分類資料夾 (選填)"
+msgstr "Category Folder (Optional)"
+
+#: .\tube_hub\templates\tube_hub\search.html:185
+msgid "選擇現有或輸入新名稱..."
+msgstr "Select existing or enter new name..."
+
+#: .\tube_hub\templates\tube_hub\search.html:196
+msgid "個人學習筆記"
+msgstr "Personal Study Notes"
+
+#: .\tube_hub\templates\tube_hub\search.html:203
+msgid "公開給社群其他使用者收藏"
+msgstr "Make public for others to collect"
+
+#: .\tube_hub\templates\tube_hub\search.html:206
+msgid "確認下載並自動分析字幕"
+msgstr "Confirm Download & Auto-analyze Subtitles"
 
 #: .\users\apps.py:7
 msgid "使用者管理"
