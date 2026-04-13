@@ -74,22 +74,41 @@ class EnterpriseInfoAdmin(admin.ModelAdmin):
     """設定 EnterpriseInfo 在 Django Admin 中的顯示與操作行為"""
 
     #! 列表頁面顯示的欄位
-    list_display = ("title", "uploader", "created_at")  # * 顯示標題、上傳者與建立時間
+    # * 使用方法包裝以確保 i18n 能作用於表頭標題
+    list_display = ("get_title", "get_uploader", "get_created_at")
 
     #! 右側過濾器
-    list_filter = ("created_at", "uploader")  # * 允許依據時間與上傳者進行資料篩選
+    list_filter = ("created_at", "uploader")
 
     #! 搜尋列設定
-    # * title 採模糊搜尋，uploader__username 則透過關聯尋找上傳者的帳號名稱
     search_fields = ("title", "uploader__username")
 
     #! 唯讀欄位設定
-    readonly_fields = ("created_at",)  # * 建立日期由系統自動產生，不可在後台手動修改
+    readonly_fields = ("created_at",)
+
+    #! 使用 gettext_lazy 進行方法標題翻譯
+    def get_title(self, obj):
+        return obj.title
+
+    get_title.short_description = _("標題")
+    get_title.admin_order_field = "title"  # * 保持排序功能
+
+    def get_uploader(self, obj):
+        return obj.uploader
+
+    get_uploader.short_description = _("上傳者")
+    get_uploader.admin_order_field = "uploader"
+
+    def get_created_at(self, obj):
+        return obj.created_at
+
+    get_created_at.short_description = _("建立日期")
+    get_created_at.admin_order_field = "created_at"
 
     def save_model(self, request, obj, form, change):
         """
         覆寫儲存邏輯：新增資料時自動綁定上傳者
         """
-        if not obj.pk:  # * 若 obj.pk 為空，代表這是一筆全新的紀錄
-            obj.uploader = request.user  # * 自動將當前登入的後台使用者設為上傳者
+        if not obj.pk:
+            obj.uploader = request.user
         super().save_model(request, obj, form, change)

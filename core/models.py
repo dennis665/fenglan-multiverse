@@ -56,11 +56,9 @@ class EnterpriseInfo(models.Model):
     )  # * 關聯上傳的使用者
     created_at = models.DateTimeField(("建立日期"), auto_now_add=True)  # * 自動記錄建立時間
 
+    class Meta:
+        verbose_name = _("企業資訊")
+        verbose_name_plural = _("企業資訊管理")
 
-class Meta:
-    verbose_name = _("企業資訊")
-    verbose_name_plural = _("企業資訊管理")
-
-
-def __str__(self):
-    return self.title
+    def __str__(self):
+        return self.title

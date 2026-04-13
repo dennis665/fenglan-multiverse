@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-13 09:34+0800\n"
+"POT-Creation-Date: 2026-04-13 10:41+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -51,6 +51,18 @@ msgstr ""
 
 #: .\core\admin.py:69
 msgid "實際耗時"
+msgstr ""
+
+#: .\core\admin.py:93 .\notices\models.py:10
+msgid "標題"
+msgstr ""
+
+#: .\core\admin.py:99 .\study_brain\models.py:27
+msgid "上傳者"
+msgstr ""
+
+#: .\core\admin.py:105
+msgid "建立日期"
 msgstr ""
 
 #: .\core\apps.py:7
@@ -224,11 +236,11 @@ msgstr ""
 msgid "功能權限管理"
 msgstr ""
 
-#: .\core\models.py:61
+#: .\core\models.py:60
 msgid "企業資訊"
 msgstr ""
 
-#: .\core\models.py:62
+#: .\core\models.py:61
 msgid "企業資訊管理"
 msgstr ""
 
@@ -1530,10 +1542,6 @@ msgstr "請先輸入股票代號！"
 msgid "系統公告"
 msgstr ""
 
-#: .\notices\models.py:10
-msgid "標題"
-msgstr ""
-
 #: .\notices\models.py:11
 msgid "內容"
 msgstr ""
@@ -1752,10 +1760,6 @@ msgstr ""
 
 #: .\study_brain\models.py:25
 msgid "所屬分類"
-msgstr ""
-
-#: .\study_brain\models.py:27
-msgid "上傳者"
 msgstr ""
 
 #: .\study_brain\models.py:29
