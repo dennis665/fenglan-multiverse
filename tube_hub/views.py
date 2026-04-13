@@ -193,9 +193,9 @@ def download_resource(request):
             outtmpl=video_tmpl,
             quiet=True,
             keepvideo=True,
-            extractor_args={"youtube": {"player_client": ["web"]}},
+            extractor_args={"youtube": {"player_client": ["web", "android", "ios"]}},
             http_headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             },
             ignoreerrors=True,
         )
