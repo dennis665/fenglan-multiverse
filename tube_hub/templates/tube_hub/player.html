@@ -9,25 +9,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/tube_hub.css' %}">
     <style>
-        /* 標籤頁選中效果 */
         .nav-tabs .nav-link { color: #6c757d; border-bottom: 2px solid transparent; }
         .nav-tabs .nav-link:hover { color: #0dcaf0; }
         .nav-tabs .nav-link.active { color: #0dcaf0 !important; border-bottom: 2px solid #0dcaf0 !important; font-weight: bold; }
     </style>
 </head>
 <body class="bg-black text-light position-relative">
-    {# --- 背景動畫容器 --- #}
     <div id="three-bg-container" class="position-fixed top-0 start-0 w-100 h-100" style="z-index: -1; pointer-events: none; overflow: hidden; background-color: #000;"></div>
 
     <div class="container-fluid py-4 px-md-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="mb-0">
-                {# 將標題文字轉為可點擊連結 #}
-                <a href="{{ resource.url }}" target="_blank" class="text-info text-decoration-none hover-bright" title="{% trans '前往 YouTube 查看' %}">
+                <a href="{{ resource.url }}" target="_blank" class="text-info text-decoration-none hover-bright">
                     {{ resource.title }}
-                    <i class="fas fa-external-link-alt ms-1" style="font-size: 0.8rem;"></i>
                 </a>
-                {# 分類標籤 #}
                 <span class="badge bg-secondary ms-2 fs-6">{{ resource.get_category_display }}</span>
             </h4>
             <a href="{% url 'tube_hub:search' %}" class="btn btn-outline-light btn-sm">{% trans "返回清單" %}</a>
@@ -35,13 +30,10 @@
 
         <div class="row g-4">
             <div class="col-lg-6">
-                {# 媒體播放容器 #}
                 <div class="media-container bg-dark rounded shadow p-3 mb-3 text-center position-relative" style="min-height: 300px;">
-                    {# 影片播放器 #}
                     <video id="videoPlayer" class="w-100 rounded {% if resource.category == 'ktv' %}d-none{% endif %}" crossorigin="anonymous" controls>
                         <source src="{{ resource.video_file.url }}" type="video/mp4">
                     </video>
-                    {# 音訊播放器 #}
                     <div id="audioWrapper" class="py-5 {% if resource.category == 'course' %}d-none{% endif %}">
                         <div class="mb-3"><i class="fas fa-music fa-4x text-info"></i></div>
                         <audio id="audioPlayer" class="w-100" crossorigin="anonymous" controls>
@@ -52,16 +44,17 @@
                     </div>
                 </div>
 
-                {# 控制面板 #}
                 <div class="control-panel bg-secondary rounded p-3 shadow-sm mt-3">
                     <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-dark pb-2">
                         <h6 class="text-light mb-0">{% trans "播放控制" %}</h6>
                         <div class="d-flex gap-3">
-                            {# 新增：全曲循環開關 #}
+                            {# 如果不是歌單，才顯示傳統的單獨全曲循環按鈕 #}
+                            {% if not playlist_items %}
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="loopToggle">
                                 <label class="form-check-label text-white small" for="loopToggle">{% trans "全曲循環" %}</label>
                             </div>
+                            {% endif %}
                             {% if resource.category == 'ktv' %}
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="modeSwitch">
@@ -82,37 +75,39 @@
                                 <option value="0.5"></option><option value="1.0"></option><option value="1.5"></option><option value="2.0"></option>
                             </datalist>
                         </div>
-
-                        {# 升降 Key 拉桿 #}
                         <div class="col-md-6">
                             <label for="pitchSlider" class="small text-light mb-1 d-block">
                                 <i class="fas fa-music me-1"></i>{% trans "升降 Key" %}: <span id="pitchValue" class="text-warning fw-bold">0</span> 半音
                             </label>
                             <input type="range" class="form-range" id="pitchSlider" min="-12" max="12" step="1" value="0">
                             <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem;">
-                                <span>-12 (降八度)</span>
-                                <span>原音</span>
-                                <span>+12 (升八度)</span>
+                                <span>-12</span>
+                                <span>0</span>
+                                <span>+12</span>
                             </div>
                         </div>
                     </div>
 
                     {# 快進快退 #}
-                    <div class="text-end">
+                    <div class="text-end mb-2">
                         <div class="btn-group btn-group-sm">
                             <button class="btn btn-dark btn-skip" data-seconds="-10">10s ⏪</button>
                             <button class="btn btn-dark btn-skip" data-seconds="-5">5s ⏪</button>
                             <button class="btn btn-dark btn-skip" data-seconds="5">⏩ 5s</button>
                             <button class="btn btn-dark btn-skip" data-seconds="10">⏩ 10s</button>
+                            {# 歌單模式下的手動下一首 #}
+                            {% if playlist_items %}
+                            <button id="btnNextSong" class="btn btn-warning text-dark fw-bold ms-2">⏭ {% trans "下一首" %}</button>
+                            {% endif %}
                         </div>
                     </div>
 
                     {# A-B 段落重複播放 #}
-                    <div class="ab-loop-control mt-4 p-3 bg-dark rounded shadow-inner">
+                    <div class="ab-loop-control mt-3 p-3 bg-dark rounded shadow-inner">
                         <h6 class="text-info small mb-3">{% trans "A-B 段落重複播放" %}</h6>
                         <div class="d-flex flex-wrap gap-2 align-items-center">
-                            <button id="btnSetA" class="btn btn-outline-info btn-sm">{% trans "設定 A 點 (起始)" %}</button>
-                            <button id="btnSetB" class="btn btn-outline-info btn-sm">{% trans "設定 B 點 (結束)" %}</button>
+                            <button id="btnSetA" class="btn btn-outline-info btn-sm">{% trans "設定 A 點" %}</button>
+                            <button id="btnSetB" class="btn btn-outline-info btn-sm">{% trans "設定 B 點" %}</button>
                             <button id="btnClearAB" class="btn btn-outline-secondary btn-sm">{% trans "清除" %}</button>
                             <div class="form-check form-switch ms-auto">
                                 <input class="form-check-input" type="checkbox" id="abLoopToggle">
@@ -124,6 +119,39 @@
                         </div>
                     </div>
                 </div>
+
+                {# 歌單面板區塊 #}
+                {% if playlist_items %}
+                <div class="playlist-panel bg-secondary rounded p-3 shadow-sm mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-dark pb-2">
+                        <h6 class="text-warning mb-0">{{ resource.folder.name }} {% trans "歌單" %}</h6>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-warning play-mode-btn" data-mode="loop_all" title="{% trans '全部循環' %}">{% trans "全部" %}</button>
+                            <button type="button" class="btn btn-outline-warning play-mode-btn" data-mode="loop_single" title="{% trans '單曲循環' %}">{% trans "單曲" %}</button>
+                            <button type="button" class="btn btn-outline-warning play-mode-btn" data-mode="shuffle" title="{% trans '隨機播放' %}">{% trans "隨機" %}</button>
+                        </div>
+                    </div>
+                    <div class="list-group list-group-flush custom-scrollbar" style="max-height: 250px;">
+                        {% for item in playlist_items %}
+                        <a href="{% url 'tube_hub:player' item.id %}" class="list-group-item list-group-item-action bg-dark text-light border-secondary {% if item.id == resource.id %}active text-warning fw-bold border-warning{% endif %}">
+                            {% if item.id == resource.id %}
+                                <i class="fas fa-play me-2 text-warning"></i>
+                            {% endif %}
+                            {{ item.title }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <script>
+                    // 傳遞歌單資料給前端 JS
+                    window.playlistItems = [
+                        {% for item in playlist_items %}
+                        { id: {{ item.id }}, title: "{{ item.title|escapejs }}" }{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ];
+                    window.currentResourceId = {{ resource.id }};
+                </script>
+                {% endif %}
             </div>
 
             <div class="col-lg-6">
@@ -164,7 +192,6 @@
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

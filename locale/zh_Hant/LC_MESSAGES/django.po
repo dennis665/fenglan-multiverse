@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-13 10:41+0800\n"
+"POT-Creation-Date: 2026-04-13 15:09+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -163,7 +163,7 @@ msgstr ""
 
 #: .\core\models.py:9 .\finance\models.py:38 .\finance\models.py:76
 #: .\finance\models.py:149 .\invest\models.py:58 .\invest\models.py:93
-#: .\study_brain\models.py:11 .\tube_hub\models.py:13 .\tube_hub\models.py:60
+#: .\study_brain\models.py:11 .\tube_hub\models.py:20 .\tube_hub\models.py:60
 msgid "建立時間"
 msgstr ""
 
@@ -2424,60 +2424,76 @@ msgstr "您的連線已加密且安全。"
 msgid "安定基金"
 msgstr ""
 
-#: .\tube_hub\models.py:10 .\tube_hub\models.py:34
+#: .\tube_hub\apps.py:7
+msgid "影音資源中心"
+msgstr ""
+
+#: .\tube_hub\models.py:9
+msgid "影片資料夾"
+msgstr ""
+
+#: .\tube_hub\models.py:10
+msgid "音樂歌單"
+msgstr ""
+
+#: .\tube_hub\models.py:14 .\tube_hub\models.py:39
 msgid "擁有者"
 msgstr ""
 
-#: .\tube_hub\models.py:12
+#: .\tube_hub\models.py:16
 msgid "資料夾名稱"
 msgstr ""
 
-#: .\tube_hub\models.py:16 .\tube_hub\models.py:17
+#: .\tube_hub\models.py:18
+msgid "類型"
+msgstr ""
+
+#: .\tube_hub\models.py:23 .\tube_hub\models.py:24
 msgid "收藏資料夾"
 msgstr ""
 
-#: .\tube_hub\models.py:28
+#: .\tube_hub\models.py:34
 msgid "影片"
 msgstr ""
 
-#: .\tube_hub\models.py:29
+#: .\tube_hub\models.py:35
 msgid "音樂"
 msgstr ""
 
-#: .\tube_hub\models.py:37
+#: .\tube_hub\models.py:42
 msgid "所屬資料夾"
 msgstr ""
 
-#: .\tube_hub\models.py:39
+#: .\tube_hub\models.py:44
 msgid "公開分享給他人"
 msgstr ""
 
-#: .\tube_hub\models.py:42
+#: .\tube_hub\models.py:46
 msgid "來源網址"
 msgstr ""
 
-#: .\tube_hub\models.py:43
+#: .\tube_hub\models.py:47
 msgid "資源標題"
 msgstr ""
 
-#: .\tube_hub\models.py:45 .\tube_hub\templates\tube_hub\search.html:177
+#: .\tube_hub\models.py:49 .\tube_hub\templates\tube_hub\search.html:171
 msgid "資源分類"
 msgstr ""
 
-#: .\tube_hub\models.py:48
+#: .\tube_hub\models.py:52
 msgid "影片檔"
 msgstr ""
 
-#: .\tube_hub\models.py:51
+#: .\tube_hub\models.py:55
 msgid "音檔"
 msgstr ""
 
-#: .\tube_hub\models.py:54
-msgid "主內容 (原生字幕/歌詞)"
+#: .\tube_hub\models.py:57
+msgid "主內容"
 msgstr ""
 
-#: .\tube_hub\models.py:57
-msgid "副內容 (AI 處理結果)"
+#: .\tube_hub\models.py:58
+msgid "副內容"
 msgstr ""
 
 #: .\tube_hub\models.py:59
@@ -2488,71 +2504,100 @@ msgstr ""
 msgid "影音資源"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:26
-msgid "前往 YouTube 查看"
-msgstr ""
-
-#: .\tube_hub\templates\tube_hub\player.html:33
+#: .\tube_hub\templates\tube_hub\player.html:28
 msgid "返回清單"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:58
+#: .\tube_hub\templates\tube_hub\player.html:49
 msgid "播放控制"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:63
+#: .\tube_hub\templates\tube_hub\player.html:55
 msgid "全曲循環"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:68
+#: .\tube_hub\templates\tube_hub\player.html:61
 msgid "切換影片模式"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:78
+#: .\tube_hub\templates\tube_hub\player.html:71
 msgid "語速"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:89
+#: .\tube_hub\templates\tube_hub\player.html:80
 msgid "升降 Key"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:112
+#: .\tube_hub\templates\tube_hub\player.html:100
+msgid "下一首"
+msgstr ""
+
+#: .\tube_hub\templates\tube_hub\player.html:107
 msgid "A-B 段落重複播放"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:114
-msgid "設定 A 點 (起始)"
+#: .\tube_hub\templates\tube_hub\player.html:109
+msgid "設定 A 點"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:115
-msgid "設定 B 點 (結束)"
+#: .\tube_hub\templates\tube_hub\player.html:110
+msgid "設定 B 點"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:116
+#: .\tube_hub\templates\tube_hub\player.html:111
 msgid "清除"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:119
+#: .\tube_hub\templates\tube_hub\player.html:114
 msgid "開啟重複播放"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:134
+#: .\tube_hub\templates\tube_hub\player.html:127
+#: .\tube_hub\templates\tube_hub\search.html:75
+msgid "歌單"
+msgstr ""
+
+#: .\tube_hub\templates\tube_hub\player.html:129
+msgid "全部循環"
+msgstr ""
+
+#: .\tube_hub\templates\tube_hub\player.html:129
+msgid "全部"
+msgstr ""
+
+#: .\tube_hub\templates\tube_hub\player.html:130
+msgid "單曲循環"
+msgstr ""
+
+#: .\tube_hub\templates\tube_hub\player.html:130
+msgid "單曲"
+msgstr ""
+
+#: .\tube_hub\templates\tube_hub\player.html:131
+msgid "隨機播放"
+msgstr ""
+
+#: .\tube_hub\templates\tube_hub\player.html:131
+msgid "隨機"
+msgstr ""
+
+#: .\tube_hub\templates\tube_hub\player.html:162
 msgid "原生字幕 / 歌詞"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:137
+#: .\tube_hub\templates\tube_hub\player.html:165
 msgid "個人筆記資料"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:151
+#: .\tube_hub\templates\tube_hub\player.html:179
 msgid "在這裡輸入您的學習筆記、歌詞段落或是重點摘要..."
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:155
+#: .\tube_hub\templates\tube_hub\player.html:183
 msgid "已儲存"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\player.html:157
+#: .\tube_hub\templates\tube_hub\player.html:185
 msgid "儲存筆記"
 msgstr ""
 
@@ -2564,87 +2609,87 @@ msgstr ""
 msgid "Tube Hub 影音中心"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:21
+#: .\tube_hub\templates\tube_hub\search.html:20
 msgid "我的收藏"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:37
-#: .\tube_hub\templates\tube_hub\search.html:93
-msgid "公開"
+#: .\tube_hub\templates\tube_hub\search.html:36
+#: .\tube_hub\templates\tube_hub\search.html:92
+msgid "公開分享"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:40
-#: .\tube_hub\templates\tube_hub\search.html:96
+#: .\tube_hub\templates\tube_hub\search.html:39
+#: .\tube_hub\templates\tube_hub\search.html:95
 msgid "移除"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:45
-#: .\tube_hub\templates\tube_hub\search.html:101
+#: .\tube_hub\templates\tube_hub\search.html:44
+#: .\tube_hub\templates\tube_hub\search.html:99
 msgid "移動至..."
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:50
-#: .\tube_hub\templates\tube_hub\search.html:106
+#: .\tube_hub\templates\tube_hub\search.html:49
+#: .\tube_hub\templates\tube_hub\search.html:104
 msgid "移出資料夾 (最外層)"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:132
+#: .\tube_hub\templates\tube_hub\search.html:129
 msgid "尚無個人收藏"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:138
+#: .\tube_hub\templates\tube_hub\search.html:135
 msgid "社群公開分享"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:146
+#: .\tube_hub\templates\tube_hub\search.html:143
 msgid "提供者:"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:149
+#: .\tube_hub\templates\tube_hub\search.html:146
 msgid "收藏"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:153
+#: .\tube_hub\templates\tube_hub\search.html:150
 msgid "目前沒有其他人公開的資源"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:161
+#: .\tube_hub\templates\tube_hub\search.html:158
 msgid "輸入關鍵字搜尋 YouTube..."
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:162
+#: .\tube_hub\templates\tube_hub\search.html:159
 msgid "搜尋"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:170
+#: .\tube_hub\templates\tube_hub\search.html:165
 msgid "下載設定"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:179
+#: .\tube_hub\templates\tube_hub\search.html:173
 msgid "影片類型"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:180
+#: .\tube_hub\templates\tube_hub\search.html:174
 msgid "音樂類型"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:184
+#: .\tube_hub\templates\tube_hub\search.html:178
 msgid "分類資料夾 (選填)"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:185
+#: .\tube_hub\templates\tube_hub\search.html:179
 msgid "選擇現有或輸入新名稱..."
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:196
+#: .\tube_hub\templates\tube_hub\search.html:189
 msgid "個人學習筆記"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:203
+#: .\tube_hub\templates\tube_hub\search.html:195
 msgid "公開給社群其他使用者收藏"
 msgstr ""
 
-#: .\tube_hub\templates\tube_hub\search.html:206
+#: .\tube_hub\templates\tube_hub\search.html:197
 msgid "確認下載並自動分析字幕"
 msgstr ""
 

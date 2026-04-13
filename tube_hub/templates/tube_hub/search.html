@@ -14,39 +14,38 @@
     <div class="container py-5">
         <h2 class="text-center text-info fw-bold mb-4">{% trans "Tube Hub 影音中心" %}</h2>
 
-        {# 分雙欄顯示我的收藏與社群分享 #}
         <div class="row mb-5 g-4">
             <div class="col-md-6">
                 <h5 class="text-warning border-bottom border-warning pb-2 mb-3">
                     <i class="fas fa-folder-open me-2"></i>{% trans "我的收藏" %}
                 </h5>
 
-                {# 無資料夾的最外層資源 #}
-                <div class="list-group mb-3">
+                {# 最外層資源 #}
+                <div class="list-group mb-3" id="root-resource-list">
                     {% for res in unfolder_resources %}
                         <div class="list-group-item bg-secondary text-white border-dark d-flex justify-content-between align-items-center">
                             <a href="{% url 'tube_hub:player' res.id %}" class="text-white text-decoration-none flex-grow-1 text-truncate pe-3">
                                 <span class="badge bg-primary me-2">{{ res.get_category_display }}</span>
                                 {{ res.title }}
                             </a>
-                            <div class="text-end d-flex flex-column align-items-end" style="min-width: 120px;">
+                            <div class="text-end d-flex flex-column align-items-end" style="min-width: 140px;">
                                 <small class="text-muted mb-2">{{ res.created_at|date:"m/d" }}</small>
-                                {# 事後設定公開開關 #}
+                                {# 公開開關 #}
                                 <div class="form-check form-switch mb-2">
                                     <input class="form-check-input public-toggle-switch" type="checkbox" data-id="{{ res.id }}" {% if res.is_public %}checked{% endif %}>
-                                    <label class="form-check-label small text-info">{% trans "公開" %}</label>
+                                    <label class="form-check-label small text-info">{% trans "公開分享" %}</label>
                                 </div>
                                 <button class="btn btn-sm btn-outline-danger btn-delete-resource w-100" data-id="{{ res.id }}">
                                     <i class="fas fa-trash-alt"></i> {% trans "移除" %}
                                 </button>
-                                {# 移動至下拉選單 #}
+                                {# 移動資料夾下拉選單 #}
                                 <div class="dropdown mt-2 w-100">
                                     <button class="btn btn-sm btn-outline-light dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
                                         <i class="fas fa-exchange-alt me-1"></i> {% trans "移動至..." %}
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-dark shadow">
                                         <li>
-                                            <a class="dropdown-item btn-move-to-folder" href="#" data-resource-id="{{ res.id }}" data-folder-id="">
+                                            <a class="dropdown-item btn-move-to-folder" href="javascript:void(0)" data-resource-id="{{ res.id }}" data-folder-id="">
                                                 <i class="fas fa-home me-2"></i> {% trans "移出資料夾 (最外層)" %}
                                             </a>
                                         </li>
@@ -54,8 +53,8 @@
                                         {% for f_opt in my_folders %}
                                             <li>
                                                 <a class="dropdown-item btn-move-to-folder {% if res.folder.id == f_opt.id %}active{% endif %}" 
-                                                   href="#" data-resource-id="{{ res.id }}" data-folder-id="{{ f_opt.id }}">
-                                                    <i class="fas fa-folder me-2"></i> {{ f_opt.name }}
+                                                   href="javascript:void(0)" data-resource-id="{{ res.id }}" data-folder-id="{{ f_opt.id }}">
+                                                    <i class="fas {% if f_opt.folder_type == 'ktv' %}fa-list-music{% else %}fa-folder{% endif %} me-2"></i> {{ f_opt.name }}
                                                 </a>
                                             </li>
                                         {% endfor %}
@@ -66,43 +65,42 @@
                     {% endfor %}
                 </div>
 
-                {# 有資料夾的折疊清單 #}
+                {# 資料夾折疊清單 (移除 if 判斷，允許空資料夾顯示，方便移入) #}
                 <div class="accordion accordion-flush bg-transparent" id="folderAccordion">
                     {% for folder in my_folders %}
-                        {% if folder.resources %}
-                        <div class="accordion-item bg-dark border-secondary mb-2 rounded">
+                        <div class="accordion-item bg-dark border-secondary mb-2 rounded" id="folder-item-{{ folder.id }}">
                             <h2 class="accordion-header" id="heading{{ folder.id }}">
                                 <button class="accordion-button collapsed bg-secondary text-white rounded shadow-sm py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ folder.id }}">
-                                    <i class="fas fa-folder text-warning me-2"></i> {{ folder.name }}
-                                    <span class="badge bg-dark ms-auto">{{ folder.resources|length }}</span>
+                                    <i class="fas {% if folder.folder_type == 'ktv' %}fa-list-music text-danger{% else %}fa-folder text-warning{% endif %} me-2"></i> 
+                                    {{ folder.name }} {% if folder.folder_type == 'ktv' %}<span class="ms-2 small text-muted">({% trans "歌單" %})</span>{% endif %}
+                                    <span class="badge bg-dark ms-auto folder-count">{{ folder.resources|length }}</span>
                                 </button>
                             </h2>
                             <div id="collapse{{ folder.id }}" class="accordion-collapse collapse" data-bs-parent="#folderAccordion">
                                 <div class="accordion-body p-0">
-                                    <div class="list-group list-group-flush border-top border-dark">
+                                    <div class="list-group list-group-flush border-top border-dark folder-resource-list" data-folder-id="{{ folder.id }}">
                                         {% for res in folder.resources %}
                                             <div class="list-group-item bg-black text-white border-dark d-flex justify-content-between align-items-center ps-4">
                                                 <a href="{% url 'tube_hub:player' res.id %}" class="text-white text-decoration-none flex-grow-1 text-truncate pe-3">
                                                     <span class="badge bg-primary me-2">{{ res.get_category_display }}</span>
                                                     {{ res.title }}
                                                 </a>
-                                                <div class="text-end d-flex flex-column align-items-end" style="min-width: 120px;">
+                                                <div class="text-end d-flex flex-column align-items-end" style="min-width: 140px;">
                                                     <small class="text-muted mb-2">{{ res.created_at|date:"m/d" }}</small>
                                                     <div class="form-check form-switch mb-2">
                                                         <input class="form-check-input public-toggle-switch" type="checkbox" data-id="{{ res.id }}" {% if res.is_public %}checked{% endif %}>
-                                                        <label class="form-check-label small text-info">{% trans "公開" %}</label>
+                                                        <label class="form-check-label small text-info">{% trans "公開分享" %}</label>
                                                     </div>
                                                     <button class="btn btn-sm btn-outline-danger btn-delete-resource w-100" data-id="{{ res.id }}">
                                                         <i class="fas fa-trash-alt"></i> {% trans "移除" %}
                                                     </button>
-                                                    {# 移動至下拉選單 #}
                                                     <div class="dropdown mt-2 w-100">
                                                         <button class="btn btn-sm btn-outline-light dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
                                                             <i class="fas fa-exchange-alt me-1"></i> {% trans "移動至..." %}
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-dark shadow">
                                                             <li>
-                                                                <a class="dropdown-item btn-move-to-folder" href="#" data-resource-id="{{ res.id }}" data-folder-id="">
+                                                                <a class="dropdown-item btn-move-to-folder" href="javascript:void(0)" data-resource-id="{{ res.id }}" data-folder-id="">
                                                                     <i class="fas fa-home me-2"></i> {% trans "移出資料夾 (最外層)" %}
                                                                 </a>
                                                             </li>
@@ -110,8 +108,8 @@
                                                             {% for f_opt in my_folders %}
                                                                 <li>
                                                                     <a class="dropdown-item btn-move-to-folder {% if res.folder.id == f_opt.id %}active{% endif %}" 
-                                                                       href="#" data-resource-id="{{ res.id }}" data-folder-id="{{ f_opt.id }}">
-                                                                        <i class="fas fa-folder me-2"></i> {{ f_opt.name }}
+                                                                       href="javascript:void(0)" data-resource-id="{{ res.id }}" data-folder-id="{{ f_opt.id }}">
+                                                                        <i class="fas {% if f_opt.folder_type == 'ktv' %}fa-list-music{% else %}fa-folder{% endif %} me-2"></i> {{ f_opt.name }}
                                                                     </a>
                                                                 </li>
                                                             {% endfor %}
@@ -124,7 +122,6 @@
                                 </div>
                             </div>
                         </div>
-                        {% endif %}
                     {% endfor %}
                 </div>
 
@@ -156,22 +153,19 @@
             </div>
         </div>
 
-        {# 搜尋區塊 #}
+        {# 搜尋區塊與下載表單保持不變 #}
         <div class="input-group mb-4 shadow-sm">
             <input type="text" id="searchInput" class="form-control form-control-lg bg-secondary text-white border-0" placeholder="{% trans '輸入關鍵字搜尋 YouTube...' %}">
             <button class="btn btn-info px-4 fw-bold text-dark" id="btnSearch">{% trans "搜尋" %}</button>
         </div>
-
         <div id="searchResults" class="list-group mb-5 shadow-sm"></div>
 
-        {# 下載設定表單 #}
         <div id="downloadFormContainer" class="card bg-secondary border-0 d-none shadow">
             <div class="card-body p-4">
                 <h5 class="text-info border-bottom border-dark pb-2 mb-3">{% trans "下載設定" %}</h5>
                 <form id="downloadForm">
                     <input type="hidden" id="selectedUrl">
                     <input type="hidden" id="selectedTitle">
-
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label">{% trans "資源分類" %}</label>
@@ -190,19 +184,16 @@
                             </datalist>
                         </div>
                     </div>
-
                     <div class="row g-3">
                         <div class="col-md-12">
                             <label class="form-label">{% trans "個人學習筆記" %}</label>
                             <input type="text" id="personalNotes" class="form-control bg-dark text-white border-0">
                         </div>
                     </div>
-
                     <div class="form-check form-switch mt-3">
                         <input class="form-check-input" type="checkbox" id="isPublic">
                         <label class="form-check-label" for="isPublic">{% trans "公開給社群其他使用者收藏" %}</label>
                     </div>
-
                     <button type="button" id="btnDownload" class="btn btn-primary btn-lg w-100 fw-bold mt-4">{% trans "確認下載並自動分析字幕" %}</button>
                 </form>
             </div>
