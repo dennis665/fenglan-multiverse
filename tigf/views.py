@@ -2,6 +2,7 @@ import io
 import warnings
 import zipfile
 from decimal import Decimal, InvalidOperation
+from urllib.parse import quote
 
 import pandas as pd
 from django.core.cache import cache
@@ -50,6 +51,8 @@ def smart_read_csv(file_obj, **kwargs):
     """
     encodings = ["utf-8-sig", "cp950", "utf-8", "big5"]
     content = file_obj.read()
+    if "dtype" not in kwargs:
+        kwargs["dtype"] = str
     for enc in encodings:
         try:
             #! 每次嘗試需將指標重置或使用 io.BytesIO
@@ -252,7 +255,7 @@ def tigf_dashboard(request):
                                         "中文欄位": pk_ch,
                                         "英文欄位": pk_en,
                                         "申報值": r_key_val,
-                                        "DB值": "DB 查無此主鍵",
+                                        "DB值": "DB 此行無對應資料",
                                     }
                                 )
                                 continue
@@ -270,7 +273,7 @@ def tigf_dashboard(request):
                                         "中文欄位": pk_ch,
                                         "英文欄位": pk_en,
                                         "申報值": r_key_val,
-                                        "DB值": "DB 中無多餘的此主鍵資料可供比對 (DB筆數不足)",
+                                        "DB值": "DB 缺漏此行資料",
                                     }
                                 )
                                 continue
@@ -303,9 +306,9 @@ def tigf_dashboard(request):
                         diff_count = len(diff_list)
                         if diff_count > 0:
                             df_diff = pd.DataFrame(diff_list)
-                            csv_buf = io.StringIO()
-                            df_diff.to_csv(csv_buf, index=False, encoding="utf-8-sig")
-                            cache.set(f"diff_{session_key}_{cno}_{fid}", csv_buf.getvalue(), 3600)
+                            excel_buf = io.BytesIO()
+                            df_diff.to_excel(excel_buf, index=False, engine="openpyxl")
+                            cache.set(f"diff_{session_key}_{cno}_{fid}", excel_buf.getvalue(), 3600)
 
                         diff_summary.append({"cno": cno, "fid": fid, "diff_count": diff_count})
 
@@ -329,20 +332,22 @@ def download_diff_csv(request, cno, fid):
 
     #! 組合快取 Key
     cache_key = f"diff_{session_key}_{cno}_{fid}"
-    csv_data = cache.get(cache_key)
+    excel_data = cache.get(cache_key)
 
     #! 檢查資料是否存在
-    if not csv_data:
+    if not excel_data:
         #! 如果快取過期（1小時）或找不到資料
         return HttpResponse("找不到比對資料或檔案已過期，請重新執行比對。", status=404)
 
     #! 建立 HttpResponse
     #! 指定內容類型為 CSV
-    response = HttpResponse(csv_data, content_type="text/csv")
+    response = HttpResponse(
+        excel_data, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
     #! 設定下載檔名 (Content-Disposition)
     #! 建議檔名加上 fid，方便使用者辨識
-    filename = f"TIGF_Diff_{cno}_{fid}.csv"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    filename = f"安定比對差異檔_{cno}_{fid}.xlsx"
+    response["Content-Disposition"] = f"attachment; filename*=utf-8''{quote(filename)}"
 
     return response
