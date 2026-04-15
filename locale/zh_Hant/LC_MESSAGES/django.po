@@ -643,7 +643,7 @@ msgstr "下載 CSV"
 #: .\core\templates\core\tigf_dashboard.html:99
 #: .\core\templates\core\tigf_dashboard.html:123
 msgid "No comparison data"
-msgstr "無比對數據"
+msgstr "還未比對"
 
 #: .\core\templates\core\tigf_dashboard.html:116
 msgid "Upload Error"
