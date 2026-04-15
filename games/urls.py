@@ -12,6 +12,7 @@ urlpatterns = [
     path("survivor/", views.survivor_index, name="survivor_index"),
     path("api/survivor/save/", views.survivor_save_api, name="survivor_save_api"),
     path("api/survivor/upgrade/", views.buy_upgrade_api, name="buy_upgrade_api"),
-    #! 虛擬人生遊戲 (預留)
+    #! 虛擬人生遊戲
     path("virtual-life/", views.virtual_life_index, name="virtual_life_index"),
+    path("api/virtual-life/save/", views.vl_save_api, name="vl_save_api"),
 ]

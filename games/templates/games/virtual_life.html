@@ -1,0 +1,125 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% trans "虛擬人生 RPG" %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/virtual_life.css' %}">
+    <script>
+        const CSI_CONFIG = {
+            csrfToken: '{{ csrf_token }}',
+            lobbyUrl: '{% url "games:lobby_index" %}',
+            saveApiUrl: '{% url "games:vl_save_api" %}',
+            upgradeApiUrl: '{% url "games:buy_upgrade_api" %}', //* 共用局外升級 API
+            
+            baseHpLv: {{ profile.survivor_hp_lv|default:0 }},
+            baseAtkLv: {{ profile.survivor_atk_lv|default:0 }},
+            currentLevel: {{ profile.vl_cleared_boards|default:1 }},
+            totalCoins: {{ profile.total_coins|default:0 }}
+        };
+    </script>
+</head>
+<body class="bg-dark text-white">
+
+    {# --- 1. 局外大廳與升級畫面 --- #}
+    <div id="lobby-screen" class="screen-overlay active">
+        <div class="container py-5 d-flex flex-column align-items-center">
+            <h1 class="text-success fw-bold mb-4">{% trans "虛擬人生 RPG" %}</h1>
+
+            <div class="stats-board mb-4 text-center">
+                <h4 class="text-warning">
+                    <i class="fas fa-coins me-2"></i>{% trans "持有金幣" %}: 
+                    <span id="lobby-coins">{{ profile.total_coins }}</span>
+                </h4>
+                <p class="text-info">{% trans "目前關卡等級" %}: {{ profile.vl_cleared_boards }}</p>
+            </div>
+
+            {# 局外強化面板 #}
+            <div class="row g-3 w-100 px-3 mb-5 justify-content-center">
+                <div class="col-6 col-md-4">
+                    <div class="upgrade-card bg-black p-3 border border-secondary rounded text-center">
+                        <h6 class="text-success">❤️ {% trans "初始血量" %}</h6>
+                        <p class="small">Lv. <span id="lbl-hp-lv">{{ profile.survivor_hp_lv }}</span></p>
+                        <button class="btn btn-sm btn-outline-success btn-buy w-100" data-type="hp">
+                            {% trans "升級" %} (<span id="cost-hp"></span> G)
+                        </button>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="upgrade-card bg-black p-3 border border-secondary rounded text-center">
+                        <h6 class="text-danger">⚔️ {% trans "初始攻擊" %}</h6>
+                        <p class="small">Lv. <span id="lbl-atk-lv">{{ profile.survivor_atk_lv }}</span></p>
+                        <button class="btn btn-sm btn-outline-danger btn-buy w-100" data-type="atk">
+                            {% trans "升級" %} (<span id="cost-atk"></span> G)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-start-game" class="btn btn-lg btn-success px-5 rounded-pill shadow-lg">
+                <i class="fas fa-play me-2"></i>{% trans "開始冒險" %}
+            </button>
+            <a href="{% url 'games:lobby_index' %}" 
+                class="btn btn-outline-light mt-4 px-4 py-2 rounded-pill shadow-sm text-decoration-none">
+                    <i class="fas fa-gamepad me-2"></i>{% trans "回到遊戲中心" %}
+            </a>
+        </div>
+    </div>
+
+    {# --- 2. 實際遊戲畫面 --- #}
+    <div id="game-screen" class="d-none">
+        <div class="container-fluid py-3">
+            {# 頂部狀態列 #}
+            <div class="row mb-3 bg-black p-2 rounded shadow align-items-center mx-1">
+                <div class="col-4 text-warning fw-bold small">
+                    👑 <span id="ui-level">1</span> | 👿 <span id="ui-boss-turns">20</span>
+                </div>
+                <div class="col-8 d-flex justify-content-end gap-3 small">
+                    <span class="text-success">❤️ <span id="ui-hp">100</span></span>
+                    <span class="text-danger">⚔️ <span id="ui-atk">10</span></span>
+                    <span class="text-info">🧪 <span id="ui-potions">0</span></span>
+                </div>
+            </div>
+
+            <div id="game-board" class="board-container mb-3"></div>
+
+            <div class="row px-3">
+                <div class="col-4">
+                    <div class="dice-box bg-black rounded text-center py-2 border border-secondary">
+                        <span id="dice-result" class="h2 fw-bold">-</span>
+                    </div>
+                </div>
+                <div class="col-8">
+                    <button id="btn-roll" class="btn btn-primary btn-lg w-100 h-100 rounded-3 shadow">
+                        🎲 {% trans "擲骰子" %}
+                    </button>
+                </div>
+            </div>
+
+            {# 遊戲內離開按鈕 #}
+            <div class="text-center mt-4">
+                <button class="btn btn-sm btn-outline-secondary px-4 rounded-pill" onclick="confirmExit()">
+                    <i class="fas fa-sign-out-alt me-2"></i>{% trans "離開遊戲" %}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {# 戰鬥與事件 Modal (保持不變) #}
+    <div id="action-modal" class="modal-overlay d-none">
+        <div class="modal-content bg-dark border border-secondary rounded p-4 text-center">
+            <h3 id="modal-title" class="mb-3"></h3>
+            <p id="modal-desc" class="text-light mb-4"></p>
+            <div id="modal-combat-stats" class="d-none mb-3 bg-black p-2 rounded">
+                <div class="text-danger">👾 {% trans "怪物 HP" %}: <span id="monster-hp">0</span></div>
+            </div>
+            <div id="modal-actions" class="d-flex flex-column gap-2"></div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/virtual_life.js' %}"></script>
+</body>
+</html>

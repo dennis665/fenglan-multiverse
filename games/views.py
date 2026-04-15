@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from .models import GameProfile, SurvivorLevel, SurvivorMonster
+from .models import GameProfile, SurvivorLevel, SurvivorMonster, VirtualLifeEvent
 
 
 @login_required
@@ -24,17 +24,10 @@ def lobby_index(request):
 
     context = {
         "profile": profile,
+        "leve": profile.vl_cleared_boards - 1 if profile.vl_cleared_boards else 0,
         "avatar_url": avatar_url,
     }
     return render(request, "games/lobby.html", context)
-
-
-@login_required
-def virtual_life_index(request):
-    """進入虛擬人生遊戲"""
-    profile, _ = GameProfile.objects.get_or_create(user=request.user)
-    context = {"profile": profile}
-    return render(request, "games/virtual_life.html", context)
 
 
 @login_required
@@ -143,6 +136,87 @@ def buy_upgrade_api(request):
                 )
             else:
                 return JsonResponse({"status": "insufficient_funds", "message": "金幣不足"}, status=400)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    return JsonResponse({"status": "invalid request"}, status=405)
+
+
+@login_required
+def virtual_life_index(request):
+    """進入虛擬人生遊戲大廳與盤面"""
+    profile, _ = GameProfile.objects.get_or_create(user=request.user)
+
+    #! 檢查是否需要初始化預設事件
+    if not VirtualLifeEvent.objects.exists():
+        events = [
+            VirtualLifeEvent(
+                name="成功建立被動收入",
+                event_type="money_up",
+                effect_value=30000,
+                description="你的理財計畫大成功！每月被動收入達標，獲得大量金錢。",
+            ),
+            VirtualLifeEvent(
+                name="Steam 遊戲特賣",
+                event_type="money_down",
+                effect_value=-1500,
+                description="遇到 Steam 冬季特賣，忍不住買了幾款超讚的視覺小說遊戲。",
+            ),
+            VirtualLifeEvent(
+                name="升級電腦硬體",
+                event_type="stat_up",
+                effect_value=10,
+                description="將電腦處理器升級至 i5-14400F 搭配新主機板，工作與遊戲效率大增！全屬性提升。",
+            ),
+            VirtualLifeEvent(
+                name="孝親費支出",
+                event_type="money_down",
+                effect_value=-5000,
+                description="每個月固定給家裡的孝親費，雖然荷包失血但心情很踏實。",
+            ),
+        ]
+        VirtualLifeEvent.objects.bulk_create(events)  # * 批次寫入資料庫
+
+    context = {"profile": profile}
+    return render(request, "games/virtual_life.html", context)
+
+
+@login_required
+def vl_save_api(request):
+    #! 處理虛擬人生 RPG 版本的遊戲結算
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            is_win = data.get("is_win", False)
+            current_level = int(data.get("level", 1))
+            kill_coins = int(data.get("kill_coins", 0))  # * 取得局內累積的擊殺金幣
+
+            profile = request.user.game_profile
+
+            #! 基礎獲得金幣為擊殺數量
+            earned_coins = kill_coins
+
+            if is_win:
+                #! 破關額外獎勵：通關層數 * 50
+                win_bonus = current_level * 50
+                earned_coins += win_bonus
+
+                #! 更新最高通關層數
+                if current_level >= profile.vl_cleared_boards:
+                    profile.vl_cleared_boards = current_level + 1
+
+            #! 將本次獲得的總金幣存入玩家帳戶
+            profile.total_coins += earned_coins
+            profile.save()
+
+            return JsonResponse(
+                {
+                    "status": "success",
+                    "earned_coins": earned_coins,
+                    "total_coins": profile.total_coins,
+                    "next_level": profile.vl_cleared_boards if is_win else current_level,
+                }
+            )
+
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     return JsonResponse({"status": "invalid request"}, status=405)

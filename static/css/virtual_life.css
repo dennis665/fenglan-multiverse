@@ -1,0 +1,125 @@
+/*! 豎屏手機版遊戲盤面 (10x15 網格) */
+.board-container {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    /*! 10 欄 */
+    grid-template-rows: repeat(15, 1fr);
+    /*! 15 列 */
+    gap: 2px;
+    width: 100%;
+    height: 70vh;
+    /*! 佔據螢幕高度的 70% */
+    background-color: #111;
+    margin: 0 auto;
+    padding: 4px;
+    border-radius: 8px;
+    border: 2px solid #333;
+    position: relative;
+}
+
+/*! 路徑方向指引標記 */
+.path-arrow {
+    position: absolute;
+    font-size: 1rem;
+    opacity: 0.3;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/*! 隱藏非路徑的格子 */
+.board-cell-empty {
+    background-color: transparent;
+}
+
+/*! 格子樣式優化 */
+.board-cell {
+    border-radius: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    /*! 手機版圖示放大 */
+    position: relative;
+    overflow: hidden;
+    background-color: #444;
+    z-index: 2;
+}
+
+/*! 各種特殊格子的顏色與樣式 */
+.cell-start {
+    background-color: #fff;
+    color: #000;
+}
+
+.cell-monster {
+    background-color: #8b0000;
+    color: #fff;
+}
+
+/** 深紅 */
+.cell-shop {
+    background-color: #006400;
+    color: #fff;
+}
+
+/** 深綠 */
+.cell-event {
+    background-color: #4b0082;
+    color: #fff;
+}
+
+/** 紫色 */
+
+/*! 玩家棋子優化，確保在格子內置中縮放 */
+.player-token {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    background-color: #ffc107;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.8);
+}
+
+/*! 互動 Modal 覆蓋層 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.d-none {
+    display: none !important;
+}
+
+/*! 修正背景日誌容器的滾動與高度問題 */
+.event-log {
+    background-color: #1a1a1a;
+    max-height: 400px;
+    /*! 給予日誌容器一個最大高度，以啟用內部滾動 */
+    overflow-y: auto;
+    /*! 啟用垂直滾動 */
+}
+
+/*! 戰鬥日誌在手機上的高度限制 */
+#modal-log {
+    max-height: 120px;
+    font-size: 0.85rem;
+}
+
+/*! 非路徑的草地格子 (取代原本的 board-cell-empty) */
+.cell-grass {
+    background-color: #1a2e1a;
+    /** 暗綠色背景 */
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.9);
+    /** 加深內陰影讓它看起來像背景 */
+}
