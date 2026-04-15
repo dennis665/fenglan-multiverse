@@ -2,23 +2,42 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from .models import GameProfile, SurvivorLevel, SurvivorMonster
+from .models import GameProfile, SurvivorLevel, SurvivorMonster, VirtualLifeEvent
 
 
 @admin.register(GameProfile)
 class GameProfileAdmin(admin.ModelAdmin):
     """玩家遊戲存檔後台管理"""
 
-    #! 列表顯示的欄位
     list_display = ("user", "total_coins", "survivor_max_time", "survivor_max_kills")
-    #! 支援透過使用者名稱搜尋
     search_fields = ("user__username", "user__email")
 
-    #! 詳細頁面的欄位分組區塊
+    #! 將倖存者與虛擬人生的資料分區塊顯示
     fieldsets = (
         (_("基本資訊"), {"fields": ("user", "total_coins")}),
-        (_("倖存者生存 - 遊戲紀錄"), {"fields": ("survivor_max_time", "survivor_max_kills")}),
-        (_("倖存者生存 - 局外成長等級"), {"fields": ("survivor_hp_lv", "survivor_atk_lv", "survivor_speed_lv")}),
+        (
+            _("倖存者生存 - 紀錄與成長"),
+            {
+                "fields": (
+                    "survivor_max_time",
+                    "survivor_max_kills",
+                    "survivor_hp_lv",
+                    "survivor_atk_lv",
+                    "survivor_speed_lv",
+                )
+            },
+        ),
+        (
+            _("虛擬人生 - 紀錄與成長"),
+            {
+                "fields": (
+                    "vl_max_money",
+                    "vl_cleared_boards",
+                    "vl_start_money_lv",
+                    "vl_dice_control_lv",
+                )
+            },
+        ),
     )
 
 
@@ -53,3 +72,11 @@ class SurvivorMonsterAdmin(admin.ModelAdmin):
 
     #! 設定欄位顯示名稱
     image_preview.short_description = _("圖片預覽")
+
+@admin.register(VirtualLifeEvent)
+class VirtualLifeEventAdmin(admin.ModelAdmin):
+    """虛擬人生事件設定後台管理"""
+
+    list_display = ("name", "event_type", "effect_value", "description")
+    list_filter = ("event_type",)
+    search_fields = ("name", "description")

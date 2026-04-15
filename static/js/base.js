@@ -86,7 +86,7 @@ function initSecretGameTrigger() {
 
             // 這裡設定您的專屬密碼
             if (pwd === "666") {
-                window.location.href = CSI_CONFIG.survivorUrl;
+                window.location.href = CSI_CONFIG.lobbyUrl;
             } else if (pwd !== null) {
                 alert("密碼錯誤，存取被拒。");
             }

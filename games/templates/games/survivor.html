@@ -65,7 +65,10 @@
                     </div>
 
                     <button id="btn-start-game" class="btn btn-lg btn-primary fw-bold px-5 mt-2 shadow-lg w-75 rounded-pill"><i class="fas fa-play me-2"></i>開始生存</button>
-                    <button class="btn btn-sm btn-link text-secondary mt-3 text-decoration-none" onclick="window.location.href='/'">離開遊戲</button>
+                    <a href="{% url 'games:lobby_index' %}" 
+                        class="btn btn-outline-light mt-4 px-4 py-2 rounded-pill shadow-sm text-decoration-none">
+                            <i class="fas fa-gamepad me-2"></i>{% trans "回到遊戲中心" %}
+                    </a>
                 </div>
             </div>
 

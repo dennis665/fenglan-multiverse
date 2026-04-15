@@ -1,6 +1,8 @@
 import io
+import re
 import warnings
 import zipfile
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from urllib.parse import quote
 
@@ -74,7 +76,7 @@ def smart_read_excel(file_obj, **kwargs):
         return pd.read_excel(file_obj, **kwargs)
 
 
-#! 獨立的數值比對函式：處理 0.0 == "" 以及浮點數誤差
+#! 獨立的數值與日期比對函式：處理日期正規化、0.0 == "" 以及浮點數誤差
 def is_value_matched(val_r, val_db):
     #! 基礎清理與正規化
     str_r = str(val_r).strip().replace("nan", "").replace("None", "")
@@ -84,13 +86,28 @@ def is_value_matched(val_r, val_db):
     if str_r == str_db:
         return True
 
+    #! 日期格式正規化比對 (處理如 20250130 = 2025-01-30)
+    #! 移除所有非數字字元後嘗試進行日期長度檢查
+    date_r = re.sub(r"[^0-9]", "", str_r)
+    date_db = re.sub(r"[^0-9]", "", str_db)
+
+    #! 若兩者清理後皆為 8 位數字且內容相同，視為日期匹配
+    if len(date_r) == 8 and len(date_db) == 8 and date_r == date_db:
+        try:
+            #! 確保字串符合基本日期邏輯 (例如不會出現 20251340)
+            datetime.strptime(date_r, "%Y%m%d")
+            return True
+        except ValueError:
+            #! 若非有效日期則跳過，進入後續數值比對
+            pass
+
     #! 數值比對：將空字串視為 0 進行 Decimal 轉換
     try:
         dec_r = Decimal(str_r) if str_r else Decimal("0")
         dec_db = Decimal(str_db) if str_db else Decimal("0")
 
         #! 誤差小於 1e-5 視為相同
-        if abs(dec_r - dec_db) < 1e-5:
+        if abs(dec_r - dec_db) < Decimal("1e-5"):
             return True
     except InvalidOperation:
         #! 若無法轉為數值 (例如純文字與空字串比對)，則回傳不匹配
@@ -201,6 +218,8 @@ def tigf_dashboard(request):
                                     top_l = top
                                 elif top:
                                     new_columns.append(top)
+                                elif not top_l:
+                                    new_columns.append(bottom)
                                 else:
                                     new_columns.append(f"{top_l}_{bottom}")
                             df_r.columns = new_columns

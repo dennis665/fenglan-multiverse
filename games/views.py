@@ -9,6 +9,35 @@ from .models import GameProfile, SurvivorLevel, SurvivorMonster
 
 
 @login_required
+def lobby_index(request):
+    """進入綜合遊戲大廳"""
+    profile, _ = GameProfile.objects.get_or_create(user=request.user)
+
+    #! 取得玩家大頭貼
+    avatar_url = ""
+    if hasattr(request.user, "profile") and request.user.profile.avatar:
+        avatar_url = request.user.profile.avatar.url
+    elif request.user.socialaccount_set.filter(provider="google").exists():
+        avatar_url = request.user.socialaccount_set.get(provider="google").extra_data.get(
+            "picture", ""
+        )
+
+    context = {
+        "profile": profile,
+        "avatar_url": avatar_url,
+    }
+    return render(request, "games/lobby.html", context)
+
+
+@login_required
+def virtual_life_index(request):
+    """進入虛擬人生遊戲"""
+    profile, _ = GameProfile.objects.get_or_create(user=request.user)
+    context = {"profile": profile}
+    return render(request, "games/virtual_life.html", context)
+
+
+@login_required
 def survivor_index(request):
     """進入倖存者生存遊戲大廳"""
     profile, _ = GameProfile.objects.get_or_create(user=request.user)

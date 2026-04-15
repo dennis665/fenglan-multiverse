@@ -51,7 +51,7 @@
 <script>
     const CSI_CONFIG = {
         csrfToken: '{{ csrf_token }}',
-        survivorUrl: '{% url "games:survivor_index" %}',
+        lobbyUrl: '{% url "games:lobby_index" %}',
         trans: {
             systemError: '{% trans "Sorry, the system cannot respond at the moment." %}',
             netError: '{% trans "Connection failed, please check your network." %}'
