@@ -175,26 +175,43 @@ function renderResults(diffResults) {
     }
 
     diffResults.forEach(res => {
-        const downloadBtn = res.diff_count > 0
-            ? `<a href="/download-diff-csv/${res.cno}/${res.fid}/" target="_blank" class="btn btn-sm btn-outline-danger">
-                <i class="fas fa-download me-1"></i>${VERIFY_I18N.downloadDiff}
-               </a>`
-            : `<span class="text-success small"><i class="fas fa-check-double me-1"></i>${VERIFY_I18N.dataConsistent}</span>`;
+        let downloadBtn = '';
+        let diffText = '';
+        let badgeHTML = '';
+        let titleClass = 'text-dark';
 
-        const diffText = res.diff_count > 0
-            ? VERIFY_I18N.detectedDiff.replace('{count}', res.diff_count)
-            : VERIFY_I18N.consistentWithDb;
+        // 是否為 Schema 欄位比對錯誤
+        if (res.schema_error) {
+            titleClass = 'text-danger';
+            diffText = '無法進行比對：報表與 Schema 欄位名稱完全無法對應';
+            badgeHTML = `<span class="badge bg-danger me-3">欄位對應錯誤</span>`;
+            downloadBtn = `<span class="text-danger small"><i class="fas fa-times-circle me-1"></i>設定異常</span>`;
+        }
+        // 有發現資料差異
+        else if (res.diff_count > 0) {
+            titleClass = 'text-danger';
+            diffText = VERIFY_I18N.detectedDiff.replace('{count}', res.diff_count);
+            badgeHTML = `<span class="badge bg-danger me-3">${VERIFY_I18N.hasDiff}</span>`;
+            downloadBtn = `
+                <a href="/download-diff-csv/${res.cno}/${res.fid}/" target="_blank" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-download me-1"></i>${VERIFY_I18N.downloadDiff}
+                </a>`;
+        }
+        // 資料完全一致
+        else {
+            diffText = VERIFY_I18N.consistentWithDb;
+            badgeHTML = `<span class="badge bg-success me-3">${VERIFY_I18N.fullyMatched}</span>`;
+            downloadBtn = `<span class="text-success small"><i class="fas fa-check-double me-1"></i>${VERIFY_I18N.dataConsistent}</span>`;
+        }
 
         resultContainer.innerHTML += `
             <div class="list-group-item d-flex justify-content-between align-items-center p-3">
                 <div>
-                    <span class="fw-bold ${res.diff_count > 0 ? 'text-danger' : 'text-dark'}">${VERIFY_I18N.companyText} ${res.cno} - ${VERIFY_I18N.reportText} ${res.fid}</span>
+                    <span class="fw-bold ${titleClass}">${VERIFY_I18N.companyText} ${res.cno} - ${VERIFY_I18N.reportText} ${res.fid}</span>
                     <div class="small text-muted">${diffText}</div>
                 </div>
                 <div class="d-flex align-items-center">
-                    <span class="badge ${res.diff_count > 0 ? 'bg-danger' : 'bg-success'} me-3">
-                        ${res.diff_count > 0 ? VERIFY_I18N.hasDiff : VERIFY_I18N.fullyMatched}
-                    </span>
+                    ${badgeHTML}
                     ${downloadBtn}
                 </div>
             </div>`;

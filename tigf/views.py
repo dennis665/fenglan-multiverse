@@ -116,6 +116,24 @@ def is_value_matched(val_r, val_db):
     return False
 
 
+#! 欄位轉換函式：將 Excel 英文欄位名稱轉換為從 1 開始的整數索引
+def excel_column_to_number(column_str):
+    #! 基礎清理：轉為大寫並去除空格
+    column_str = str(column_str).upper().strip()
+
+    number = 0
+    #! 遍歷字串中的每個字母，並依照 26 進制原理進行加權計算
+    for char in column_str:
+        #! ord(char) 取得字元編碼，'A' 的編碼為 65，減去 64 得到 A=1
+        if "A" <= char <= "Z":
+            number = number * 26 + (ord(char) - ord("A") + 1)
+        else:
+            #! 若字串包含非英文字母則回傳 0 或拋出錯誤
+            return 0
+
+    return number
+
+
 @staff_required
 def tigf_dashboard(request):
     #! 雙層結構: { '1234567': { 'A011': {'report': True, 'template': True, 'db': True} } }
@@ -185,12 +203,20 @@ def tigf_dashboard(request):
                 if fid in global_templates and fid in global_dbs:
                     try:
                         ignore_rows = set()
+                        ignore_data = ""
+                        ignore_column_num = 0
+                        ignore_column_name = ""
                         start_row = 8
 
                         #! 讀取範本 Config
                         df_config = smart_read_excel(global_templates[fid], sheet_name="config", header=None)
                         if pd.notna(df_config.iloc[3, 1]):
                             start_row = int(df_config.iloc[3, 1])
+
+                        #! 抓取忽略檢查值的行 (通常是A-合計)
+                        if pd.notna(df_config.iloc[18, 1]):
+                            ignore_column, *_, ignore_data = str(df_config.iloc[18, 1]).split("-")
+                            ignore_column_num = excel_column_to_number(ignore_column)
 
                         val_ignore = str(df_config.iloc[10, 1])
                         if val_ignore and val_ignore.lower() != "nan":
@@ -235,11 +261,18 @@ def tigf_dashboard(request):
                         #! 取得目標比對欄位
                         target_cols = [c for c in df_r.columns if c in mapping]
                         if not target_cols:
+                            diff_summary.append(
+                                {"cno": cno, "fid": fid, "diff_count": 0, "schema_error": True}
+                            )
                             continue
 
                         #! === 核心優化：建立 DB 字典 (支援重複主鍵) ===
                         pk_ch = target_cols[0]
                         pk_en = mapping[pk_ch]
+
+                        #! 忽略欄位名
+                        if ignore_column_num:
+                            ignore_column_name = target_cols[ignore_column_num - 1]
 
                         #! 將字典的值改為 List，用來存放相同 Key 的多筆資料，並加入 used 標記
                         db_lookup = {}
@@ -264,6 +297,14 @@ def tigf_dashboard(request):
                             )
 
                             if not r_key_val:
+                                continue
+
+                            #! 判斷是否忽略行
+                            if (
+                                ignore_column_name
+                                and ignore_column_name == pk_ch
+                                and r_key_val == ignore_data
+                            ):
                                 continue
 
                             #! 檢查主鍵是否存在於 DB
@@ -329,7 +370,14 @@ def tigf_dashboard(request):
                             df_diff.to_excel(excel_buf, index=False, engine="openpyxl")
                             cache.set(f"diff_{session_key}_{cno}_{fid}", excel_buf.getvalue(), 3600)
 
-                        diff_summary.append({"cno": cno, "fid": fid, "diff_count": diff_count})
+                        diff_summary.append(
+                            {
+                                "cno": cno,
+                                "fid": fid,
+                                "diff_count": diff_count,
+                                "schema_error": False,
+                            }
+                        )
 
                     except Exception as e:
                         print(f"處理 {cno}-{fid} 時發生錯誤: {e}")
