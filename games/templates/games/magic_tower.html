@@ -1,0 +1,114 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% trans "魔塔 - CSI Server" %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/magic_tower.css' %}">
+    <script>
+        const MT_CONFIG = {
+            csrfToken: '{{ csrf_token }}',
+            lobbyUrl: '{% url "games:lobby_index" %}',
+            saveApi: '{% url "games:mt_save_api" %}',
+            rewardApi: '{% url "games:mt_reward_api" %}',
+            resetApi: '{% url "games:mt_reset_api" %}',
+            baseHpLv: {{ profile.mt_hp_lv|default:0 }},
+            baseAtkLv: {{ profile.mt_atk_lv|default:0 }},
+            baseDefLv: {{ profile.mt_def_lv|default:0 }},
+            floorsData: {{ floors_json|safe }},
+            monstersData: {{ monsters_json|safe }},
+            resourcesData: {{ resources_json|safe }},
+            saveData: {{ save_json|safe }}
+        };
+    </script>
+</head>
+<body class="bg-dark text-white">
+    <div class="container-fluid py-2 pb-5">
+        <div class="row">
+            {# 1. 左側/頂部：狀態列 (優化高對比顏色與手機排版) #}
+            <div class="col-md-4 col-lg-3">
+                <div class="card bg-secondary border-dark mb-3 shadow-lg">
+                    <div class="card-body p-2 p-md-3">
+                        <h4 class="text-warning fw-bold text-center mb-3">🗼 {% trans "魔塔" %} <span id="ui-floor" class="text-white">1</span>F</h4>
+                        
+                        {# 數值區 (手機版自動變為雙欄/四欄排列) #}
+                        <div class="row g-2 text-light small fw-bold fs-6">
+                            <div class="col-6 col-md-12 d-flex justify-content-between">
+                                <span>{% trans "職業" %}</span><span id="ui-class" class="text-warning">-</span>
+                            </div>
+                            <div class="col-6 col-md-12 d-flex justify-content-between">
+                                <span>{% trans "等級" %}</span><span id="ui-level" class="text-white">1</span>
+                            </div>
+                            <div class="col-12 my-0 d-none d-md-block"><hr class="border-dark my-1"></div>
+                            <div class="col-6 col-md-12 d-flex justify-content-between">
+                                <span>❤️ HP</span><span id="ui-hp" class="text-success">0</span>
+                            </div>
+                            <div class="col-6 col-md-12 d-flex justify-content-between">
+                                <span>⚔️ ATK</span><span id="ui-atk" class="text-danger">0</span>
+                            </div>
+                            <div class="col-6 col-md-12 d-flex justify-content-between">
+                                <span>🛡️ DEF</span><span id="ui-def" class="text-info">0</span>
+                            </div>
+                            <div class="col-6 col-md-12 d-flex justify-content-between">
+                                <span>⭐ EXP</span><span id="ui-exp" class="text-white">0</span>
+                            </div>
+                            <div class="col-12 my-0 d-none d-md-block"><hr class="border-dark my-1"></div>
+                            <div class="col-6 col-md-12 d-flex justify-content-between">
+                                <span>🟨 {% trans "黃鑰" %}</span><span id="ui-ykey" class="text-warning">0</span>
+                            </div>
+                            <div class="col-6 col-md-12 d-flex justify-content-between">
+                                <span>🟦 {% trans "藍鑰" %}</span><span id="ui-bkey" class="text-primary">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# 操作按鈕區 #}
+                <div class="d-flex flex-row flex-md-column gap-2 mb-3">
+                    <button id="btn-save" class="btn btn-success fw-bold flex-fill shadow">💾 {% trans "存檔" %}</button>
+                    <button id="btn-reset" class="btn btn-danger fw-bold flex-fill shadow">🔄 {% trans "重置" %}</button>
+                    <button class="btn btn-outline-light flex-fill shadow" onclick="window.location.href=MT_CONFIG.lobbyUrl">🚪 {% trans "離開" %}</button>
+                </div>
+            </div>
+
+            {# 2. 右側/中央：遊戲盤面 #}
+            <div class="col-md-8 col-lg-9 d-flex flex-column align-items-center">
+                <div id="game-board" class="mt-board shadow-lg"></div>
+
+                {# 3. 手機版專用虛擬方向鍵 (僅在小螢幕顯示) #}
+                <div id="mobile-dpad" class="d-md-none mt-3 d-flex flex-column align-items-center gap-1">
+                    <button class="btn btn-secondary dpad-btn shadow" onclick="triggerMove(0, -1)">⬆️</button>
+                    <div class="d-flex gap-4">
+                        <button class="btn btn-secondary dpad-btn shadow" onclick="triggerMove(-1, 0)">⬅️</button>
+                        <button class="btn btn-secondary dpad-btn shadow" onclick="triggerMove(0, 1)">⬇️</button>
+                        <button class="btn btn-secondary dpad-btn shadow" onclick="triggerMove(1, 0)">➡️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# 職業選擇 Modal #}
+    <div id="class-modal" class="modal-overlay d-none">
+        <div class="modal-content bg-dark border-secondary p-4 text-center shadow-lg" style="max-width: 500px; width: 90%;">
+            <h3 class="text-warning mb-4">✨ {% trans "選擇你的職業" %} ✨</h3>
+            <p class="text-light mb-4">{% trans "將會加上你局外的能力加成" %}</p>
+            <div class="d-flex flex-column gap-3">
+                <button class="btn btn-outline-success btn-lg text-start px-3 shadow" onclick="selectClass('tank')">
+                    🛡️ {% trans "聖騎士 (高血防)" %}
+                </button>
+                <button class="btn btn-outline-danger btn-lg text-start px-3 shadow" onclick="selectClass('warrior')">
+                    ⚔️ {% trans "戰士 (能力平均)" %}
+                </button>
+                <button class="btn btn-outline-info btn-lg text-start px-3 shadow" onclick="selectClass('mage')">
+                    🔥 {% trans "魔法師 (高攻擊)" %}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/magic_tower.js' %}"></script>
+</body>
+</html>

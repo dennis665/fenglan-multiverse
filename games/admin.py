@@ -2,7 +2,15 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from .models import GameProfile, SurvivorLevel, SurvivorMonster, VirtualLifeEvent
+from .models import (
+    GameProfile,
+    MagicTowerMonster,
+    MagicTowerSave,
+    MagicTowerTile,
+    SurvivorLevel,
+    SurvivorMonster,
+    VirtualLifeEvent,
+)
 
 
 @admin.register(GameProfile)
@@ -80,3 +88,34 @@ class VirtualLifeEventAdmin(admin.ModelAdmin):
     list_display = ("name", "event_type", "effect_value", "description")
     list_filter = ("event_type",)
     search_fields = ("name", "description")
+
+
+@admin.register(MagicTowerTile)
+class MagicTowerTileAdmin(admin.ModelAdmin):
+    list_display = ("tile_id", "name", "image_preview")
+    ordering = ("tile_id",)
+
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="height:30px;" />', obj.image.url)
+        return "-"
+
+    image_preview.short_description = _("圖片預覽")
+
+
+@admin.register(MagicTowerMonster)
+class MagicTowerMonsterAdmin(admin.ModelAdmin):
+    list_display = ("tile_id", "name", "image_preview", "hp", "atk", "def_stat")
+    ordering = ("tile_id",)
+
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="height:30px;" />', obj.image.url)
+        return "-"
+
+    image_preview.short_description = _("圖片預覽")
+
+
+@admin.register(MagicTowerSave)
+class MagicTowerSaveAdmin(admin.ModelAdmin):
+    list_display = ("user", "class_type", "level", "current_floor")

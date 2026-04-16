@@ -66,6 +66,21 @@
                     </div>
                 </div>
             </div>
+
+            {% comment %} 
+            魔塔遊戲入口卡片
+            {% endcomment %}
+            <div class="col-md-4">
+                <div class="card bg-dark text-white game-card h-100" onclick="window.location.href='{% url 'games:mt_index' %}'">
+                    <div class="card-body text-center py-5">
+                        <h3 class="card-title text-info mb-3">{% trans "魔塔冒險" %}</h3>
+                        <p class="card-text text-secondary">{% trans "精算血量與資源，選擇合適的職業挑戰深邃的魔塔。" %}</p>
+                        <hr class="border-secondary">
+                        <p class="small text-warning">{% trans "最高探索" %}: {{ profile.mt_max_floor }} {% trans "樓" %}</p>
+                        <button class="btn btn-outline-info mt-3">{% trans "進入魔塔" %}</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>

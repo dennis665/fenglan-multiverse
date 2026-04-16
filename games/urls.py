@@ -15,4 +15,9 @@ urlpatterns = [
     #! 虛擬人生遊戲
     path("virtual-life/", views.virtual_life_index, name="virtual_life_index"),
     path("api/virtual-life/save/", views.vl_save_api, name="vl_save_api"),
+    #! 魔塔路由
+    path("magictower/", views.mt_index, name="mt_index"),
+    path("api/magictower/save/", views.mt_save_api, name="mt_save_api"),
+    path("api/magictower/reward/", views.mt_reward_api, name="mt_reward_api"),
+    path("api/magictower/reset/", views.mt_reset_api, name="mt_reset_api"),
 ]

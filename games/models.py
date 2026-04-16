@@ -25,6 +25,14 @@ class GameProfile(models.Model):
     vl_start_money_lv = models.IntegerField(default=0, verbose_name=_("虛擬人生-初始資金等級"))
     vl_dice_control_lv = models.IntegerField(default=0, verbose_name=_("虛擬人生-控骰能力等級"))
 
+    #! 魔塔局外成長等級
+    mt_hp_lv = models.IntegerField(default=0, verbose_name=_("魔塔-血量等級"))
+    mt_atk_lv = models.IntegerField(default=0, verbose_name=_("魔塔-攻擊等級"))
+    mt_def_lv = models.IntegerField(default=0, verbose_name=_("魔塔-防禦等級"))
+    mt_max_floor = models.IntegerField(
+        default=0, verbose_name=_("魔塔-最高到達樓層")
+    )  # * 用於判斷首通獎勵
+
     class Meta:
         verbose_name = _("玩家遊戲存檔")
         verbose_name_plural = _("玩家遊戲存檔")
@@ -91,3 +99,66 @@ class VirtualLifeEvent(models.Model):
 
     def __str__(self):
         return self.name
+
+class MagicTowerTile(models.Model):
+    """魔塔 - 地圖物件代碼表與圖片配置"""
+
+    tile_id = models.IntegerField(unique=True, verbose_name=_("物件代碼"))
+    name = models.CharField(max_length=50, verbose_name=_("物件名稱"))
+    image = models.ImageField(
+        upload_to="games/mt_tiles/", blank=True, null=True, verbose_name=_("上傳圖片")
+    )
+
+    class Meta:
+        verbose_name = _("魔塔-地圖物件圖鑑")
+        verbose_name_plural = _("魔塔-地圖物件圖鑑")
+
+    def __str__(self):
+        return f"[{self.tile_id}] {self.name}"
+
+
+class MagicTowerMonster(models.Model):
+    """魔塔 - 怪物數值設定"""
+
+    tile_id = models.IntegerField(unique=True, verbose_name=_("對應地圖代碼"))
+    name = models.CharField(max_length=50, verbose_name=_("怪物名稱"))
+    image = models.ImageField(
+        upload_to="games/mt_monsters/", blank=True, null=True, verbose_name=_("上傳圖片")
+    )
+    hp = models.IntegerField(default=50, verbose_name=_("生命值"))
+    atk = models.IntegerField(default=20, verbose_name=_("攻擊力"))
+    def_stat = models.IntegerField(default=10, verbose_name=_("防禦力"))
+    exp = models.IntegerField(default=5, verbose_name=_("掉落經驗"))
+    gold = models.IntegerField(default=2, verbose_name=_("掉落金幣"))
+
+    class Meta:
+        verbose_name = _("魔塔-怪物圖鑑")
+        verbose_name_plural = _("魔塔-怪物圖鑑")
+
+    def __str__(self):
+        return f"[{self.tile_id}] {self.name}"
+
+
+class MagicTowerSave(models.Model):
+    """魔塔 - 玩家目前遊戲進度存檔"""
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="mt_save", verbose_name=_("玩家")
+    )
+    class_type = models.CharField(max_length=20, verbose_name=_("職業"))  # * tank, warrior, mage
+    level = models.IntegerField(default=1, verbose_name=_("等級"))
+    hp = models.IntegerField(default=1000, verbose_name=_("當前生命"))
+    atk = models.IntegerField(default=10, verbose_name=_("攻擊力"))
+    def_stat = models.IntegerField(default=10, verbose_name=_("防禦力"))
+    exp = models.IntegerField(default=0, verbose_name=_("經驗值"))
+    yellow_keys = models.IntegerField(default=0, verbose_name=_("黃鑰匙"))
+    blue_keys = models.IntegerField(default=0, verbose_name=_("藍鑰匙"))
+    current_floor = models.IntegerField(default=1, verbose_name=_("當前樓層"))
+
+    #! JSON 欄位儲存動態資料
+    map_states = models.JSONField(default=dict, verbose_name=_("各地圖狀態紀錄"))
+    cleared_floors = models.JSONField(default=list, verbose_name=_("已通關樓層"))
+
+    class Meta:
+        verbose_name = _("魔塔-玩家存檔")
+        verbose_name_plural = _("魔塔-玩家存檔")
