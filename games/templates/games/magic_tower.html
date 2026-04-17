@@ -69,6 +69,7 @@
                 <div class="d-flex flex-row flex-md-column gap-2 mb-3">
                     <button id="btn-save" class="btn btn-success fw-bold flex-fill shadow">💾 {% trans "存檔" %}</button>
                     <button id="btn-reset" class="btn btn-danger fw-bold flex-fill shadow">🔄 {% trans "重置" %}</button>
+                    <button id="btn-handbook" class="btn btn-info fw-bold flex-fill shadow text-dark">📘 {% trans "圖鑑" %}</button>
                     <button class="btn btn-outline-light flex-fill shadow" onclick="window.location.href=MT_CONFIG.lobbyUrl">🚪 {% trans "離開" %}</button>
                 </div>
             </div>
@@ -105,6 +106,52 @@
                 <button class="btn btn-outline-info btn-lg text-start px-3 shadow" onclick="selectClass('mage')">
                     🔥 {% trans "魔法師 (高攻擊)" %}
                 </button>
+            </div>
+        </div>
+    </div>
+
+    {# --- 圖鑑 Modal 視窗 --- #}
+    <div id="handbook-modal" class="modal-overlay d-none">
+        <div class="modal-content bg-dark border border-secondary p-3 shadow-lg rounded" style="max-width: 600px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-secondary pb-2">
+                <h4 class="text-info fw-bold m-0">📖 樓層資訊與怪物圖鑑</h4>
+                <button class="btn btn-sm btn-outline-light" onclick="document.getElementById('handbook-modal').classList.add('d-none')">❌ 關閉</button>
+            </div>
+            <div id="handbook-content" class="overflow-auto pe-2" style="flex-grow: 1;">
+                </div>
+        </div>
+    </div>
+
+    {# --- 戰鬥畫面 Modal --- #}
+    <div id="battle-modal" class="modal-overlay d-none">
+        <div class="modal-content bg-dark border border-danger p-3 p-md-4 shadow-lg rounded text-center" style="max-width: 650px; width: 95%;">
+            <h3 class="text-danger fw-bold mb-4">⚔️ 戰鬥開始 ⚔️</h3>
+
+            <div class="row align-items-center justify-content-center mb-4 position-relative">
+                {# 玩家側 (左) #}
+                <div class="col-4">
+                    <h5 id="battle-player-name" class="text-info fw-bold mb-2">玩家</h5>
+                    <div id="battle-player-img" class="combatant mx-auto mb-3" style="font-size: 5rem; height: 100px; width: 100px; display:flex; justify-content:center; align-items:center;">🧑</div>
+                    <div class="progress bg-secondary mb-1" style="height: 15px; border: 1px solid #444;">
+                        <div id="battle-player-hp-bar" class="progress-bar bg-success" style="width: 100%; transition: width 0.2s;"></div>
+                    </div>
+                    <span id="battle-player-hp-text" class="text-success fw-bold fs-5">1000</span>
+                </div>
+
+                {# VS 標誌 (中) #}
+                <div class="col-4">
+                    <h1 class="text-warning fw-bold m-0" style="font-style: italic; text-shadow: 2px 2px 0 #000;">VS</h1>
+                </div>
+
+                {# 怪物側 (右) #}
+                <div class="col-4">
+                    <h5 id="battle-monster-name" class="text-danger fw-bold mb-2">怪物</h5>
+                    <div id="battle-monster-img" class="combatant mx-auto mb-3" style="font-size: 5rem; height: 100px; width: 100px; display:flex; justify-content:center; align-items:center;">👾</div>
+                    <div class="progress bg-secondary mb-1" style="height: 15px; border: 1px solid #444;">
+                        <div id="battle-monster-hp-bar" class="progress-bar bg-danger" style="width: 100%; transition: width 0.2s;"></div>
+                    </div>
+                    <span id="battle-monster-hp-text" class="text-danger fw-bold fs-5">50</span>
+                </div>
             </div>
         </div>
     </div>

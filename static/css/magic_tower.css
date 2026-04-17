@@ -107,3 +107,92 @@ body {
     background-color: #555;
     transform: scale(0.95);
 }
+/*! === 戰鬥畫面 Modal 專用樣式 === */
+#battle-modal .combatant {
+    transition: transform 0.2s;
+    position: relative;
+}
+
+/*! 攻擊衝刺動畫 */
+.anim-attack-right {
+    animation: dash-right 0.25s ease-in-out;
+    z-index: 10;
+}
+
+.anim-attack-left {
+    animation: dash-left 0.25s ease-in-out;
+    z-index: 10;
+}
+
+/*! 受傷閃爍動畫 */
+.anim-hurt {
+    animation: flash-red 0.3s;
+}
+
+@keyframes dash-right {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(60px) scale(1.1);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes dash-left {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(-60px) scale(1.1);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes flash-red {
+    0% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5);
+        transform: translateX(-5px);
+    }
+
+    100% {
+        filter: brightness(1);
+    }
+}
+
+/*! 傷害數字飄字特效 */
+.dmg-float {
+    position: absolute;
+    color: #ff3333;
+    font-weight: 900;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+    animation: float-up 0.8s forwards;
+    pointer-events: none;
+    z-index: 100;
+    top: -20px;
+}
+
+@keyframes float-up {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-60px) scale(1.5);
+        opacity: 0;
+    }
+}
