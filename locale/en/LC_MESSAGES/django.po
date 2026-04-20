@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-13 15:09+0800\n"
+"POT-Creation-Date: 2026-04-20 08:28+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -1035,27 +1035,27 @@ msgstr ""
 msgid "Click anywhere to close"
 msgstr ""
 
-#: .\games\admin.py:19
+#: .\games\admin.py:25
 msgid "基本資訊"
 msgstr "Basic Information"
 
-#: .\games\admin.py:20
-msgid "倖存者生存 - 遊戲紀錄"
-msgstr "Survivor - Game Records"
+#: .\games\admin.py:27
+msgid "倖存者生存 - 紀錄與成長"
+msgstr "Survivor Survival - Records and Growth"
 
-#: .\games\admin.py:21
-msgid "倖存者生存 - 局外成長等級"
-msgstr "Survivor - Meta-Progression Levels"
+#: .\games\admin.py:39
+msgid "虛擬人生 - 紀錄與成長"
+msgstr "Virtual Life - Records and Growth"
 
-#: .\games\admin.py:55
+#: .\games\admin.py:82 .\games\admin.py:103 .\games\admin.py:116
 msgid "圖片預覽"
 msgstr "Image Preview"
 
-#: .\games\apps.py:7
+#: .\games\apps.py:7 .\games\templates\games\lobby.html:29
 msgid "遊戲中心"
 msgstr "Game Center"
 
-#: .\games\models.py:10
+#: .\games\models.py:10 .\games\models.py:146
 msgid "玩家"
 msgstr "Player"
 
@@ -1071,78 +1071,332 @@ msgstr "Survivor - Max Survival Time (Sec)"
 msgid "倖存者-最高擊殺數"
 msgstr "Survivor - Max Kills"
 
-#: .\games\models.py:20
+#: .\games\models.py:18
 msgid "倖存者-血量等級"
 msgstr "Survivor - HP Level"
 
-#: .\games\models.py:21
+#: .\games\models.py:19
 msgid "倖存者-攻擊等級"
 msgstr "Survivor - ATK Level"
 
-#: .\games\models.py:22
+#: .\games\models.py:20
 msgid "倖存者-移速等級"
 msgstr "Survivor - Speed Level"
 
-#: .\games\models.py:28 .\games\models.py:29
+#: .\games\models.py:23
+msgid "虛擬人生-最高持有金錢"
+msgstr "Virtual Life - Max Cash Held"
+
+#: .\games\models.py:24
+msgid "虛擬人生-通關地圖數"
+msgstr "Virtual Life - Maps Completed"
+
+#: .\games\models.py:25
+msgid "虛擬人生-初始資金等級"
+msgstr "Virtual Life - Initial Capital Level"
+
+#: .\games\models.py:26
+msgid "虛擬人生-控骰能力等級"
+msgstr "Virtual Life - Dice Control Level"
+
+#: .\games\models.py:29
+msgid "魔塔-血量等級"
+msgstr "Magic Tower - HP Level"
+
+#: .\games\models.py:30
+msgid "魔塔-攻擊等級"
+msgstr "Magic Tower - Attack Level"
+
+#: .\games\models.py:31
+msgid "魔塔-防禦等級"
+msgstr "Magic Tower - Defense Level"
+
+#: .\games\models.py:33
+msgid "魔塔-最高到達樓層"
+msgstr "Magic Tower - Max Floor Reached"
+
+#: .\games\models.py:37 .\games\models.py:38
 msgid "玩家遊戲存檔"
 msgstr "Player Save Data"
 
-#: .\games\models.py:38
+#: .\games\models.py:47
 msgid "關卡名稱"
 msgstr "Stage Name"
 
-#: .\games\models.py:39
+#: .\games\models.py:48
 msgid "通關時間(秒)"
 msgstr "Clear Time (Sec)"
 
-#: .\games\models.py:40
+#: .\games\models.py:49
 msgid "出怪頻率倍率(越高越快)"
 msgstr "Spawn Rate Multiplier (Higher = Faster)"
 
-#: .\games\models.py:41
+#: .\games\models.py:50
 msgid "怪物屬性倍率(難度)"
 msgstr "Mob Stat Multiplier (Difficulty)"
 
-#: .\games\models.py:42
+#: .\games\models.py:51
 msgid "通關獎勵金幣"
 msgstr "Clear Reward Coins"
 
-#: .\games\models.py:45 .\games\models.py:46
+#: .\games\models.py:54 .\games\models.py:55
 msgid "倖存者-關卡設定"
 msgstr "Survivor - Stage Settings"
 
-#: .\games\models.py:55
+#: .\games\models.py:64 .\games\models.py:124
 msgid "怪物名稱"
 msgstr "Monster Name"
 
-#: .\games\models.py:56
+#: .\games\models.py:65
 msgid "怪物圖片"
 msgstr "Monster Image"
 
-#: .\games\models.py:57
+#: .\games\models.py:66
 msgid "基礎血量"
 msgstr "Base HP"
 
-#: .\games\models.py:58
+#: .\games\models.py:67
 msgid "基礎攻擊力"
 msgstr "Base ATK"
 
-#: .\games\models.py:59
+#: .\games\models.py:68
 msgid "基礎跑速"
 msgstr "Base Move Speed"
 
-#: .\games\models.py:60
+#: .\games\models.py:69
 msgid "碰撞體積(半徑)"
 msgstr "Collision Size (Radius)"
 
-#: .\games\models.py:63 .\games\models.py:64
+#: .\games\models.py:72 .\games\models.py:73
 msgid "倖存者-怪物圖鑑"
 msgstr "Survivor - Bestiary"
 
+#: .\games\models.py:83
+msgid "獲得金錢"
+msgstr "Gain Money"
+
+#: .\games\models.py:84
+msgid "失去金錢"
+msgstr "Lose Money"
+
+#: .\games\models.py:85
+msgid "提升屬性"
+msgstr "Boost Stats"
+
+#: .\games\models.py:86
+msgid "抽事件卡"
+msgstr "Draw Event Card"
+
+#: .\games\models.py:89
+msgid "事件名稱"
+msgstr "Event Name"
+
+#: .\games\models.py:91
+msgid "事件類型"
+msgstr "Event Type"
+
+#: .\games\models.py:93
+msgid "影響數值"
+msgstr "Affected Value"
+
+#: .\games\models.py:94
+msgid "事件描述"
+msgstr "Event Description"
+
+#: .\games\models.py:97 .\games\models.py:98
+msgid "虛擬人生-事件設定"
+msgstr "Virtual Life - Event Settings"
+
+#: .\games\models.py:106
+msgid "物件代碼"
+msgstr "Object Code"
+
+#: .\games\models.py:107
+msgid "物件名稱"
+msgstr "Object Name"
+
+#: .\games\models.py:109 .\games\models.py:126
+msgid "上傳圖片"
+msgstr "Upload Image"
+
+#: .\games\models.py:113 .\games\models.py:114
+msgid "魔塔-地圖物件圖鑑"
+msgstr "Magic Tower - Map Object Encyclopedia"
+
+#: .\games\models.py:123
+msgid "對應地圖代碼"
+msgstr "Corresponding Map Code"
+
+#: .\games\models.py:128
+msgid "生命值"
+msgstr "HP"
+
+#: .\games\models.py:129 .\games\models.py:151
+msgid "攻擊力"
+msgstr "Attack"
+
+#: .\games\models.py:130 .\games\models.py:152
+msgid "防禦力"
+msgstr "Defense"
+
+#: .\games\models.py:131
+msgid "掉落經驗"
+msgstr "EXP Drop"
+
+#: .\games\models.py:132
+msgid "掉落金幣"
+msgstr "Gold Drop"
+
+#: .\games\models.py:135 .\games\models.py:136
+msgid "魔塔-怪物圖鑑"
+msgstr "Magic Tower - Monster Encyclopedia"
+
+#: .\games\models.py:148 .\games\templates\games\magic_tower.html:39
+msgid "職業"
+msgstr "Job Class"
+
+#: .\games\models.py:149 .\games\templates\games\magic_tower.html:42
+msgid "等級"
+msgstr "Level"
+
+#: .\games\models.py:150
+msgid "當前生命"
+msgstr "Current HP"
+
+#: .\games\models.py:153
+msgid "經驗值"
+msgstr "EXP"
+
+#: .\games\models.py:154
+msgid "黃鑰匙"
+msgstr "Yellow Key"
+
+#: .\games\models.py:155
+msgid "藍鑰匙"
+msgstr "Blue Key"
+
+#: .\games\models.py:156
+msgid "當前樓層"
+msgstr "Current Floor"
+
+#: .\games\models.py:159
+msgid "各地圖狀態紀錄"
+msgstr "Map State Records"
+
+#: .\games\models.py:160
+msgid "已通關樓層"
+msgstr "Cleared Floors"
+
+#: .\games\models.py:163 .\games\models.py:164
+msgid "魔塔-玩家存檔"
+msgstr "Magic Tower - Player Save"
+
+#: .\games\templates\games\lobby.html:7
+msgid "遊戲大廳"
+msgstr "Game Lobby"
+
+#: .\games\templates\games\lobby.html:47
 #: .\games\templates\games\survivor.html:7
 #: .\games\templates\games\survivor.html:30
 msgid "倖存者生存"
 msgstr "Survivor Survival"
+
+#: .\games\templates\games\lobby.html:48
+msgid "在無盡的怪物浪潮中生存，利用局外養成提升基礎戰力。"
+msgstr "Survive endless waves of monsters and use meta-progression to boost your base stats."
+
+#: .\games\templates\games\lobby.html:50
+msgid "最高存活"
+msgstr "Best Survival"
+
+#: .\games\templates\games\lobby.html:50
+msgid "秒"
+msgstr "sec"
+
+#: .\games\templates\games\lobby.html:51 .\games\templates\games\lobby.html:67
+msgid "進入大廳"
+msgstr "Enter Lobby"
+
+#: .\games\templates\games\lobby.html:63
+msgid "虛擬人生 (輕量版)"
+msgstr "Virtual Life (Lite)"
+
+#: .\games\templates\games\lobby.html:64
+msgid "擲骰子決定命運，經歷各種隨機事件，賺取金錢並培養角色。"
+msgstr "Roll the dice to decide your fate, experience random events, earn money, and grow your character."
+
+#: .\games\templates\games\lobby.html:66
+msgid "通關關卡等級"
+msgstr "Cleared Level"
+
+#: .\games\templates\games\lobby.html:79
+msgid "魔塔冒險"
+msgstr "Magic Tower Adventure"
+
+#: .\games\templates\games\lobby.html:80
+msgid "精算血量與資源，選擇合適的職業挑戰深邃的魔塔。"
+msgstr "Calculate your HP and resources carefully, choose the right class, and challenge the deep tower."
+
+#: .\games\templates\games\lobby.html:82
+msgid "最高探索"
+msgstr "Deepest Floor"
+
+#: .\games\templates\games\lobby.html:82
+msgid "樓"
+msgstr "F"
+
+#: .\games\templates\games\lobby.html:83
+msgid "進入魔塔"
+msgstr "Enter Tower"
+
+#: .\games\templates\games\magic_tower.html:7
+#: .\games\templates\games\magic_tower.html:34
+msgid "魔塔"
+msgstr "Magic Tower"
+
+#: .\games\templates\games\magic_tower.html:59
+msgid "黃鑰"
+msgstr "Yellow Key"
+
+#: .\games\templates\games\magic_tower.html:62
+msgid "藍鑰"
+msgstr "Blue Key"
+
+#: .\games\templates\games\magic_tower.html:70
+msgid "存檔"
+msgstr "Save"
+
+#: .\games\templates\games\magic_tower.html:71
+msgid "重置"
+msgstr "Reset"
+
+#: .\games\templates\games\magic_tower.html:72
+msgid "圖鑑"
+msgstr "Handbook"
+
+#: .\games\templates\games\magic_tower.html:73
+msgid "離開"
+msgstr "Exit"
+
+#: .\games\templates\games\magic_tower.html:97
+msgid "選擇你的職業"
+msgstr "Select Your Class"
+
+#: .\games\templates\games\magic_tower.html:98
+msgid "將會加上你局外的能力加成"
+msgstr "External meta-progression bonuses will be applied."
+
+#: .\games\templates\games\magic_tower.html:101
+msgid "聖騎士 (高血防)"
+msgstr "Paladin (High HP/DEF)"
+
+#: .\games\templates\games\magic_tower.html:104
+msgid "戰士 (能力平均)"
+msgstr "Warrior (Balanced)"
+
+#: .\games\templates\games\magic_tower.html:107
+msgid "魔法師 (高攻擊)"
+msgstr "Mage (High ATK)"
 
 #: .\games\templates\games\survivor.html:34
 msgid "金幣"
@@ -1151,6 +1405,53 @@ msgstr "Coins"
 #: .\games\templates\games\survivor.html:38
 msgid "選擇挑戰關卡"
 msgstr "Select Challenge Stage"
+
+#: .\games\templates\games\survivor.html:70
+#: .\games\templates\games\virtual_life.html:67
+msgid "回到遊戲中心"
+msgstr "Back to Game Center"
+
+#: .\games\templates\games\virtual_life.html:7
+#: .\games\templates\games\virtual_life.html:30
+msgid "虛擬人生 RPG"
+msgstr "Virtual Life RPG"
+
+#: .\games\templates\games\virtual_life.html:34
+msgid "持有金幣"
+msgstr "Coins Held"
+
+#: .\games\templates\games\virtual_life.html:37
+msgid "目前關卡等級"
+msgstr "Current Level"
+
+#: .\games\templates\games\virtual_life.html:44
+msgid "初始血量"
+msgstr "Initial HP"
+
+#: .\games\templates\games\virtual_life.html:47
+#: .\games\templates\games\virtual_life.html:56
+msgid "升級"
+msgstr "Upgrade"
+
+#: .\games\templates\games\virtual_life.html:53
+msgid "初始攻擊"
+msgstr "Initial ATK"
+
+#: .\games\templates\games\virtual_life.html:63
+msgid "開始冒險"
+msgstr "Start Adventure"
+
+#: .\games\templates\games\virtual_life.html:97
+msgid "擲骰子"
+msgstr "Roll Dice"
+
+#: .\games\templates\games\virtual_life.html:105
+msgid "離開遊戲"
+msgstr "Exit Game"
+
+#: .\games\templates\games\virtual_life.html:117
+msgid "怪物 HP"
+msgstr "Monster HP"
 
 #: .\invest\apps.py:7
 msgid "投資理財"
@@ -2714,12 +3015,12 @@ msgid "下載設定"
 msgstr "Download Settings"
 
 #: .\tube_hub\templates\tube_hub\search.html:173
-msgid "影片類型"
-msgstr "Video Type"
-
-#: .\tube_hub\templates\tube_hub\search.html:174
 msgid "音樂類型"
 msgstr "Music Type"
+
+#: .\tube_hub\templates\tube_hub\search.html:174
+msgid "影片類型"
+msgstr "Video Type"
 
 #: .\tube_hub\templates\tube_hub\search.html:178
 msgid "分類資料夾 (選填)"
@@ -2769,6 +3070,9 @@ msgstr "User Profile"
 msgid "You do not have permission, redirected to home page."
 msgstr ""
 
+#~ msgid "倖存者生存 - 局外成長等級"
+#~ msgstr "Survivor - Meta-Progression Levels"
+
 #~ msgid "主內容 (原生字幕/歌詞)"
 #~ msgstr "Primary Content (Original Subtitles/Lyrics)"
 
@@ -2781,20 +3085,8 @@ msgstr ""
 #~ msgid "公開"
 #~ msgstr "Public"
 
-#~ msgid "最高存活"
-#~ msgstr "Best Survival"
-
 #~ msgid "最高擊殺"
 #~ msgstr "Best Kills"
-
-#~ msgid "強化初始血量"
-#~ msgstr "Upgrade Starting HP"
-
-#~ msgid "升級"
-#~ msgstr "Upgrade"
-
-#~ msgid "強化初始攻擊"
-#~ msgstr "Enhance Starting ATK"
 
 #~ msgid "強化初始移速"
 #~ msgstr "Enhance Starting SPD"

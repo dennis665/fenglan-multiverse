@@ -5,8 +5,14 @@ from .models import ExternalTool, SiteVisit
 
 
 def external_tools_processor(request):
-    #! 抓取所有啟用的工具並傳給所有模板
-    return {"external_tools": ExternalTool.objects.filter(is_active=True)}
+    #! 將 QuerySet 轉換為 list，確保在迴圈中修改的物件屬性可以成功傳遞到樣板
+    tools = list(ExternalTool.objects.filter(is_active=True))
+
+    for tool in tools:
+        #! 自動判斷並補齊當前網站的協定與網域
+        tool.url = request.build_absolute_uri(tool.url)  # * 直接覆蓋 url 屬性，樣板端完全不需要修改
+
+    return {"external_tools": tools}
 
 def visit_stats(request):
     today = timezone.now().date()

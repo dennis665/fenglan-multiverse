@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CSI Server 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-13 15:09+0800\n"
+"POT-Creation-Date: 2026-04-20 08:35+0800\n"
 "PO-Revision-Date: 2026-04-13 10:15+0800\n"
 "Last-Translator: Gemini AI\n"
 "Language-Team: Japanese\n"
@@ -286,11 +286,17 @@ msgid "Maintenance"
 msgstr "メンテナンス中"
 
 #: .\core\templates\core\feature_list.html:85
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "                提示：管理員可透過 Django Admin 後台即時調整各項功能的存取"
+#| "權限與全局啟動狀態。\n"
+#| "            "
 msgid ""
 "\n"
-"                提示：管理員可透過 Django Admin 後台即時調整各項功能的存取"
-"權限與全局啟動狀態。\n"
-"            "
+"                提示：管理員可透過 Django Admin 後台即時調整各項功能的存取權"
+"限與全局啟動狀態。\n"
+"            "
 msgstr ""
 "\n"
 "                ヒント：管理者は Django Admin 管理画面から、各機能のアクセス"
@@ -982,12 +988,17 @@ msgid "Max %(price)s points"
 msgstr "最大 %(price)s ポイント"
 
 #: .\finance\templates\finance\shop.html:97
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                    將扣除 <strong class=\"text-primary "
+#| "deposit-calc\">%(points)s</strong> 儲值點\n"
+#| "                                "
 msgid ""
 "\n"
-"                                    將扣除 <strong class=\"text-primary "
+"                                    將扣除 <strong class=\"text-primary "
 "deposit-calc\">%(points)s</strong> 儲值點\n"
-"                                "
+"                                "
 msgstr ""
 "\n"
 "                                    <strong class=\"text-primary deposit-"
@@ -1031,27 +1042,27 @@ msgstr "交換が正常に完了しました！"
 msgid "Click anywhere to close"
 msgstr "どこかをクリックして閉じる"
 
-#: .\games\admin.py:19
+#: .\games\admin.py:25
 msgid "基本資訊"
 msgstr "基本情報"
 
-#: .\games\admin.py:20
-msgid "倖存者生存 - 遊戲紀錄"
-msgstr "サバイバー生存 - プレイ記録"
+#: .\games\admin.py:27
+msgid "倖存者生存 - 紀錄與成長"
+msgstr "サバイバー生存 - 記録と成長"
 
-#: .\games\admin.py:21
-msgid "倖存者生存 - 局外成長等級"
-msgstr "サバイバー生存 - メタ成長レベル"
+#: .\games\admin.py:39
+msgid "虛擬人生 - 紀錄與成長"
+msgstr "バーチャルライフ - 記録と成長"
 
-#: .\games\admin.py:55
+#: .\games\admin.py:82 .\games\admin.py:103 .\games\admin.py:116
 msgid "圖片預覽"
 msgstr "画像プレビュー"
 
-#: .\games\apps.py:7
+#: .\games\apps.py:7 .\games\templates\games\lobby.html:29
 msgid "遊戲中心"
 msgstr "ゲームセンター"
 
-#: .\games\models.py:10
+#: .\games\models.py:10 .\games\models.py:146
 msgid "玩家"
 msgstr "プレイヤー"
 
@@ -1067,78 +1078,332 @@ msgstr "サバイバー - 最大生存時間 (秒)"
 msgid "倖存者-最高擊殺數"
 msgstr "サバイバー - 最大キル数"
 
-#: .\games\models.py:20
+#: .\games\models.py:18
 msgid "倖存者-血量等級"
 msgstr "サバイバー - HPレベル"
 
-#: .\games\models.py:21
+#: .\games\models.py:19
 msgid "倖存者-攻擊等級"
 msgstr "サバイバー - 攻撃レベル"
 
-#: .\games\models.py:22
+#: .\games\models.py:20
 msgid "倖存者-移速等級"
 msgstr "サバイバー - 移動速度レベル"
 
-#: .\games\models.py:28 .\games\models.py:29
+#: .\games\models.py:23
+msgid "虛擬人生-最高持有金錢"
+msgstr "バーチャルライフ-最高所持金"
+
+#: .\games\models.py:24
+msgid "虛擬人生-通關地圖數"
+msgstr "バーチャルライフ-クリアマップ数"
+
+#: .\games\models.py:25
+msgid "虛擬人生-初始資金等級"
+msgstr "バーチャルライフ-初期資金レベル"
+
+#: .\games\models.py:26
+msgid "虛擬人生-控骰能力等級"
+msgstr "バーチャルライフ-ダイス操作レベル"
+
+#: .\games\models.py:29
+msgid "魔塔-血量等級"
+msgstr "魔塔-HPレベル"
+
+#: .\games\models.py:30
+msgid "魔塔-攻擊等級"
+msgstr "魔塔-攻撃レベル"
+
+#: .\games\models.py:31
+msgid "魔塔-防禦等級"
+msgstr "魔塔-防御レベル"
+
+#: .\games\models.py:33
+msgid "魔塔-最高到達樓層"
+msgstr "魔塔-最高到達階層"
+
+#: .\games\models.py:37 .\games\models.py:38
 msgid "玩家遊戲存檔"
 msgstr "プレイヤーセーブデータ"
 
-#: .\games\models.py:38
+#: .\games\models.py:47
 msgid "關卡名稱"
 msgstr "ステージ名"
 
-#: .\games\models.py:39
+#: .\games\models.py:48
 msgid "通關時間(秒)"
 msgstr "クリア時間 (秒)"
 
-#: .\games\models.py:40
+#: .\games\models.py:49
 msgid "出怪頻率倍率(越高越快)"
 msgstr "出現頻率倍率 (高いほど速い)"
 
-#: .\games\models.py:41
+#: .\games\models.py:50
 msgid "怪物屬性倍率(難度)"
 msgstr "モンスター属性倍率 (難易度)"
 
-#: .\games\models.py:42
+#: .\games\models.py:51
 msgid "通關獎勵金幣"
 msgstr "クリア報酬コイン"
 
-#: .\games\models.py:45 .\games\models.py:46
+#: .\games\models.py:54 .\games\models.py:55
 msgid "倖存者-關卡設定"
 msgstr "サバイバー - ステージ設定"
 
-#: .\games\models.py:55
+#: .\games\models.py:64 .\games\models.py:124
 msgid "怪物名稱"
 msgstr "モンスター名"
 
-#: .\games\models.py:56
+#: .\games\models.py:65
 msgid "怪物圖片"
 msgstr "モンスター画像"
 
-#: .\games\models.py:57
+#: .\games\models.py:66
 msgid "基礎血量"
 msgstr "基本HP"
 
-#: .\games\models.py:58
+#: .\games\models.py:67
 msgid "基礎攻擊力"
 msgstr "基本攻撃力"
 
-#: .\games\models.py:59
+#: .\games\models.py:68
 msgid "基礎跑速"
 msgstr "基本移動速度"
 
-#: .\games\models.py:60
+#: .\games\models.py:69
 msgid "碰撞體積(半徑)"
 msgstr "当たり判定 (半径)"
 
-#: .\games\models.py:63 .\games\models.py:64
+#: .\games\models.py:72 .\games\models.py:73
 msgid "倖存者-怪物圖鑑"
 msgstr "サバイバー - モンスター図鑑"
 
+#: .\games\models.py:83
+msgid "獲得金錢"
+msgstr "お金を獲得"
+
+#: .\games\models.py:84
+msgid "失去金錢"
+msgstr "お金を失う"
+
+#: .\games\models.py:85
+msgid "提升屬性"
+msgstr "ステータス上昇"
+
+#: .\games\models.py:86
+msgid "抽事件卡"
+msgstr "イベントカードを引く"
+
+#: .\games\models.py:89
+msgid "事件名稱"
+msgstr "イベント名"
+
+#: .\games\models.py:91
+msgid "事件類型"
+msgstr "イベントタイプ"
+
+#: .\games\models.py:93
+msgid "影響數值"
+msgstr "影響数値"
+
+#: .\games\models.py:94
+msgid "事件描述"
+msgstr "イベント説明"
+
+#: .\games\models.py:97 .\games\models.py:98
+msgid "虛擬人生-事件設定"
+msgstr "バーチャルライフ-イベント設定"
+
+#: .\games\models.py:106
+msgid "物件代碼"
+msgstr "オブジェクトコード"
+
+#: .\games\models.py:107
+msgid "物件名稱"
+msgstr "オブジェクト名"
+
+#: .\games\models.py:109 .\games\models.py:126
+msgid "上傳圖片"
+msgstr "画像をアップロード"
+
+#: .\games\models.py:113 .\games\models.py:114
+msgid "魔塔-地圖物件圖鑑"
+msgstr "魔塔-マップオブジェクト図鑑"
+
+#: .\games\models.py:123
+msgid "對應地圖代碼"
+msgstr "対応マップコード"
+
+#: .\games\models.py:128
+msgid "生命值"
+msgstr "体力"
+
+#: .\games\models.py:129 .\games\models.py:151
+msgid "攻擊力"
+msgstr "攻撃力"
+
+#: .\games\models.py:130 .\games\models.py:152
+msgid "防禦力"
+msgstr "防御力"
+
+#: .\games\models.py:131
+msgid "掉落經驗"
+msgstr "獲得経験値"
+
+#: .\games\models.py:132
+msgid "掉落金幣"
+msgstr "獲得ゴールド"
+
+#: .\games\models.py:135 .\games\models.py:136
+msgid "魔塔-怪物圖鑑"
+msgstr "魔塔-モンスター図鑑"
+
+#: .\games\models.py:148 .\games\templates\games\magic_tower.html:39
+msgid "職業"
+msgstr "職業"
+
+#: .\games\models.py:149 .\games\templates\games\magic_tower.html:42
+msgid "等級"
+msgstr "レベル"
+
+#: .\games\models.py:150
+msgid "當前生命"
+msgstr "現在の体力"
+
+#: .\games\models.py:153
+msgid "經驗值"
+msgstr "経験値"
+
+#: .\games\models.py:154
+msgid "黃鑰匙"
+msgstr "黄色の鍵"
+
+#: .\games\models.py:155
+msgid "藍鑰匙"
+msgstr "青色の鍵"
+
+#: .\games\models.py:156
+msgid "當前樓層"
+msgstr "現在の階層"
+
+#: .\games\models.py:159
+msgid "各地圖狀態紀錄"
+msgstr "マップ状態記録"
+
+#: .\games\models.py:160
+msgid "已通關樓層"
+msgstr "クリア済み階層"
+
+#: .\games\models.py:163 .\games\models.py:164
+msgid "魔塔-玩家存檔"
+msgstr "魔塔-プレイヤーセーブ"
+
+#: .\games\templates\games\lobby.html:7
+msgid "遊戲大廳"
+msgstr "ゲームロビー"
+
+#: .\games\templates\games\lobby.html:47
 #: .\games\templates\games\survivor.html:7
 #: .\games\templates\games\survivor.html:30
 msgid "倖存者生存"
 msgstr "サバイバー生存"
+
+#: .\games\templates\games\lobby.html:48
+msgid "在無盡的怪物浪潮中生存，利用局外養成提升基礎戰力。"
+msgstr "迫りくるモンスターの群れから生き残り、育成要素で基礎戦力を強化しましょう。"
+
+#: .\games\templates\games\lobby.html:50
+msgid "最高存活"
+msgstr "最高生存記録"
+
+#: .\games\templates\games\lobby.html:50
+msgid "秒"
+msgstr "秒"
+
+#: .\games\templates\games\lobby.html:51 .\games\templates\games\lobby.html:67
+msgid "進入大廳"
+msgstr "ロビーに入る"
+
+#: .\games\templates\games\lobby.html:63
+msgid "虛擬人生 (輕量版)"
+msgstr "バーチャルライフ (ライト版)"
+
+#: .\games\templates\games\lobby.html:64
+msgid "擲骰子決定命運，經歷各種隨機事件，賺取金錢並培養角色。"
+msgstr "ダイスで運命を決め、様々なイベントを乗り越えながら、お金を稼いでキャラを育成しましょう。"
+
+#: .\games\templates\games\lobby.html:66
+msgid "通關關卡等級"
+msgstr "クリア済みステージ"
+
+#: .\games\templates\games\lobby.html:79
+msgid "魔塔冒險"
+msgstr "魔塔アドベンチャー"
+
+#: .\games\templates\games\lobby.html:80
+msgid "精算血量與資源，選擇合適的職業挑戰深邃的魔塔。"
+msgstr "体力とリソースを計算し、最適な職業を選んで謎深き魔塔に挑みましょう。"
+
+#: .\games\templates\games\lobby.html:82
+msgid "最高探索"
+msgstr "最高探索階層"
+
+#: .\games\templates\games\lobby.html:82
+msgid "樓"
+msgstr "階"
+
+#: .\games\templates\games\lobby.html:83
+msgid "進入魔塔"
+msgstr "魔塔に入る"
+
+#: .\games\templates\games\magic_tower.html:7
+#: .\games\templates\games\magic_tower.html:34
+msgid "魔塔"
+msgstr "魔塔"
+
+#: .\games\templates\games\magic_tower.html:59
+msgid "黃鑰"
+msgstr "黄の鍵"
+
+#: .\games\templates\games\magic_tower.html:62
+msgid "藍鑰"
+msgstr "青の鍵"
+
+#: .\games\templates\games\magic_tower.html:70
+msgid "存檔"
+msgstr "セーブ"
+
+#: .\games\templates\games\magic_tower.html:71
+msgid "重置"
+msgstr "リセット"
+
+#: .\games\templates\games\magic_tower.html:72
+msgid "圖鑑"
+msgstr "図鑑"
+
+#: .\games\templates\games\magic_tower.html:73
+msgid "離開"
+msgstr "退出"
+
+#: .\games\templates\games\magic_tower.html:97
+msgid "選擇你的職業"
+msgstr "職業を選択してください"
+
+#: .\games\templates\games\magic_tower.html:98
+msgid "將會加上你局外的能力加成"
+msgstr "ゲーム外の能力ボーナスが適用されます"
+
+#: .\games\templates\games\magic_tower.html:101
+msgid "聖騎士 (高血防)"
+msgstr "パラディン (高HP/防御)"
+
+#: .\games\templates\games\magic_tower.html:104
+msgid "戰士 (能力平均)"
+msgstr "戦士 (バランス型)"
+
+#: .\games\templates\games\magic_tower.html:107
+msgid "魔法師 (高攻擊)"
+msgstr "メイジ (高攻撃)"
 
 #: .\games\templates\games\survivor.html:34
 msgid "金幣"
@@ -1147,6 +1412,53 @@ msgstr "コイン"
 #: .\games\templates\games\survivor.html:38
 msgid "選擇挑戰關卡"
 msgstr "ステージを選択"
+
+#: .\games\templates\games\survivor.html:70
+#: .\games\templates\games\virtual_life.html:67
+msgid "回到遊戲中心"
+msgstr ""
+
+#: .\games\templates\games\virtual_life.html:7
+#: .\games\templates\games\virtual_life.html:30
+msgid "虛擬人生 RPG"
+msgstr ""
+
+#: .\games\templates\games\virtual_life.html:34
+msgid "持有金幣"
+msgstr "所持コイン"
+
+#: .\games\templates\games\virtual_life.html:37
+msgid "目前關卡等級"
+msgstr "現在のステージレベル"
+
+#: .\games\templates\games\virtual_life.html:44
+msgid "初始血量"
+msgstr "初期体力"
+
+#: .\games\templates\games\virtual_life.html:47
+#: .\games\templates\games\virtual_life.html:56
+msgid "升級"
+msgstr "アップグレード"
+
+#: .\games\templates\games\virtual_life.html:53
+msgid "初始攻擊"
+msgstr "初期攻撃力"
+
+#: .\games\templates\games\virtual_life.html:63
+msgid "開始冒險"
+msgstr "冒険を始める"
+
+#: .\games\templates\games\virtual_life.html:97
+msgid "擲骰子"
+msgstr "ダイスを振る"
+
+#: .\games\templates\games\virtual_life.html:105
+msgid "離開遊戲"
+msgstr "ゲームを終了"
+
+#: .\games\templates\games\virtual_life.html:117
+msgid "怪物 HP"
+msgstr "モンスター HP"
 
 #: .\invest\apps.py:7
 msgid "投資理財"
@@ -1343,12 +1655,17 @@ msgid "Your Personalized AI Financial Plan"
 msgstr "あなたのパーソナライズ AI 運用計画"
 
 #: .\invest\templates\invest\ai_plan_result.html:16
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                        基於您的目標：%(years)s 年後達成每月 $%(income)s "
+#| "被動收入\n"
+#| "                    "
 msgid ""
 "\n"
-"                        基於您的目標：%(years)s 年後達成每月 $%(income)s "
-"被動收入\n"
-"                    "
+"                        基於您的目標：%(years)s 年後達成每月 $%(income)s 被動"
+"收入\n"
+"                    "
 msgstr ""
 "\n"
 "                        目標設定：%(years)s 年後に毎月 $%(income)s の不労所得"
@@ -2179,14 +2496,21 @@ msgid "Confirm Email Address"
 msgstr "メールアドレスを確認"
 
 #: .\templates\account\email_confirm.html:23
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                請確認您要為帳號 <strong class=\"text-"
+#| "dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
+#| "                                <span class=\"badge bg-light text-primary "
+#| "fs-6 mt-2 border border-primary-subtle\">%(email)s</span>\n"
+#| "                            "
 msgid ""
 "\n"
-"                                請確認您要為帳號 <strong class=\"text-"
+"                                請確認您要為帳號 <strong class=\"text-"
 "dark\">%(user_display)s</strong> 驗證此電子郵件地址：<br>\n"
-"                                <span class=\"badge bg-light text-primary "
+"                                <span class=\"badge bg-light text-primary "
 "fs-6 mt-2 border border-primary-subtle\">%(email)s</span>\n"
-"                            "
+"                            "
 msgstr ""
 "\n"
 "                                アカウント <strong class=\"text-"
@@ -2197,12 +2521,17 @@ msgstr ""
 "                            "
 
 #: .\templates\account\email_confirm.html:41
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                此電子郵件確認連結已過期或無效。請嘗試 <a "
+#| "href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
+#| "                            "
 msgid ""
 "\n"
-"                                此電子郵件確認連結已過期或無效。請嘗試 <a "
+"                                此電子郵件確認連結已過期或無效。請嘗試 <a "
 "href=\"%(email_url)s\" class=\"alert-link\">重新發送確認信</a>。\n"
-"                            "
+"                            "
 msgstr ""
 "\n"
 "                                この確認リンクは期限切れか無効です。<a "
@@ -2230,12 +2559,17 @@ msgid "Or use Email"
 msgstr "またはメールアドレスを使用"
 
 #: .\templates\account\login.html:50
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                還沒有帳號嗎？ <a href=\"%(signup_url)s\" "
+#| "class=\"fw-bold text-decoration-none\">立即註冊</a>\n"
+#| "                            "
 msgid ""
 "\n"
-"                                還沒有帳號嗎？ <a href=\"%(signup_url)s\" "
+"                                還沒有帳號嗎？ <a href=\"%(signup_url)s\" "
 "class=\"fw-bold text-decoration-none\">立即註冊</a>\n"
-"                            "
+"                            "
 msgstr ""
 "\n"
 "                                アカウントをお持ちではありませんか？ <a "
@@ -2275,13 +2609,18 @@ msgid "Or fill in details"
 msgstr "または詳細を入力"
 
 #: .\templates\account\signup.html:57
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                已經有帳號了嗎？ <a "
+#| "href=\"%(login_url)s\" class=\"fw-bold text-decoration-none\">立即登入</"
+#| "a>\n"
+#| "                            "
 msgid ""
 "\n"
-"                                已經有帳號了嗎？ <a "
-"href=\"%(login_url)s\" class=\"fw-bold text-decoration-none\">立即登入</"
-"a>\n"
-"                            "
+"                                已經有帳號了嗎？ <a href=\"%(login_url)s\" "
+"class=\"fw-bold text-decoration-none\">立即登入</a>\n"
+"                            "
 msgstr ""
 "\n"
 "                                すでにアカウントをお持ちですか？ <a "
@@ -2295,11 +2634,17 @@ msgid "Verify Your Email Address"
 msgstr "メールアドレスの認証"
 
 #: .\templates\account\verification_sent.html:23
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "                            我們已向您發送了一封電子郵件，請點擊信中的連結"
+#| "以完成註冊。\n"
+#| "                        "
 msgid ""
 "\n"
-"                            我們已向您發送了一封電子郵件，請點擊信中的連結"
-"以完成註冊。\n"
-"                        "
+"                            我們已向您發送了一封電子郵件，請點擊信中的連結以"
+"完成註冊。\n"
+"                        "
 msgstr ""
 "\n"
 "                            確認メールを送信しました。メール内のリンクをク"
@@ -2423,12 +2768,17 @@ msgid "This is a system built with Django 6.0 and Google OAuth."
 msgstr "このシステムは Django 6.0 と Google OAuth で構築されています。"
 
 #: .\templates\index.html:33
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                            Hello, <strong class=\"text-"
+#| "success\">%(name)s</strong>! Authorization Granted.\n"
+#| "                        "
 msgid ""
 "\n"
-"                            Hello, <strong class=\"text-"
-"success\">%(name)s</strong>! Authorization Granted.\n"
-"                        "
+"                            Hello, <strong class=\"text-success\">%(name)s</"
+"strong>! Authorization Granted.\n"
+"                        "
 msgstr ""
 "\n"
 "                            こんにちは、<strong class=\"text-"
@@ -2448,11 +2798,17 @@ msgid "Go to Login Page"
 msgstr "ログインページへ"
 
 #: .\templates\socialaccount\login.html:21
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "                        您即將使用 Google 帳號進行驗證。系統將導向 Google "
+#| "授權頁面，請確認是否繼續？\n"
+#| "                        "
 msgid ""
 "\n"
-"                        您即將使用 Google 帳號進行驗證。系統將導向 Google "
-"授權頁面，請確認是否繼續？\n"
-"                        "
+"                        您即將使用 Google 帳號進行驗證。系統將導向 Google 授"
+"權頁面，請確認是否繼續？\n"
+"                        "
 msgstr ""
 "\n"
 "                        Google アカウントを使用して認証を行おうとしています。"
@@ -2717,12 +3073,12 @@ msgid "下載設定"
 msgstr "ダウンロード設定"
 
 #: .\tube_hub\templates\tube_hub\search.html:173
-msgid "影片類型"
-msgstr "動画タイプ"
-
-#: .\tube_hub\templates\tube_hub\search.html:174
 msgid "音樂類型"
 msgstr "音楽タイプ"
+
+#: .\tube_hub\templates\tube_hub\search.html:174
+msgid "影片類型"
+msgstr "動画タイプ"
 
 #: .\tube_hub\templates\tube_hub\search.html:178
 msgid "分類資料夾 (選填)"
@@ -2771,6 +3127,9 @@ msgstr "プロフィール"
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr "権限がありません。ホームへリダイレクトします。"
+
+#~ msgid "倖存者生存 - 局外成長等級"
+#~ msgstr "サバイバー生存 - メタ成長レベル"
 
 #~ msgid "主內容 (原生字幕/歌詞)"
 #~ msgstr "主内容 (オリジナル字幕/歌詞)"

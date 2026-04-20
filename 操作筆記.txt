@@ -21,6 +21,7 @@ python manage.py collectstatic --noinput
 
 #! 啟動
 python manage.py runserver
+python manage.py runserver 0.0.0.0:8000
 
 #! 建立超級使用者
 python manage.py createsuperuser
@@ -45,6 +46,9 @@ winget install UB-Mannheim.TesseractOCR
 
 #! requests 問題
 pip install urllib3==1.26.18 charset-normalizer==3.3.2 chardet==5.2.0 --force-reinstall
+
+#! 關閉強制 https (delete 127.0.0.1)
+chrome://net-internals/#hsts
 
 -------docker 相關-------
 #! 建立並啟動所有容器，改 Dockerfile、裝新套件

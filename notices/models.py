@@ -24,7 +24,7 @@ class Announcement(BaseModel):
 
 class ExternalTool(models.Model):
     title = models.CharField(max_length=50, verbose_name=_("工具名稱"))
-    url = models.URLField(verbose_name=_("網址"))
+    url = models.CharField(max_length=255, verbose_name=_("網址"))
     icon_class = models.CharField(
         max_length=50, default="fas fa-external-link-alt", verbose_name=_("FontAwesome 圖示碼")
     )
