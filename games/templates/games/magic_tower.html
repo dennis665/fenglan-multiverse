@@ -24,6 +24,12 @@
             resourcesData: {{ resources_json|safe }},
             saveData: {{ save_json|safe }}
         };
+
+        // 手機專用抓漏工具：只要有錯誤就直接彈窗警告
+        window.onerror = function(message, source, lineno, colno, error) {
+            alert("JS錯誤: " + message + "\n行數: " + lineno);
+            return true;
+        };
     </script>
 </head>
 <body class="bg-dark text-white">
