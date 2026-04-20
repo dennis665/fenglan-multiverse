@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CSI Server 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-20 08:35+0800\n"
+"POT-Creation-Date: 2026-04-20 09:08+0800\n"
 "PO-Revision-Date: 2026-04-13 10:15+0800\n"
 "Last-Translator: Gemini AI\n"
 "Language-Team: Japanese\n"
@@ -1258,11 +1258,11 @@ msgstr "獲得ゴールド"
 msgid "魔塔-怪物圖鑑"
 msgstr "魔塔-モンスター図鑑"
 
-#: .\games\models.py:148 .\games\templates\games\magic_tower.html:39
+#: .\games\models.py:148 .\games\templates\games\magic_tower.html:92
 msgid "職業"
 msgstr "職業"
 
-#: .\games\models.py:149 .\games\templates\games\magic_tower.html:42
+#: .\games\models.py:149 .\games\templates\games\magic_tower.html:95
 msgid "等級"
 msgstr "レベル"
 
@@ -1310,7 +1310,8 @@ msgstr "サバイバー生存"
 
 #: .\games\templates\games\lobby.html:48
 msgid "在無盡的怪物浪潮中生存，利用局外養成提升基礎戰力。"
-msgstr "迫りくるモンスターの群れから生き残り、育成要素で基礎戦力を強化しましょう。"
+msgstr ""
+"迫りくるモンスターの群れから生き残り、育成要素で基礎戦力を強化しましょう。"
 
 #: .\games\templates\games\lobby.html:50
 msgid "最高存活"
@@ -1330,13 +1331,16 @@ msgstr "バーチャルライフ (ライト版)"
 
 #: .\games\templates\games\lobby.html:64
 msgid "擲骰子決定命運，經歷各種隨機事件，賺取金錢並培養角色。"
-msgstr "ダイスで運命を決め、様々なイベントを乗り越えながら、お金を稼いでキャラを育成しましょう。"
+msgstr ""
+"ダイスで運命を決め、様々なイベントを乗り越えながら、お金を稼いでキャラを育成"
+"しましょう。"
 
 #: .\games\templates\games\lobby.html:66
 msgid "通關關卡等級"
 msgstr "クリア済みステージ"
 
 #: .\games\templates\games\lobby.html:79
+#: .\games\templates\games\magic_tower.html:32
 msgid "魔塔冒險"
 msgstr "魔塔アドベンチャー"
 
@@ -1349,59 +1353,86 @@ msgid "最高探索"
 msgstr "最高探索階層"
 
 #: .\games\templates\games\lobby.html:82
+#: .\games\templates\games\magic_tower.html:39
 msgid "樓"
 msgstr "階"
 
 #: .\games\templates\games\lobby.html:83
+#: .\games\templates\games\magic_tower.html:74
 msgid "進入魔塔"
 msgstr "魔塔に入る"
 
 #: .\games\templates\games\magic_tower.html:7
-#: .\games\templates\games\magic_tower.html:34
+#: .\games\templates\games\magic_tower.html:87
 msgid "魔塔"
 msgstr "魔塔"
 
-#: .\games\templates\games\magic_tower.html:59
+#: .\games\templates\games\magic_tower.html:36
+#: .\games\templates\games\virtual_life.html:34
+msgid "持有金幣"
+msgstr "所持コイン"
+
+#: .\games\templates\games\magic_tower.html:39
+msgid "目前最高突破"
+msgstr "現在の最高突破階層"
+
+#: .\games\templates\games\magic_tower.html:46
+msgid "血量"
+msgstr "体力"
+
+#: .\games\templates\games\magic_tower.html:55
+msgid "攻擊"
+msgstr "攻撃"
+
+#: .\games\templates\games\magic_tower.html:64
+msgid "防禦"
+msgstr "防御"
+
+#: .\games\templates\games\magic_tower.html:77
+msgid "返回遊戲中心"
+msgstr "ゲームセンターに戻る"
+
+#: .\games\templates\games\magic_tower.html:112
 msgid "黃鑰"
 msgstr "黄の鍵"
 
-#: .\games\templates\games\magic_tower.html:62
+#: .\games\templates\games\magic_tower.html:115
 msgid "藍鑰"
 msgstr "青の鍵"
 
-#: .\games\templates\games\magic_tower.html:70
+#: .\games\templates\games\magic_tower.html:123
 msgid "存檔"
 msgstr "セーブ"
 
-#: .\games\templates\games\magic_tower.html:71
+#: .\games\templates\games\magic_tower.html:124
 msgid "重置"
 msgstr "リセット"
 
-#: .\games\templates\games\magic_tower.html:72
+#: .\games\templates\games\magic_tower.html:125
 msgid "圖鑑"
 msgstr "図鑑"
 
-#: .\games\templates\games\magic_tower.html:73
+#: .\games\templates\games\magic_tower.html:126
 msgid "離開"
 msgstr "退出"
 
-#: .\games\templates\games\magic_tower.html:97
+#: .\games\templates\games\magic_tower.html:150
 msgid "選擇你的職業"
 msgstr "職業を選択してください"
 
-#: .\games\templates\games\magic_tower.html:98
+#: .\games\templates\games\magic_tower.html:151
 msgid "將會加上你局外的能力加成"
 msgstr "ゲーム外の能力ボーナスが適用されます"
 
-#: .\games\templates\games\magic_tower.html:101
+#: .\games\templates\games\magic_tower.html:154
 msgid "聖騎士 (高血防)"
 msgstr "パラディン (高HP/防御)"
 
-#: .\games\templates\games\magic_tower.html:104
+#: .\games\templates\games\magic_tower.html:157
 msgid "戰士 (能力平均)"
 msgstr "戦士 (バランス型)"
 
-#: .\games\templates\games\magic_tower.html:107
+#: .\games\templates\games\magic_tower.html:160
 msgid "魔法師 (高攻擊)"
 msgstr "メイジ (高攻撃)"
 
@@ -1422,10 +1453,6 @@ msgstr ""
 #: .\games\templates\games\virtual_life.html:30
 msgid "虛擬人生 RPG"
 msgstr ""
-
-#: .\games\templates\games\virtual_life.html:34
-msgid "持有金幣"
-msgstr "所持コイン"
 
 #: .\games\templates\games\virtual_life.html:37
 msgid "目前關卡等級"

@@ -128,8 +128,14 @@ def buy_upgrade_api(request):
             upgrade_type = data.get("upgrade_type")  # 'hp', 'atk', 或 'speed'
             profile = request.user.game_profile
 
-            #! 根據模型欄位名稱組合屬性字串 (survivor_hp_lv)
-            field_name = f"survivor_{upgrade_type}_lv"
+            #! 根據傳入的類型判斷前綴，組合出正確的模型欄位名稱
+            if upgrade_type.startswith("mt_"):
+                # * 魔塔專用欄位 (例如：mt_hp_lv)
+                field_name = f"{upgrade_type}_lv"
+            else:
+                # * 倖存者專用欄位 (例如：survivor_hp_lv)
+                field_name = f"survivor_{upgrade_type}_lv"
+
             current_level = getattr(profile, field_name)
 
             cost = (current_level + 1) * 50

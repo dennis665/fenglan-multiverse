@@ -2,6 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('game-board');
     const classModal = document.getElementById('class-modal');
 
+    // 綁定大廳與遊戲畫面的切換
+    const lobbyScreen = document.getElementById('lobby-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const btnStart = document.getElementById('btn-start-game');
+
     let currentFloor = 1;
     let isAnimating = false; //* 防止戰鬥動畫期間玩家亂動
     let mapData = {};
@@ -9,7 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let player = {
         classType: '', level: 1, hp: 0, atk: 0, def: 0, exp: 0, yellowKeys: 0, blueKeys: 0,
-        x: 0, y: 0
+        x: 0, y: 0,
+        hpLv: MT_CONFIG.baseHpLv,
+        atkLv: MT_CONFIG.baseAtkLv,
+        defLv: MT_CONFIG.baseDefLv,
+        coins: MT_CONFIG.totalCoins
     };
 
     const outHp = MT_CONFIG.baseHpLv * 50;
@@ -19,40 +28,95 @@ document.addEventListener('DOMContentLoaded', () => {
     const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
     // ==========================================
-    // 1. 初始化與存檔讀取 (修復卡牆壁 Bug)
+    // 0. 局外大廳加點邏輯
     // ==========================================
-    function initGame() {
-        mapData = JSON.parse(JSON.stringify(MT_CONFIG.floorsData));
+    const updateLobbyUI = () => {
+        document.getElementById('lobby-coins').innerText = player.coins;
+        ['hp', 'atk', 'def'].forEach(type => {
+            const lv = player[`${type}Lv`];
+            const lvLbl = document.getElementById(`lbl-${type}-lv`);
+            const costLbl = document.getElementById(`cost-${type}`);
+            if (lvLbl) lvLbl.innerText = lv;
+            if (costLbl) costLbl.innerText = (lv + 1) * 50; //* 升級花費公式
+        });
+    };
+    updateLobbyUI();
 
-        if (MT_CONFIG.saveData) {
-            let s = MT_CONFIG.saveData;
-            player = {
-                classType: s.class_type, level: s.level, hp: s.hp, atk: s.atk, def: s.def,
-                exp: s.exp, yellowKeys: s.yellow_keys, blueKeys: s.blue_keys,
-                x: 0, y: 0
-            };
-            currentFloor = s.current_floor;
-            mapStates = s.map_states || {};
+    document.querySelectorAll('.btn-buy').forEach(btn => {
+        btn.onclick = async (e) => {
+            const type = e.currentTarget.dataset.type; // "mt_hp", "mt_atk", "mt_def"
+            try {
+                const res = await fetch(MT_CONFIG.upgradeApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': MT_CONFIG.csrfToken },
+                    body: JSON.stringify({ upgrade_type: type })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    if (type === 'mt_hp') player.hpLv = data.new_level;
+                    else if (type === 'mt_atk') player.atkLv = data.new_level;
+                    else if (type === 'mt_def') player.defLv = data.new_level;
 
-            // 🚀 從 mapStates 中還原玩家的精確座標
-            if (mapStates.player_x !== undefined) player.x = mapStates.player_x;
-            if (mapStates.player_y !== undefined) player.y = mapStates.player_y;
+                    player.coins = data.remaining_coins;
+                    updateLobbyUI();
+                } else {
+                    alert("金幣不足！");
+                }
+            } catch (err) { console.error(err); }
+        };
+    });
 
-            loadMap(currentFloor, false, true); //* 標記為 true 代表是「讀檔載入」
-        } else {
-            classModal.classList.remove('d-none');
-        }
+    // ==========================================
+    // 1. 初始化與存檔讀取 (綁定在進入按鈕上)
+    // ==========================================
+    if (btnStart) {
+        btnStart.onclick = () => {
+            lobbyScreen.classList.add('d-none'); //* 隱藏大廳
+
+            mapData = JSON.parse(JSON.stringify(MT_CONFIG.floorsData));
+
+            if (MT_CONFIG.saveData) {
+                // 有存檔：直接進入遊戲畫面並讀檔
+                gameScreen.classList.remove('d-none');
+                let s = MT_CONFIG.saveData;
+
+                player.classType = s.class_type;
+                player.level = s.level;
+                player.hp = s.hp;
+                player.atk = s.atk;
+                player.def = s.def;
+                player.exp = s.exp;
+                player.yellowKeys = s.yellow_keys;
+                player.blueKeys = s.blue_keys;
+
+                currentFloor = s.current_floor;
+                mapStates = s.map_states || {};
+
+                if (mapStates.player_x !== undefined) player.x = mapStates.player_x;
+                if (mapStates.player_y !== undefined) player.y = mapStates.player_y;
+
+                loadMap(currentFloor, false, true);
+            } else {
+                // 無存檔：跳出職業選擇視窗
+                classModal.classList.remove('d-none');
+            }
+        };
     }
 
+    // 職業選擇完成後進入遊戲
     window.selectClass = function (type) {
         player.classType = type;
         if (type === 'tank') { player.hp = 2000; player.atk = 10; player.def = 25; }
         else if (type === 'warrior') { player.hp = 1000; player.atk = 15; player.def = 10; }
         else if (type === 'mage') { player.hp = 500; player.atk = 25; player.def = 5; }
 
-        player.hp += outHp; player.atk += outAtk; player.def += outDef;
+        // 🚀 套用大廳點出來的局外能力加成
+        player.hp += (player.hpLv * 50);
+        player.atk += (player.atkLv * 5);
+        player.def += (player.defLv * 5);
 
         classModal.classList.add('d-none');
+        gameScreen.classList.remove('d-none'); //* 顯示遊戲畫面
         loadMap(1, false, false);
     };
 
@@ -580,6 +644,4 @@ document.addEventListener('DOMContentLoaded', () => {
         await delay(600); // 戰鬥結束稍微停留一下，看清楚結算血量
         modal.classList.add('d-none');
     }
-
-    initGame();
 });

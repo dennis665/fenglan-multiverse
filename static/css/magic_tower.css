@@ -90,7 +90,7 @@ body {
     z-index: 9999;
 }
 
-/*! 手機專用虛擬方向鍵 */
+/*! 手機專用虛擬方向鍵*/
 .dpad-btn {
     width: 65px;
     height: 65px;
@@ -101,6 +101,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    /*! 關閉瀏覽器的雙擊縮放與反白選取 */
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
 }
 
 .dpad-btn:active {

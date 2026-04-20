@@ -14,6 +14,8 @@
             saveApi: '{% url "games:mt_save_api" %}',
             rewardApi: '{% url "games:mt_reward_api" %}',
             resetApi: '{% url "games:mt_reset_api" %}',
+            upgradeApiUrl: '{% url "games:buy_upgrade_api" %}',
+            totalCoins: {{ profile.total_coins|default:0 }},
             baseHpLv: {{ profile.mt_hp_lv|default:0 }},
             baseAtkLv: {{ profile.mt_atk_lv|default:0 }},
             baseDefLv: {{ profile.mt_def_lv|default:0 }},
@@ -25,14 +27,65 @@
     </script>
 </head>
 <body class="bg-dark text-white">
-    <div class="container-fluid py-2 pb-5">
+    {# --- 1. 局外大廳與升級畫面 --- #}
+    <div id="lobby-screen" class="container py-5 d-flex flex-column align-items-center">
+        <h1 class="text-info fw-bold mb-4">🗼 {% trans "魔塔冒險" %}</h1>
+
+        <div class="stats-board mb-4 text-center">
+            <h4 class="text-warning">
+                <i class="fas fa-coins me-2"></i>{% trans "持有金幣" %}: 
+                <span id="lobby-coins">{{ profile.total_coins }}</span>
+            </h4>
+            <p class="text-secondary">{% trans "目前最高突破" %}: {{ profile.mt_max_floor }} {% trans "樓" %}</p>
+        </div>
+
+        {# 局外強化面板 #}
+        <div class="row g-3 w-100 px-2 mb-5 justify-content-center" style="max-width: 600px;">
+            <div class="col-4">
+                <div class="bg-black p-2 p-md-3 border border-secondary rounded text-center shadow">
+                    <h6 class="text-success small fw-bold">❤️ {% trans "血量" %}</h6>
+                    <p class="small m-1">Lv. <span id="lbl-hp-lv">{{ profile.mt_hp_lv }}</span></p>
+                    <button class="btn btn-sm btn-outline-success btn-buy w-100 mt-1" data-type="mt_hp">
+                        <span id="cost-hp"></span> G
+                    </button>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="bg-black p-2 p-md-3 border border-secondary rounded text-center shadow">
+                    <h6 class="text-danger small fw-bold">⚔️ {% trans "攻擊" %}</h6>
+                    <p class="small m-1">Lv. <span id="lbl-atk-lv">{{ profile.mt_atk_lv }}</span></p>
+                    <button class="btn btn-sm btn-outline-danger btn-buy w-100 mt-1" data-type="mt_atk">
+                        <span id="cost-atk"></span> G
+                    </button>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="bg-black p-2 p-md-3 border border-secondary rounded text-center shadow">
+                    <h6 class="text-info small fw-bold">🛡️ {% trans "防禦" %}</h6>
+                    <p class="small m-1">Lv. <span id="lbl-def-lv">{{ profile.mt_def_lv }}</span></p>
+                    <button class="btn btn-sm btn-outline-info btn-buy w-100 mt-1" data-type="mt_def">
+                        <span id="cost-def"></span> G
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-start-game" class="btn btn-lg btn-info px-5 rounded-pill shadow-lg fw-bold text-dark mb-3">
+            <i class="fas fa-play me-2"></i>{% trans "進入魔塔" %}
+        </button>
+        <button class="btn btn-link text-secondary text-decoration-none" onclick="window.location.href=MT_CONFIG.lobbyUrl">
+            {% trans "返回遊戲中心" %}
+        </button>
+    </div>
+
+    <div id="game-screen" class="container-fluid py-2 pb-5 d-none">
         <div class="row">
             {# 1. 左側/頂部：狀態列 (優化高對比顏色與手機排版) #}
             <div class="col-md-4 col-lg-3">
                 <div class="card bg-secondary border-dark mb-3 shadow-lg">
                     <div class="card-body p-2 p-md-3">
                         <h4 class="text-warning fw-bold text-center mb-3">🗼 {% trans "魔塔" %} <span id="ui-floor" class="text-white">1</span>F</h4>
-                        
+
                         {# 數值區 (手機版自動變為雙欄/四欄排列) #}
                         <div class="row g-2 text-light small fw-bold fs-6">
                             <div class="col-6 col-md-12 d-flex justify-content-between">

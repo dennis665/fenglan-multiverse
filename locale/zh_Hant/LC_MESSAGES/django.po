@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-20 08:35+0800\n"
+"POT-Creation-Date: 2026-04-20 09:08+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -1243,11 +1243,11 @@ msgstr ""
 msgid "魔塔-怪物圖鑑"
 msgstr ""
 
-#: .\games\models.py:148 .\games\templates\games\magic_tower.html:39
+#: .\games\models.py:148 .\games\templates\games\magic_tower.html:92
 msgid "職業"
 msgstr ""
 
-#: .\games\models.py:149 .\games\templates\games\magic_tower.html:42
+#: .\games\models.py:149 .\games\templates\games\magic_tower.html:95
 msgid "等級"
 msgstr ""
 
@@ -1322,6 +1322,7 @@ msgid "通關關卡等級"
 msgstr ""
 
 #: .\games\templates\games\lobby.html:79
+#: .\games\templates\games\magic_tower.html:32
 msgid "魔塔冒險"
 msgstr ""
 
@@ -1334,59 +1335,86 @@ msgid "最高探索"
 msgstr ""
 
 #: .\games\templates\games\lobby.html:82
+#: .\games\templates\games\magic_tower.html:39
 msgid "樓"
 msgstr ""
 
 #: .\games\templates\games\lobby.html:83
+#: .\games\templates\games\magic_tower.html:74
 msgid "進入魔塔"
 msgstr ""
 
 #: .\games\templates\games\magic_tower.html:7
-#: .\games\templates\games\magic_tower.html:34
+#: .\games\templates\games\magic_tower.html:87
 msgid "魔塔"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:59
+#: .\games\templates\games\magic_tower.html:36
+#: .\games\templates\games\virtual_life.html:34
+msgid "持有金幣"
+msgstr ""
+
+#: .\games\templates\games\magic_tower.html:39
+msgid "目前最高突破"
+msgstr ""
+
+#: .\games\templates\games\magic_tower.html:46
+msgid "血量"
+msgstr ""
+
+#: .\games\templates\games\magic_tower.html:55
+msgid "攻擊"
+msgstr ""
+
+#: .\games\templates\games\magic_tower.html:64
+msgid "防禦"
+msgstr ""
+
+#: .\games\templates\games\magic_tower.html:77
+msgid "返回遊戲中心"
+msgstr ""
+
+#: .\games\templates\games\magic_tower.html:112
 msgid "黃鑰"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:62
+#: .\games\templates\games\magic_tower.html:115
 msgid "藍鑰"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:70
+#: .\games\templates\games\magic_tower.html:123
 msgid "存檔"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:71
+#: .\games\templates\games\magic_tower.html:124
 msgid "重置"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:72
+#: .\games\templates\games\magic_tower.html:125
 msgid "圖鑑"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:73
+#: .\games\templates\games\magic_tower.html:126
 msgid "離開"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:97
+#: .\games\templates\games\magic_tower.html:150
 msgid "選擇你的職業"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:98
+#: .\games\templates\games\magic_tower.html:151
 msgid "將會加上你局外的能力加成"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:101
+#: .\games\templates\games\magic_tower.html:154
 msgid "聖騎士 (高血防)"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:104
+#: .\games\templates\games\magic_tower.html:157
 msgid "戰士 (能力平均)"
 msgstr ""
 
-#: .\games\templates\games\magic_tower.html:107
+#: .\games\templates\games\magic_tower.html:160
 msgid "魔法師 (高攻擊)"
 msgstr ""
 
@@ -1406,10 +1434,6 @@ msgstr ""
 #: .\games\templates\games\virtual_life.html:7
 #: .\games\templates\games\virtual_life.html:30
 msgid "虛擬人生 RPG"
-msgstr ""
-
-#: .\games\templates\games\virtual_life.html:34
-msgid "持有金幣"
 msgstr ""
 
 #: .\games\templates\games\virtual_life.html:37
