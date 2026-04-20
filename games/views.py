@@ -4,7 +4,6 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.decorators.cache import never_cache
 
 from .models import (
     GameProfile,
@@ -236,7 +235,6 @@ def vl_save_api(request):
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     return JsonResponse({"status": "invalid request"}, status=405)
 
-@never_cache
 @login_required
 def mt_index(request):
     """進入魔塔遊戲大廳與畫面"""
