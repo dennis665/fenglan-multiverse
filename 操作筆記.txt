@@ -50,6 +50,13 @@ pip install urllib3==1.26.18 charset-normalizer==3.3.2 chardet==5.2.0 --force-re
 #! 關閉強制 https (delete 127.0.0.1)
 chrome://net-internals/#hsts
 
+#! 圖片去背套件安裝 cpu
+pip install "rembg[cpu]"
+
+#* 如果有 NVIDIA 顯卡且配置好 CUDA 環境
+pip install "rembg[gpu]"
+
+
 -------docker 相關-------
 #! 建立並啟動所有容器，改 Dockerfile、裝新套件
 docker compose up --build

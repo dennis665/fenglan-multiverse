@@ -108,6 +108,8 @@ urlpatterns = [
     path("tube_hub/", include("tube_hub.urls")),
     #! CSI 資訊
     path("csi-info/", csi_info_list, name="csi_info_list"),
+    #! 影音圖片編輯
+    path("media_studio/", include("media_studio.urls")),
 ]
 
 if settings.DEBUG:

@@ -49,12 +49,21 @@ HASH_IV = env("HASH_IV")
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
+#! 本機開發測試專用記憶體層
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}  # * 正式上線時需替換為 Redis 伺服器
 SITE_ID = 1  # * django-allauth 與 sites 框架必備
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # *讓代理伺服器(Proxy)通過
 # ? ==============================================================================
 
 #! 3. 應用程式定義 (INSTALLED_APPS)
 # ? ==============================================================================
+WEBSOCKET_APPS = ["daphne"]
+
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -73,6 +82,7 @@ THIRD_PARTY_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "django_apscheduler",
+    "channels",
 ]
 
 LOCAL_APPS = [
@@ -86,9 +96,10 @@ LOCAL_APPS = [
     "vision_brain",
     "games",
     "tube_hub",
+    "media_studio",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+INSTALLED_APPS = WEBSOCKET_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # ? ==============================================================================
 
 #! 使用 SMTP 寄信

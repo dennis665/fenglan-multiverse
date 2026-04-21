@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CSI Server 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-20 09:08+0800\n"
+"POT-Creation-Date: 2026-04-21 15:17+0800\n"
 "PO-Revision-Date: 2026-04-13 10:15+0800\n"
 "Last-Translator: Gemini AI\n"
 "Language-Team: Japanese\n"
@@ -17,15 +17,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\config\settings.py:282
+#: .\config\consumers.py:23
+msgid "伺服器已收到"
+msgstr "サーバーが受信しました"
+
+#: .\config\settings.py:293
 msgid "繁體中文"
 msgstr "繁体中国語"
 
-#: .\config\settings.py:283
+#: .\config\settings.py:294
 msgid "英文"
 msgstr "英語"
 
-#: .\config\settings.py:284
+#: .\config\settings.py:295
 msgid "日文"
 msgstr "日本語"
 
@@ -1258,11 +1262,11 @@ msgstr "獲得ゴールド"
 msgid "魔塔-怪物圖鑑"
 msgstr "魔塔-モンスター図鑑"
 
-#: .\games\models.py:148 .\games\templates\games\magic_tower.html:92
+#: .\games\models.py:148 .\games\templates\games\magic_tower.html:98
 msgid "職業"
 msgstr "職業"
 
-#: .\games\models.py:149 .\games\templates\games\magic_tower.html:95
+#: .\games\models.py:149 .\games\templates\games\magic_tower.html:101
 msgid "等級"
 msgstr "レベル"
 
@@ -1340,7 +1344,7 @@ msgid "通關關卡等級"
 msgstr "クリア済みステージ"
 
 #: .\games\templates\games\lobby.html:79
-#: .\games\templates\games\magic_tower.html:32
+#: .\games\templates\games\magic_tower.html:38
 msgid "魔塔冒險"
 msgstr "魔塔アドベンチャー"
 
@@ -1353,86 +1357,86 @@ msgid "最高探索"
 msgstr "最高探索階層"
 
 #: .\games\templates\games\lobby.html:82
-#: .\games\templates\games\magic_tower.html:39
+#: .\games\templates\games\magic_tower.html:45
 msgid "樓"
 msgstr "階"
 
 #: .\games\templates\games\lobby.html:83
-#: .\games\templates\games\magic_tower.html:74
+#: .\games\templates\games\magic_tower.html:80
 msgid "進入魔塔"
 msgstr "魔塔に入る"
 
 #: .\games\templates\games\magic_tower.html:7
-#: .\games\templates\games\magic_tower.html:87
+#: .\games\templates\games\magic_tower.html:93
 msgid "魔塔"
 msgstr "魔塔"
 
-#: .\games\templates\games\magic_tower.html:36
+#: .\games\templates\games\magic_tower.html:42
 #: .\games\templates\games\virtual_life.html:34
 msgid "持有金幣"
 msgstr "所持コイン"
 
-#: .\games\templates\games\magic_tower.html:39
+#: .\games\templates\games\magic_tower.html:45
 msgid "目前最高突破"
 msgstr "現在の最高突破階層"
 
-#: .\games\templates\games\magic_tower.html:46
+#: .\games\templates\games\magic_tower.html:52
 msgid "血量"
 msgstr "体力"
 
-#: .\games\templates\games\magic_tower.html:55
+#: .\games\templates\games\magic_tower.html:61
 msgid "攻擊"
 msgstr "攻撃"
 
-#: .\games\templates\games\magic_tower.html:64
+#: .\games\templates\games\magic_tower.html:70
 msgid "防禦"
 msgstr "防御"
 
-#: .\games\templates\games\magic_tower.html:77
+#: .\games\templates\games\magic_tower.html:83
 msgid "返回遊戲中心"
 msgstr "ゲームセンターに戻る"
 
-#: .\games\templates\games\magic_tower.html:112
+#: .\games\templates\games\magic_tower.html:118
 msgid "黃鑰"
 msgstr "黄の鍵"
 
-#: .\games\templates\games\magic_tower.html:115
+#: .\games\templates\games\magic_tower.html:121
 msgid "藍鑰"
 msgstr "青の鍵"
 
-#: .\games\templates\games\magic_tower.html:123
+#: .\games\templates\games\magic_tower.html:129
 msgid "存檔"
 msgstr "セーブ"
 
-#: .\games\templates\games\magic_tower.html:124
+#: .\games\templates\games\magic_tower.html:130
 msgid "重置"
 msgstr "リセット"
 
-#: .\games\templates\games\magic_tower.html:125
+#: .\games\templates\games\magic_tower.html:131
 msgid "圖鑑"
 msgstr "図鑑"
 
-#: .\games\templates\games\magic_tower.html:126
+#: .\games\templates\games\magic_tower.html:132
 msgid "離開"
 msgstr "退出"
 
-#: .\games\templates\games\magic_tower.html:150
+#: .\games\templates\games\magic_tower.html:156
 msgid "選擇你的職業"
 msgstr "職業を選択してください"
 
-#: .\games\templates\games\magic_tower.html:151
+#: .\games\templates\games\magic_tower.html:157
 msgid "將會加上你局外的能力加成"
 msgstr "ゲーム外の能力ボーナスが適用されます"
 
-#: .\games\templates\games\magic_tower.html:154
+#: .\games\templates\games\magic_tower.html:160
 msgid "聖騎士 (高血防)"
 msgstr "パラディン (高HP/防御)"
 
-#: .\games\templates\games\magic_tower.html:157
+#: .\games\templates\games\magic_tower.html:163
 msgid "戰士 (能力平均)"
 msgstr "戦士 (バランス型)"
 
-#: .\games\templates\games\magic_tower.html:160
+#: .\games\templates\games\magic_tower.html:166
 msgid "魔法師 (高攻擊)"
 msgstr "メイジ (高攻撃)"
 
@@ -1890,6 +1894,75 @@ msgstr "ネットワークエラー"
 #: .\invest\templates\invest\dashboard.html:315
 msgid "Please enter a stock symbol first!"
 msgstr "先に銘柄コードを入力してください！"
+
+#: .\media_studio\forms.py:8
+msgid "選擇圖片"
+msgstr "画像を選択"
+
+#: .\media_studio\forms.py:12
+msgid "自動去背 (AI 移除背景)"
+msgstr "自動背景削除 (AI背景除去)"
+
+#: .\media_studio\forms.py:15
+msgid "勾選後將使用 AI 智慧去背。建議輸出格式選擇 PNG 或 WebP 以保留透明背景。"
+msgstr "チェックを入れるとAIが背景を自動で削除します。透明背景を維持するには、PNGまたはWebP形式を選択することをお勧めします。"
+
+#: .\media_studio\forms.py:19
+msgid "縮放比例 (%)"
+msgstr "リサイズ比率 (%)"
+
+#: .\media_studio\forms.py:23
+msgid "100% 代表不改變長寬像素，僅壓縮品質。"
+msgstr "100%は解像度を変更せず、画質の圧縮のみを行います。"
+
+#: .\media_studio\forms.py:26
+msgid "壓縮品質 (1-100)"
+msgstr "圧縮品質 (1-100)"
+
+#: .\media_studio\forms.py:30
+msgid "數值越低檔案越小，畫質越差。對 PNG 無效。"
+msgstr "数値が低いほどファイルサイズは小さくなりますが、画質は低下します。PNGには適用されません。"
+
+#: .\media_studio\forms.py:33
+msgid "輸出格式"
+msgstr "出力形式"
+
+#: .\media_studio\templates\media_studio\compressor.html:10
+#: .\media_studio\views.py:24
+msgid "圖片處理與去背工具"
+msgstr "画像処理・背景削除ツール"
+
+#: .\media_studio\templates\media_studio\compressor.html:18
+msgid "開始處理"
+msgstr "処理を開始"
+
+#: .\media_studio\templates\media_studio\compressor.html:31
+msgid "處理完成"
+msgstr "処理完了"
+
+#: .\media_studio\templates\media_studio\compressor.html:36
+msgid "原始大小"
+msgstr "元のサイズ"
+
+#: .\media_studio\templates\media_studio\compressor.html:40
+msgid "處理後大小"
+msgstr "処理後のサイズ"
+
+#: .\media_studio\templates\media_studio\compressor.html:47
+msgid "原始像素"
+msgstr "元の解像度"
+
+#: .\media_studio\templates\media_studio\compressor.html:51
+msgid "處理後像素"
+msgstr "処理後の解像度"
+
+#: .\media_studio\templates\media_studio\compressor.html:62
+msgid "下載處理後的圖片"
+msgstr "処理した画像をダウンロード"
+
+#: .\media_studio\templates\media_studio\compressor.html:80
+msgid "處理中..."
+msgstr "処理中..."
 
 #: .\notices\apps.py:7
 msgid "系統公告"
@@ -2742,47 +2815,51 @@ msgstr "投資"
 msgid "Vision Brain"
 msgstr "ビジョンブレイン"
 
-#: .\templates\includes\navbar.html:83
+#: .\templates\includes\navbar.html:75
+msgid "Image Studio"
+msgstr "画像スタジオ"
+
+#: .\templates\includes\navbar.html:88
 msgid "CSI 專屬"
 msgstr "CSI 専用"
 
-#: .\templates\includes\navbar.html:86
+#: .\templates\includes\navbar.html:91
 msgid "企業資源"
 msgstr "企業リソース"
 
-#: .\templates\includes\navbar.html:89
+#: .\templates\includes\navbar.html:94
 msgid "企業內部資訊"
 msgstr "企業内情報"
 
-#: .\templates\includes\navbar.html:100
+#: .\templates\includes\navbar.html:105
 msgid "Tester Zone"
 msgstr "テスターゾーン"
 
-#: .\templates\includes\navbar.html:103
+#: .\templates\includes\navbar.html:108
 msgid "Test Management System"
 msgstr "テスト管理システム"
 
-#: .\templates\includes\navbar.html:111
+#: .\templates\includes\navbar.html:116
 msgid "No tools available"
 msgstr "利用可能なツールはありません"
 
-#: .\templates\includes\navbar.html:144
+#: .\templates\includes\navbar.html:149
 msgid "Admin"
 msgstr "管理"
 
-#: .\templates\includes\navbar.html:164
+#: .\templates\includes\navbar.html:169
 msgid "Profile"
 msgstr "プロフィール"
 
-#: .\templates\includes\navbar.html:169
+#: .\templates\includes\navbar.html:174
 msgid "Logout"
 msgstr "ログアウト"
 
-#: .\templates\includes\navbar.html:176
+#: .\templates\includes\navbar.html:181
 msgid "Login"
 msgstr "ログイン"
 
-#: .\templates\includes\navbar.html:179
+#: .\templates\includes\navbar.html:184
 msgid "Register"
 msgstr "登録"
 

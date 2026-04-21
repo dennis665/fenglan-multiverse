@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-{% if compressed_data_uri %}5{% else %}8{% endif %}" id="form-container">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{% trans "圖片處理與去背工具" %}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="compress-form">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success btn-lg" id="submit-btn">
+                                {% trans "開始處理" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {# 處理結果區塊 #}
+        <div class="col-md-7 mt-4 mt-md-0 {% if not compressed_data_uri %}d-none{% endif %}" id="result-container">
+            {% if compressed_data_uri %}
+            <div class="card shadow border-success h-100">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">{% trans "處理完成" %}</h4>
+                </div>
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <h5 class="text-muted mb-1">{% trans "原始大小" %}</h5>
+                            <p class="fs-4 text-danger mb-0">{{ original_size_str }}</p>
+                        </div>
+                        <div class="col-6 border-start">
+                            <h5 class="text-muted mb-1">{% trans "處理後大小" %}</h5>
+                            <p class="fs-4 text-success fw-bold mb-0">{{ compressed_size_str }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4 border-top pt-3">
+                        <div class="col-6">
+                            <h6 class="text-muted mb-1">{% trans "原始像素" %}</h6>
+                            <p class="text-secondary mb-0">{{ original_dimensions }}</p>
+                        </div>
+                        <div class="col-6 border-start">
+                            <h6 class="text-muted mb-1">{% trans "處理後像素" %}</h6>
+                            <p class="text-primary fw-bold mb-0">{{ new_dimensions }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 bg-light p-3 rounded border text-center">
+                        <img src="{{ compressed_data_uri }}" class="img-fluid rounded shadow-sm" style="max-height: 250px; object-fit: contain;" alt="Processed Preview">
+                    </div>
+
+                    <div class="d-grid mt-auto">
+                        <a href="{{ compressed_data_uri }}" download="{{ new_filename }}" class="btn btn-primary btn-lg">
+                            {% trans "下載處理後的圖片" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('compress-form').addEventListener('submit', function() {
+        const submitBtn = document.getElementById('submit-btn');
+        const resultContainer = document.getElementById('result-container');
+        const formContainer = document.getElementById('form-container');
+
+        // 鎖住並更改按鈕狀態
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {% trans "處理中..." %}';
+
+        // 隱藏舊的結果區塊
+        if (resultContainer) {
+            resultContainer.classList.add('d-none');
+        }
+
+        // 將表單容器恢復寬度 (如果是並排狀態)
+        if (formContainer.classList.contains('col-md-5')) {
+            formContainer.classList.remove('col-md-5');
+            formContainer.classList.add('col-md-8');
+        }
+    });
+</script>
+{% endblock %}
