@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-21 15:17+0800\n"
+"POT-Creation-Date: 2026-04-22 11:05+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -1887,74 +1887,146 @@ msgstr ""
 msgid "Please enter a stock symbol first!"
 msgstr ""
 
-#: .\media_studio\forms.py:8
+#: .\media_studio\forms.py:27
 msgid "選擇圖片"
 msgstr "Select Image"
 
-#: .\media_studio\forms.py:12
+#: .\media_studio\forms.py:31
 msgid "自動去背 (AI 移除背景)"
 msgstr "Auto Background Removal (AI)"
 
-#: .\media_studio\forms.py:15
+#: .\media_studio\forms.py:34
 msgid "勾選後將使用 AI 智慧去背。建議輸出格式選擇 PNG 或 WebP 以保留透明背景。"
-msgstr "Check this to use AI background removal. PNG or WebP is recommended for transparency."
+msgstr ""
+"Check this to use AI background removal. PNG or WebP is recommended for "
+"transparency."
 
-#: .\media_studio\forms.py:19
+#: .\media_studio\forms.py:38
 msgid "縮放比例 (%)"
 msgstr "Scale (%)"
 
-#: .\media_studio\forms.py:23
+#: .\media_studio\forms.py:42
 msgid "100% 代表不改變長寬像素，僅壓縮品質。"
 msgstr "100% means dimensions remain unchanged, only quality is compressed."
 
-#: .\media_studio\forms.py:26
+#: .\media_studio\forms.py:45
 msgid "壓縮品質 (1-100)"
 msgstr "Compression Quality (1-100)"
 
-#: .\media_studio\forms.py:30
+#: .\media_studio\forms.py:49
 msgid "數值越低檔案越小，畫質越差。對 PNG 無效。"
-msgstr "Lower values reduce file size but decrease quality. Does not apply to PNG."
+msgstr ""
+"Lower values reduce file size but decrease quality. Does not apply to PNG."
 
-#: .\media_studio\forms.py:33
+#: .\media_studio\forms.py:52
 msgid "輸出格式"
 msgstr "Output Format"
 
-#: .\media_studio\templates\media_studio\compressor.html:10
-#: .\media_studio\views.py:24
-msgid "圖片處理與去背工具"
-msgstr "Image Processing & Background Removal Tool"
+#: .\media_studio\forms.py:66
+msgid "選擇影片檔"
+msgstr "Select Video Files"
 
-#: .\media_studio\templates\media_studio\compressor.html:18
-msgid "開始處理"
-msgstr "Start Processing"
+#: .\media_studio\forms.py:66
+msgid "可一次選擇多個影片進行拼接"
+msgstr "You can select multiple videos to merge at once"
 
-#: .\media_studio\templates\media_studio\compressor.html:31
+#: .\media_studio\forms.py:70
+msgid "裁切開始時間 (秒)"
+msgstr "Trim Start Time (seconds)"
+
+#: .\media_studio\forms.py:70
+msgid "若不裁切請保持 0"
+msgstr "Keep as 0 if no trimming is needed"
+
+#: .\media_studio\forms.py:73
+msgid "裁切持續時間 (秒)"
+msgstr "Trim Duration (seconds)"
+
+#: .\media_studio\forms.py:73
+msgid "設為 0 代表取至影片結束"
+msgstr "Set to 0 to keep until the end of the video"
+
+#: .\media_studio\forms.py:76
+msgid "輸出品質 (0-100)"
+msgstr "Output Quality (0-100)"
+
+#: .\media_studio\forms.py:80
+msgid "數值越高畫質越好，但檔案越大 (建議 50-80)"
+msgstr "Higher values mean better quality but larger file size (Recommended: 50-80)"
+
+#: .\media_studio\forms.py:83
+msgid "縮放解析度"
+msgstr "Scale Resolution"
+
+#: .\media_studio\forms.py:85
+msgid "原始尺寸"
+msgstr "Original Size"
+
+#: .\media_studio\templates\media_studio\studio.html:6
+#: .\media_studio\views.py:25
+msgid "多媒體處理工作室"
+msgstr "Multimedia Processing Studio"
+
+#: .\media_studio\templates\media_studio\studio.html:11
+msgid "圖片處理"
+msgstr "Image Processing"
+
+#: .\media_studio\templates\media_studio\studio.html:16
+msgid "影片編輯"
+msgstr "Video Editing"
+
+#: .\media_studio\templates\media_studio\studio.html:35
+msgid "預計輸出解析度"
+msgstr "Estimated Output Resolution"
+
+#: .\media_studio\templates\media_studio\studio.html:40
+msgid "開始處理圖片"
+msgstr "Start Image Processing"
+
+#: .\media_studio\templates\media_studio\studio.html:52
+#: .\media_studio\templates\media_studio\studio.html:116
 msgid "處理完成"
 msgstr "Processing Complete"
 
-#: .\media_studio\templates\media_studio\compressor.html:36
+#: .\media_studio\templates\media_studio\studio.html:58
 msgid "原始大小"
 msgstr "Original Size"
 
-#: .\media_studio\templates\media_studio\compressor.html:40
+#: .\media_studio\templates\media_studio\studio.html:62
 msgid "處理後大小"
 msgstr "Processed Size"
 
-#: .\media_studio\templates\media_studio\compressor.html:47
-msgid "原始像素"
-msgstr "Original Resolution"
+#: .\media_studio\templates\media_studio\studio.html:71
+msgid "解析度已變更"
+msgstr "Resolution changed"
 
-#: .\media_studio\templates\media_studio\compressor.html:51
-msgid "處理後像素"
-msgstr "Processed Resolution"
-
-#: .\media_studio\templates\media_studio\compressor.html:62
+#: .\media_studio\templates\media_studio\studio.html:80
 msgid "下載處理後的圖片"
 msgstr "Download Processed Image"
 
-#: .\media_studio\templates\media_studio\compressor.html:80
-msgid "處理中..."
-msgstr "Processing..."
+#: .\media_studio\templates\media_studio\studio.html:105
+msgid "開始處理影片"
+msgstr "Start Video Processing"
+
+#: .\media_studio\templates\media_studio\studio.html:119
+msgid "總原始大小"
+msgstr "Total Original Size"
+
+#: .\media_studio\templates\media_studio\studio.html:120
+msgid "壓縮後大小"
+msgstr "Compressed Size"
+
+#: .\media_studio\templates\media_studio\studio.html:121
+msgid "輸出規格"
+msgstr "Output Specs"
+
+#: .\media_studio\templates\media_studio\studio.html:126
+msgid "下載處理後的影片"
+msgstr "Download Processed Video"
+
+#: .\media_studio\views.py:199
+msgid "原始解析度"
+msgstr "Original Resolution"
 
 #: .\notices\apps.py:7
 msgid "系統公告"
@@ -2776,8 +2848,8 @@ msgid "Vision Brain"
 msgstr ""
 
 #: .\templates\includes\navbar.html:75
-msgid "Image Studio"
-msgstr ""
+msgid "多媒體工具"
+msgstr "Multimedia Tools"
 
 #: .\templates\includes\navbar.html:88
 msgid "CSI 專屬"
@@ -3176,6 +3248,15 @@ msgstr "User Profile"
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr ""
+
+#~ msgid "原始像素"
+#~ msgstr "Original Resolution"
+
+#~ msgid "處理後像素"
+#~ msgstr "Processed Resolution"
+
+#~ msgid "處理中..."
+#~ msgstr "Processing..."
 
 #~ msgid "倖存者生存 - 局外成長等級"
 #~ msgstr "Survivor - Meta-Progression Levels"

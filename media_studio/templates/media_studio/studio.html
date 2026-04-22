@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load i18n crispy_forms_tags static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">{% trans "多媒體處理工作室" %}</h2>
+
+    <ul class="nav nav-tabs justify-content-center mb-4" id="mediaStudioTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold fs-5 {% if active_tab == 'image' %}active{% endif %}" id="image-tab" data-bs-toggle="tab" data-bs-target="#image-pane" type="button" role="tab" aria-selected="true">
+                <i class="fas fa-image me-2 text-success"></i>{% trans "圖片處理" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold fs-5 {% if active_tab == 'video' %}active{% endif %}" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-pane" type="button" role="tab" aria-selected="false">
+                <i class="fas fa-video me-2 text-primary"></i>{% trans "影片編輯" %}
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        {# ==== 圖片處理頁籤 ==== #}
+        <div class="tab-pane fade {% if active_tab == 'image' %}show active{% endif %}" id="image-pane" role="tabpanel">
+            <div class="row justify-content-center">
+                <div class="col-md-{% if image_compressed_uri %}5{% else %}8{% endif %}" id="image-form-container">
+                    <div class="card shadow border-success">
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data" id="image-compress-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="image">
+                                {{ image_form|crispy }}
+
+                                {# 即時像素預算顯示 #}
+                                <div id="pixel-estimation" class="alert alert-secondary d-none py-2 mt-2">
+                                    <small><i class="fas fa-calculator me-1"></i> {% trans "預計輸出解析度" %}: <span id="est-width">0</span> x <span id="est-height">0</span> px</small>
+                                </div>
+
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-success btn-lg" id="image-submit-btn">
+                                        {% trans "開始處理圖片" %}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {% if image_compressed_uri %}
+                <div class="col-md-7 mt-4 mt-md-0" id="image-result-container">
+                    <div class="card shadow border-success h-100">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0">{% trans "處理完成" %}</h4>
+                        </div>
+                        <div class="card-body text-center d-flex flex-column justify-content-center">
+                            {# 檔案大小對比 #}
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <h5 class="text-muted">{% trans "原始大小" %}</h5>
+                                    <p class="fs-4 text-danger">{{ image_orig_size }}</p>
+                                </div>
+                                <div class="col-6 border-start">
+                                    <h5 class="text-muted">{% trans "處理後大小" %}</h5>
+                                    <p class="fs-4 text-success fw-bold">{{ image_comp_size }}</p>
+                                </div>
+                            </div>
+
+                            {# 如果像素有變化才顯示解析度對比 #}
+                            {% if image_orig_dim != image_new_dim %}
+                            <div class="alert alert-warning py-2 mb-3">
+                                <i class="fas fa-expand-arrows-alt me-2"></i>
+                                <strong>{% trans "解析度已變更" %}:</strong> 
+                                {{ image_orig_dim }} <i class="fas fa-arrow-right mx-2"></i> {{ image_new_dim }}
+                            </div>
+                            {% endif %}
+
+                            <div class="mb-4 bg-light p-3 rounded border text-center">
+                                <img src="{{ image_compressed_uri }}" class="img-fluid rounded shadow-sm" style="max-height: 250px; object-fit: contain;">
+                            </div>
+                            <a href="{{ image_compressed_uri }}" download="{{ image_new_name }}" class="btn btn-success btn-lg">
+                                <i class="fas fa-download me-1"></i> {% trans "下載處理後的圖片" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# ==== 影片處理頁籤 ==== #}
+        <div class="tab-pane fade {% if active_tab == 'video' %}show active{% endif %}" id="video-pane" role="tabpanel" tabindex="0">
+            <div class="row justify-content-center">
+                <div class="col-md-{% if video_compressed_uri %}5{% else %}8{% endif %}" id="video-form-container">
+                    <div class="card shadow border-primary">
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data" id="video-compress-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="video">
+                                {{ video_form|crispy }}
+
+                                {# 動態產生的影片片段編輯區 #}
+                                <div id="video-fragments-list" class="mt-3"></div>
+
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="video-submit-btn">
+                                        {% trans "開始處理影片" %}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {% if video_compressed_uri %}
+                <div class="col-md-7 mt-4 mt-md-0" id="video-result-container">
+                    <div class="card shadow border-primary h-100">
+                        <div class="card-header bg-primary text-white"><h4 class="mb-0">{% trans "處理完成" %}</h4></div>
+                        <div class="card-body text-center d-flex flex-column justify-content-center">
+                            <div class="row mb-3">
+                                <div class="col-4"><small class="text-muted">{% trans "總原始大小" %}</small><p class="h5 text-danger">{{ video_orig_size }}</p></div>
+                                <div class="col-4"><small class="text-muted">{% trans "壓縮後大小" %}</small><p class="h5 text-success fw-bold">{{ video_comp_size }}</p></div>
+                                <div class="col-4"><small class="text-muted">{% trans "輸出規格" %}</small><p class="h5 text-primary">{{ video_res_info }}</p></div>
+                            </div>
+                            <video controls class="w-100 rounded shadow-sm bg-black mb-4" style="max-height: 300px;">
+                                <source src="{{ video_compressed_uri }}" type="video/mp4">
+                            </video>
+                            <a href="{{ video_compressed_uri }}" download="{{ video_new_name }}" class="btn btn-primary btn-lg">{% trans "下載處理後的影片" %}</a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{# 載入獨立的 JS 檔案 #}
+<script src="{% static 'js/media_studio.js' %}"></script>
+{% endblock %}

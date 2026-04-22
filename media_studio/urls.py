@@ -5,5 +5,5 @@ from . import views
 app_name = "media_studio"
 
 urlpatterns = [
-    path("compressor/", views.image_compressor_view, name="image_compressor"),
+    path("studio/", views.media_studio_view, name="media_studio_index"),
 ]

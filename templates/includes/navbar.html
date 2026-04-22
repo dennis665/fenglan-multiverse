@@ -71,8 +71,8 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item {% if 'media_studio' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'media_studio:image_compressor' %}">
-                                <i class="fas fa-file-image fa-fw me-2 {% if 'media_studio' not in request.path %}text-success{% endif %}"></i>{% trans "Image Studio" %}
+                            <a class="dropdown-item {% if 'media_studio' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'media_studio:media_studio_index' %}">
+                                <i class="fas fa-file-image fa-fw me-2 {% if 'media_studio' not in request.path %}text-success{% endif %}"></i>{% trans "多媒體工具" %}
                             </a>
                         </li>
                         {% comment %} <li><hr class="dropdown-divider"></li> {% endcomment %}
