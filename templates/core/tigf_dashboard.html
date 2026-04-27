@@ -68,6 +68,18 @@
                 {# 右側內容區塊 #}
                 <div class="col-md-9 tab-content">
                     <div class="tab-pane fade show active p-4" id="check-tab">
+                        
+                        {# 將按鈕區塊移到最上方，並加入底線分隔 #}
+                        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                            <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#compareRulesModal">
+                                <i class="fas fa-question-circle me-1"></i>{% trans "比對規則說明與設定" %}
+                            </button>
+                            <button id="btn-compare" class="btn btn-primary px-4 fw-bold" {% if not all_matched %}disabled{% endif %}>
+                                <i class="fas fa-play-circle me-1"></i> {% trans "Start Data Comparison" %}
+                            </button>
+                        </div>
+
+                        {# 表格資料清單 #}
                         <table class="table table-sm align-middle">
                             <thead class="table-light">
                                 <tr>
@@ -81,11 +93,6 @@
                                 {# 初始內容由後端渲染或 JS 更新 #}
                             </tbody>
                         </table>
-                        <div class="text-end mt-4">
-                            <button id="btn-compare" class="btn btn-primary" {% if not all_matched %}disabled{% endif %}>
-                                {% trans "Start Data Comparison" %}
-                            </button>
-                        </div>
                     </div>
 
                     <div class="tab-pane fade p-4" id="result-tab">
@@ -101,6 +108,70 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# 規則說明與設定彈窗 (全黑背景與高對比文字) #}
+<div class="modal fade" id="compareRulesModal" tabindex="-1" aria-labelledby="compareRulesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-light border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-info fw-bold" id="compareRulesModalLabel">
+                    <i class="fas fa-sliders-h me-2"></i>{% trans "資料比對規則說明與設定" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                {# 第一部分：檔案讀取邏輯 #}
+                <h6 class="text-info fw-bold border-bottom border-secondary pb-2 mb-3">一. 檔案解析邏輯 (固定)</h6>
+                <div class="mb-4 ps-2">
+                    <p class="mb-1 fw-bold text-warning">範本檔設定：</p>
+                    <ul class="small text-light">
+                        <li><strong>config (頁籤)</strong>：讀取 B4 (資料起始行)、B11 (忽略列數)、B19 (結束/合計欄位關鍵字)。</li>
+                        <li><strong>schema (頁籤)</strong>：讀取 COLUMN_NAME (英文) 與 中文欄位名稱，建立欄位映射。</li>
+                    </ul>
+                    <p class="mb-1 fw-bold text-warning">申報表解析：</p>
+                    <ul class="small text-light">
+                        <li>判斷「資料起始行」往上 2、3 行之文字，自動組合成中文欄位名稱（處理雙層表頭）。</li>
+                    </ul>
+                </div>
+
+                {# 第二部分：整體比對邏輯 #}
+                <h6 class="text-info fw-bold border-bottom border-secondary pb-2 mb-3">二. 報表整體比對 (固定)</h6>
+                <div class="mb-4 ps-2 small text-light">
+                    <ol>
+                        <li>檢查報表中文欄位是否能正確對應到 DB 英文名稱。</li>
+                        <li>自動略過 Config 指定之忽略行與合計列。</li>
+                        <li>依據主鍵 (PK) 判斷該行資料是否存在於資料庫 (DB)。</li>
+                        <li>判斷申報檔資料筆數是否與 DB 匹配。</li>
+                    </ol>
+                </div>
+
+                {# 第三部分：可切換檢核規則 #}
+                <h6 class="text-success fw-bold border-bottom border-secondary pb-2 mb-3">三. 逐欄值比對 (可選開關)</h6>
+                <div class="mt-3 ps-2">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="ruleStrMatch" checked>
+                        <label class="form-check-label text-light" for="ruleStrMatch">1. 轉成字串是否完全相同比對</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="ruleDateCheck" checked>
+                        <label class="form-check-label text-light" for="ruleDateCheck">2. 日期格式統一與合理性檢核 (例如: 2025-01-30 視同 20250130)</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="ruleEmptyZero" checked>
+                        <label class="form-check-label text-light" for="ruleEmptyZero">3. 數值比對時，自動將「空字串」視同「0」</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="ruleTolerance" checked>
+                        <label class="form-check-label text-light" for="ruleTolerance">4. 浮點數容差 (兩者相差 0.00001 內含皆視為無差異)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">{% trans "關閉並儲存設定" %}</button>
             </div>
         </div>
     </div>

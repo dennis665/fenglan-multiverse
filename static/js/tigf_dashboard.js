@@ -136,6 +136,12 @@ async function startComparison() {
     const formData = new FormData();
     formData.append('action', 'compare');
 
+    // 收集比對規則開關狀態並傳遞給後端
+    formData.append('rule_str_match', document.getElementById('ruleStrMatch').checked);
+    formData.append('rule_date_check', document.getElementById('ruleDateCheck').checked);
+    formData.append('rule_empty_zero', document.getElementById('ruleEmptyZero').checked);
+    formData.append('rule_tolerance', document.getElementById('ruleTolerance').checked);
+
     document.querySelectorAll('input[type="file"]').forEach(input => {
         for (let file of input.files) { formData.append(input.name, file); }
     });

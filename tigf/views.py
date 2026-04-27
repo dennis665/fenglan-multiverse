@@ -77,38 +77,56 @@ def smart_read_excel(file_obj, **kwargs):
 
 
 #! 獨立的數值與日期比對函式：處理日期正規化、0.0 == "" 以及浮點數誤差
-def is_value_matched(val_r, val_db):
+def is_value_matched(
+    val_r,
+    val_db,
+    rule_str_match=True,
+    rule_date_check=True,
+    rule_empty_zero=True,
+    rule_tolerance=True,
+):
     #! 基礎清理與正規化
     str_r = str(val_r).strip().replace("nan", "").replace("None", "")
     str_db = str(val_db).strip().replace("nan", "").replace("None", "")
 
     #! 字串完全相同 (包含兩者皆為空字串)
-    if str_r == str_db:
+    if rule_str_match and str_r == str_db:
         return True
 
-    #! 日期格式正規化比對 (處理如 20250130 = 2025-01-30)
-    #! 移除所有非數字字元後嘗試進行日期長度檢查
-    date_r = re.sub(r"[^0-9]", "", str_r)
-    date_db = re.sub(r"[^0-9]", "", str_db)
+    if rule_date_check:
+        #! 日期格式正規化比對 (處理如 20250130 = 2025-01-30)
+        #! 移除所有非數字字元後嘗試進行日期長度檢查
+        date_r = re.sub(r"[^0-9]", "", str_r)
+        date_db = re.sub(r"[^0-9]", "", str_db)
 
-    #! 若兩者清理後皆為 8 位數字且內容相同，視為日期匹配
-    if len(date_r) == 8 and len(date_db) == 8 and date_r == date_db:
-        try:
-            #! 確保字串符合基本日期邏輯 (例如不會出現 20251340)
-            datetime.strptime(date_r, "%Y%m%d")
-            return True
-        except ValueError:
-            #! 若非有效日期則跳過，進入後續數值比對
-            pass
+        #! 若兩者清理後皆為 8 位數字且內容相同，視為日期匹配
+        if len(date_r) == 8 and len(date_db) == 8 and date_r == date_db:
+            try:
+                #! 確保字串符合基本日期邏輯 (例如不會出現 20251340)
+                datetime.strptime(date_r, "%Y%m%d")
+                return True
+            except ValueError:
+                #! 若非有效日期則跳過，進入後續數值比對
+                pass
 
     #! 數值比對：將空字串視為 0 進行 Decimal 轉換
     try:
-        dec_r = Decimal(str_r) if str_r else Decimal("0")
-        dec_db = Decimal(str_db) if str_db else Decimal("0")
+        if rule_empty_zero:
+            dec_r = Decimal(str_r) if str_r else Decimal("0")
+            dec_db = Decimal(str_db) if str_db else Decimal("0")
+        else:
+            #! 若未啟用空值視為 0，遇空字串轉 Decimal 會拋出 InvalidOperation 並略過比對
+            dec_r = Decimal(str_r)
+            dec_db = Decimal(str_db)
 
-        #! 誤差小於 1e-5 視為相同
-        if abs(dec_r - dec_db) < Decimal("1e-5"):
-            return True
+        if rule_tolerance:
+            #! 誤差小於 1e-5 視為相同
+            if abs(dec_r - dec_db) < Decimal("1e-5"):
+                return True
+        else:
+            #! 關閉容差：必須絕對相等
+            if dec_r == dec_db:
+                return True
     except InvalidOperation:
         #! 若無法轉為數值 (例如純文字與空字串比對)，則回傳不匹配
         pass
@@ -192,6 +210,12 @@ def tigf_dashboard(request):
         elif action == "compare":
             diff_summary = []
             session_key = request.session.session_key or request.session.create()
+
+            #! 從 request 中取得前端設定的 4 項規則開關，若為字串 "true" 則轉為布林值 True
+            rule_str_match = request.POST.get("rule_str_match") == "true"
+            rule_date_check = request.POST.get("rule_date_check") == "true"
+            rule_empty_zero = request.POST.get("rule_empty_zero") == "true"
+            rule_tolerance = request.POST.get("rule_tolerance") == "true"
 
             #! 解析申報檔
             for name, report_obj in dict_report.items():
@@ -352,7 +376,14 @@ def tigf_dashboard(request):
                                 val_r = row_r[ch_col]
                                 val_db = row_db[en_col]
 
-                                if not is_value_matched(val_r, val_db):
+                                if not is_value_matched(
+                                    val_r,
+                                    val_db,
+                                    rule_str_match,
+                                    rule_date_check,
+                                    rule_empty_zero,
+                                    rule_tolerance,
+                                ):
                                     diff_list.append(
                                         {
                                             "行號": i + 1,
