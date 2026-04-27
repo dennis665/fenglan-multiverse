@@ -69,31 +69,38 @@ urlpatterns = [
     path("feature-permission/", feature_permission, name="feature_permission"),
     #! 後台
     path("admin/", admin.site.urls),
-    #! 切換語言
-    path("i18n/", include("django.conf.urls.i18n")),
-    #! 帳號個人檔案跳轉
-    path("accounts/", lambda request: redirect("profile", permanent=False)),
-    path("accounts/", include("allauth.urls")),
     #! 個人檔案
     path("accounts/profile/", profile_view, name="profile"),
-    #! 公告消息
-    path("notices/", include("notices.urls")),
     #! 幸運抽獎
     path("lucky-draw/", lucky_draw, name="lucky_draw"),
     #! 發文簿系統
     path("ticket-pull/", ticket_pull, name="ticket_pull"),
     #! 安定專用比對
     path("tigf-comparison/", tigf_dashboard, name="tigf_comparison"),
+    #! CSI 資訊
+    path("csi-info/", csi_info_list, name="csi_info_list"),
+    # ? ======================================================================
+    # ? =================================API==================================
+    #! 智能客服
+    path("ai-chat/", portal_ai_bot, name="portal_ai_bot"),
+    #! 安定下載比對檔案
     path("download-diff-csv/<str:cno>/<str:fid>/", download_diff_csv, name="download_diff_csv"),
     # ? ======================================================================
+    # ? =================================其它==================================
     #! ICON
     path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "images/CSI.ico")),
     #! 網頁開發者模式
     path(".well-known/appspecific/com.chrome.devtools.json", lambda r: JsonResponse({})),
-    # ? =================================API==================================
-    #! 智能客服
-    path("ai-chat/", portal_ai_bot, name="portal_ai_bot"),
+    #! 切換語言
+    path("i18n/", include("django.conf.urls.i18n")),
+    #! 帳號個人檔案跳轉
+    path("accounts/", lambda request: redirect("profile", permanent=False)),
     # ? ======================================================================
+    # ? ===============================app 串接================================
+    #! allauth
+    path("accounts/", include("allauth.urls")),
+    #! 公告消息
+    path("notices/", include("notices.urls")),
     #! 金流
     path("finance/", include("finance.urls")),
     #! 投資理財
@@ -106,10 +113,11 @@ urlpatterns = [
     path("games/", include("games.urls")),
     #! yt 應用
     path("tube_hub/", include("tube_hub.urls")),
-    #! CSI 資訊
-    path("csi-info/", csi_info_list, name="csi_info_list"),
     #! 影音圖片編輯
     path("media_studio/", include("media_studio.urls")),
+    #! 虛擬 AI
+    path("bionic_chat/", include("bionic_chat.urls")),
+    # ? ======================================================================
 ]
 
 if settings.DEBUG:

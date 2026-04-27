@@ -1,0 +1,35 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="zh-hant">
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans "仿生人通訊終端" %}</title>
+    <link rel="stylesheet" href="/static/css/bionic_chat.css">
+</head>
+<body>
+    {# 遊戲主視窗容器 #}
+    <div id="visual-novel-container">
+
+        {# 角色立繪展示區 #}
+        <div id="character-layer">
+            <img id="avatar" src="/static/img/character_idle.png" alt="{% trans '角色立繪' %}">
+        </div>
+
+        {# 底部對話系統 #}
+        <div id="dialogue-system">
+            {% comment %}
+            此區塊負責顯示文字歷史紀錄，
+            超出高度時會自動出現捲動條。
+            {% endcomment %}
+            <div id="chat-history"></div>
+
+            <div id="control-panel">
+                <input type="text" id="user-input" placeholder="{% trans '輸入對話...' %}">
+                <button id="send-btn">{% trans "發送" %}</button>
+            </div>
+        </div>
+        
+    </div>
+    <script src="/static/js/bionic_chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+body {
+    background-color: #1e1e1e;
+    /** 模擬編輯器或終端機的深色背景 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: sans-serif;
+}
+
+#visual-novel-container {
+    width: 800px;
+    height: 600px;
+    background-color: #2d2d2d;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    /** 增加視窗立體感 */
+}
+
+#character-layer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /** 讓立繪對齊視窗底部 */
+}
+
+#character-layer img {
+    height: 90%;
+    object-fit: contain;
+}
+
+#dialogue-system {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 220px;
+    background: rgba(0, 0, 0, 0.75);
+    /** 半透明黑底，確保文字清晰 */
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+#chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    color: #e0e0e0;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.bot-msg {
+    color: #4da6ff;
+    /** 區分仿生人回覆的文字顏色 */
+}
