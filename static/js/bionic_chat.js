@@ -1,32 +1,19 @@
-#! static/js/bionic_chat.js
-
 const avatar = document.getElementById('avatar');
 const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 const chatHistory = document.getElementById('chat-history');
-const dialogueSystem = document.getElementById('dialogue-system');
 
 let isSpeaking = false;
 let time = 0;
-let sentenceBuffer = "";
-let availableVoices = [];
+const audioQueue = []; //* 語音佇列
+let isAudioPlaying = false; //* 播放狀態追蹤
 
 // 固定優化後的動態參數
 const CONFIG = {
     breathIntensity: 0.5,
     baseScale: 1.0,
-    baseAngleZ: 0,
-    pitch: 1.1,
-    rate: 0.9
+    baseAngleZ: 0
 };
-
-const synth = window.speechSynthesis;
-
-function loadVoices() { availableVoices = synth.getVoices(); }
-if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = loadVoices;
-}
-loadVoices();
 
 // 渲染循環
 function updateAvatar() {
@@ -47,22 +34,32 @@ function updateAvatar() {
 }
 updateAvatar();
 
-function playVoice(text) {
-    if (!text) return;
-    const msg = new SpeechSynthesisUtterance(text);
-    const voice = availableVoices.find(v => v.lang.includes('zh-TW'));
-    if (voice) msg.voice = voice;
+// 播放佇列中的下一個音檔
+function playNextAudio() {
+    if (audioQueue.length === 0) {
+        isSpeaking = false; //* 佇列清空停止震動
+        isAudioPlaying = false;
+        return;
+    }
 
-    msg.pitch = CONFIG.pitch;
-    msg.rate = CONFIG.rate;
+    isAudioPlaying = true;
+    isSpeaking = true; //* 開始震動
+    const audioUrl = audioQueue.shift();
 
-    msg.onstart = () => { isSpeaking = true; };
-    msg.onend = () => { if (!synth.speaking) isSpeaking = false; };
-    synth.speak(msg);
+    const audioPlayer = new Audio(audioUrl);
+
+    audioPlayer.onended = () => {
+        playNextAudio();
+    };
+
+    audioPlayer.onerror = () => {
+        playNextAudio(); //* 錯誤時忽略並繼續
+    };
+
+    audioPlayer.play().catch(() => playNextAudio());
 }
 
 function startBionicStream(message) {
-    // 確保路徑包含 bionic_chat
     const apiUrl = `/bionic_chat/api/stream/?message=${encodeURIComponent(message)}`;
     const eventSource = new EventSource(apiUrl);
 
@@ -71,31 +68,29 @@ function startBionicStream(message) {
     botMsgDiv.textContent = '[Bionic] ';
     chatHistory.appendChild(botMsgDiv);
 
-    sentenceBuffer = "";
-
     eventSource.onmessage = (e) => {
         const data = JSON.parse(e.data);
-        botMsgDiv.textContent += data.text;
-        chatHistory.scrollTop = chatHistory.scrollHeight;
 
-        sentenceBuffer += data.text;
-        if (/[。！？；\n]/.test(data.text) || sentenceBuffer.length > 25) {
-            playVoice(sentenceBuffer);
-            sentenceBuffer = "";
+        if (data.type === 'text') {
+            botMsgDiv.textContent += data.content;
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        } else if (data.type === 'audio') {
+            audioQueue.push(data.url); //* 將接收到的 Media 網址加入佇列
+            if (!isAudioPlaying) {
+                playNextAudio();
+            }
         }
     };
 
     eventSource.onerror = () => {
-        if (sentenceBuffer) playVoice(sentenceBuffer);
         eventSource.close();
-        isSpeaking = false;
     };
 }
 
 sendBtn.addEventListener('click', () => {
     const val = userInput.value.trim();
     if (!val) return;
-    synth.speak(new SpeechSynthesisUtterance('')); // 解鎖語音
+
     const userDiv = document.createElement('div');
     userDiv.textContent = `[You] ${val}`;
     chatHistory.appendChild(userDiv);

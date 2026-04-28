@@ -19,20 +19,39 @@ llm_engine = Llama(
     verbose=False,
 )
 
-#! 設定 Edge-TTS 的聲音與語速 (選擇曉臻，聲音知性成熟)
+#! 設定 Edge-TTS 的聲音與語速
 VOICE = "zh-TW-HsiaoChenNeural"
 
-#! 建立一個存放音檔的暫存資料夾 (請確保此路徑存在)
-AUDIO_DIR = os.path.join(settings.BASE_DIR, "static", "audio_temp")
+#! 設定 Media 資料夾路徑存放暫存音檔
+AUDIO_DIR = os.path.join(settings.MEDIA_ROOT, "audio_temp")
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
 
+def cleanup_temp_audio():
+    """清理過期暫存音檔"""
+    #! 刪除超過兩分鐘的暫存音檔確保前端有足夠時間下載播放且不佔用伺服器空間
+    now = time.time()
+    for filename in os.listdir(AUDIO_DIR):
+        if filename.endswith(".mp3"):
+            file_path = os.path.join(AUDIO_DIR, filename)
+            if now - os.path.getctime(file_path) > 120:
+                try:
+                    os.remove(file_path)
+                except Exception:
+                    pass
+
+
 def chat_interface(request):
+    """渲染主介面"""
     return render(request, "bionic_chat/chat.html")
 
 
 def stream_llm_response(request):
+    """處理語言模型推論與音檔生成串流"""
     user_text = request.GET.get("message", "")
+
+    #! 每次產生新對話前自動清理過期的舊音檔
+    cleanup_temp_audio()
 
     #! 使用非同步函式來處理語音生成
     async def generate_audio(text, filename):
@@ -47,7 +66,7 @@ def stream_llm_response(request):
             }
         ]
 
-        #! 讀取並截斷歷史紀錄 (維持防爆設定)
+        #! 讀取並截斷歷史紀錄維持防爆設定
         history_qs = ChatHistory.objects.all().order_by("-created_at")[:3]
         for h in reversed(list(history_qs)):
             messages.append({"role": "user", "content": h.user_message[:150]})
@@ -56,7 +75,7 @@ def stream_llm_response(request):
         messages.append({"role": "user", "content": user_text})
 
         stream = llm_engine.create_chat_completion(
-            messages=messages,  # pyright: ignore
+            messages=messages,  # pyright: ignore[reportArgumentType]
             stream=True,
             max_tokens=512,
             temperature=0.3,
@@ -64,12 +83,12 @@ def stream_llm_response(request):
 
         full_response = ""
         sentence_buffer = ""
-        audio_counter = int(time.time())  # 產生唯一檔名
+        audio_counter = int(time.time())
 
         for chunk in stream:
-            delta = chunk["choices"][0]["delta"]  # pyright: ignore
+            delta = chunk["choices"][0]["delta"]  # pyright: ignore[reportArgumentType]
             if "content" in delta:
-                text_piece = delta["content"]  # pyright: ignore
+                text_piece = delta["content"]  # pyright: ignore[reportArgumentType]
                 if text_piece:
                     full_response += text_piece
                     sentence_buffer += text_piece
@@ -77,28 +96,28 @@ def stream_llm_response(request):
                     #! 傳送文字更新給前端
                     yield f"data: {json.dumps({'type': 'text', 'content': text_piece})}\n\n"
 
-                    #! 當累積到一個完整的斷句時，觸發 Edge-TTS 生成音檔
+                    #! 當累積到一個完整的斷句時觸發語音生成
                     if any(p in text_piece for p in "。！？；\n"):
                         clean_text = sentence_buffer.strip()
                         if len(clean_text) > 0:
                             filename = os.path.join(AUDIO_DIR, f"voice_{audio_counter}.mp3")
 
-                            #! 執行非同步的 TTS 任務
+                            #! 執行非同步任務
                             asyncio.run(generate_audio(clean_text, filename))
 
-                            #! 告訴前端音檔準備好了，請去播放
-                            audio_url = f"/static/audio_temp/voice_{audio_counter}.mp3"
+                            #! 將 Media 網址傳給前端
+                            audio_url = f"{settings.MEDIA_URL}audio_temp/voice_{audio_counter}.mp3"
                             yield f"data: {json.dumps({'type': 'audio', 'url': audio_url})}\n\n"
 
                             audio_counter += 1
-                            sentence_buffer = ""  # * 清空緩衝準備下一句
+                            sentence_buffer = ""
 
         #! 處理迴圈結束後剩餘的碎字
         clean_text = sentence_buffer.strip()
         if len(clean_text) > 0:
             filename = os.path.join(AUDIO_DIR, f"voice_{audio_counter}.mp3")
             asyncio.run(generate_audio(clean_text, filename))
-            audio_url = f"/static/audio_temp/voice_{audio_counter}.mp3"
+            audio_url = f"{settings.MEDIA_URL}audio_temp/voice_{audio_counter}.mp3"
             yield f"data: {json.dumps({'type': 'audio', 'url': audio_url})}\n\n"
 
         ChatHistory.objects.create(user_message=user_text, bot_response=full_response)
