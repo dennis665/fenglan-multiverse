@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CSI Server 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-22 11:05+0800\n"
+"POT-Creation-Date: 2026-04-28 14:38+0800\n"
 "PO-Revision-Date: 2026-04-13 10:15+0800\n"
 "Last-Translator: Gemini AI\n"
 "Language-Team: Japanese\n"
@@ -17,19 +17,50 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: .\bionic_chat\admin.py:31
+msgid "使用者內容截斷"
+msgstr "ユーザー内容の切り捨て"
+
+#: .\bionic_chat\admin.py:36
+msgid "仿生人回覆截斷"
+msgstr "バイオニック応答の切り捨て"
+
+#: .\bionic_chat\apps.py:7
+msgid "仿生人對話系統"
+msgstr "バイオニック対話システム"
+
+#: .\bionic_chat\models.py:8
+msgid "使用者輸入"
+msgstr "ユーザー入力"
+
+#: .\bionic_chat\models.py:12
+msgid "仿生人回覆"
+msgstr "バイオニック応答"
+
+#: .\bionic_chat\models.py:17 .\core\models.py:9 .\finance\models.py:38
+#: .\finance\models.py:76 .\finance\models.py:149 .\invest\models.py:58
+#: .\invest\models.py:93 .\sh_recognition\models.py:41
+#: .\study_brain\models.py:11 .\tube_hub\models.py:20 .\tube_hub\models.py:60
+msgid "建立時間"
+msgstr "作成日時"
+
+#: .\bionic_chat\models.py:21 .\bionic_chat\models.py:22
+msgid "對話紀錄"
+msgstr "対話履歴"
+
 #: .\config\consumers.py:23
 msgid "伺服器已收到"
 msgstr "サーバーが受信しました"
 
-#: .\config\settings.py:293
+#: .\config\settings.py:295
 msgid "繁體中文"
 msgstr "繁体中国語"
 
-#: .\config\settings.py:294
+#: .\config\settings.py:296
 msgid "英文"
 msgstr "英語"
 
-#: .\config\settings.py:295
+#: .\config\settings.py:297
 msgid "日文"
 msgstr "日本語"
 
@@ -165,12 +196,6 @@ msgstr "スタックトレース"
 msgid "任務執行期間發生異常的追蹤紀錄 (若有的話)。"
 msgstr "タスク実行中に発生した例外のトレースログ (ある場合)。"
 
-#: .\core\models.py:9 .\finance\models.py:38 .\finance\models.py:76
-#: .\finance\models.py:149 .\invest\models.py:58 .\invest\models.py:93
-#: .\study_brain\models.py:11 .\tube_hub\models.py:20 .\tube_hub\models.py:60
-msgid "建立時間"
-msgstr "作成日時"
-
 #: .\core\models.py:10 .\finance\models.py:12 .\invest\models.py:37
 #: .\notices\models.py:57
 msgid "更新時間"
@@ -247,462 +272,6 @@ msgstr "企業情報"
 #: .\core\models.py:61
 msgid "企業資訊管理"
 msgstr "企業情報管理"
-
-#: .\core\templates\core\feature_list.html:5
-#: .\core\templates\core\feature_list.html:11
-msgid "System Feature Permissions"
-msgstr "システム機能権限"
-
-#: .\core\templates\core\feature_list.html:13
-msgid "Last Updated"
-msgstr "最終更新"
-
-#: .\core\templates\core\feature_list.html:23
-msgid "Feature Module"
-msgstr "機能モジュール"
-
-#: .\core\templates\core\feature_list.html:24
-msgid "Global Status"
-msgstr "グローバル状態"
-
-#: .\core\templates\core\feature_list.html:25
-msgid "Guest"
-msgstr "ゲスト"
-
-#: .\core\templates\core\feature_list.html:26
-msgid "User"
-msgstr "ユーザー"
-
-#: .\core\templates\core\feature_list.html:27
-msgid "Staff"
-msgstr "スタッフ"
-
-#: .\core\templates\core\feature_list.html:28
-msgid "Administrator"
-msgstr "管理者"
-
-#: .\core\templates\core\feature_list.html:40
-msgid "Active"
-msgstr "有効"
-
-#: .\core\templates\core\feature_list.html:42
-msgid "Maintenance"
-msgstr "メンテナンス中"
-
-#: .\core\templates\core\feature_list.html:85
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "                提示：管理員可透過 Django Admin 後台即時調整各項功能的存取"
-#| "權限與全局啟動狀態。\n"
-#| "            "
-msgid ""
-"\n"
-"                提示：管理員可透過 Django Admin 後台即時調整各項功能的存取權"
-"限與全局啟動狀態。\n"
-"            "
-msgstr ""
-"\n"
-"                ヒント：管理者は Django Admin 管理画面から、各機能のアクセス"
-"権限およびグローバル有効状態をリアルタイムで調整できます。\n"
-"            "
-
-#: .\core\templates\core\lucky_draw.html:4 .\templates\includes\navbar.html:31
-msgid "Lucky Draw"
-msgstr "抽選会"
-
-#: .\core\templates\core\lucky_draw.html:12
-msgid "CSI Lucky Wheel"
-msgstr "CSI ラッキーホイール"
-
-#: .\core\templates\core\lucky_draw.html:19
-msgid "Prize Settings"
-msgstr "景品設定"
-
-#: .\core\templates\core\lucky_draw.html:22
-msgid "Ignore Probabilities (Fair Mode)"
-msgstr "確率を無視する (公平モード)"
-
-#: .\core\templates\core\lucky_draw.html:29
-#: .\core\templates\core\lucky_draw.html:127
-msgid "Prize Name"
-msgstr "景品名"
-
-#: .\core\templates\core\lucky_draw.html:30
-msgid "Weight"
-msgstr "重み"
-
-#: .\core\templates\core\lucky_draw.html:31
-msgid "Qty (-1=Inf)"
-msgstr "数量 (-1=無制限)"
-
-#: .\core\templates\core\lucky_draw.html:37
-msgid "Grand Prize"
-msgstr "特賞"
-
-#: .\core\templates\core\lucky_draw.html:44
-msgid "Add Prize"
-msgstr "景品を追加"
-
-#: .\core\templates\core\lucky_draw.html:50
-msgid "Import Participant List"
-msgstr "参加者リストをインポート"
-
-#: .\core\templates\core\lucky_draw.html:55
-msgid "Choose File"
-msgstr "ファイルを選択"
-
-#: .\core\templates\core\lucky_draw.html:58
-msgid "No file selected"
-msgstr "ファイルが選択されていません"
-
-#: .\core\templates\core\lucky_draw.html:62
-msgid "First column must be names"
-msgstr "最初の列は氏名である必要があります"
-
-#: .\core\templates\core\lucky_draw.html:76
-msgid "Start Draw"
-msgstr "抽選開始"
-
-#: .\core\templates\core\lucky_draw.html:86
-msgid "Winning Records"
-msgstr "当選記録"
-
-#: .\core\templates\core\lucky_draw.html:89
-msgid "Export Excel"
-msgstr "Excel出力"
-
-#: .\core\templates\core\lucky_draw.html:91
-msgid "Clear Records"
-msgstr "記録を消去"
-
-#: .\core\templates\core\lucky_draw.html:100
-msgid "Time"
-msgstr "時間"
-
-#: .\core\templates\core\lucky_draw.html:101
-msgid "Winner"
-msgstr "当選者"
-
-#: .\core\templates\core\lucky_draw.html:102
-msgid "Prize"
-msgstr "景品"
-
-#: .\core\templates\core\lucky_draw.html:107
-#: .\core\templates\core\lucky_draw.html:131
-msgid "No records yet"
-msgstr "記録がまだありません"
-
-#: .\core\templates\core\lucky_draw.html:119
-msgid "Imported"
-msgstr "インポート済み"
-
-#: .\core\templates\core\lucky_draw.html:120
-msgid "All prizes drawn!"
-msgstr "すべての景品が終了しました！"
-
-#: .\core\templates\core\lucky_draw.html:121
-msgid "Please import participant list first!"
-msgstr "先に参加者リストをインポートしてください！"
-
-#: .\core\templates\core\lucky_draw.html:122
-msgid "Congratulations"
-msgstr "おめでとうございます"
-
-#: .\core\templates\core\lucky_draw.html:123
-msgid "won"
-msgstr "が当選しました"
-
-#: .\core\templates\core\lucky_draw.html:124
-msgid "Are you sure you want to clear all records?"
-msgstr "すべての記録を消去してもよろしいですか？"
-
-#: .\core\templates\core\lucky_draw.html:125
-msgid "No records to export!"
-msgstr "出力する記録がありません！"
-
-#: .\core\templates\core\lucky_draw.html:126
-msgid "Prizes Sold Out"
-msgstr "景品終了"
-
-#: .\core\templates\core\lucky_draw.html:128
-msgid "Winner List"
-msgstr "当選者一覧"
-
-#: .\core\templates\core\lucky_draw.html:129
-msgid "No."
-msgstr "No."
-
-#: .\core\templates\core\lucky_draw.html:129
-msgid "Draw Time"
-msgstr "抽選日時"
-
-#: .\core\templates\core\lucky_draw.html:129
-msgid "Winner Name"
-msgstr "当選者名"
-
-#: .\core\templates\core\lucky_draw.html:129
-msgid "Award"
-msgstr "賞品"
-
-#: .\core\templates\core\lucky_draw.html:130
-msgid "Remaining"
-msgstr "残り"
-
-#: .\core\templates\core\profile.html:5 .\core\templates\core\profile.html:19
-msgid "User Profile"
-msgstr "ユーザープロフィール"
-
-#: .\core\templates\core\profile.html:41
-msgid "Change Photo"
-msgstr "写真を変更"
-
-#: .\core\templates\core\profile.html:46
-msgid "Last Login"
-msgstr "最終ログイン"
-
-#: .\core\templates\core\profile.html:58
-msgid "My Wallet"
-msgstr "マイウォレット"
-
-#: .\core\templates\core\profile.html:62
-#: .\finance\templates\finance\shop.html:28
-msgid "Deposit Points"
-msgstr "チャージポイント"
-
-#: .\core\templates\core\profile.html:68
-#: .\finance\templates\finance\shop.html:33
-msgid "Bonus Points"
-msgstr "ボーナスポイント"
-
-#: .\core\templates\core\profile.html:75
-#: .\finance\templates\finance\recharge_store.html:75
-msgid "Recharge Now"
-msgstr "今すぐチャージ"
-
-#: .\core\templates\core\profile.html:78
-msgid "Go Shopping"
-msgstr "ショップへ行く"
-
-#: .\core\templates\core\profile.html:87
-msgid "Transaction History"
-msgstr "取引履歴"
-
-#: .\core\templates\core\profile.html:93
-#: .\core\templates\core\ticket_pull.html:40
-#: .\study_brain\templates\study_brain\quiz_history.html:26
-msgid "Date"
-msgstr "日付"
-
-#: .\core\templates\core\profile.html:94
-msgid "Description"
-msgstr "詳細"
-
-#: .\core\templates\core\profile.html:95
-msgid "Amount"
-msgstr "金額"
-
-#: .\core\templates\core\profile.html:117
-msgid "No records found."
-msgstr "記録が見つかりませんでした。"
-
-#: .\core\templates\core\ticket_pull.html:4
-#: .\core\templates\core\ticket_pull.html:13
-msgid "Outgoing Ledger System"
-msgstr "文書発信管理システム"
-
-#: .\core\templates\core\ticket_pull.html:19
-msgid "Subject (Max 20 chars)"
-msgstr "件名 (最大20文字)"
-
-#: .\core\templates\core\ticket_pull.html:20
-msgid "Please enter application subject"
-msgstr "申請の件名を入力してください"
-
-#: .\core\templates\core\ticket_pull.html:23
-msgid "Applicant (Max 10 chars)"
-msgstr "申請者 (最大10文字)"
-
-#: .\core\templates\core\ticket_pull.html:24
-msgid "Please enter name"
-msgstr "お名前を入力してください"
-
-#: .\core\templates\core\ticket_pull.html:27
-msgid "Get Number Now"
-msgstr "今すぐ採番する"
-
-#: .\core\templates\core\ticket_pull.html:35
-msgid "Recent 3 Records"
-msgstr "最近の3件の記録"
-
-#: .\core\templates\core\ticket_pull.html:41
-msgid "Serial Number"
-msgstr "シリアル番号"
-
-#: .\core\templates\core\ticket_pull.html:42
-#: .\core\templates\core\ticket_success.html:34
-msgid "Applicant"
-msgstr "申請者"
-
-#: .\core\templates\core\ticket_pull.html:43
-#: .\core\templates\core\ticket_success.html:42
-msgid "Subject"
-msgstr "件名"
-
-#: .\core\templates\core\ticket_pull.html:56
-msgid "No records found"
-msgstr "記録が見つかりません"
-
-#: .\core\templates\core\ticket_success.html:4
-msgid "Ticket Generated Successfully"
-msgstr "採番が正常に完了しました"
-
-#: .\core\templates\core\ticket_success.html:18
-msgid "Success!"
-msgstr "成功！"
-
-#: .\core\templates\core\ticket_success.html:22
-msgid "Your unique outgoing serial number is:"
-msgstr "あなたの固有文書番号は以下の通りです:"
-
-#: .\core\templates\core\ticket_success.html:35
-#: .\core\templates\core\ticket_success.html:43
-msgid "(Not provided)"
-msgstr "(未入力)"
-
-#: .\core\templates\core\ticket_success.html:38
-msgid "Date Applied"
-msgstr "申請日"
-
-#: .\core\templates\core\ticket_success.html:52
-msgid "Copy Number"
-msgstr "番号をコピー"
-
-#: .\core\templates\core\ticket_success.html:55
-msgid "Print Certificate"
-msgstr "証明書を印刷"
-
-#: .\core\templates\core\ticket_success.html:58
-msgid "Continue Drawing"
-msgstr "続けて採番"
-
-#: .\core\templates\core\ticket_success.html:65
-msgid "Notice: Please keep this number carefully for future reference."
-msgstr "注意: この番号は将来の参照のために大切に保管してください。"
-
-#: .\core\templates\core\ticket_success.html:75
-msgid "Serial number copied to clipboard"
-msgstr "番号をクリップボードにコピーしました"
-
-#: .\core\templates\core\tigf_dashboard.html:4
-msgid "Data Verification Dashboard"
-msgstr "データ照合ダッシュボード"
-
-#: .\core\templates\core\tigf_dashboard.html:12
-msgid "Report File"
-msgstr "レポートファイル"
-
-#: .\core\templates\core\tigf_dashboard.html:18
-msgid "Template File"
-msgstr "テンプレートファイル"
-
-#: .\core\templates\core\tigf_dashboard.html:24
-msgid "Database File"
-msgstr "データベースファイル"
-
-#: .\core\templates\core\tigf_dashboard.html:41
-msgid "Mapping Check"
-msgstr "マッピングチェック"
-
-#: .\core\templates\core\tigf_dashboard.html:44
-msgid "Comparison Results"
-msgstr "照合結果"
-
-#: .\core\templates\core\tigf_dashboard.html:63
-#: .\core\templates\core\tigf_dashboard.html:117
-msgid "No files detected"
-msgstr "ファイルが検出されませんでした"
-
-#: .\core\templates\core\tigf_dashboard.html:74
-msgid "ID"
-msgstr "ID"
-
-#: .\core\templates\core\tigf_dashboard.html:75
-#: .\core\templates\core\tigf_dashboard.html:118
-msgid "Report"
-msgstr "レポート"
-
-#: .\core\templates\core\tigf_dashboard.html:76
-msgid "Template"
-msgstr "テンプレート"
-
-#: .\core\templates\core\tigf_dashboard.html:77
-msgid "Database"
-msgstr "データベース"
-
-#: .\core\templates\core\tigf_dashboard.html:86
-#: .\core\templates\core\tigf_dashboard.html:122
-msgid "Start Data Comparison"
-msgstr "データ照合を開始"
-
-#: .\core\templates\core\tigf_dashboard.html:95
-#, python-format
-msgid "編號 %(fid)s 的差異數：%(count)s"
-msgstr "ID %(fid)s の差異数：%(count)s"
-
-#: .\core\templates\core\tigf_dashboard.html:96
-msgid "Download CSV"
-msgstr "CSVをダウンロード"
-
-#: .\core\templates\core\tigf_dashboard.html:99
-#: .\core\templates\core\tigf_dashboard.html:123
-msgid "No comparison data"
-msgstr "照合データがありません"
-
-#: .\core\templates\core\tigf_dashboard.html:116
-msgid "Upload Error"
-msgstr "アップロードエラー"
-
-#: .\core\templates\core\tigf_dashboard.html:119
-msgid "Company"
-msgstr "会社名"
-
-#: .\core\templates\core\tigf_dashboard.html:120
-msgid "Comparing..."
-msgstr "照合中..."
-
-#: .\core\templates\core\tigf_dashboard.html:121
-msgid "Comparison failed, please re-upload modified files"
-msgstr "照合に失敗しました。修正したファイルを再度アップロードしてください"
-
-#: .\core\templates\core\tigf_dashboard.html:124
-msgid "Download Difference List"
-msgstr "差異リストをダウンロード"
-
-#: .\core\templates\core\tigf_dashboard.html:125
-msgid "Data Consistent"
-msgstr "データ一致"
-
-#: .\core\templates\core\tigf_dashboard.html:126
-#, python-brace-format
-msgid "Detected {count} cell differences"
-msgstr "{count} セルの差異を検出しました"
-
-#: .\core\templates\core\tigf_dashboard.html:127
-msgid "Content matches database perfectly"
-msgstr "内容がデータベースと完全に一致します"
-
-#: .\core\templates\core\tigf_dashboard.html:128
-msgid "Has Differences"
-msgstr "差異あり"
-
-#: .\core\templates\core\tigf_dashboard.html:129
-msgid "Fully Matched"
-msgstr "完全一致"
-
-#: .\core\templates\csi_info\csi_info.html:11
-msgid "CSI 企業內部資訊"
-msgstr "CSI 企業内情報"
 
 #: .\core\views.py:36
 msgid "Avatar updated successfully!"
@@ -902,150 +471,6 @@ msgstr "台湾ドル実支払額"
 msgid "點數購物訂單"
 msgstr "ポイント購入注文"
 
-#: .\finance\templates\finance\recharge_store.html:4
-#: .\templates\includes\navbar.html:46
-msgid "Point Recharge"
-msgstr "ポイントチャージ"
-
-#: .\finance\templates\finance\recharge_store.html:15
-msgid "Point Recharge Center"
-msgstr "ポイントチャージセンター"
-
-#: .\finance\templates\finance\recharge_store.html:18
-msgid ""
-"Choose the best recharge plan for you to enjoy exclusive bonus rewards and "
-"shopping experiences."
-msgstr ""
-"あなたに最適なチャージプランを選んで、限定ボーナス特典とショッピング体験をお"
-"楽しみください。"
-
-#: .\finance\templates\finance\recharge_store.html:29
-msgid "Recommended"
-msgstr "おすすめ"
-
-#: .\finance\templates\finance\recharge_store.html:49
-#, python-format
-msgid ""
-"\n"
-"                                    獲得 <strong>%(points)s</strong> 點\n"
-"                                "
-msgstr ""
-
-#: .\finance\templates\finance\recharge_store.html:59
-#, python-format
-msgid ""
-"\n"
-"                                    + %(bonus)s 紅利點數\n"
-"                                "
-msgstr ""
-
-#: .\finance\templates\finance\recharge_store.html:67
-msgid "No extra bonus"
-msgstr "追加ボーナスなし"
-
-#: .\finance\templates\finance\recharge_store.html:85
-msgid "No recharge packages available at the moment."
-msgstr "現在利用可能なチャージプランがありません。"
-
-#: .\finance\templates\finance\shop.html:4 .\templates\includes\navbar.html:51
-msgid "Point Shop"
-msgstr "ポイントショップ"
-
-#: .\finance\templates\finance\shop.html:15
-msgid "CSI Point Shop"
-msgstr "CSI ポイントショップ"
-
-#: .\finance\templates\finance\shop.html:17
-msgid "Redeem your points for rich products and exclusive rights"
-msgstr "ポイントを豊富な商品や限定特典と交換しましょう"
-
-#: .\finance\templates\finance\shop.html:25
-msgid "Asset Overview"
-msgstr "資産概要"
-
-#: .\finance\templates\finance\shop.html:29
-#: .\finance\templates\finance\shop.html:34
-#: .\finance\templates\finance\shop.html:76
-msgid "Points"
-msgstr "ポイント"
-
-#: .\finance\templates\finance\shop.html:40
-msgid "Go to Recharge"
-msgstr "チャージへ"
-
-#: .\finance\templates\finance\shop.html:56
-#, python-format
-msgid "Almost Sold Out (%(stock)s left)"
-msgstr "残りわずか (残り %(stock)s)"
-
-#: .\finance\templates\finance\shop.html:59
-msgid "Sold Out"
-msgstr "売り切れ"
-
-#: .\finance\templates\finance\shop.html:87
-msgid "Bonus Deduction"
-msgstr "ボーナス割引"
-
-#: .\finance\templates\finance\shop.html:88
-#, python-format
-msgid "Max %(price)s points"
-msgstr "最大 %(price)s ポイント"
-
-#: .\finance\templates\finance\shop.html:97
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                                    將扣除 <strong class=\"text-primary "
-#| "deposit-calc\">%(points)s</strong> 儲值點\n"
-#| "                                "
-msgid ""
-"\n"
-"                                    將扣除 <strong class=\"text-primary "
-"deposit-calc\">%(points)s</strong> 儲值點\n"
-"                                "
-msgstr ""
-"\n"
-"                                    <strong class=\"text-primary deposit-"
-"calc\">%(points)s</strong> チャージポイントが差し引かれます\n"
-"                                "
-
-#: .\finance\templates\finance\shop.html:107
-msgid "Restocking"
-msgstr "入荷待ち"
-
-#: .\finance\templates\finance\shop.html:109
-msgid "Redeem Now"
-msgstr "今すぐ交換"
-
-#: .\finance\templates\finance\shop.html:120
-msgid "The shop is currently under preparation, please stay tuned!"
-msgstr "ショップは現在準備中です。乞うご期待ください！"
-
-#: .\finance\templates\finance\shop.html:135
-msgid "Confirm Redemption?"
-msgstr "交換を確認しますか？"
-
-#: .\finance\templates\finance\shop.html:136
-msgid "You are about to redeem <span id=\"modal-prod-name\"></span>"
-msgstr "<span id=\"modal-prod-name\"></span> を交換しようとしています"
-
-#: .\finance\templates\finance\shop.html:138
-msgid "Cancel"
-msgstr "キャンセル"
-
-#: .\finance\templates\finance\shop.html:139
-#: .\templates\account\email_confirm.html:33
-msgid "Confirm"
-msgstr "確認"
-
-#: .\finance\templates\finance\shop.html:155
-msgid "Redeemed Successfully!"
-msgstr "交換が正常に完了しました！"
-
-#: .\finance\templates\finance\shop.html:156
-msgid "Click anywhere to close"
-msgstr "どこかをクリックして閉じる"
-
 #: .\games\admin.py:25
 msgid "基本資訊"
 msgstr "基本情報"
@@ -1062,7 +487,7 @@ msgstr "バーチャルライフ - 記録と成長"
 msgid "圖片預覽"
 msgstr "画像プレビュー"
 
-#: .\games\apps.py:7 .\games\templates\games\lobby.html:29
+#: .\games\apps.py:7 .\templates\games\lobby.html:29
 msgid "遊戲中心"
 msgstr "ゲームセンター"
 
@@ -1262,11 +687,11 @@ msgstr "獲得ゴールド"
 msgid "魔塔-怪物圖鑑"
 msgstr "魔塔-モンスター図鑑"
 
-#: .\games\models.py:148 .\games\templates\games\magic_tower.html:98
+#: .\games\models.py:148 .\templates\games\magic_tower.html:98
 msgid "職業"
 msgstr "職業"
 
-#: .\games\models.py:149 .\games\templates\games\magic_tower.html:101
+#: .\games\models.py:149 .\templates\games\magic_tower.html:101
 msgid "等級"
 msgstr "レベル"
 
@@ -1301,195 +726,6 @@ msgstr "クリア済み階層"
 #: .\games\models.py:163 .\games\models.py:164
 msgid "魔塔-玩家存檔"
 msgstr "魔塔-プレイヤーセーブ"
-
-#: .\games\templates\games\lobby.html:7
-msgid "遊戲大廳"
-msgstr "ゲームロビー"
-
-#: .\games\templates\games\lobby.html:47
-#: .\games\templates\games\survivor.html:7
-#: .\games\templates\games\survivor.html:30
-msgid "倖存者生存"
-msgstr "サバイバー生存"
-
-#: .\games\templates\games\lobby.html:48
-msgid "在無盡的怪物浪潮中生存，利用局外養成提升基礎戰力。"
-msgstr ""
-"迫りくるモンスターの群れから生き残り、育成要素で基礎戦力を強化しましょう。"
-
-#: .\games\templates\games\lobby.html:50
-msgid "最高存活"
-msgstr "最高生存記録"
-
-#: .\games\templates\games\lobby.html:50
-msgid "秒"
-msgstr "秒"
-
-#: .\games\templates\games\lobby.html:51 .\games\templates\games\lobby.html:67
-msgid "進入大廳"
-msgstr "ロビーに入る"
-
-#: .\games\templates\games\lobby.html:63
-msgid "虛擬人生 (輕量版)"
-msgstr "バーチャルライフ (ライト版)"
-
-#: .\games\templates\games\lobby.html:64
-msgid "擲骰子決定命運，經歷各種隨機事件，賺取金錢並培養角色。"
-msgstr ""
-"ダイスで運命を決め、様々なイベントを乗り越えながら、お金を稼いでキャラを育成"
-"しましょう。"
-
-#: .\games\templates\games\lobby.html:66
-msgid "通關關卡等級"
-msgstr "クリア済みステージ"
-
-#: .\games\templates\games\lobby.html:79
-#: .\games\templates\games\magic_tower.html:38
-msgid "魔塔冒險"
-msgstr "魔塔アドベンチャー"
-
-#: .\games\templates\games\lobby.html:80
-msgid "精算血量與資源，選擇合適的職業挑戰深邃的魔塔。"
-msgstr "体力とリソースを計算し、最適な職業を選んで謎深き魔塔に挑みましょう。"
-
-#: .\games\templates\games\lobby.html:82
-msgid "最高探索"
-msgstr "最高探索階層"
-
-#: .\games\templates\games\lobby.html:82
-#: .\games\templates\games\magic_tower.html:45
-msgid "樓"
-msgstr "階"
-
-#: .\games\templates\games\lobby.html:83
-#: .\games\templates\games\magic_tower.html:80
-msgid "進入魔塔"
-msgstr "魔塔に入る"
-
-#: .\games\templates\games\magic_tower.html:7
-#: .\games\templates\games\magic_tower.html:93
-msgid "魔塔"
-msgstr "魔塔"
-
-#: .\games\templates\games\magic_tower.html:42
-#: .\games\templates\games\virtual_life.html:34
-msgid "持有金幣"
-msgstr "所持コイン"
-
-#: .\games\templates\games\magic_tower.html:45
-msgid "目前最高突破"
-msgstr "現在の最高突破階層"
-
-#: .\games\templates\games\magic_tower.html:52
-msgid "血量"
-msgstr "体力"
-
-#: .\games\templates\games\magic_tower.html:61
-msgid "攻擊"
-msgstr "攻撃"
-
-#: .\games\templates\games\magic_tower.html:70
-msgid "防禦"
-msgstr "防御"
-
-#: .\games\templates\games\magic_tower.html:83
-msgid "返回遊戲中心"
-msgstr "ゲームセンターに戻る"
-
-#: .\games\templates\games\magic_tower.html:118
-msgid "黃鑰"
-msgstr "黄の鍵"
-
-#: .\games\templates\games\magic_tower.html:121
-msgid "藍鑰"
-msgstr "青の鍵"
-
-#: .\games\templates\games\magic_tower.html:129
-msgid "存檔"
-msgstr "セーブ"
-
-#: .\games\templates\games\magic_tower.html:130
-msgid "重置"
-msgstr "リセット"
-
-#: .\games\templates\games\magic_tower.html:131
-msgid "圖鑑"
-msgstr "図鑑"
-
-#: .\games\templates\games\magic_tower.html:132
-msgid "離開"
-msgstr "退出"
-
-#: .\games\templates\games\magic_tower.html:156
-msgid "選擇你的職業"
-msgstr "職業を選択してください"
-
-#: .\games\templates\games\magic_tower.html:157
-msgid "將會加上你局外的能力加成"
-msgstr "ゲーム外の能力ボーナスが適用されます"
-
-#: .\games\templates\games\magic_tower.html:160
-msgid "聖騎士 (高血防)"
-msgstr "パラディン (高HP/防御)"
-
-#: .\games\templates\games\magic_tower.html:163
-msgid "戰士 (能力平均)"
-msgstr "戦士 (バランス型)"
-
-#: .\games\templates\games\magic_tower.html:166
-msgid "魔法師 (高攻擊)"
-msgstr "メイジ (高攻撃)"
-
-#: .\games\templates\games\survivor.html:34
-msgid "金幣"
-msgstr "コイン"
-
-#: .\games\templates\games\survivor.html:38
-msgid "選擇挑戰關卡"
-msgstr "ステージを選択"
-
-#: .\games\templates\games\survivor.html:70
-#: .\games\templates\games\virtual_life.html:67
-msgid "回到遊戲中心"
-msgstr ""
-
-#: .\games\templates\games\virtual_life.html:7
-#: .\games\templates\games\virtual_life.html:30
-msgid "虛擬人生 RPG"
-msgstr ""
-
-#: .\games\templates\games\virtual_life.html:37
-msgid "目前關卡等級"
-msgstr "現在のステージレベル"
-
-#: .\games\templates\games\virtual_life.html:44
-msgid "初始血量"
-msgstr "初期体力"
-
-#: .\games\templates\games\virtual_life.html:47
-#: .\games\templates\games\virtual_life.html:56
-msgid "升級"
-msgstr "アップグレード"
-
-#: .\games\templates\games\virtual_life.html:53
-msgid "初始攻擊"
-msgstr "初期攻撃力"
-
-#: .\games\templates\games\virtual_life.html:63
-msgid "開始冒險"
-msgstr "冒険を始める"
-
-#: .\games\templates\games\virtual_life.html:97
-msgid "擲骰子"
-msgstr "ダイスを振る"
-
-#: .\games\templates\games\virtual_life.html:105
-msgid "離開遊戲"
-msgstr "ゲームを終了"
-
-#: .\games\templates\games\virtual_life.html:117
-msgid "怪物 HP"
-msgstr "モンスター HP"
 
 #: .\invest\apps.py:7
 msgid "投資理財"
@@ -1677,224 +913,6 @@ msgstr "現在の保有銘柄"
 msgid "股"
 msgstr "株"
 
-#: .\invest\templates\invest\ai_plan_result.html:5
-msgid "AI Financial Planning Report"
-msgstr "AI 資産運用計画レポート"
-
-#: .\invest\templates\invest\ai_plan_result.html:14
-msgid "Your Personalized AI Financial Plan"
-msgstr "あなたのパーソナライズ AI 運用計画"
-
-#: .\invest\templates\invest\ai_plan_result.html:16
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                        基於您的目標：%(years)s 年後達成每月 $%(income)s "
-#| "被動收入\n"
-#| "                    "
-msgid ""
-"\n"
-"                        基於您的目標：%(years)s 年後達成每月 $%(income)s 被動"
-"收入\n"
-"                    "
-msgstr ""
-"\n"
-"                        目標設定：%(years)s 年後に毎月 $%(income)s の不労所得"
-"を達成する\n"
-"                    "
-
-#: .\invest\templates\invest\ai_plan_result.html:28
-msgid "AI Estimated Annual Return"
-msgstr "AI 予想年間収益率"
-
-#: .\invest\templates\invest\ai_plan_result.html:34
-msgid "Recommended ETF Allocation List"
-msgstr "推奨 ETF 配分リスト"
-
-#: .\invest\templates\invest\ai_plan_result.html:54
-#: .\study_brain\templates\study_brain\quiz_history.html:12
-#: .\study_brain\templates\study_brain\quiz_result.html:104
-msgid "Back to Dashboard"
-msgstr "ダッシュボードに戻る"
-
-#: .\invest\templates\invest\ai_plan_result.html:63
-msgid "Apply This Strategy Goal"
-msgstr "この戦略目標を適用する"
-
-#: .\invest\templates\invest\dashboard.html:4
-#: .\invest\templates\invest\dashboard.html:9
-msgid "Investment Portfolio Dashboard"
-msgstr "投資ポートフォリオ・ダッシュボード"
-
-#: .\invest\templates\invest\dashboard.html:17
-msgid "Total Market Value"
-msgstr "評価額合計"
-
-#: .\invest\templates\invest\dashboard.html:19
-msgid "Total Cost"
-msgstr "投資額合計"
-
-#: .\invest\templates\invest\dashboard.html:27
-#: .\invest\templates\invest\dashboard.html:134
-msgid "Unrealized PnL"
-msgstr "評価損益"
-
-#: .\invest\templates\invest\dashboard.html:32
-msgid "Return Rate"
-msgstr "収益率"
-
-#: .\invest\templates\invest\dashboard.html:41
-msgid "Realized PnL"
-msgstr "実現損益"
-
-#: .\invest\templates\invest\dashboard.html:46
-msgid "Incl. Dividends"
-msgstr "配当含む"
-
-#: .\invest\templates\invest\dashboard.html:61
-msgid "Target Monthly Income"
-msgstr "目標月間収入"
-
-#: .\invest\templates\invest\dashboard.html:72
-msgid "Expected Yield"
-msgstr "期待利回り"
-
-#: .\invest\templates\invest\dashboard.html:83
-msgid "Recalculate"
-msgstr "再計算"
-
-#: .\invest\templates\invest\dashboard.html:95
-msgid "Required Capital"
-msgstr "必要資金"
-
-#: .\invest\templates\invest\dashboard.html:108
-msgid "Enter symbol to check history (e.g. 0050)"
-msgstr "コードを入力して履歴を確認 (例: 0050)"
-
-#: .\invest\templates\invest\dashboard.html:109
-msgid "Search"
-msgstr "検索"
-
-#: .\invest\templates\invest\dashboard.html:114
-msgid "Expand Market Data"
-msgstr "市場データを展開"
-
-#: .\invest\templates\invest\dashboard.html:124
-msgid "Holdings"
-msgstr "保有銘柄"
-
-#: .\invest\templates\invest\dashboard.html:130
-msgid "Symbol"
-msgstr "コード"
-
-#: .\invest\templates\invest\dashboard.html:131
-msgid "Shares"
-msgstr "株数"
-
-#: .\invest\templates\invest\dashboard.html:132
-msgid "Avg Cost / Current"
-msgstr "平均取得 / 現在値"
-
-#: .\invest\templates\invest\dashboard.html:133
-msgid "Market Value"
-msgstr "時価評価額"
-
-#: .\invest\templates\invest\dashboard.html:169
-msgid "Your AI Financial Advisor"
-msgstr "あなたの AI 財務アドバイザー"
-
-#: .\invest\templates\invest\dashboard.html:170
-msgid "Your portfolio is currently empty. Not sure where to start?"
-msgstr "現在ポートフォリオが空です。何から始めればいいか迷っていますか？"
-
-#: .\invest\templates\invest\dashboard.html:170
-msgid ""
-"Fill out the information below to let AI generate a customized ETF "
-"allocation plan for you!"
-msgstr ""
-"以下の情報を入力して、AIにあなた専用の ETF 配分計画を作成させましょう！"
-
-#: .\invest\templates\invest\dashboard.html:186
-msgid "Generate Custom Plan"
-msgstr "カスタムプランを作成"
-
-#: .\invest\templates\invest\dashboard.html:205
-msgid "Record Transaction"
-msgstr "取引を記録"
-
-#: .\invest\templates\invest\dashboard.html:218
-msgid "Submit Record"
-msgstr "記録を送信"
-
-#: .\invest\templates\invest\dashboard.html:228
-msgid "Market Data & Analysis"
-msgstr "市場データ・分析"
-
-#: .\invest\templates\invest\dashboard.html:234
-msgid "Asset Allocation"
-msgstr "資産配分"
-
-#: .\invest\templates\invest\dashboard.html:243
-#: .\invest\templates\invest\dashboard.html:258
-#, python-format
-msgid "Top 10 Gainers (%%)"
-msgstr "値上がり率 Top 10 (%%)"
-
-#: .\invest\templates\invest\dashboard.html:250
-#: .\invest\templates\invest\dashboard.html:265
-#, python-format
-msgid "Top 10 Losers (%%)"
-msgstr "値下がり率 Top 10 (%%)"
-
-#: .\invest\templates\invest\dashboard.html:273
-msgid "Highest Priced Stocks Top 10"
-msgstr "値がさ株 Top 10"
-
-#: .\invest\templates\invest\dashboard.html:280
-msgid "Penny Stocks Top 10"
-msgstr "低位株 Top 10"
-
-#: .\invest\templates\invest\dashboard.html:293
-msgid "Loading..."
-msgstr "読み込み中..."
-
-#: .\invest\templates\invest\dashboard.html:307
-msgid "AI is planning for you, please wait..."
-msgstr "AIが計画を策定中です。お待ちください..."
-
-#: .\invest\templates\invest\dashboard.html:308
-#, python-format
-msgid "Change (%%)"
-msgstr "騰落率 (%%)"
-
-#: .\invest\templates\invest\dashboard.html:309
-msgid "Price"
-msgstr "価格"
-
-#: .\invest\templates\invest\dashboard.html:310
-msgid "Loading data for"
-msgstr "データを読み込んでいます："
-
-#: .\invest\templates\invest\dashboard.html:311
-msgid "Failed to load data:"
-msgstr "データの読み込みに失敗しました："
-
-#: .\invest\templates\invest\dashboard.html:312
-msgid "6-Month Trend"
-msgstr "6ヶ月のトレンド"
-
-#: .\invest\templates\invest\dashboard.html:313
-msgid "Close Price"
-msgstr "終値"
-
-#: .\invest\templates\invest\dashboard.html:314
-msgid "Network Error"
-msgstr "ネットワークエラー"
-
-#: .\invest\templates\invest\dashboard.html:315
-msgid "Please enter a stock symbol first!"
-msgstr "先に銘柄コードを入力してください！"
-
 #: .\media_studio\forms.py:27
 msgid "選擇圖片"
 msgstr "画像を選択"
@@ -1961,7 +979,9 @@ msgstr "出力画質 (0-100)"
 
 #: .\media_studio\forms.py:80
 msgid "數值越高畫質越好，但檔案越大 (建議 50-80)"
-msgstr "数値が高いほど画質は良くなりますが、ファイルサイズが大きくなります (推奨: 50-80)"
+msgstr ""
+"数値が高いほど画質は良くなりますが、ファイルサイズが大きくなります (推奨: "
+"50-80)"
 
 #: .\media_studio\forms.py:83
 msgid "縮放解析度"
@@ -1971,67 +991,9 @@ msgstr "解像度のリサイズ"
 msgid "原始尺寸"
 msgstr "元のサイズ"
 
-#: .\media_studio\templates\media_studio\studio.html:6
-#: .\media_studio\views.py:25
+#: .\media_studio\views.py:25 .\templates\media_studio\studio.html:6
 msgid "多媒體處理工作室"
 msgstr "マルチメディア処理スタジオ"
-
-#: .\media_studio\templates\media_studio\studio.html:11
-msgid "圖片處理"
-msgstr "画像処理"
-
-#: .\media_studio\templates\media_studio\studio.html:16
-msgid "影片編輯"
-msgstr "動画編集"
-
-#: .\media_studio\templates\media_studio\studio.html:35
-msgid "預計輸出解析度"
-msgstr "予想出力解像度"
-
-#: .\media_studio\templates\media_studio\studio.html:40
-msgid "開始處理圖片"
-msgstr "画像の処理を開始"
-
-#: .\media_studio\templates\media_studio\studio.html:52
-#: .\media_studio\templates\media_studio\studio.html:116
-msgid "處理完成"
-msgstr "処理完了"
-
-#: .\media_studio\templates\media_studio\studio.html:58
-msgid "原始大小"
-msgstr "元のサイズ"
-
-#: .\media_studio\templates\media_studio\studio.html:62
-msgid "處理後大小"
-msgstr "処理後のサイズ"
-
-#: .\media_studio\templates\media_studio\studio.html:71
-msgid "解析度已變更"
-msgstr "解像度が変更されました"
-
-#: .\media_studio\templates\media_studio\studio.html:80
-msgid "下載處理後的圖片"
-msgstr "処理した画像をダウンロード"
-
-#: .\media_studio\templates\media_studio\studio.html:105
-msgid "開始處理影片"
-msgstr "動画の処理を開始"
-
-#: .\media_studio\templates\media_studio\studio.html:119
-msgid "總原始大小"
-msgstr "元の合計サイズ"
-
-#: .\media_studio\templates\media_studio\studio.html:120
-msgid "壓縮後大小"
-msgstr "圧縮後のサイズ"
-
-#: .\media_studio\templates\media_studio\studio.html:121
-msgid "輸出規格"
-msgstr "出力仕様"
-
-#: .\media_studio\templates\media_studio\studio.html:126
-msgid "下載處理後的影片"
-msgstr "処理した動画をダウンロード"
 
 #: .\media_studio\views.py:199
 msgid "原始解析度"
@@ -2181,65 +1143,78 @@ msgstr "採番者"
 msgid "發文簿紀錄"
 msgstr "文書採番記録"
 
-#: .\notices\templates\notices\detail.html:12
-#: .\notices\templates\notices\list.html:4
-msgid "Notice List"
-msgstr "お知らせ一覧"
+#: .\sh_recognition\apps.py:7
+msgid "世祥辨識"
+msgstr "世祥認識システム"
 
-#: .\notices\templates\notices\detail.html:14
-msgid "Notice Detail"
-msgstr "お知らせ詳細"
+#: .\sh_recognition\models.py:9
+msgid "模型版本名稱"
+msgstr "モデルバージョン名"
 
-#: .\notices\templates\notices\detail.html:23
-#: .\notices\templates\notices\list.html:36
-msgid "Pinned"
-msgstr "固定"
+#: .\sh_recognition\models.py:12
+msgid "模型檔案 (.pth)"
+msgstr "モデルファイル (.pth)"
 
-#: .\notices\templates\notices\detail.html:31
-#: .\notices\templates\notices\list.html:25
-msgid "Author"
-msgstr "投稿者"
+#: .\sh_recognition\models.py:14 .\study_brain\models.py:35
+msgid "上傳時間"
+msgstr "アップロード日時"
 
-#: .\notices\templates\notices\detail.html:34
-msgid "Posted"
-msgstr "投稿日"
+#: .\sh_recognition\models.py:17
+msgid "AI 模型"
+msgstr "AI モデル"
 
-#: .\notices\templates\notices\detail.html:38
-msgid "Updated at"
-msgstr "更新日"
+#: .\sh_recognition\models.py:18
+msgid "AI 模型管理"
+msgstr "AI モデル管理"
 
-#: .\notices\templates\notices\detail.html:51
-msgid "Back to List"
-msgstr "一覧に戻る"
+#: .\sh_recognition\models.py:26
+msgid "原始圖片"
+msgstr "元の画像"
 
-#: .\notices\templates\notices\list.html:11 .\templates\includes\navbar.html:26
-msgid "Notices"
-msgstr "お知らせ"
+#: .\sh_recognition\models.py:28
+msgid "辨識結果圖片"
+msgstr "認識結果画像"
 
-#: .\notices\templates\notices\list.html:14
-#, python-format
-msgid "共 %(count)s 則公告"
-msgstr "全 %(count)s 件のお知らせ"
+#: .\sh_recognition\models.py:33
+msgid "辨識文字結果"
+msgstr "テキスト認識結果"
 
-#: .\notices\templates\notices\list.html:23
-msgid "Type"
-msgstr "タイプ"
+#: .\sh_recognition\models.py:35
+msgid "是否有辨識到物體"
+msgstr "物体の検出有無"
 
-#: .\notices\templates\notices\list.html:24
-msgid "Title"
-msgstr "タイトル"
+#: .\sh_recognition\models.py:36
+msgid "使用信心閥值"
+msgstr "使用された信頼度しきい値"
 
-#: .\notices\templates\notices\list.html:26
-msgid "Date Posted"
-msgstr "投稿日"
+#: .\sh_recognition\models.py:37
+#: .\templates\sh_recognition\record_detail.html:29
+msgid "使用者註記"
+msgstr "ユーザーメモ"
 
-#: .\notices\templates\notices\list.html:40
-msgid "General"
-msgstr "全般"
+#: .\sh_recognition\models.py:39
+msgid "使用模型"
+msgstr "使用モデル"
 
-#: .\notices\templates\notices\list.html:64
-msgid "No notices available."
-msgstr "お知らせはありません。"
+#: .\sh_recognition\models.py:44
+msgid "圖片辨識紀錄"
+msgstr "画像認識履歴"
+
+#: .\sh_recognition\models.py:45
+msgid "圖片辨識紀錄管理"
+msgstr "画像認識履歴管理"
+
+#: .\sh_recognition\views.py:69
+msgid "部分圖片辨識失敗："
+msgstr "一部の画像認識に失敗しました："
+
+#: .\sh_recognition\views.py:110
+msgid "請至少勾選一筆要刪除的資料。"
+msgstr "削除するデータを少なくとも1つ選択してください。"
+
+#: .\sh_recognition\views.py:184
+msgid "已使用新模型完成重新辨識！"
+msgstr "新しいモデルでの再認識が完了しました！"
 
 #: .\study_brain\apps.py:9
 msgid "AI 教材大腦"
@@ -2277,10 +1252,6 @@ msgstr "教材タイトル"
 #: .\study_brain\models.py:39
 msgid "教材檔案"
 msgstr "教材ファイル"
-
-#: .\study_brain\models.py:35
-msgid "上傳時間"
-msgstr "アップロード日時"
 
 #: .\study_brain\models.py:49
 msgid "關聯教材"
@@ -2390,220 +1361,6 @@ msgstr "生成日時"
 msgid "AI 深度解析"
 msgstr "AI 詳細解説"
 
-#: .\study_brain\templates\study_brain\dashboard.html:4
-msgid "AI Study Brain Dashboard"
-msgstr "AI 教材ブレイン・ダッシュボード"
-
-#: .\study_brain\templates\study_brain\dashboard.html:14
-#: .\templates\includes\navbar.html:65
-msgid "AI Study Brain"
-msgstr "AI 教材ブレイン"
-
-#: .\study_brain\templates\study_brain\dashboard.html:15
-msgid "Upload materials to train your personal AI tutor."
-msgstr ""
-"教材をアップロードして、あなた専用のAIチューターをトレーニングしましょう。"
-
-#: .\study_brain\templates\study_brain\dashboard.html:26
-#: .\study_brain\templates\study_brain\quiz_history.html:4
-#: .\study_brain\templates\study_brain\quiz_history.html:14
-msgid "My Quiz History"
-msgstr "マイテスト履歴"
-
-#: .\study_brain\templates\study_brain\dashboard.html:36
-msgid "Upload Material"
-msgstr "教材をアップロード"
-
-#: .\study_brain\templates\study_brain\dashboard.html:42
-msgid "Category"
-msgstr "カテゴリー"
-
-#: .\study_brain\templates\study_brain\dashboard.html:44
-msgid "Select Category..."
-msgstr "カテゴリーを選択..."
-
-#: .\study_brain\templates\study_brain\dashboard.html:51
-msgid "Material Title"
-msgstr "教材タイトル"
-
-#: .\study_brain\templates\study_brain\dashboard.html:52
-msgid "Enter a descriptive title"
-msgstr "タイトルを入力してください"
-
-#: .\study_brain\templates\study_brain\dashboard.html:55
-msgid "File (PDF/Word)"
-msgstr "ファイル (PDF/Word)"
-
-#: .\study_brain\templates\study_brain\dashboard.html:59
-msgid "Click or drag file here"
-msgstr "クリックまたはドラッグ＆ドロップでファイルを追加"
-
-#: .\study_brain\templates\study_brain\dashboard.html:67
-msgid "這是歷屆考題"
-msgstr "これは過去問です"
-
-#: .\study_brain\templates\study_brain\dashboard.html:70
-msgid ""
-"打勾後，AI 將不會產生重點摘要，而是直接萃取檔案中的考題並自動為您生成詳解。"
-msgstr ""
-"チェックを入れると、AIは要約を作成せず、ファイルから問題を直接抽出し、自動的"
-"に詳細な解説を生成します。"
-
-#: .\study_brain\templates\study_brain\dashboard.html:76
-msgid "Upload & Prepare"
-msgstr "アップロードして準備"
-
-#: .\study_brain\templates\study_brain\dashboard.html:92
-msgid "My Library"
-msgstr "マイライブラリ"
-
-#: .\study_brain\templates\study_brain\dashboard.html:98
-msgid "Explore Public Materials"
-msgstr "公開教材を探索"
-
-#: .\study_brain\templates\study_brain\dashboard.html:116
-msgid "Remove from My Library"
-msgstr "マイライブラリから削除"
-
-#: .\study_brain\templates\study_brain\dashboard.html:121
-#: .\study_brain\templates\study_brain\dashboard.html:169
-msgid "Uploaded by"
-msgstr "アップロード者："
-
-#: .\study_brain\templates\study_brain\dashboard.html:121
-#: .\study_brain\templates\study_brain\dashboard.html:169
-msgid "System"
-msgstr "システム"
-
-#: .\study_brain\templates\study_brain\dashboard.html:124
-#: .\study_brain\templates\study_brain\study_room.html:28
-msgid "View Original File"
-msgstr "オリジナルファイルを表示"
-
-#: .\study_brain\templates\study_brain\dashboard.html:132
-msgid "Train AI"
-msgstr "AIをトレーニング"
-
-#: .\study_brain\templates\study_brain\dashboard.html:137
-#: .\study_brain\templates\study_brain\study_room.html:4
-msgid "Study Room"
-msgstr "学習室"
-
-#: .\study_brain\templates\study_brain\dashboard.html:141
-msgid "No Data Yet"
-msgstr "データがまだありません"
-
-#: .\study_brain\templates\study_brain\dashboard.html:151
-msgid "Your library is empty. Upload or explore materials to begin!"
-msgstr "ライブラリが空です。教材をアップロードするか探索して始めましょう！"
-
-#: .\study_brain\templates\study_brain\dashboard.html:174
-msgid "Add to My Library"
-msgstr "マイライブラリに追加"
-
-#: .\study_brain\templates\study_brain\dashboard.html:183
-msgid "No public materials available at the moment."
-msgstr "現在利用可能な公開教材はありません。"
-
-#: .\study_brain\templates\study_brain\dashboard.html:199
-msgid "Training..."
-msgstr "トレーニング中..."
-
-#: .\study_brain\templates\study_brain\mistake_book.html:4
-msgid "我的專屬錯題本"
-msgstr "マイトラブル・ブック (誤答集)"
-
-#: .\study_brain\templates\study_brain\quiz_history.html:15
-msgid "Review your past quiz records and mistakes to improve your learning."
-msgstr "過去のテスト記録と誤答を復習して、学習効率を高めましょう。"
-
-#: .\study_brain\templates\study_brain\quiz_history.html:27
-msgid "Material"
-msgstr "教材"
-
-#: .\study_brain\templates\study_brain\quiz_history.html:28
-msgid "Score"
-msgstr "スコア"
-
-#: .\study_brain\templates\study_brain\quiz_history.html:29
-#: .\study_brain\templates\study_brain\quiz_result.html:31
-msgid "Error Rate"
-msgstr "誤答率"
-
-#: .\study_brain\templates\study_brain\quiz_history.html:30
-msgid "Action"
-msgstr "アクション"
-
-#: .\study_brain\templates\study_brain\quiz_history.html:57
-msgid "Review Mistakes"
-msgstr "誤答を確認"
-
-#: .\study_brain\templates\study_brain\quiz_history.html:65
-msgid "You have no quiz records yet. Go practice some materials!"
-msgstr "テスト記録がありません。教材を使って練習してみましょう！"
-
-#: .\study_brain\templates\study_brain\quiz_result.html:4
-#: .\study_brain\templates\study_brain\quiz_result.html:16
-msgid "Quiz Result Report"
-msgstr "テスト結果レポート"
-
-#: .\study_brain\templates\study_brain\quiz_result.html:25
-msgid "Correct Answers"
-msgstr "正解数"
-
-#: .\study_brain\templates\study_brain\quiz_result.html:41
-msgid "Mistakes Analysis"
-msgstr "誤答分析"
-
-#: .\study_brain\templates\study_brain\quiz_result.html:58
-msgid "Your Answer"
-msgstr "あなたの回答"
-
-#: .\study_brain\templates\study_brain\quiz_result.html:68
-msgid "Correct Answer"
-msgstr "正解"
-
-#: .\study_brain\templates\study_brain\quiz_result.html:80
-msgid "AI Explanation"
-msgstr "AI 解説"
-
-#: .\study_brain\templates\study_brain\quiz_result.html:93
-msgid "Perfect Score! Excellent Job!"
-msgstr "満点！素晴らしいですね！"
-
-#: .\study_brain\templates\study_brain\quiz_result.html:94
-msgid "You have fully mastered the content of this material."
-msgstr "この教材の内容を完全にマスターしました。"
-
-#: .\study_brain\templates\study_brain\quiz_result.html:101
-msgid "Review Material"
-msgstr "教材を復習"
-
-#: .\study_brain\templates\study_brain\study_room.html:15
-msgid "Back to Library"
-msgstr "ライブラリに戻る"
-
-#: .\study_brain\templates\study_brain\study_room.html:22
-msgid "Last Generated:"
-msgstr "最終生成："
-
-#: .\study_brain\templates\study_brain\study_room.html:38
-msgid "Key Summaries"
-msgstr "重要ポイント要約"
-
-#: .\study_brain\templates\study_brain\study_room.html:43
-#: .\study_brain\templates\study_brain\study_room.html:68
-msgid "Practice Quiz"
-msgstr "練習テスト"
-
-#: .\study_brain\templates\study_brain\study_room.html:127
-msgid "Quiz Progress"
-msgstr "テスト進行状況"
-
-#: .\study_brain\templates\study_brain\study_room.html:191
-msgid "Submit Answers"
-msgstr "回答を送信"
-
 #: .\study_brain\utils.py:179
 msgid "此為歷屆考題匯入，無重點摘要。請直接前往「測驗練習」進行刷題！"
 msgstr ""
@@ -2692,6 +1449,10 @@ msgstr ""
 "                                <span class=\"badge bg-light text-primary "
 "fs-6 mt-2 border border-primary-subtle\">%(email)s</span>\n"
 "                            "
+
+#: .\templates\account\email_confirm.html:33 .\templates\finance\shop.html:139
+msgid "Confirm"
+msgstr "確認"
 
 #: .\templates\account\email_confirm.html:41
 #, fuzzy, python-format
@@ -2860,6 +1621,799 @@ msgstr "申し訳ありません。現在システムが応答できません。
 msgid "Connection failed, please check your network."
 msgstr "接続に失敗しました。ネットワークを確認してください。"
 
+#: .\templates\bionic_chat\chat.html:6
+msgid "仿生人通訊終端"
+msgstr "バイオニック通信端末"
+
+#: .\templates\bionic_chat\chat.html:15
+msgid "角色立繪"
+msgstr "キャラクター立ち絵"
+
+#: .\templates\bionic_chat\chat.html:23
+msgid "輸入對話..."
+msgstr "メッセージを入力..."
+
+#: .\templates\bionic_chat\chat.html:24
+msgid "發送"
+msgstr "送信"
+
+#: .\templates\core\feature_list.html:5 .\templates\core\feature_list.html:11
+msgid "System Feature Permissions"
+msgstr "システム機能権限"
+
+#: .\templates\core\feature_list.html:13
+msgid "Last Updated"
+msgstr "最終更新"
+
+#: .\templates\core\feature_list.html:23
+msgid "Feature Module"
+msgstr "機能モジュール"
+
+#: .\templates\core\feature_list.html:24
+msgid "Global Status"
+msgstr "グローバル状態"
+
+#: .\templates\core\feature_list.html:25
+msgid "Guest"
+msgstr "ゲスト"
+
+#: .\templates\core\feature_list.html:26
+msgid "User"
+msgstr "ユーザー"
+
+#: .\templates\core\feature_list.html:27
+msgid "Staff"
+msgstr "スタッフ"
+
+#: .\templates\core\feature_list.html:28
+msgid "Administrator"
+msgstr "管理者"
+
+#: .\templates\core\feature_list.html:40
+msgid "Active"
+msgstr "有効"
+
+#: .\templates\core\feature_list.html:42
+msgid "Maintenance"
+msgstr "メンテナンス中"
+
+#: .\templates\core\feature_list.html:85
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "                提示：管理員可透過 Django Admin 後台即時調整各項功能的存取"
+#| "權限與全局啟動狀態。\n"
+#| "            "
+msgid ""
+"\n"
+"                提示：管理員可透過 Django Admin 後台即時調整各項功能的存取權"
+"限與全局啟動狀態。\n"
+"            "
+msgstr ""
+"\n"
+"                ヒント：管理者は Django Admin 管理画面から、各機能のアクセス"
+"権限およびグローバル有効状態をリアルタイムで調整できます。\n"
+"            "
+
+#: .\templates\core\lucky_draw.html:4 .\templates\includes\navbar.html:31
+msgid "Lucky Draw"
+msgstr "抽選会"
+
+#: .\templates\core\lucky_draw.html:12
+msgid "CSI Lucky Wheel"
+msgstr "CSI ラッキーホイール"
+
+#: .\templates\core\lucky_draw.html:19
+msgid "Prize Settings"
+msgstr "景品設定"
+
+#: .\templates\core\lucky_draw.html:22
+msgid "Ignore Probabilities (Fair Mode)"
+msgstr "確率を無視する (公平モード)"
+
+#: .\templates\core\lucky_draw.html:29 .\templates\core\lucky_draw.html:127
+msgid "Prize Name"
+msgstr "景品名"
+
+#: .\templates\core\lucky_draw.html:30
+msgid "Weight"
+msgstr "重み"
+
+#: .\templates\core\lucky_draw.html:31
+msgid "Qty (-1=Inf)"
+msgstr "数量 (-1=無制限)"
+
+#: .\templates\core\lucky_draw.html:37
+msgid "Grand Prize"
+msgstr "特賞"
+
+#: .\templates\core\lucky_draw.html:44
+msgid "Add Prize"
+msgstr "景品を追加"
+
+#: .\templates\core\lucky_draw.html:50
+msgid "Import Participant List"
+msgstr "参加者リストをインポート"
+
+#: .\templates\core\lucky_draw.html:55
+msgid "Choose File"
+msgstr "ファイルを選択"
+
+#: .\templates\core\lucky_draw.html:58
+msgid "No file selected"
+msgstr "ファイルが選択されていません"
+
+#: .\templates\core\lucky_draw.html:62
+msgid "First column must be names"
+msgstr "最初の列は氏名である必要があります"
+
+#: .\templates\core\lucky_draw.html:76
+msgid "Start Draw"
+msgstr "抽選開始"
+
+#: .\templates\core\lucky_draw.html:86
+msgid "Winning Records"
+msgstr "当選記録"
+
+#: .\templates\core\lucky_draw.html:89
+msgid "Export Excel"
+msgstr "Excel出力"
+
+#: .\templates\core\lucky_draw.html:91
+msgid "Clear Records"
+msgstr "記録を消去"
+
+#: .\templates\core\lucky_draw.html:100
+msgid "Time"
+msgstr "時間"
+
+#: .\templates\core\lucky_draw.html:101
+msgid "Winner"
+msgstr "当選者"
+
+#: .\templates\core\lucky_draw.html:102
+msgid "Prize"
+msgstr "景品"
+
+#: .\templates\core\lucky_draw.html:107 .\templates\core\lucky_draw.html:131
+msgid "No records yet"
+msgstr "記録がまだありません"
+
+#: .\templates\core\lucky_draw.html:119
+msgid "Imported"
+msgstr "インポート済み"
+
+#: .\templates\core\lucky_draw.html:120
+msgid "All prizes drawn!"
+msgstr "すべての景品が終了しました！"
+
+#: .\templates\core\lucky_draw.html:121
+msgid "Please import participant list first!"
+msgstr "先に参加者リストをインポートしてください！"
+
+#: .\templates\core\lucky_draw.html:122
+msgid "Congratulations"
+msgstr "おめでとうございます"
+
+#: .\templates\core\lucky_draw.html:123
+msgid "won"
+msgstr "が当選しました"
+
+#: .\templates\core\lucky_draw.html:124
+msgid "Are you sure you want to clear all records?"
+msgstr "すべての記録を消去してもよろしいですか？"
+
+#: .\templates\core\lucky_draw.html:125
+msgid "No records to export!"
+msgstr "出力する記録がありません！"
+
+#: .\templates\core\lucky_draw.html:126
+msgid "Prizes Sold Out"
+msgstr "景品終了"
+
+#: .\templates\core\lucky_draw.html:128
+msgid "Winner List"
+msgstr "当選者一覧"
+
+#: .\templates\core\lucky_draw.html:129
+msgid "No."
+msgstr "No."
+
+#: .\templates\core\lucky_draw.html:129
+msgid "Draw Time"
+msgstr "抽選日時"
+
+#: .\templates\core\lucky_draw.html:129
+msgid "Winner Name"
+msgstr "当選者名"
+
+#: .\templates\core\lucky_draw.html:129
+msgid "Award"
+msgstr "賞品"
+
+#: .\templates\core\lucky_draw.html:130
+msgid "Remaining"
+msgstr "残り"
+
+#: .\templates\core\profile.html:5 .\templates\core\profile.html:19
+msgid "User Profile"
+msgstr "ユーザープロフィール"
+
+#: .\templates\core\profile.html:41
+msgid "Change Photo"
+msgstr "写真を変更"
+
+#: .\templates\core\profile.html:46
+msgid "Last Login"
+msgstr "最終ログイン"
+
+#: .\templates\core\profile.html:58
+msgid "My Wallet"
+msgstr "マイウォレット"
+
+#: .\templates\core\profile.html:62 .\templates\finance\shop.html:28
+msgid "Deposit Points"
+msgstr "チャージポイント"
+
+#: .\templates\core\profile.html:68 .\templates\finance\shop.html:33
+msgid "Bonus Points"
+msgstr "ボーナスポイント"
+
+#: .\templates\core\profile.html:75 .\templates\finance\recharge_store.html:75
+msgid "Recharge Now"
+msgstr "今すぐチャージ"
+
+#: .\templates\core\profile.html:78
+msgid "Go Shopping"
+msgstr "ショップへ行く"
+
+#: .\templates\core\profile.html:87
+msgid "Transaction History"
+msgstr "取引履歴"
+
+#: .\templates\core\profile.html:93 .\templates\core\ticket_pull.html:40
+#: .\templates\study_brain\quiz_history.html:26
+msgid "Date"
+msgstr "日付"
+
+#: .\templates\core\profile.html:94
+msgid "Description"
+msgstr "詳細"
+
+#: .\templates\core\profile.html:95
+msgid "Amount"
+msgstr "金額"
+
+#: .\templates\core\profile.html:117
+msgid "No records found."
+msgstr "記録が見つかりませんでした。"
+
+#: .\templates\core\ticket_pull.html:4 .\templates\core\ticket_pull.html:13
+msgid "Outgoing Ledger System"
+msgstr "文書発信管理システム"
+
+#: .\templates\core\ticket_pull.html:19
+msgid "Subject (Max 20 chars)"
+msgstr "件名 (最大20文字)"
+
+#: .\templates\core\ticket_pull.html:20
+msgid "Please enter application subject"
+msgstr "申請の件名を入力してください"
+
+#: .\templates\core\ticket_pull.html:23
+msgid "Applicant (Max 10 chars)"
+msgstr "申請者 (最大10文字)"
+
+#: .\templates\core\ticket_pull.html:24
+msgid "Please enter name"
+msgstr "お名前を入力してください"
+
+#: .\templates\core\ticket_pull.html:27
+msgid "Get Number Now"
+msgstr "今すぐ採番する"
+
+#: .\templates\core\ticket_pull.html:35
+msgid "Recent 3 Records"
+msgstr "最近の3件の記録"
+
+#: .\templates\core\ticket_pull.html:41
+msgid "Serial Number"
+msgstr "シリアル番号"
+
+#: .\templates\core\ticket_pull.html:42 .\templates\core\ticket_success.html:34
+msgid "Applicant"
+msgstr "申請者"
+
+#: .\templates\core\ticket_pull.html:43 .\templates\core\ticket_success.html:42
+msgid "Subject"
+msgstr "件名"
+
+#: .\templates\core\ticket_pull.html:56
+msgid "No records found"
+msgstr "記録が見つかりません"
+
+#: .\templates\core\ticket_success.html:4
+msgid "Ticket Generated Successfully"
+msgstr "採番が正常に完了しました"
+
+#: .\templates\core\ticket_success.html:18
+msgid "Success!"
+msgstr "成功！"
+
+#: .\templates\core\ticket_success.html:22
+msgid "Your unique outgoing serial number is:"
+msgstr "あなたの固有文書番号は以下の通りです:"
+
+#: .\templates\core\ticket_success.html:35
+#: .\templates\core\ticket_success.html:43
+msgid "(Not provided)"
+msgstr "(未入力)"
+
+#: .\templates\core\ticket_success.html:38
+msgid "Date Applied"
+msgstr "申請日"
+
+#: .\templates\core\ticket_success.html:52
+msgid "Copy Number"
+msgstr "番号をコピー"
+
+#: .\templates\core\ticket_success.html:55
+msgid "Print Certificate"
+msgstr "証明書を印刷"
+
+#: .\templates\core\ticket_success.html:58
+msgid "Continue Drawing"
+msgstr "続けて採番"
+
+#: .\templates\core\ticket_success.html:65
+msgid "Notice: Please keep this number carefully for future reference."
+msgstr "注意: この番号は将来の参照のために大切に保管してください。"
+
+#: .\templates\core\ticket_success.html:75
+msgid "Serial number copied to clipboard"
+msgstr "番号をクリップボードにコピーしました"
+
+#: .\templates\core\tigf_dashboard.html:4
+msgid "Data Verification Dashboard"
+msgstr "データ照合ダッシュボード"
+
+#: .\templates\core\tigf_dashboard.html:12
+msgid "Report File"
+msgstr "レポートファイル"
+
+#: .\templates\core\tigf_dashboard.html:18
+msgid "Template File"
+msgstr "テンプレートファイル"
+
+#: .\templates\core\tigf_dashboard.html:24
+msgid "Database File"
+msgstr "データベースファイル"
+
+#: .\templates\core\tigf_dashboard.html:41
+msgid "Mapping Check"
+msgstr "マッピングチェック"
+
+#: .\templates\core\tigf_dashboard.html:44
+msgid "Comparison Results"
+msgstr "照合結果"
+
+#: .\templates\core\tigf_dashboard.html:63
+#: .\templates\core\tigf_dashboard.html:188
+msgid "No files detected"
+msgstr "ファイルが検出されませんでした"
+
+#: .\templates\core\tigf_dashboard.html:75
+msgid "比對規則說明與設定"
+msgstr "照合ルールの説明と設定"
+
+#: .\templates\core\tigf_dashboard.html:78
+#: .\templates\core\tigf_dashboard.html:193
+msgid "Start Data Comparison"
+msgstr "データ照合を開始"
+
+#: .\templates\core\tigf_dashboard.html:86
+msgid "ID"
+msgstr "ID"
+
+#: .\templates\core\tigf_dashboard.html:87
+#: .\templates\core\tigf_dashboard.html:189
+msgid "Report"
+msgstr "レポート"
+
+#: .\templates\core\tigf_dashboard.html:88
+msgid "Template"
+msgstr "テンプレート"
+
+#: .\templates\core\tigf_dashboard.html:89
+msgid "Database"
+msgstr "データベース"
+
+#: .\templates\core\tigf_dashboard.html:102
+#, python-format
+msgid "編號 %(fid)s 的差異數：%(count)s"
+msgstr "ID %(fid)s の差異数：%(count)s"
+
+#: .\templates\core\tigf_dashboard.html:103
+msgid "Download CSV"
+msgstr "CSVをダウンロード"
+
+#: .\templates\core\tigf_dashboard.html:106
+#: .\templates\core\tigf_dashboard.html:194
+msgid "No comparison data"
+msgstr "照合データがありません"
+
+#: .\templates\core\tigf_dashboard.html:122
+msgid "資料比對規則說明與設定"
+msgstr "データ照合ルールの説明と設定"
+
+#: .\templates\core\tigf_dashboard.html:174
+msgid "關閉並儲存設定"
+msgstr "閉じて設定を保存"
+
+#: .\templates\core\tigf_dashboard.html:187
+msgid "Upload Error"
+msgstr "アップロードエラー"
+
+#: .\templates\core\tigf_dashboard.html:190
+msgid "Company"
+msgstr "会社名"
+
+#: .\templates\core\tigf_dashboard.html:191
+msgid "Comparing..."
+msgstr "照合中..."
+
+#: .\templates\core\tigf_dashboard.html:192
+msgid "Comparison failed, please re-upload modified files"
+msgstr "照合に失敗しました。修正したファイルを再度アップロードしてください"
+
+#: .\templates\core\tigf_dashboard.html:195
+msgid "Download Difference List"
+msgstr "差異リストをダウンロード"
+
+#: .\templates\core\tigf_dashboard.html:196
+msgid "Data Consistent"
+msgstr "データ一致"
+
+#: .\templates\core\tigf_dashboard.html:197
+#, python-brace-format
+msgid "Detected {count} cell differences"
+msgstr "{count} セルの差異を検出しました"
+
+#: .\templates\core\tigf_dashboard.html:198
+msgid "Content matches database perfectly"
+msgstr "内容がデータベースと完全に一致します"
+
+#: .\templates\core\tigf_dashboard.html:199
+msgid "Has Differences"
+msgstr "差異あり"
+
+#: .\templates\core\tigf_dashboard.html:200
+msgid "Fully Matched"
+msgstr "完全一致"
+
+#: .\templates\csi_info\csi_info.html:11
+msgid "CSI 企業內部資訊"
+msgstr "CSI 企業内情報"
+
+#: .\templates\finance\recharge_store.html:4
+#: .\templates\includes\navbar.html:46
+msgid "Point Recharge"
+msgstr "ポイントチャージ"
+
+#: .\templates\finance\recharge_store.html:15
+msgid "Point Recharge Center"
+msgstr "ポイントチャージセンター"
+
+#: .\templates\finance\recharge_store.html:18
+msgid ""
+"Choose the best recharge plan for you to enjoy exclusive bonus rewards and "
+"shopping experiences."
+msgstr ""
+"あなたに最適なチャージプランを選んで、限定ボーナス特典とショッピング体験をお"
+"楽しみください。"
+
+#: .\templates\finance\recharge_store.html:29
+msgid "Recommended"
+msgstr "おすすめ"
+
+#: .\templates\finance\recharge_store.html:49
+#, python-format
+msgid ""
+"\n"
+"                                    獲得 <strong>%(points)s</strong> 點\n"
+"                                "
+msgstr ""
+
+#: .\templates\finance\recharge_store.html:59
+#, python-format
+msgid ""
+"\n"
+"                                    + %(bonus)s 紅利點數\n"
+"                                "
+msgstr ""
+
+#: .\templates\finance\recharge_store.html:67
+msgid "No extra bonus"
+msgstr "追加ボーナスなし"
+
+#: .\templates\finance\recharge_store.html:85
+msgid "No recharge packages available at the moment."
+msgstr "現在利用可能なチャージプランがありません。"
+
+#: .\templates\finance\shop.html:4 .\templates\includes\navbar.html:51
+msgid "Point Shop"
+msgstr "ポイントショップ"
+
+#: .\templates\finance\shop.html:15
+msgid "CSI Point Shop"
+msgstr "CSI ポイントショップ"
+
+#: .\templates\finance\shop.html:17
+msgid "Redeem your points for rich products and exclusive rights"
+msgstr "ポイントを豊富な商品や限定特典と交換しましょう"
+
+#: .\templates\finance\shop.html:25
+msgid "Asset Overview"
+msgstr "資産概要"
+
+#: .\templates\finance\shop.html:29 .\templates\finance\shop.html:34
+#: .\templates\finance\shop.html:76
+msgid "Points"
+msgstr "ポイント"
+
+#: .\templates\finance\shop.html:40
+msgid "Go to Recharge"
+msgstr "チャージへ"
+
+#: .\templates\finance\shop.html:56
+#, python-format
+msgid "Almost Sold Out (%(stock)s left)"
+msgstr "残りわずか (残り %(stock)s)"
+
+#: .\templates\finance\shop.html:59
+msgid "Sold Out"
+msgstr "売り切れ"
+
+#: .\templates\finance\shop.html:87
+msgid "Bonus Deduction"
+msgstr "ボーナス割引"
+
+#: .\templates\finance\shop.html:88
+#, python-format
+msgid "Max %(price)s points"
+msgstr "最大 %(price)s ポイント"
+
+#: .\templates\finance\shop.html:97
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                    將扣除 <strong class=\"text-primary "
+#| "deposit-calc\">%(points)s</strong> 儲值點\n"
+#| "                                "
+msgid ""
+"\n"
+"                                    將扣除 <strong class=\"text-primary "
+"deposit-calc\">%(points)s</strong> 儲值點\n"
+"                                "
+msgstr ""
+"\n"
+"                                    <strong class=\"text-primary deposit-"
+"calc\">%(points)s</strong> チャージポイントが差し引かれます\n"
+"                                "
+
+#: .\templates\finance\shop.html:107
+msgid "Restocking"
+msgstr "入荷待ち"
+
+#: .\templates\finance\shop.html:109
+msgid "Redeem Now"
+msgstr "今すぐ交換"
+
+#: .\templates\finance\shop.html:120
+msgid "The shop is currently under preparation, please stay tuned!"
+msgstr "ショップは現在準備中です。乞うご期待ください！"
+
+#: .\templates\finance\shop.html:135
+msgid "Confirm Redemption?"
+msgstr "交換を確認しますか？"
+
+#: .\templates\finance\shop.html:136
+msgid "You are about to redeem <span id=\"modal-prod-name\"></span>"
+msgstr "<span id=\"modal-prod-name\"></span> を交換しようとしています"
+
+#: .\templates\finance\shop.html:138
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: .\templates\finance\shop.html:155
+msgid "Redeemed Successfully!"
+msgstr "交換が正常に完了しました！"
+
+#: .\templates\finance\shop.html:156
+msgid "Click anywhere to close"
+msgstr "どこかをクリックして閉じる"
+
+#: .\templates\games\lobby.html:7
+msgid "遊戲大廳"
+msgstr "ゲームロビー"
+
+#: .\templates\games\lobby.html:47 .\templates\games\survivor.html:7
+#: .\templates\games\survivor.html:30
+msgid "倖存者生存"
+msgstr "サバイバー生存"
+
+#: .\templates\games\lobby.html:48
+msgid "在無盡的怪物浪潮中生存，利用局外養成提升基礎戰力。"
+msgstr ""
+"迫りくるモンスターの群れから生き残り、育成要素で基礎戦力を強化しましょう。"
+
+#: .\templates\games\lobby.html:50
+msgid "最高存活"
+msgstr "最高生存記録"
+
+#: .\templates\games\lobby.html:50
+msgid "秒"
+msgstr "秒"
+
+#: .\templates\games\lobby.html:51 .\templates\games\lobby.html:67
+msgid "進入大廳"
+msgstr "ロビーに入る"
+
+#: .\templates\games\lobby.html:63
+msgid "虛擬人生 (輕量版)"
+msgstr "バーチャルライフ (ライト版)"
+
+#: .\templates\games\lobby.html:64
+msgid "擲骰子決定命運，經歷各種隨機事件，賺取金錢並培養角色。"
+msgstr ""
+"ダイスで運命を決め、様々なイベントを乗り越えながら、お金を稼いでキャラを育成"
+"しましょう。"
+
+#: .\templates\games\lobby.html:66
+msgid "通關關卡等級"
+msgstr "クリア済みステージ"
+
+#: .\templates\games\lobby.html:79 .\templates\games\magic_tower.html:38
+msgid "魔塔冒險"
+msgstr "魔塔アドベンチャー"
+
+#: .\templates\games\lobby.html:80
+msgid "精算血量與資源，選擇合適的職業挑戰深邃的魔塔。"
+msgstr "体力とリソースを計算し、最適な職業を選んで謎深き魔塔に挑みましょう。"
+
+#: .\templates\games\lobby.html:82
+msgid "最高探索"
+msgstr "最高探索階層"
+
+#: .\templates\games\lobby.html:82 .\templates\games\magic_tower.html:45
+msgid "樓"
+msgstr "階"
+
+#: .\templates\games\lobby.html:83 .\templates\games\magic_tower.html:80
+msgid "進入魔塔"
+msgstr "魔塔に入る"
+
+#: .\templates\games\magic_tower.html:7 .\templates\games\magic_tower.html:93
+msgid "魔塔"
+msgstr "魔塔"
+
+#: .\templates\games\magic_tower.html:42 .\templates\games\virtual_life.html:34
+msgid "持有金幣"
+msgstr "所持コイン"
+
+#: .\templates\games\magic_tower.html:45
+msgid "目前最高突破"
+msgstr "現在の最高突破階層"
+
+#: .\templates\games\magic_tower.html:52
+msgid "血量"
+msgstr "体力"
+
+#: .\templates\games\magic_tower.html:61
+msgid "攻擊"
+msgstr "攻撃"
+
+#: .\templates\games\magic_tower.html:70
+msgid "防禦"
+msgstr "防御"
+
+#: .\templates\games\magic_tower.html:83
+msgid "返回遊戲中心"
+msgstr "ゲームセンターに戻る"
+
+#: .\templates\games\magic_tower.html:118
+msgid "黃鑰"
+msgstr "黄の鍵"
+
+#: .\templates\games\magic_tower.html:121
+msgid "藍鑰"
+msgstr "青の鍵"
+
+#: .\templates\games\magic_tower.html:129
+msgid "存檔"
+msgstr "セーブ"
+
+#: .\templates\games\magic_tower.html:130
+msgid "重置"
+msgstr "リセット"
+
+#: .\templates\games\magic_tower.html:131
+msgid "圖鑑"
+msgstr "図鑑"
+
+#: .\templates\games\magic_tower.html:132
+msgid "離開"
+msgstr "退出"
+
+#: .\templates\games\magic_tower.html:156
+msgid "選擇你的職業"
+msgstr "職業を選択してください"
+
+#: .\templates\games\magic_tower.html:157
+msgid "將會加上你局外的能力加成"
+msgstr "ゲーム外の能力ボーナスが適用されます"
+
+#: .\templates\games\magic_tower.html:160
+msgid "聖騎士 (高血防)"
+msgstr "パラディン (高HP/防御)"
+
+#: .\templates\games\magic_tower.html:163
+msgid "戰士 (能力平均)"
+msgstr "戦士 (バランス型)"
+
+#: .\templates\games\magic_tower.html:166
+msgid "魔法師 (高攻擊)"
+msgstr "メイジ (高攻撃)"
+
+#: .\templates\games\survivor.html:34
+msgid "金幣"
+msgstr "コイン"
+
+#: .\templates\games\survivor.html:38
+msgid "選擇挑戰關卡"
+msgstr "ステージを選択"
+
+#: .\templates\games\survivor.html:70 .\templates\games\virtual_life.html:67
+msgid "回到遊戲中心"
+msgstr "ゲームセンターへ戻る"
+
+#: .\templates\games\virtual_life.html:7 .\templates\games\virtual_life.html:30
+msgid "虛擬人生 RPG"
+msgstr "バーチャルライフ RPG"
+
+#: .\templates\games\virtual_life.html:37
+msgid "目前關卡等級"
+msgstr "現在のステージレベル"
+
+#: .\templates\games\virtual_life.html:44
+msgid "初始血量"
+msgstr "初期体力"
+
+#: .\templates\games\virtual_life.html:47
+#: .\templates\games\virtual_life.html:56
+msgid "升級"
+msgstr "アップグレード"
+
+#: .\templates\games\virtual_life.html:53
+msgid "初始攻擊"
+msgstr "初期攻撃力"
+
+#: .\templates\games\virtual_life.html:63
+msgid "開始冒險"
+msgstr "冒険を始める"
+
+#: .\templates\games\virtual_life.html:97
+msgid "擲骰子"
+msgstr "ダイスを振る"
+
+#: .\templates\games\virtual_life.html:105
+msgid "離開遊戲"
+msgstr "ゲームを終了"
+
+#: .\templates\games\virtual_life.html:117
+msgid "怪物 HP"
+msgstr "モンスター HP"
+
 #: .\templates\includes\footer.html:7
 msgid "All Rights Reserved."
 msgstr "All Rights Reserved."
@@ -2876,6 +2430,10 @@ msgstr "累計訪問者数"
 msgid "Home"
 msgstr "ホーム"
 
+#: .\templates\includes\navbar.html:26 .\templates\notices\list.html:11
+msgid "Notices"
+msgstr "お知らせ"
+
 #: .\templates\includes\navbar.html:40
 msgid "Member Zone"
 msgstr "メンバーゾーン"
@@ -2883,6 +2441,11 @@ msgstr "メンバーゾーン"
 #: .\templates\includes\navbar.html:60
 msgid "Investment"
 msgstr "投資"
+
+#: .\templates\includes\navbar.html:65
+#: .\templates\study_brain\dashboard.html:14
+msgid "AI Study Brain"
+msgstr "AI 教材ブレイン"
 
 #: .\templates\includes\navbar.html:70
 msgid "Vision Brain"
@@ -2974,6 +2537,539 @@ msgstr "全機能を利用するには、まずログインしてください。
 msgid "Go to Login Page"
 msgstr "ログインページへ"
 
+#: .\templates\invest\ai_plan_result.html:5
+msgid "AI Financial Planning Report"
+msgstr "AI 資産運用計画レポート"
+
+#: .\templates\invest\ai_plan_result.html:14
+msgid "Your Personalized AI Financial Plan"
+msgstr "あなたのパーソナライズ AI 運用計画"
+
+#: .\templates\invest\ai_plan_result.html:16
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                        基於您的目標：%(years)s 年後達成每月 $%(income)s "
+#| "被動收入\n"
+#| "                    "
+msgid ""
+"\n"
+"                        基於您的目標：%(years)s 年後達成每月 $%(income)s 被動"
+"收入\n"
+"                    "
+msgstr ""
+"\n"
+"                        目標設定：%(years)s 年後に毎月 $%(income)s の不労所得"
+"を達成する\n"
+"                    "
+
+#: .\templates\invest\ai_plan_result.html:28
+msgid "AI Estimated Annual Return"
+msgstr "AI 予想年間収益率"
+
+#: .\templates\invest\ai_plan_result.html:34
+msgid "Recommended ETF Allocation List"
+msgstr "推奨 ETF 配分リスト"
+
+#: .\templates\invest\ai_plan_result.html:54
+#: .\templates\study_brain\quiz_history.html:12
+#: .\templates\study_brain\quiz_result.html:104
+msgid "Back to Dashboard"
+msgstr "ダッシュボードに戻る"
+
+#: .\templates\invest\ai_plan_result.html:63
+msgid "Apply This Strategy Goal"
+msgstr "この戦略目標を適用する"
+
+#: .\templates\invest\dashboard.html:4 .\templates\invest\dashboard.html:9
+msgid "Investment Portfolio Dashboard"
+msgstr "投資ポートフォリオ・ダッシュボード"
+
+#: .\templates\invest\dashboard.html:17
+msgid "Total Market Value"
+msgstr "評価額合計"
+
+#: .\templates\invest\dashboard.html:19
+msgid "Total Cost"
+msgstr "投資額合計"
+
+#: .\templates\invest\dashboard.html:27 .\templates\invest\dashboard.html:134
+msgid "Unrealized PnL"
+msgstr "評価損益"
+
+#: .\templates\invest\dashboard.html:32
+msgid "Return Rate"
+msgstr "収益率"
+
+#: .\templates\invest\dashboard.html:41
+msgid "Realized PnL"
+msgstr "実現損益"
+
+#: .\templates\invest\dashboard.html:46
+msgid "Incl. Dividends"
+msgstr "配当含む"
+
+#: .\templates\invest\dashboard.html:61
+msgid "Target Monthly Income"
+msgstr "目標月間収入"
+
+#: .\templates\invest\dashboard.html:72
+msgid "Expected Yield"
+msgstr "期待利回り"
+
+#: .\templates\invest\dashboard.html:83
+msgid "Recalculate"
+msgstr "再計算"
+
+#: .\templates\invest\dashboard.html:95
+msgid "Required Capital"
+msgstr "必要資金"
+
+#: .\templates\invest\dashboard.html:108
+msgid "Enter symbol to check history (e.g. 0050)"
+msgstr "コードを入力して履歴を確認 (例: 0050)"
+
+#: .\templates\invest\dashboard.html:109
+msgid "Search"
+msgstr "検索"
+
+#: .\templates\invest\dashboard.html:114
+msgid "Expand Market Data"
+msgstr "市場データを展開"
+
+#: .\templates\invest\dashboard.html:124
+msgid "Holdings"
+msgstr "保有銘柄"
+
+#: .\templates\invest\dashboard.html:130
+msgid "Symbol"
+msgstr "コード"
+
+#: .\templates\invest\dashboard.html:131
+msgid "Shares"
+msgstr "株数"
+
+#: .\templates\invest\dashboard.html:132
+msgid "Avg Cost / Current"
+msgstr "平均取得 / 現在値"
+
+#: .\templates\invest\dashboard.html:133
+msgid "Market Value"
+msgstr "時価評価額"
+
+#: .\templates\invest\dashboard.html:169
+msgid "Your AI Financial Advisor"
+msgstr "あなたの AI 財務アドバイザー"
+
+#: .\templates\invest\dashboard.html:170
+msgid "Your portfolio is currently empty. Not sure where to start?"
+msgstr "現在ポートフォリオが空です。何から始めればいいか迷っていますか？"
+
+#: .\templates\invest\dashboard.html:170
+msgid ""
+"Fill out the information below to let AI generate a customized ETF "
+"allocation plan for you!"
+msgstr ""
+"以下の情報を入力して、AIにあなた専用の ETF 配分計画を作成させましょう！"
+
+#: .\templates\invest\dashboard.html:186
+msgid "Generate Custom Plan"
+msgstr "カスタムプランを作成"
+
+#: .\templates\invest\dashboard.html:205
+msgid "Record Transaction"
+msgstr "取引を記録"
+
+#: .\templates\invest\dashboard.html:218
+msgid "Submit Record"
+msgstr "記録を送信"
+
+#: .\templates\invest\dashboard.html:228
+msgid "Market Data & Analysis"
+msgstr "市場データ・分析"
+
+#: .\templates\invest\dashboard.html:234
+msgid "Asset Allocation"
+msgstr "資産配分"
+
+#: .\templates\invest\dashboard.html:243 .\templates\invest\dashboard.html:258
+#, python-format
+msgid "Top 10 Gainers (%%)"
+msgstr "値上がり率 Top 10 (%%)"
+
+#: .\templates\invest\dashboard.html:250 .\templates\invest\dashboard.html:265
+#, python-format
+msgid "Top 10 Losers (%%)"
+msgstr "値下がり率 Top 10 (%%)"
+
+#: .\templates\invest\dashboard.html:273
+msgid "Highest Priced Stocks Top 10"
+msgstr "値がさ株 Top 10"
+
+#: .\templates\invest\dashboard.html:280
+msgid "Penny Stocks Top 10"
+msgstr "低位株 Top 10"
+
+#: .\templates\invest\dashboard.html:293
+msgid "Loading..."
+msgstr "読み込み中..."
+
+#: .\templates\invest\dashboard.html:307
+msgid "AI is planning for you, please wait..."
+msgstr "AIが計画を策定中です。お待ちください..."
+
+#: .\templates\invest\dashboard.html:308
+#, python-format
+msgid "Change (%%)"
+msgstr "騰落率 (%%)"
+
+#: .\templates\invest\dashboard.html:309
+msgid "Price"
+msgstr "価格"
+
+#: .\templates\invest\dashboard.html:310
+msgid "Loading data for"
+msgstr "データを読み込んでいます："
+
+#: .\templates\invest\dashboard.html:311
+msgid "Failed to load data:"
+msgstr "データの読み込みに失敗しました："
+
+#: .\templates\invest\dashboard.html:312
+msgid "6-Month Trend"
+msgstr "6ヶ月のトレンド"
+
+#: .\templates\invest\dashboard.html:313
+msgid "Close Price"
+msgstr "終値"
+
+#: .\templates\invest\dashboard.html:314
+msgid "Network Error"
+msgstr "ネットワークエラー"
+
+#: .\templates\invest\dashboard.html:315
+msgid "Please enter a stock symbol first!"
+msgstr "先に銘柄コードを入力してください！"
+
+#: .\templates\media_studio\studio.html:11
+msgid "圖片處理"
+msgstr "画像処理"
+
+#: .\templates\media_studio\studio.html:16
+msgid "影片編輯"
+msgstr "動画編集"
+
+#: .\templates\media_studio\studio.html:35
+msgid "預計輸出解析度"
+msgstr "予想出力解像度"
+
+#: .\templates\media_studio\studio.html:40
+msgid "開始處理圖片"
+msgstr "画像の処理を開始"
+
+#: .\templates\media_studio\studio.html:52
+#: .\templates\media_studio\studio.html:116
+msgid "處理完成"
+msgstr "処理完了"
+
+#: .\templates\media_studio\studio.html:58
+msgid "原始大小"
+msgstr "元のサイズ"
+
+#: .\templates\media_studio\studio.html:62
+msgid "處理後大小"
+msgstr "処理後のサイズ"
+
+#: .\templates\media_studio\studio.html:71
+msgid "解析度已變更"
+msgstr "解像度が変更されました"
+
+#: .\templates\media_studio\studio.html:80
+msgid "下載處理後的圖片"
+msgstr "処理した画像をダウンロード"
+
+#: .\templates\media_studio\studio.html:105
+msgid "開始處理影片"
+msgstr "動画の処理を開始"
+
+#: .\templates\media_studio\studio.html:119
+msgid "總原始大小"
+msgstr "元の合計サイズ"
+
+#: .\templates\media_studio\studio.html:120
+msgid "壓縮後大小"
+msgstr "圧縮後のサイズ"
+
+#: .\templates\media_studio\studio.html:121
+msgid "輸出規格"
+msgstr "出力仕様"
+
+#: .\templates\media_studio\studio.html:126
+msgid "下載處理後的影片"
+msgstr "処理した動画をダウンロード"
+
+#: .\templates\notices\detail.html:12 .\templates\notices\list.html:4
+msgid "Notice List"
+msgstr "お知らせ一覧"
+
+#: .\templates\notices\detail.html:14
+msgid "Notice Detail"
+msgstr "お知らせ詳細"
+
+#: .\templates\notices\detail.html:23 .\templates\notices\list.html:36
+msgid "Pinned"
+msgstr "固定"
+
+#: .\templates\notices\detail.html:31 .\templates\notices\list.html:25
+msgid "Author"
+msgstr "投稿者"
+
+#: .\templates\notices\detail.html:34
+msgid "Posted"
+msgstr "投稿日"
+
+#: .\templates\notices\detail.html:38
+msgid "Updated at"
+msgstr "更新日"
+
+#: .\templates\notices\detail.html:51
+msgid "Back to List"
+msgstr "一覧に戻る"
+
+#: .\templates\notices\list.html:14
+#, python-format
+msgid "共 %(count)s 則公告"
+msgstr "全 %(count)s 件のお知らせ"
+
+#: .\templates\notices\list.html:23
+msgid "Type"
+msgstr "タイプ"
+
+#: .\templates\notices\list.html:24
+msgid "Title"
+msgstr "タイトル"
+
+#: .\templates\notices\list.html:26
+msgid "Date Posted"
+msgstr "投稿日"
+
+#: .\templates\notices\list.html:40
+msgid "General"
+msgstr "全般"
+
+#: .\templates\notices\list.html:64
+msgid "No notices available."
+msgstr "お知らせはありません。"
+
+#: .\templates\sh_recognition\index.html:7
+msgid "世祥辨識系統 - 首頁"
+msgstr "世祥認識システム - ホーム"
+
+#: .\templates\sh_recognition\index.html:13
+msgid "世祥圖片辨識系統"
+msgstr "世祥画像認識システム"
+
+#: .\templates\sh_recognition\index.html:15
+msgid "返回系統主頁"
+msgstr "システムメインページに戻る"
+
+#: .\templates\sh_recognition\index.html:16
+msgid "歷史紀錄"
+msgstr "履歴"
+
+#: .\templates\sh_recognition\index.html:29
+msgid "圖片辨識推論"
+msgstr "画像認識推論"
+
+#: .\templates\sh_recognition\index.html:34
+msgid "選擇模型版本"
+msgstr "モデルバージョンを選択"
+
+#: .\templates\sh_recognition\index.html:36
+msgid "請選擇"
+msgstr "選択してください"
+
+#: .\templates\sh_recognition\index.html:43
+msgid "辨識註記"
+msgstr "認識メモ"
+
+#: .\templates\sh_recognition\index.html:44
+msgid "輸入對這批圖片的說明"
+msgstr "この画像バッチの説明を入力"
+
+#: .\templates\sh_recognition\index.html:47
+msgid "信心閥值 (0.1 - 1.0)"
+msgstr "信頼度しきい値 (0.1 - 1.0)"
+
+#: .\templates\sh_recognition\index.html:51
+msgid "上傳待辨識圖片 (可複選多張)"
+msgstr "認識する画像をアップロード (複数選択可)"
+
+#: .\templates\sh_recognition\index.html:56
+msgid "開始辨識"
+msgstr "認識を開始"
+
+#: .\templates\sh_recognition\index.html:59
+msgid "批次模型運算中，請耐心稍候..."
+msgstr "一括モデル処理中、しばらくお待ちください..."
+
+#: .\templates\sh_recognition\index.html:66
+msgid "最新辨識結果"
+msgstr "最新の認識結果"
+
+#: .\templates\sh_recognition\index.html:70
+msgid "版本"
+msgstr "バージョン"
+
+#: .\templates\sh_recognition\index.html:71
+msgid "狀態"
+msgstr "ステータス"
+
+#: .\templates\sh_recognition\index.html:73
+msgid "偵測到物體"
+msgstr "物体を検出"
+
+#: .\templates\sh_recognition\index.html:75
+msgid "未偵測到物體"
+msgstr "物体未検出"
+
+#: .\templates\sh_recognition\index.html:81
+msgid "註記"
+msgstr "メモ"
+
+#: .\templates\sh_recognition\index.html:85
+msgid "尚未有辨識紀錄"
+msgstr "認識履歴がまだありません"
+
+#: .\templates\sh_recognition\record_detail.html:7
+msgid "辨識結果詳情"
+msgstr "認識結果の詳細"
+
+#: .\templates\sh_recognition\record_detail.html:13
+msgid "辨識紀錄詳情"
+msgstr "認識履歴の詳細"
+
+#: .\templates\sh_recognition\record_detail.html:14
+msgid "返回列表"
+msgstr "一覧に戻る"
+
+#: .\templates\sh_recognition\record_detail.html:25
+msgid "使用模型版本"
+msgstr "使用モデルバージョン"
+
+#: .\templates\sh_recognition\record_detail.html:26
+msgid "辨識日期時間"
+msgstr "認識日時"
+
+#: .\templates\sh_recognition\record_detail.html:27
+msgid "設定信心閥值"
+msgstr "設定された信頼度しきい値"
+
+#: .\templates\sh_recognition\record_detail.html:28
+msgid "是否有偵測到物體"
+msgstr "物体の検出有無"
+
+#: .\templates\sh_recognition\record_detail.html:28
+msgid "是,否"
+msgstr "はい,いいえ"
+
+#: .\templates\sh_recognition\record_detail.html:33
+msgid "使用新模型重新辨識"
+msgstr "新しいモデルで再認識"
+
+#: .\templates\sh_recognition\record_detail.html:41
+msgid "選擇未使用的模型..."
+msgstr "未使用のモデルを選択..."
+
+#: .\templates\sh_recognition\record_detail.html:46
+msgid "信心閥值"
+msgstr "信頼度しきい値"
+
+#: .\templates\sh_recognition\record_detail.html:48
+msgid "進行重新辨識"
+msgstr "再認識を実行"
+
+#: .\templates\sh_recognition\record_detail.html:51
+msgid "重新運算中..."
+msgstr "再計算中..."
+
+#: .\templates\sh_recognition\record_detail.html:56
+msgid "此原圖已使用過所有現有模型進行辨識。"
+msgstr "この元の画像は、既存のすべてのモデルで認識済みです。"
+
+#: .\templates\sh_recognition\record_detail.html:64
+msgid "原始上傳圖片"
+msgstr "元のアップロード画像"
+
+#: .\templates\sh_recognition\record_detail.html:68
+msgid "模型辨識繪製圖片"
+msgstr "モデル認識描画画像"
+
+#: .\templates\sh_recognition\record_detail.html:72
+msgid "無結果圖"
+msgstr "結果画像なし"
+
+#: .\templates\sh_recognition\record_detail.html:77
+msgid "細節座標紀錄 (類別 座標)"
+msgstr "詳細座標記録 (クラス 座標)"
+
+#: .\templates\sh_recognition\record_list.html:7
+#: .\templates\sh_recognition\record_list.html:13
+msgid "辨識紀錄清單"
+msgstr "認識履歴リスト"
+
+#: .\templates\sh_recognition\record_list.html:14
+msgid "返回辨識首頁"
+msgstr "認識ホームに戻る"
+
+#: .\templates\sh_recognition\record_list.html:25
+msgid "所有模型"
+msgstr "すべてのモデル"
+
+#: .\templates\sh_recognition\record_list.html:33
+msgid "搜尋註記..."
+msgstr "メモを検索..."
+
+#: .\templates\sh_recognition\record_list.html:34
+msgid "查詢"
+msgstr "検索"
+
+#: .\templates\sh_recognition\record_list.html:44
+msgid "刪除已勾選資料"
+msgstr "選択したデータを削除"
+
+#: .\templates\sh_recognition\record_list.html:54
+msgid "模型版本"
+msgstr "モデルバージョン"
+
+#: .\templates\sh_recognition\record_list.html:55
+msgid "辨識時間"
+msgstr "認識時間"
+
+#: .\templates\sh_recognition\record_list.html:56
+msgid "偵測物體"
+msgstr "検出物体"
+
+#: .\templates\sh_recognition\record_list.html:57
+msgid "資訊"
+msgstr "情報"
+
+#: .\templates\sh_recognition\record_list.html:70
+msgid "有"
+msgstr "あり"
+
+#: .\templates\sh_recognition\record_list.html:72
+msgid "無"
+msgstr "なし"
+
+#: .\templates\sh_recognition\record_list.html:75
+msgid "詳情"
+msgstr "詳細"
+
+#: .\templates\sh_recognition\record_list.html:79
+msgid "查無紀錄，可嘗試清空日期查詢全部"
+msgstr "記録が見つかりません。日付をクリアしてすべてを検索してください"
+
 #: .\templates\socialaccount\login.html:21
 #, fuzzy
 #| msgid ""
@@ -3003,6 +3099,403 @@ msgstr "キャンセルしてログインページに戻る"
 #: .\templates\socialaccount\login.html:42
 msgid "Your connection is encrypted and secure."
 msgstr "接続は暗号化されており安全です。"
+
+#: .\templates\study_brain\dashboard.html:4
+msgid "AI Study Brain Dashboard"
+msgstr "AI 教材ブレイン・ダッシュボード"
+
+#: .\templates\study_brain\dashboard.html:15
+msgid "Upload materials to train your personal AI tutor."
+msgstr ""
+"教材をアップロードして、あなた専用のAIチューターをトレーニングしましょう。"
+
+#: .\templates\study_brain\dashboard.html:26
+#: .\templates\study_brain\quiz_history.html:4
+#: .\templates\study_brain\quiz_history.html:14
+msgid "My Quiz History"
+msgstr "マイテスト履歴"
+
+#: .\templates\study_brain\dashboard.html:36
+msgid "Upload Material"
+msgstr "教材をアップロード"
+
+#: .\templates\study_brain\dashboard.html:42
+msgid "Category"
+msgstr "カテゴリー"
+
+#: .\templates\study_brain\dashboard.html:44
+msgid "Select Category..."
+msgstr "カテゴリーを選択..."
+
+#: .\templates\study_brain\dashboard.html:51
+msgid "Material Title"
+msgstr "教材タイトル"
+
+#: .\templates\study_brain\dashboard.html:52
+msgid "Enter a descriptive title"
+msgstr "タイトルを入力してください"
+
+#: .\templates\study_brain\dashboard.html:55
+msgid "File (PDF/Word)"
+msgstr "ファイル (PDF/Word)"
+
+#: .\templates\study_brain\dashboard.html:59
+msgid "Click or drag file here"
+msgstr "クリックまたはドラッグ＆ドロップでファイルを追加"
+
+#: .\templates\study_brain\dashboard.html:67
+msgid "這是歷屆考題"
+msgstr "これは過去問です"
+
+#: .\templates\study_brain\dashboard.html:70
+msgid ""
+"打勾後，AI 將不會產生重點摘要，而是直接萃取檔案中的考題並自動為您生成詳解。"
+msgstr ""
+"チェックを入れると、AIは要約を作成せず、ファイルから問題を直接抽出し、自動的"
+"に詳細な解説を生成します。"
+
+#: .\templates\study_brain\dashboard.html:76
+msgid "Upload & Prepare"
+msgstr "アップロードして準備"
+
+#: .\templates\study_brain\dashboard.html:92
+msgid "My Library"
+msgstr "マイライブラリ"
+
+#: .\templates\study_brain\dashboard.html:98
+msgid "Explore Public Materials"
+msgstr "公開教材を探索"
+
+#: .\templates\study_brain\dashboard.html:116
+msgid "Remove from My Library"
+msgstr "マイライブラリから削除"
+
+#: .\templates\study_brain\dashboard.html:121
+#: .\templates\study_brain\dashboard.html:169
+msgid "Uploaded by"
+msgstr "アップロード者："
+
+#: .\templates\study_brain\dashboard.html:121
+#: .\templates\study_brain\dashboard.html:169
+msgid "System"
+msgstr "システム"
+
+#: .\templates\study_brain\dashboard.html:124
+#: .\templates\study_brain\study_room.html:28
+msgid "View Original File"
+msgstr "オリジナルファイルを表示"
+
+#: .\templates\study_brain\dashboard.html:132
+msgid "Train AI"
+msgstr "AIをトレーニング"
+
+#: .\templates\study_brain\dashboard.html:137
+#: .\templates\study_brain\study_room.html:4
+msgid "Study Room"
+msgstr "学習室"
+
+#: .\templates\study_brain\dashboard.html:141
+msgid "No Data Yet"
+msgstr "データがまだありません"
+
+#: .\templates\study_brain\dashboard.html:151
+msgid "Your library is empty. Upload or explore materials to begin!"
+msgstr "ライブラリが空です。教材をアップロードするか探索して始めましょう！"
+
+#: .\templates\study_brain\dashboard.html:174
+msgid "Add to My Library"
+msgstr "マイライブラリに追加"
+
+#: .\templates\study_brain\dashboard.html:183
+msgid "No public materials available at the moment."
+msgstr "現在利用可能な公開教材はありません。"
+
+#: .\templates\study_brain\dashboard.html:199
+msgid "Training..."
+msgstr "トレーニング中..."
+
+#: .\templates\study_brain\mistake_book.html:4
+msgid "我的專屬錯題本"
+msgstr "マイトラブル・ブック (誤答集)"
+
+#: .\templates\study_brain\quiz_history.html:15
+msgid "Review your past quiz records and mistakes to improve your learning."
+msgstr "過去のテスト記録と誤答を復習して、学習効率を高めましょう。"
+
+#: .\templates\study_brain\quiz_history.html:27
+msgid "Material"
+msgstr "教材"
+
+#: .\templates\study_brain\quiz_history.html:28
+msgid "Score"
+msgstr "スコア"
+
+#: .\templates\study_brain\quiz_history.html:29
+#: .\templates\study_brain\quiz_result.html:31
+msgid "Error Rate"
+msgstr "誤答率"
+
+#: .\templates\study_brain\quiz_history.html:30
+msgid "Action"
+msgstr "アクション"
+
+#: .\templates\study_brain\quiz_history.html:57
+msgid "Review Mistakes"
+msgstr "誤答を確認"
+
+#: .\templates\study_brain\quiz_history.html:65
+msgid "You have no quiz records yet. Go practice some materials!"
+msgstr "テスト記録がありません。教材を使って練習してみましょう！"
+
+#: .\templates\study_brain\quiz_result.html:4
+#: .\templates\study_brain\quiz_result.html:16
+msgid "Quiz Result Report"
+msgstr "テスト結果レポート"
+
+#: .\templates\study_brain\quiz_result.html:25
+msgid "Correct Answers"
+msgstr "正解数"
+
+#: .\templates\study_brain\quiz_result.html:41
+msgid "Mistakes Analysis"
+msgstr "誤答分析"
+
+#: .\templates\study_brain\quiz_result.html:58
+msgid "Your Answer"
+msgstr "あなたの回答"
+
+#: .\templates\study_brain\quiz_result.html:68
+msgid "Correct Answer"
+msgstr "正解"
+
+#: .\templates\study_brain\quiz_result.html:80
+msgid "AI Explanation"
+msgstr "AI 解説"
+
+#: .\templates\study_brain\quiz_result.html:93
+msgid "Perfect Score! Excellent Job!"
+msgstr "満点！素晴らしいですね！"
+
+#: .\templates\study_brain\quiz_result.html:94
+msgid "You have fully mastered the content of this material."
+msgstr "この教材の内容を完全にマスターしました。"
+
+#: .\templates\study_brain\quiz_result.html:101
+msgid "Review Material"
+msgstr "教材を復習"
+
+#: .\templates\study_brain\study_room.html:15
+msgid "Back to Library"
+msgstr "ライブラリに戻る"
+
+#: .\templates\study_brain\study_room.html:22
+msgid "Last Generated:"
+msgstr "最終生成："
+
+#: .\templates\study_brain\study_room.html:38
+msgid "Key Summaries"
+msgstr "重要ポイント要約"
+
+#: .\templates\study_brain\study_room.html:43
+#: .\templates\study_brain\study_room.html:68
+msgid "Practice Quiz"
+msgstr "練習テスト"
+
+#: .\templates\study_brain\study_room.html:127
+msgid "Quiz Progress"
+msgstr "テスト進行状況"
+
+#: .\templates\study_brain\study_room.html:191
+msgid "Submit Answers"
+msgstr "回答を送信"
+
+#: .\templates\tube_hub\player.html:28
+msgid "返回清單"
+msgstr "リストに戻る"
+
+#: .\templates\tube_hub\player.html:49
+msgid "播放控制"
+msgstr "再生コントロール"
+
+#: .\templates\tube_hub\player.html:55
+msgid "全曲循環"
+msgstr "リピート再生"
+
+#: .\templates\tube_hub\player.html:61
+msgid "切換影片模式"
+msgstr "動画モードに切替"
+
+#: .\templates\tube_hub\player.html:71
+msgid "語速"
+msgstr "再生速度"
+
+#: .\templates\tube_hub\player.html:80
+msgid "升降 Key"
+msgstr "キー変更 (ピッチ)"
+
+#: .\templates\tube_hub\player.html:100
+msgid "下一首"
+msgstr "次の曲"
+
+#: .\templates\tube_hub\player.html:107
+msgid "A-B 段落重複播放"
+msgstr "A-B 区間リピート"
+
+#: .\templates\tube_hub\player.html:109
+msgid "設定 A 點"
+msgstr "A地点を設定"
+
+#: .\templates\tube_hub\player.html:110
+msgid "設定 B 點"
+msgstr "B地点を設定"
+
+#: .\templates\tube_hub\player.html:111
+msgid "清除"
+msgstr "クリア"
+
+#: .\templates\tube_hub\player.html:114
+msgid "開啟重複播放"
+msgstr "リピート有効"
+
+#: .\templates\tube_hub\player.html:127 .\templates\tube_hub\search.html:75
+msgid "歌單"
+msgstr "プレイリスト"
+
+#: .\templates\tube_hub\player.html:129
+msgid "全部循環"
+msgstr "全曲リピート"
+
+#: .\templates\tube_hub\player.html:129
+msgid "全部"
+msgstr "すべて"
+
+#: .\templates\tube_hub\player.html:130
+msgid "單曲循環"
+msgstr "1曲リピート"
+
+#: .\templates\tube_hub\player.html:130
+msgid "單曲"
+msgstr "1曲"
+
+#: .\templates\tube_hub\player.html:131
+msgid "隨機播放"
+msgstr "シャッフル再生"
+
+#: .\templates\tube_hub\player.html:131
+msgid "隨機"
+msgstr "シャッフル"
+
+#: .\templates\tube_hub\player.html:162
+msgid "原生字幕 / 歌詞"
+msgstr "オリジナル字幕 / 歌詞"
+
+#: .\templates\tube_hub\player.html:165
+msgid "個人筆記資料"
+msgstr "個人メモデータ"
+
+#: .\templates\tube_hub\player.html:179
+msgid "在這裡輸入您的學習筆記、歌詞段落或是重點摘要..."
+msgstr "ここに学習メモ、歌詞、または要約を入力してください..."
+
+#: .\templates\tube_hub\player.html:183
+msgid "已儲存"
+msgstr "保存済み"
+
+#: .\templates\tube_hub\player.html:185
+msgid "儲存筆記"
+msgstr "メモを保存"
+
+#: .\templates\tube_hub\search.html:8
+msgid "影音資源庫 - 搜尋與下載"
+msgstr "メディアライブラリ - 検索とダウンロード"
+
+#: .\templates\tube_hub\search.html:15
+msgid "Tube Hub 影音中心"
+msgstr "Tube Hub メディアセンター"
+
+#: .\templates\tube_hub\search.html:20
+msgid "我的收藏"
+msgstr "マイコレクション"
+
+#: .\templates\tube_hub\search.html:36 .\templates\tube_hub\search.html:92
+msgid "公開分享"
+msgstr "公開共有"
+
+#: .\templates\tube_hub\search.html:39 .\templates\tube_hub\search.html:95
+msgid "移除"
+msgstr "削除"
+
+#: .\templates\tube_hub\search.html:44 .\templates\tube_hub\search.html:99
+msgid "移動至..."
+msgstr "移動..."
+
+#: .\templates\tube_hub\search.html:49 .\templates\tube_hub\search.html:104
+msgid "移出資料夾 (最外層)"
+msgstr "フォルダから出す (ルート)"
+
+#: .\templates\tube_hub\search.html:129
+msgid "尚無個人收藏"
+msgstr "コレクションはまだありません"
+
+#: .\templates\tube_hub\search.html:135
+msgid "社群公開分享"
+msgstr "コミュニティ公開リソース"
+
+#: .\templates\tube_hub\search.html:143
+msgid "提供者:"
+msgstr "提供者："
+
+#: .\templates\tube_hub\search.html:146
+msgid "收藏"
+msgstr "お気に入り"
+
+#: .\templates\tube_hub\search.html:150
+msgid "目前沒有其他人公開的資源"
+msgstr "他人の公開リソースは現在ありません"
+
+#: .\templates\tube_hub\search.html:158
+msgid "輸入關鍵字搜尋 YouTube..."
+msgstr "キーワードを入力して YouTube を検索..."
+
+#: .\templates\tube_hub\search.html:159
+msgid "搜尋"
+msgstr "検索"
+
+#: .\templates\tube_hub\search.html:165
+msgid "下載設定"
+msgstr "ダウンロード設定"
+
+#: .\templates\tube_hub\search.html:171 .\tube_hub\models.py:49
+msgid "資源分類"
+msgstr "リソースカテゴリー"
+
+#: .\templates\tube_hub\search.html:173
+msgid "音樂類型"
+msgstr "音楽タイプ"
+
+#: .\templates\tube_hub\search.html:174
+msgid "影片類型"
+msgstr "動画タイプ"
+
+#: .\templates\tube_hub\search.html:178
+msgid "分類資料夾 (選填)"
+msgstr "カテゴリーフォルダ (任意)"
+
+#: .\templates\tube_hub\search.html:179
+msgid "選擇現有或輸入新名稱..."
+msgstr "既存を選択するか新規入力..."
+
+#: .\templates\tube_hub\search.html:189
+msgid "個人學習筆記"
+msgstr "個人学習メモ"
+
+#: .\templates\tube_hub\search.html:195
+msgid "公開給社群其他使用者收藏"
+msgstr "コミュニティに公開する"
+
+#: .\templates\tube_hub\search.html:197
+msgid "確認下載並自動分析字幕"
+msgstr "ダウンロードして自動字幕解析"
 
 #: .\tigf\apps.py:7
 msgid "安定基金"
@@ -3060,10 +3553,6 @@ msgstr "ソースURL"
 msgid "資源標題"
 msgstr "リソースタイトル"
 
-#: .\tube_hub\models.py:49 .\tube_hub\templates\tube_hub\search.html:171
-msgid "資源分類"
-msgstr "リソースカテゴリー"
-
 #: .\tube_hub\models.py:52
 msgid "影片檔"
 msgstr "動画ファイル"
@@ -3087,195 +3576,6 @@ msgstr "個人メモ"
 #: .\tube_hub\models.py:63 .\tube_hub\models.py:64
 msgid "影音資源"
 msgstr "メディアリソース"
-
-#: .\tube_hub\templates\tube_hub\player.html:28
-msgid "返回清單"
-msgstr "リストに戻る"
-
-#: .\tube_hub\templates\tube_hub\player.html:49
-msgid "播放控制"
-msgstr "再生コントロール"
-
-#: .\tube_hub\templates\tube_hub\player.html:55
-msgid "全曲循環"
-msgstr "リピート再生"
-
-#: .\tube_hub\templates\tube_hub\player.html:61
-msgid "切換影片模式"
-msgstr "動画モードに切替"
-
-#: .\tube_hub\templates\tube_hub\player.html:71
-msgid "語速"
-msgstr "再生速度"
-
-#: .\tube_hub\templates\tube_hub\player.html:80
-msgid "升降 Key"
-msgstr "キー変更 (ピッチ)"
-
-#: .\tube_hub\templates\tube_hub\player.html:100
-msgid "下一首"
-msgstr "次の曲"
-
-#: .\tube_hub\templates\tube_hub\player.html:107
-msgid "A-B 段落重複播放"
-msgstr "A-B 区間リピート"
-
-#: .\tube_hub\templates\tube_hub\player.html:109
-msgid "設定 A 點"
-msgstr "A地点を設定"
-
-#: .\tube_hub\templates\tube_hub\player.html:110
-msgid "設定 B 點"
-msgstr "B地点を設定"
-
-#: .\tube_hub\templates\tube_hub\player.html:111
-msgid "清除"
-msgstr "クリア"
-
-#: .\tube_hub\templates\tube_hub\player.html:114
-msgid "開啟重複播放"
-msgstr "リピート有効"
-
-#: .\tube_hub\templates\tube_hub\player.html:127
-#: .\tube_hub\templates\tube_hub\search.html:75
-msgid "歌單"
-msgstr "プレイリスト"
-
-#: .\tube_hub\templates\tube_hub\player.html:129
-msgid "全部循環"
-msgstr "全曲リピート"
-
-#: .\tube_hub\templates\tube_hub\player.html:129
-msgid "全部"
-msgstr "すべて"
-
-#: .\tube_hub\templates\tube_hub\player.html:130
-msgid "單曲循環"
-msgstr "1曲リピート"
-
-#: .\tube_hub\templates\tube_hub\player.html:130
-msgid "單曲"
-msgstr "1曲"
-
-#: .\tube_hub\templates\tube_hub\player.html:131
-msgid "隨機播放"
-msgstr "シャッフル再生"
-
-#: .\tube_hub\templates\tube_hub\player.html:131
-msgid "隨機"
-msgstr "シャッフル"
-
-#: .\tube_hub\templates\tube_hub\player.html:162
-msgid "原生字幕 / 歌詞"
-msgstr "オリジナル字幕 / 歌詞"
-
-#: .\tube_hub\templates\tube_hub\player.html:165
-msgid "個人筆記資料"
-msgstr "個人メモデータ"
-
-#: .\tube_hub\templates\tube_hub\player.html:179
-msgid "在這裡輸入您的學習筆記、歌詞段落或是重點摘要..."
-msgstr "ここに学習メモ、歌詞、または要約を入力してください..."
-
-#: .\tube_hub\templates\tube_hub\player.html:183
-msgid "已儲存"
-msgstr "保存済み"
-
-#: .\tube_hub\templates\tube_hub\player.html:185
-msgid "儲存筆記"
-msgstr "メモを保存"
-
-#: .\tube_hub\templates\tube_hub\search.html:8
-msgid "影音資源庫 - 搜尋與下載"
-msgstr "メディアライブラリ - 検索とダウンロード"
-
-#: .\tube_hub\templates\tube_hub\search.html:15
-msgid "Tube Hub 影音中心"
-msgstr "Tube Hub メディアセンター"
-
-#: .\tube_hub\templates\tube_hub\search.html:20
-msgid "我的收藏"
-msgstr "マイコレクション"
-
-#: .\tube_hub\templates\tube_hub\search.html:36
-#: .\tube_hub\templates\tube_hub\search.html:92
-msgid "公開分享"
-msgstr "公開共有"
-
-#: .\tube_hub\templates\tube_hub\search.html:39
-#: .\tube_hub\templates\tube_hub\search.html:95
-msgid "移除"
-msgstr "削除"
-
-#: .\tube_hub\templates\tube_hub\search.html:44
-#: .\tube_hub\templates\tube_hub\search.html:99
-msgid "移動至..."
-msgstr "移動..."
-
-#: .\tube_hub\templates\tube_hub\search.html:49
-#: .\tube_hub\templates\tube_hub\search.html:104
-msgid "移出資料夾 (最外層)"
-msgstr "フォルダから出す (ルート)"
-
-#: .\tube_hub\templates\tube_hub\search.html:129
-msgid "尚無個人收藏"
-msgstr "コレクションはまだありません"
-
-#: .\tube_hub\templates\tube_hub\search.html:135
-msgid "社群公開分享"
-msgstr "コミュニティ公開リソース"
-
-#: .\tube_hub\templates\tube_hub\search.html:143
-msgid "提供者:"
-msgstr "提供者："
-
-#: .\tube_hub\templates\tube_hub\search.html:146
-msgid "收藏"
-msgstr "お気に入り"
-
-#: .\tube_hub\templates\tube_hub\search.html:150
-msgid "目前沒有其他人公開的資源"
-msgstr "他人の公開リソースは現在ありません"
-
-#: .\tube_hub\templates\tube_hub\search.html:158
-msgid "輸入關鍵字搜尋 YouTube..."
-msgstr "キーワードを入力して YouTube を検索..."
-
-#: .\tube_hub\templates\tube_hub\search.html:159
-msgid "搜尋"
-msgstr "検索"
-
-#: .\tube_hub\templates\tube_hub\search.html:165
-msgid "下載設定"
-msgstr "ダウンロード設定"
-
-#: .\tube_hub\templates\tube_hub\search.html:173
-msgid "音樂類型"
-msgstr "音楽タイプ"
-
-#: .\tube_hub\templates\tube_hub\search.html:174
-msgid "影片類型"
-msgstr "動画タイプ"
-
-#: .\tube_hub\templates\tube_hub\search.html:178
-msgid "分類資料夾 (選填)"
-msgstr "カテゴリーフォルダ (任意)"
-
-#: .\tube_hub\templates\tube_hub\search.html:179
-msgid "選擇現有或輸入新名稱..."
-msgstr "既存を選択するか新規入力..."
-
-#: .\tube_hub\templates\tube_hub\search.html:189
-msgid "個人學習筆記"
-msgstr "個人学習メモ"
-
-#: .\tube_hub\templates\tube_hub\search.html:195
-msgid "公開給社群其他使用者收藏"
-msgstr "コミュニティに公開する"
-
-#: .\tube_hub\templates\tube_hub\search.html:197
-msgid "確認下載並自動分析字幕"
-msgstr "ダウンロードして自動字幕解析"
 
 #: .\users\apps.py:7
 msgid "使用者管理"
