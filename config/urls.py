@@ -117,6 +117,8 @@ urlpatterns = [
     path("media_studio/", include("media_studio.urls")),
     #! 虛擬 AI
     path("bionic_chat/", include("bionic_chat.urls")),
+    #! 世祥辨識專用
+    path("sh_recognition/", include("sh_recognition.urls")),
     # ? ======================================================================
 ]
 

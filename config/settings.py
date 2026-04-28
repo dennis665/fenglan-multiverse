@@ -98,6 +98,7 @@ LOCAL_APPS = [
     "tube_hub",
     "media_studio",
     "bionic_chat",
+    "sh_recognition",
 ]
 
 INSTALLED_APPS = WEBSOCKET_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

@@ -1,0 +1,92 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="zh-hant">
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans "世祥辨識系統 - 首頁" %}</title>
+    <link rel="stylesheet" href="{% static 'css/sh_recognition.css' %}">
+</head>
+<body>
+    <div class="sh-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1>{% trans "世祥圖片辨識系統" %}</h1>
+            <div>
+                <a href="/" class="sh-btn sh-btn-secondary">{% trans "返回系統主頁" %}</a>
+                <a href="{% url 'sh_recognition:record_list' %}" class="sh-btn sh-btn-success">{% trans "歷史紀錄" %}</a>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div style="padding: 15px; background: #d4edda; color: #155724; border-radius: 6px; margin-bottom: 20px;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="sh-split-layout">
+            {# 左側：辨識表單 #}
+            <div class="sh-column">
+                <h2>{% trans "圖片辨識推論" %}</h2>
+                <form id="image-recognition-form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="recognize_image">
+                    <div class="sh-form-group">
+                        <label>{% trans "選擇模型版本" %}</label>
+                        <select name="model_id" required>
+                            <option value="">-- {% trans "請選擇" %} --</option>
+                            {% for model in models %}
+                                <option value="{{ model.id }}">{{ model.version_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="sh-form-group">
+                        <label>{% trans "辨識註記" %}</label>
+                        <input type="text" name="user_note" placeholder="{% trans '輸入對這批圖片的說明' %}">
+                    </div>
+                    <div class="sh-form-group">
+                        <label>{% trans "信心閥值 (0.1 - 1.0)" %}</label>
+                        <input type="number" name="threshold" step="0.1" min="0.1" max="1.0" value="0.5" required>
+                    </div>
+                    <div class="sh-form-group">
+                        <label>{% trans "上傳待辨識圖片 (可複選多張)" %}</label>
+                        {# * 加入 multiple 屬性支援多檔案上傳 #}
+                        <input type="file" name="image_file" accept="image/*" multiple required>
+                    </div>
+                    <button type="submit" id="recognize-submit-btn" class="sh-btn sh-btn-primary" style="width: 100%;">
+                        {% trans "開始辨識" %}
+                    </button>
+                    <div id="recognize-loading" style="display:none; text-align:center; margin-top:10px; color:#007bff;">
+                        {% trans "批次模型運算中，請耐心稍候..." %}
+                    </div>
+                </form>
+            </div>
+
+            {# 右側：最新結果 #}
+            <div class="sh-column">
+                <h2>{% trans "最新辨識結果" %}</h2>
+                {% if records %}
+                    {% with latest=records.0 %}
+                        <div style="margin-bottom: 15px;">
+                            <strong>{% trans "版本" %}：</strong>{{ latest.used_model.version_name }} | 
+                            <strong>{% trans "狀態" %}：</strong>
+                            {% if latest.has_object %}
+                                <span class="sh-badge sh-badge-success">{% trans "偵測到物體" %}</span>
+                            {% else %}
+                                <span class="sh-badge sh-badge-danger">{% trans "未偵測到物體" %}</span>
+                            {% endif %}
+                        </div>
+                        {% if latest.result_image %}
+                            <img src="{{ latest.result_image.url }}" class="sh-img-responsive" alt="Result">
+                        {% endif %}
+                        <p><strong>{% trans "註記" %}:</strong> {{ latest.user_note|default:"-" }}</p>
+                        <pre class="sh-pre">{{ latest.result_text|default:"No data" }}</pre>
+                    {% endwith %}
+                {% else %}
+                    <p style="text-align: center; color: #999; padding: 50px 0;">{% trans "尚未有辨識紀錄" %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/sh_recognition.js' %}"></script>
+</body>
+</html>

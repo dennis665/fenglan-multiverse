@@ -1,0 +1,146 @@
+/*! 世祥辨識獨立樣式表 */
+body {
+    font-family: "Microsoft JhengHei", sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.sh-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.sh-centered-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 分欄佈局 */
+.sh-split-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.sh-column {
+    flex: 1;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 元件樣式 */
+h1,
+h2 {
+    margin-top: 0;
+    color: #1a1a1a;
+}
+
+.sh-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.sh-btn-primary {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.sh-btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.sh-btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.sh-btn-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.sh-form-group {
+    margin-bottom: 15px;
+}
+
+.sh-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.sh-form-group input,
+.sh-form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.sh-img-responsive {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.sh-pre {
+    background: #272822;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 14px;
+}
+
+.sh-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.sh-badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.sh-badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* 表格樣式 */
+.sh-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.sh-table th,
+.sh-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.sh-table th {
+    background-color: #f8f9fa;
+}

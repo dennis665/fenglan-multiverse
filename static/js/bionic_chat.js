@@ -1,48 +1,106 @@
-document.getElementById('send-btn').addEventListener('click', () => {
-    const inputElement = document.getElementById('user-input');
-    const message = inputElement.value.trim(); //* 取得並清理使用者輸入字串
+#! static/js/bionic_chat.js
 
-    if (!message) return; //* 避免發送空白訊息
+const avatar = document.getElementById('avatar');
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+const chatHistory = document.getElementById('chat-history');
+const dialogueSystem = document.getElementById('dialogue-system');
 
-    appendMessage('You', message); //* 將使用者訊息寫入歷史區塊
-    inputElement.value = ''; //* 清空輸入框
+let isSpeaking = false;
+let time = 0;
+let sentenceBuffer = "";
+let availableVoices = [];
 
-    startTypingEffect(message); //* 啟動向伺服器請求的流程
+// 固定優化後的動態參數
+const CONFIG = {
+    breathIntensity: 0.5,
+    baseScale: 1.0,
+    baseAngleZ: 0,
+    pitch: 1.1,
+    rate: 0.9
+};
+
+const synth = window.speechSynthesis;
+
+function loadVoices() { availableVoices = synth.getVoices(); }
+if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = loadVoices;
+}
+loadVoices();
+
+// 渲染循環
+function updateAvatar() {
+    if (!avatar) return;
+
+    const breathRate = isSpeaking ? 0.015 : 0.008;
+    time += breathRate;
+
+    const breathEffect = Math.sin(time) * 0.01 * CONFIG.breathIntensity;
+
+    const finalScaleY = CONFIG.baseScale + breathEffect;
+    const finalScaleX = CONFIG.baseScale - (breathEffect * 0.1);
+    const talkJitter = isSpeaking ? Math.sin(time * 8) * 0.15 : 0;
+    const finalAngleZ = CONFIG.baseAngleZ + (Math.sin(time * 0.2) * 0.3) + talkJitter;
+
+    avatar.style.transform = `scaleX(${finalScaleX}) scaleY(${finalScaleY}) rotateZ(${finalAngleZ}deg)`;
+    requestAnimationFrame(updateAvatar);
+}
+updateAvatar();
+
+function playVoice(text) {
+    if (!text) return;
+    const msg = new SpeechSynthesisUtterance(text);
+    const voice = availableVoices.find(v => v.lang.includes('zh-TW'));
+    if (voice) msg.voice = voice;
+
+    msg.pitch = CONFIG.pitch;
+    msg.rate = CONFIG.rate;
+
+    msg.onstart = () => { isSpeaking = true; };
+    msg.onend = () => { if (!synth.speaking) isSpeaking = false; };
+    synth.speak(msg);
+}
+
+function startBionicStream(message) {
+    // 確保路徑包含 bionic_chat
+    const apiUrl = `/bionic_chat/api/stream/?message=${encodeURIComponent(message)}`;
+    const eventSource = new EventSource(apiUrl);
+
+    const botMsgDiv = document.createElement('div');
+    botMsgDiv.className = 'bot-msg';
+    botMsgDiv.textContent = '[Bionic] ';
+    chatHistory.appendChild(botMsgDiv);
+
+    sentenceBuffer = "";
+
+    eventSource.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        botMsgDiv.textContent += data.text;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        sentenceBuffer += data.text;
+        if (/[。！？；\n]/.test(data.text) || sentenceBuffer.length > 25) {
+            playVoice(sentenceBuffer);
+            sentenceBuffer = "";
+        }
+    };
+
+    eventSource.onerror = () => {
+        if (sentenceBuffer) playVoice(sentenceBuffer);
+        eventSource.close();
+        isSpeaking = false;
+    };
+}
+
+sendBtn.addEventListener('click', () => {
+    const val = userInput.value.trim();
+    if (!val) return;
+    synth.speak(new SpeechSynthesisUtterance('')); // 解鎖語音
+    const userDiv = document.createElement('div');
+    userDiv.textContent = `[You] ${val}`;
+    chatHistory.appendChild(userDiv);
+    userInput.value = '';
+    startBionicStream(val);
 });
 
-function appendMessage(sender, text) {
-    // 建立新的 DOM 元素來顯示單筆對話
-    const historyBox = document.getElementById('chat-history');
-    const msgDiv = document.createElement('div');
-
-    msgDiv.textContent = `[${sender}] ${text}`;
-    if (sender !== 'You') {
-        msgDiv.className = 'bot-msg'; //* 為仿生人設定專屬樣式類別
-    }
-
-    historyBox.appendChild(msgDiv);
-    historyBox.scrollTop = historyBox.scrollHeight; //* 自動捲動到最新訊息
-    return msgDiv; //* 回傳節點以便後續追加文字
-}
-
-function startTypingEffect(userMessage) {
-    // 透過 SSE 連線接收後端 LLM 產生的文字串流
-    const encodedMsg = encodeURIComponent(userMessage);
-    const eventSource = new EventSource(`/bionic_chat/api/stream/?message=${encodedMsg}`); //* 發起請求
-
-    const botMsgDiv = appendMessage('Bionic', ''); //* 先建立一個空白的對話列
-
-    eventSource.onmessage = function (event) {
-        // 每次收到伺服器傳來的一個字，就接在現有文字後方
-        const data = JSON.parse(event.data);
-        botMsgDiv.textContent += data.text; //* 實現打字機的動態跳動效果
-
-        const historyBox = document.getElementById('chat-history');
-        historyBox.scrollTop = historyBox.scrollHeight; //* 確保打字過程中畫面跟著捲動
-    };
-
-    eventSource.onerror = function () {
-        // 當模型生成結束或遇到錯誤時，關閉連線以節省資源
-        eventSource.close(); //* 中斷 SSE 連線
-    };
-}
+userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendBtn.click(); });

@@ -56,6 +56,8 @@ pip install "rembg[cpu]"
 #* 如果有 NVIDIA 顯卡且配置好 CUDA 環境
 pip install "rembg[gpu]"
 
+#! 下載 辨識資料已包含在專案裡 (rtdetrv2_pytorch)
+https://github.com/lyuwenyu/RT-DETR
 
 -------docker 相關-------
 #! 建立並啟動所有容器，改 Dockerfile、裝新套件

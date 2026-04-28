@@ -1,0 +1,82 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="zh-hant">
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans "辨識結果詳情" %}</title>
+    <link rel="stylesheet" href="{% static 'css/sh_recognition.css' %}">
+</head>
+<body>
+    <div class="sh-centered-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>{% trans "辨識紀錄詳情" %}</h2>
+            <a href="{% url 'sh_recognition:record_list' %}" class="sh-btn sh-btn-secondary">{% trans "返回列表" %}</a>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div style="padding: 15px; background: #d4edda; color: #155724; border-radius: 6px; margin-bottom: 20px;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 25px;">
+            <div style="flex: 2; background: #f8f9fa; padding: 20px; border-radius: 8px; line-height: 1.8;">
+                <div><strong>{% trans "使用模型版本" %}：</strong>{{ record.used_model.version_name }}</div>
+                <div><strong>{% trans "辨識日期時間" %}：</strong>{{ record.created_at|date:"Y-m-d H:i:s" }}</div>
+                <div><strong>{% trans "設定信心閥值" %}：</strong>{{ record.conf_threshold }}</div>
+                <div><strong>{% trans "是否有偵測到物體" %}：</strong>{{ record.has_object|yesno:_("是,否") }}</div>
+                <div><strong>{% trans "使用者註記" %}：</strong>{{ record.user_note|default:"-" }}</div>
+            </div>
+
+            <div style="flex: 1; background: #e9ecef; padding: 20px; border-radius: 8px;">
+                <h4 style="margin-top: 0;">{% trans "使用新模型重新辨識" %}</h4>
+                
+                {# * 若所有模型皆已辨識過該圖，則隱藏表單顯示提示 #}
+                {% if available_models %}
+                    <form method="post" id="image-recognition-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="re_recognize">
+                        <select name="new_model_id" required style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="">{% trans "選擇未使用的模型..." %}</option>
+                            {% for model in available_models %}
+                                <option value="{{ model.id }}">{{ model.version_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="number" name="new_threshold" step="0.1" min="0.1" max="1.0" value="{{ record.conf_threshold }}" title="{% trans '信心閥值' %}" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;">
+                        <button type="submit" id="recognize-submit-btn" class="sh-btn sh-btn-primary" style="width: 100%;">
+                            {% trans "進行重新辨識" %}
+                        </button>
+                        <div id="recognize-loading" style="display:none; text-align:center; margin-top:10px; color:#007bff; font-size:12px;">
+                            {% trans "重新運算中..." %}
+                        </div>
+                    </form>
+                {% else %}
+                    <div style="padding: 15px; text-align: center; color: #6c757d; font-weight: bold; border: 1px dashed #ccc; border-radius: 4px;">
+                        {% trans "此原圖已使用過所有現有模型進行辨識。" %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 20px; margin-bottom: 25px;">
+            <div style="flex: 1; text-align: center;">
+                <h4 style="margin-bottom: 10px;">{% trans "原始上傳圖片" %}</h4>
+                <img src="{{ record.original_image.url }}" class="sh-img-responsive" alt="Original">
+            </div>
+            <div style="flex: 1; text-align: center;">
+                <h4 style="margin-bottom: 10px;">{% trans "模型辨識繪製圖片" %}</h4>
+                {% if record.result_image %}
+                    <img src="{{ record.result_image.url }}" class="sh-img-responsive" alt="Result">
+                {% else %}
+                    <div style="padding: 50px; background: #eee; border-radius: 8px;">{% trans "無結果圖" %}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <h4>{% trans "細節座標紀錄 (類別 座標)" %}</h4>
+        <pre class="sh-pre">{{ record.result_text|default:"(No detection data)" }}</pre>
+    </div>
+    <script src="{% static 'js/sh_recognition.js' %}"></script>
+</body>
+</html>
