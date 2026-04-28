@@ -47,3 +47,6 @@ yolo11n.pt
 
 #! 雜物
 5.29.6
+
+#! 辨識套件
+sh_recognition/rtdetrv2_pytorch/

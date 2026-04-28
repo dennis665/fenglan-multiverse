@@ -59,6 +59,15 @@ pip install "rembg[gpu]"
 #! 下載 辨識資料已包含在專案裡 (rtdetrv2_pytorch)
 https://github.com/lyuwenyu/RT-DETR
 
+#! 移除單一檔案的追蹤
+git rm --cached <檔案路徑>
+
+#! 移除整個資料夾的追蹤 (例如 media 資料夾)
+git rm -r --cached <資料夾路徑>
+
+#! 移除目前目錄下所有檔案的追蹤 (注意最後有個點)
+git rm -r --cached .
+
 -------docker 相關-------
 #! 建立並啟動所有容器，改 Dockerfile、裝新套件
 docker compose up --build
