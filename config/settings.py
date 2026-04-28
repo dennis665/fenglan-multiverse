@@ -46,6 +46,7 @@ CSI_EMAIL = env("CSI_EMAIL")
 MERCHANT_ID = env("MERCHANT_ID")
 HASH_KEY = env("HASH_KEY")
 HASH_IV = env("HASH_IV")
+LLM_MODEL_PATH = env("LLM_MODEL_PATH")
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"

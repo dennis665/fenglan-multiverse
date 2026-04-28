@@ -13,7 +13,7 @@ from .models import ChatHistory
 
 #! 初始化模型實例
 llm_engine = Llama(
-    model_path=r"d:\SI1403\dennis\csi_server\test\Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
+    model_path=settings.LLM_MODEL_PATH,
     n_ctx=4096,
     n_threads=8,
     verbose=False,
