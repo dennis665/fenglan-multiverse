@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import re
 import time
 
 import edge_tts
@@ -102,8 +103,11 @@ def stream_llm_response(request):
                         if len(clean_text) > 0:
                             filename = os.path.join(AUDIO_DIR, f"voice_{audio_counter}.mp3")
 
+                            #! 核心修正：洗掉會被唸出來的星號、井字號與反引號等符號
+                            tts_text = re.sub(r"[*#_~`]", "", clean_text)
+
                             #! 執行非同步任務
-                            asyncio.run(generate_audio(clean_text, filename))
+                            asyncio.run(generate_audio(tts_text, filename))
 
                             #! 將 Media 網址傳給前端
                             audio_url = f"{settings.MEDIA_URL}audio_temp/voice_{audio_counter}.mp3"
@@ -116,7 +120,8 @@ def stream_llm_response(request):
         clean_text = sentence_buffer.strip()
         if len(clean_text) > 0:
             filename = os.path.join(AUDIO_DIR, f"voice_{audio_counter}.mp3")
-            asyncio.run(generate_audio(clean_text, filename))
+            tts_text = re.sub(r"[*#_~`]", "", clean_text)
+            asyncio.run(generate_audio(tts_text, filename))
             audio_url = f"{settings.MEDIA_URL}audio_temp/voice_{audio_counter}.mp3"
             yield f"data: {json.dumps({'type': 'audio', 'url': audio_url})}\n\n"
 

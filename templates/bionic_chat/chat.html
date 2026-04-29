@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>{% trans "仿生人通訊終端" %}</title>
     <link rel="stylesheet" href="/static/css/bionic_chat.css">
+    {# 引入 Markdown 解析套件 #}
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     {# 遊戲主視窗容器 #}
@@ -12,7 +14,7 @@
 
         {# 角色立繪展示區 #}
         <div id="character-layer">
-            <img id="avatar" src="/static/images/character_idle.png" alt="{% trans '角色立繪' %}">
+            <img id="avatar" src="/static/images/character_idle.webp" alt="{% trans '角色立繪' %}">
         </div>
 
         {# 底部對話系統 #}

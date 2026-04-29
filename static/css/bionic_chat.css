@@ -29,19 +29,29 @@ body {
     justify-content: center;
     align-items: flex-end;
     padding-bottom: 0;
-        box-sizing: border-box;
+    box-sizing: border-box;
+    cursor: grab;
+        touch-action: none;
+    }
+    
+    #character-layer:active {
+        cursor: grabbing;
+        /** 拖拉時改變游標 */
 }
 
 /*! 偽 Live2D 立繪動態設定 */
 #character-layer img {
     height: 100%;
-        max-height: 100%;
+    max-height: 100%;
         width: 100%;
     object-fit: contain;
     object-position: center bottom;
-        transform-origin: bottom center;
-        transition: transform 0.1s ease-out;
-        filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
+    transform-origin: bottom center;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
+    pointer-events: none;
+        /** 防止瀏覽器把圖片當成檔案拖曳出來 */
+        user-select: none;
+        /** 防止不小心反白選取到圖片 */
     }
     
     /*! 參數測試面板樣式 */
@@ -110,6 +120,31 @@ body {
 }
 
 .bot-msg {
-    color: #4da6ff;
+color: #4da6ff;
     /** 區分仿生人回覆的文字顏色 */
+background: rgba(77, 166, 255, 0.1);
+    /** 加一點點底色區分對話框 */
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/*! 針對 Markdown 轉換後的 HTML 元素進行間距調整 */
+.bot-msg p {
+    margin: 0 0 8px 0;
+}
+
+.bot-msg p:last-child {
+    margin-bottom: 0;
+}
+
+.bot-msg ul,
+.bot-msg ol {
+    margin: 4px 0 8px 0;
+    padding-left: 20px;
+}
+
+.bot-msg strong {
+    color: #80c1ff;
+    /** 讓粗體稍微亮一點 */
 }
