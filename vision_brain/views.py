@@ -1,36 +1,33 @@
-import base64
-import io
-import os
-import re
-import time
-from collections import Counter
+from utils.logger_utils import time_tracker
 
-#! 關閉 Paddle 每次都要連線上網檢查模型
-os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("Vision_Brain"):
+    import base64
+    import io
+    import os
+    import re
+    import time
+    from collections import Counter
 
-import cv2
-import numpy as np
-import pytesseract
-from django.contrib import messages
-from django.shortcuts import redirect, render
-from paddleocr import PaddleOCR
-from PIL import Image
-from ultralytics import YOLO
+    #! 關閉 Paddle 每次都要連線上網檢查模型
+    os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
 
-from utils.logger_utils import jinfo
+    from django.contrib import messages
+    from django.shortcuts import redirect, render
+    from PIL import Image
 
-#! 設定 Tesseract 執行檔路徑 (Windows 必備)
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    from utils.logger_utils import jinfo
 
-#! 讀取模型只執行一次 (快取字典)
-PADDLE_MODELS_CACHE = {}
-YOLO_MODEL_CACHE = None
+    #! 讀取模型只執行一次 (快取字典)
+    PADDLE_MODELS_CACHE = {}
+    YOLO_MODEL_CACHE = None
 
 
 def get_paddle_instance(lang_code):
     """獲取或初始化 PaddleOCR 模型"""
     if lang_code not in PADDLE_MODELS_CACHE:
         start_time = time.time()
+        from paddleocr import PaddleOCR
         PADDLE_MODELS_CACHE[lang_code] = PaddleOCR(
             use_textline_orientation=True,
             enable_mkldnn=False,
@@ -38,7 +35,7 @@ def get_paddle_instance(lang_code):
             text_detection_model_name="PP-OCRv4_mobile_det",
             text_recognition_model_name="PP-OCRv4_mobile_rec",
         )
-        jinfo(f"🕒 首次讀取 Paddle 模型耗時: {time.time() - start_time:.2f} 秒")
+        jinfo(f"🕒 首次讀取 Paddle 模型耗時：{time.time() - start_time:.2f} 秒")
     return PADDLE_MODELS_CACHE[lang_code]
 
 
@@ -47,14 +44,22 @@ def get_yolo_instance():
     global YOLO_MODEL_CACHE
     if YOLO_MODEL_CACHE is None:
         start_time = time.time()
+        from ultralytics import YOLO
         #! 載入最新的 YOLOv11 預訓練模型
         YOLO_MODEL_CACHE = YOLO("yolo11n.pt")
-        jinfo(f"🕒 首次讀取 YOLO 模型耗時: {time.time() - start_time:.2f} 秒")
+        jinfo(f"🕒 首次讀取 YOLO 模型耗時：{time.time() - start_time:.2f} 秒")
     return YOLO_MODEL_CACHE
 
 
 def ocr_recognize(request):
     """處理即時圖片上傳與視覺 AI (OCR / YOLO) 辨識"""
+    import cv2
+    import numpy as np
+    import pytesseract
+
+    #! 設定 Tesseract 執行檔路徑 (Windows 必備)
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
     result_text = request.session.pop("ocr_result_text", None)
     image_data_uri = request.session.pop("ocr_image_uri", None)
     selected_lang = request.session.get("ocr_selected_lang", "cht")
@@ -106,7 +111,7 @@ def ocr_recognize(request):
                         texts.extend(res["rec_texts"])
 
                 final_text = "\n".join(texts)
-                jinfo(f"🕒 PADDLEOCR 耗時: {time.time() - start_time:.2f} 秒")
+                jinfo(f"🕒 PADDLEOCR 耗時：{time.time() - start_time:.2f} 秒")
 
             # ==========================================
             #! Tesseract 處理邏輯
@@ -117,7 +122,7 @@ def ocr_recognize(request):
 
                 text = pytesseract.image_to_string(img, lang=lang_code)
                 final_text = re.sub(r"(?<=[\u4e00-\u9fa5])[ \t]+|[ \t]+(?=[\u4e00-\u9fa5])", "", text).strip()
-                jinfo(f"🕒 TESSERACT 辨識耗時: {time.time() - start_time:.2f} 秒")
+                jinfo(f"🕒 TESSERACT 辨識耗時：{time.time() - start_time:.2f} 秒")
 
             # ==========================================
             #! YOLOv11 物件偵測邏輯
@@ -161,7 +166,7 @@ def ocr_recognize(request):
                 encoded_annotated = base64.b64encode(buffer).decode('utf-8')
                 image_data_uri = f"data:image/jpeg;base64,{encoded_annotated}"
 
-                jinfo(f"🕒 YOLO 辨識與繪圖耗時: {time.time() - start_time:.2f} 秒")
+                jinfo(f"🕒 YOLO 辨識與繪圖耗時：{time.time() - start_time:.2f} 秒")
 
             # ==========================================
             #! 統一結果回傳

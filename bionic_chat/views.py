@@ -1,31 +1,44 @@
-import asyncio
-import json
-import os
-import re
-import time
+from utils.logger_utils import time_tracker
 
-import edge_tts
-from django.conf import settings
-from django.http import StreamingHttpResponse
-from django.shortcuts import render
-from llama_cpp import Llama
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("bionic_chat"):
+    import asyncio
+    import json
+    import os
+    import re
+    import time
 
-from .models import ChatHistory
+    import edge_tts
+    from django.conf import settings
+    from django.http import StreamingHttpResponse
+    from django.shortcuts import render
 
-#! 初始化模型實例
-llm_engine = Llama(
-    model_path=settings.LLM_MODEL_PATH,
-    n_ctx=4096,
-    n_threads=8,
-    verbose=False,
-)
+    from .models import ChatHistory
 
-#! 設定 Edge-TTS 的聲音與語速
-VOICE = "zh-TW-HsiaoChenNeural"
+    llm_engine = None
 
-#! 設定 Media 資料夾路徑存放暫存音檔
-AUDIO_DIR = os.path.join(settings.MEDIA_ROOT, "audio_temp")
-os.makedirs(AUDIO_DIR, exist_ok=True)
+    #! 設定 Edge-TTS 的聲音與語速
+    VOICE = "zh-TW-HsiaoChenNeural"
+
+    #! 設定 Media 資料夾路徑存放暫存音檔
+    AUDIO_DIR = os.path.join(settings.MEDIA_ROOT, "audio_temp")
+    os.makedirs(AUDIO_DIR, exist_ok=True)
+
+
+def get_llm_engine():
+    global llm_engine
+    if llm_engine is None:
+        #! 只有在第一次對話時才匯入並初始化模型
+        from llama_cpp import Llama
+
+        print("🤖 正在初始化 Llama 模型...")
+        llm_engine = Llama(
+            model_path=settings.LLM_MODEL_PATH,
+            n_ctx=4096,
+            n_threads=8,
+            verbose=False,
+        )
+    return llm_engine
 
 
 def cleanup_temp_audio():
@@ -60,6 +73,7 @@ def stream_llm_response(request):
         await communicate.save(filename)
 
     def generate_events():
+        engine = get_llm_engine()
         messages = [
             {
                 "role": "system",
@@ -75,7 +89,7 @@ def stream_llm_response(request):
 
         messages.append({"role": "user", "content": user_text})
 
-        stream = llm_engine.create_chat_completion(
+        stream = engine.create_chat_completion(
             messages=messages,  # pyright: ignore[reportArgumentType]
             stream=True,
             max_tokens=512,

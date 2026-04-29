@@ -1,19 +1,22 @@
-#! 遊戲中心視圖
-import json
+from utils.logger_utils import time_tracker
 
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.shortcuts import render
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("games"):
+    import json
 
-from .models import (
-    GameProfile,
-    MagicTowerMonster,
-    MagicTowerSave,
-    MagicTowerTile,
-    SurvivorLevel,
-    SurvivorMonster,
-    VirtualLifeEvent,
-)
+    from django.contrib.auth.decorators import login_required
+    from django.http import JsonResponse
+    from django.shortcuts import render
+
+    from .models import (
+        GameProfile,
+        MagicTowerMonster,
+        MagicTowerSave,
+        MagicTowerTile,
+        SurvivorLevel,
+        SurvivorMonster,
+        VirtualLifeEvent,
+    )
 
 
 @login_required

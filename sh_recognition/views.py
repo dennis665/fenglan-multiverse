@@ -1,14 +1,17 @@
-import os
-from datetime import datetime
+from utils.logger_utils import time_tracker
 
-from django.conf import settings
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("sh_recognition"):
+    import os
+    from datetime import datetime
 
-from .inference_utils import run_image_inference
-from .models import AIModel, ImageRecord
+    from django.conf import settings
+    from django.contrib import messages
+    from django.shortcuts import get_object_or_404, redirect, render
+    from django.utils import timezone
+    from django.utils.translation import gettext_lazy as _
+
+    from .models import AIModel, ImageRecord
 
 
 def index(request):
@@ -31,6 +34,7 @@ def index(request):
                 threshold = 0.5
 
             if image_files and model_id:
+                from .inference_utils import run_image_inference
                 selected_model = AIModel.objects.get(id=model_id)
                 success_count = 0
                 error_msgs = []
@@ -158,6 +162,7 @@ def record_detail(request, pk):
                 new_threshold = 0.5
 
             if new_model_id:
+                from .inference_utils import run_image_inference
                 new_model = get_object_or_404(AIModel, id=new_model_id)
 
                 new_record = ImageRecord.objects.create(

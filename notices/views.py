@@ -1,6 +1,10 @@
-from django.views.generic import DetailView, ListView
+from utils.logger_utils import time_tracker
 
-from .models import Announcement
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("notices"):
+    from django.views.generic import DetailView, ListView
+
+    from .models import Announcement
 
 
 class NoticeListView(ListView):

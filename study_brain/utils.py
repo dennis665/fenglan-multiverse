@@ -4,15 +4,8 @@ import shutil
 import tempfile
 import time
 
-import docx
-import pdfplumber
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from google import genai
-from google.genai import types
-
-#! 建立 Gemini 官方最新版 Client
-client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
 FALLBACK_MODELS = [
     "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
@@ -29,12 +22,14 @@ def extract_text_from_file(file_path):
 
     try:
         if ext == ".pdf":
+            import pdfplumber
             with pdfplumber.open(file_path) as pdf:
                 for page in pdf.pages:
                     extracted = page.extract_text()
                     if extracted:
                         text += extracted + "\n"
         elif ext in [".doc", ".docx"]:
+            import docx
             doc = docx.Document(file_path)
             for para in doc.paragraphs:
                 text += para.text + "\n"
@@ -46,7 +41,11 @@ def extract_text_from_file(file_path):
 
 def generate_ai_content(file_path, text_content, existing_summary=None, existing_questions=None, is_exam_paper=False):
     """混合雙引擎：PDF/影片 走 File API 視覺直讀，Word 走 50 萬字純文字萃取"""
+    from google import genai
+    from google.genai import types
 
+    #! 建立 Gemini 官方最新版 Client
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
     prompt = "請扮演專業的 AI 導師與出題專家。執行以下任務：\n\n"
 
     #! 判斷檔案類型，精細區分 PDF 與 影片
@@ -214,6 +213,12 @@ def generate_ai_content(file_path, text_content, existing_summary=None, existing
 
 def generate_question_deep_analysis(question_text, options, answer, explanation):
     """針對單一題目呼叫 AI 產生深度解析與 3 題延伸練習"""
+    from google import genai
+    from google.genai import types
+
+    #! 建立 Gemini 官方最新版 Client
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+
     prompt = f"""
     請扮演專業的 AI 導師。學生遇到了一道難題，請針對這道題目進行「深度觀念解析」，並出 3 題「相關觀念的單選練習題」來幫助他確認是否真的懂了。
 

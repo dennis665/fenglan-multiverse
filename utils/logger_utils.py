@@ -1,4 +1,6 @@
 import logging
+import time
+from contextlib import contextmanager
 
 #! 初始化基本的 logging 配置 (如果其他地方沒設定的話)
 logging.basicConfig(
@@ -95,3 +97,12 @@ def jinfo_error(error: Exception | str = "", message: str = ""):
     else:
         msg_content = message or error
         logging.error(f"{Colors.FAIL}\n{msg_content}\n{Colors.ENDC}")
+
+
+@contextmanager
+#! 定義一個計時器，用於測量區塊程式碼的執行時間
+def time_tracker(name):
+    start = time.time()
+    yield
+    #! 在 Console 快速辨識耗時大戶
+    Colors.paragraph_print(f"🕒 [{name}] 載入耗時：{time.time() - start:.1f} 秒")

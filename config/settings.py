@@ -233,6 +233,12 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        #! 針對 daphne 伺服器進行設定
+        "daphne": {
+            "handlers": ["console"],
+            "level": "WARNING",  # * 將等級設為 WARNING，隱藏 INFO 訊息
+            "propagate": False,
+        },
     },
 }
 # ? ==============================================================================

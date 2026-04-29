@@ -3,6 +3,7 @@
 import os
 import re
 import sys
+import time
 from datetime import datetime
 
 #! 強制清除環境變數，讓 Python 回去抓預設路徑
@@ -14,14 +15,17 @@ if "TK_LIBRARY" in os.environ:
 
 #! 啟動訊息調整
 class DjangoTranslator:
-    def __init__(self, stream):
+    def __init__(self, stream, start_time):
         self.stream = stream
+        self.start_time = start_time
+        self.has_printed_duration = False
         self.translations = {
             "Performing system checks...": "🔍 正在執行系統檢查...",
             "System check identified no issues (0 silenced).": "✅ 系統檢查完成，未發現任何問題。",
             "Django version": "📦 Django 版本",
             "using settings": "⚙️  使用設定檔",
             "Starting development server at": "🚀 開發伺服器已啟動，請訪問：",
+            "Starting ASGI/Daphne version 4.2.1 development server at": "🚀 ASGI/Daphne 版本 4.2.1 開發伺服器啟動於：",
             "Quit the server with": "🛑 停止伺服器請按",
         }
 
@@ -50,6 +54,15 @@ class DjangoTranslator:
             if eng in translated_data:
                 translated_data = translated_data.replace(eng, chi)
 
+        #! 偵測到啟動成功訊息時，計算並補上耗時
+        if (
+            "Starting ASGI/Daphne version 4.2.1 development server at" in data
+            and not self.has_printed_duration
+        ):
+            duration = time.time() - self.start_time
+            translated_data = translated_data.rstrip() + f" (⚡ 總啟動耗時：{duration:.1f} 秒)\n"
+            self.has_printed_duration = True
+
         self.stream.write(translated_data)
 
     def flush(self):
@@ -61,11 +74,12 @@ class DjangoTranslator:
 
 def main():
     """Run administrative tasks."""
+    start_time = time.time()
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
     #! 在啟動 runserver 時掛載翻譯過濾器
     if "runserver" in sys.argv:
-        sys.stdout = DjangoTranslator(sys.stdout)
+        sys.stdout = DjangoTranslator(sys.stdout, start_time)
 
     try:
         from django.core.management import execute_from_command_line

@@ -1,15 +1,17 @@
-import base64
-import os
-import tempfile
-from io import BytesIO
+from utils.logger_utils import time_tracker
 
-import ffmpeg
-from django.shortcuts import render
-from django.utils.translation import gettext_lazy as _
-from PIL import Image
-from rembg import remove
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("media_studio"):
+    import base64
+    import os
+    import tempfile
+    from io import BytesIO
 
-from .forms import ImageCompressForm, VideoStudioForm
+    from django.shortcuts import render
+    from django.utils.translation import gettext_lazy as _
+    from PIL import Image
+
+    from .forms import ImageCompressForm, VideoStudioForm
 
 
 #! 格式化檔案大小
@@ -47,6 +49,7 @@ def media_studio_view(request):
                 original_width, original_height = img.size
 
                 if remove_bg:
+                    from rembg import remove
                     img = remove(img)
 
                 if output_format == "JPEG" and img.mode in ("RGBA", "P"):  # pyright: ignore[reportAttributeAccessIssue]
@@ -110,6 +113,7 @@ def media_studio_view(request):
                 crf_val = int(51 - (quality / 100 * 30))
 
                 with tempfile.TemporaryDirectory() as tmp_dir:
+                    import ffmpeg
                     input_paths = []
                     #! 儲存所有上傳的原始檔案
                     for idx, vf in enumerate(video_files):

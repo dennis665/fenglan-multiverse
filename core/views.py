@@ -1,28 +1,31 @@
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.paginator import Paginator
-from django.http import JsonResponse
-from django.shortcuts import redirect, render
-from django.utils import timezone
-from django.utils.timezone import now
-from django.utils.translation import get_language
-from django.utils.translation import gettext as _
-from google import genai
+from utils.logger_utils import time_tracker
 
-from finance.models import PointTransaction, UserPoints
-from notices.models import AISystemSetting, Announcement, TicketRecord
-from utils.decorators import staff_required
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("core"):
+    from django.conf import settings
+    from django.contrib import messages
+    from django.contrib.auth.decorators import login_required, user_passes_test
+    from django.core.paginator import Paginator
+    from django.http import JsonResponse
+    from django.shortcuts import redirect, render
+    from django.utils import timezone
+    from django.utils.timezone import now
+    from django.utils.translation import get_language
+    from django.utils.translation import gettext as _
 
-from .models import EnterpriseInfo, FeatureStatus
+    from finance.models import PointTransaction, UserPoints
+    from notices.models import AISystemSetting, Announcement, TicketRecord
+    from utils.decorators import staff_required
 
-FALLBACK_MODELS = [
-    "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
-    "gemini-2.5-flash",  # * 備援 1：前代主力 (每天額外 20 次)
-    "gemini-3.1-flash-lite-preview",  # * 備援 2：超級救星！(每天 500 次，不再 404)
-    "gemini-flash-lite-latest",  # * 備援 3：官方動態 Lite 捷徑
-    "gemini-2.0-flash",  # * 備援 4：老將壓陣
-]
+    from .models import EnterpriseInfo, FeatureStatus
+
+    FALLBACK_MODELS = [
+        "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
+        "gemini-2.5-flash",  # * 備援 1：前代主力 (每天額外 20 次)
+        "gemini-3.1-flash-lite-preview",  # * 備援 2：超級救星！(每天 500 次，不再 404)
+        "gemini-flash-lite-latest",  # * 備援 3：官方動態 Lite 捷徑
+        "gemini-2.0-flash",  # * 備援 4：老將壓陣
+    ]
 
 @login_required
 def profile_view(request):
@@ -55,6 +58,7 @@ def profile_view(request):
 
 
 def portal_ai_bot(request):
+    from google import genai
     client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
     if request.method == "POST":

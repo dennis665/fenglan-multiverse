@@ -1,25 +1,27 @@
-import json
-from decimal import Decimal, InvalidOperation
+from utils.logger_utils import time_tracker
 
-import yfinance as yf
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
-from django.http import JsonResponse
-from django.shortcuts import redirect, render
-from google import genai
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("invest"):
+    import json
+    from decimal import Decimal, InvalidOperation
 
-from .forms import AIRoboAdvisorForm, TransactionForm
-from .models import Holding, Portfolio, Stock, StockPrice, Transaction
+    from django.conf import settings
+    from django.contrib import messages
+    from django.contrib.auth.decorators import login_required
+    from django.db.models import Sum
+    from django.http import JsonResponse
+    from django.shortcuts import redirect, render
 
-FALLBACK_MODELS = [
-    "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
-    "gemini-2.5-flash",  # * 備援 1：前代主力 (每天額外 20 次)
-    "gemini-3.1-flash-lite-preview",  # * 備援 2：超級救星！(每天 500 次，不再 404)
-    "gemini-flash-lite-latest",  # * 備援 3：官方動態 Lite 捷徑
-    "gemini-2.0-flash",  # * 備援 4：老將壓陣
-]
+    from .forms import AIRoboAdvisorForm, TransactionForm
+    from .models import Holding, Portfolio, Stock, StockPrice, Transaction
+
+    FALLBACK_MODELS = [
+        "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
+        "gemini-2.5-flash",  # * 備援 1：前代主力 (每天額外 20 次)
+        "gemini-3.1-flash-lite-preview",  # * 備援 2：超級救星！(每天 500 次，不再 404)
+        "gemini-flash-lite-latest",  # * 備援 3：官方動態 Lite 捷徑
+        "gemini-2.0-flash",  # * 備援 4：老將壓陣
+    ]
 
 @login_required
 def portfolio_dashboard(request):
@@ -201,6 +203,7 @@ def generate_ai_plan(request):
         messages.error(request, "表單資料有誤，請重新填寫。")
         return redirect("invest:dashboard")
 
+    from google import genai
     #! 取得使用者輸入的參數
     data = form.cleaned_data
     risk_map = {"LOW": "保守", "MEDIUM": "穩健", "HIGH": "積極"}
@@ -267,7 +270,7 @@ def generate_ai_plan(request):
             else:
                 #! 如果是其他錯誤 (例如 JSON 解析失敗、系統斷線)，就不換模型，直接報錯
                 print(f"❌ 發生非額度相關錯誤: {error_msg}")
-                return None
+                return redirect("invest:dashboard")
 
     messages.error(request, "AI 顧問目前正在休息，請稍後再試。")
     return redirect("invest:dashboard")
@@ -311,6 +314,7 @@ def apply_ai_plan(request):
 def stock_history_api(request, symbol):
     """提供給前端畫圖用的歷史股價 API"""
     try:
+        import yfinance as yf
         stock = Stock.objects.get(symbol=symbol, is_active=True)
         yf_symbol = f"{stock.symbol}.TW" if stock.exchange == "TWSE" else f"{stock.symbol}.TWO"
 

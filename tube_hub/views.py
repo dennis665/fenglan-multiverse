@@ -1,16 +1,20 @@
-import os
+from utils.logger_utils import time_tracker
 
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.core.files.storage import default_storage
-from django.db.models import Prefetch
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.views.decorators.csrf import csrf_exempt
-from youtube_transcript_api import YouTubeTranscriptApi
-from yt_dlp import YoutubeDL
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("tube_hub"):
+    import os
 
-from .models import TubeFolder, TubeResource
+    from django.conf import settings
+    from django.contrib.auth.decorators import login_required
+    from django.core.files.storage import default_storage
+    from django.db.models import Prefetch
+    from django.http import JsonResponse
+    from django.shortcuts import get_object_or_404, render
+    from django.views.decorators.csrf import csrf_exempt
+    from youtube_transcript_api import YouTubeTranscriptApi
+    from yt_dlp import YoutubeDL
+
+    from .models import TubeFolder, TubeResource
 
 
 @login_required

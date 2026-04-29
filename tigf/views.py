@@ -1,17 +1,21 @@
-import io
-import re
-import warnings
-import zipfile
-from datetime import datetime
-from decimal import Decimal, InvalidOperation
-from urllib.parse import quote
+from utils.logger_utils import time_tracker
 
-import pandas as pd
-from django.core.cache import cache
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("tigf"):
+    import io
+    import re
+    import warnings
+    import zipfile
+    from datetime import datetime
+    from decimal import Decimal, InvalidOperation
+    from urllib.parse import quote
 
-from utils.decorators import staff_required
+    import pandas as pd
+    from django.core.cache import cache
+    from django.http import HttpResponse, JsonResponse
+    from django.shortcuts import render
+
+    from utils.decorators import staff_required
 
 
 def get_all_files(uploaded_files):

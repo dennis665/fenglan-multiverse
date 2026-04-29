@@ -1,17 +1,28 @@
-import time
+from utils.logger_utils import time_tracker
 
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.utils.timezone import localtime, now
-from django.views.decorators.csrf import csrf_exempt
+#! 包裝整個 import 區塊或初始化邏輯
+with time_tracker("finance"):
+    import time
 
-from .ecpay_payment_sdk import ECPayPaymentSdk
-from .models import PointPackage, PointTransaction, Product, RechargeOrder, ShopOrder, UserPoints
+    from django.conf import settings
+    from django.contrib import messages
+    from django.contrib.auth.decorators import login_required
+    from django.db import transaction
+    from django.http import HttpResponse
+    from django.shortcuts import get_object_or_404, redirect, render
+    from django.urls import reverse
+    from django.utils.timezone import localtime, now
+    from django.views.decorators.csrf import csrf_exempt
+
+    from .ecpay_payment_sdk import ECPayPaymentSdk
+    from .models import (
+        PointPackage,
+        PointTransaction,
+        Product,
+        RechargeOrder,
+        ShopOrder,
+        UserPoints,
+    )
 
 
 @login_required
