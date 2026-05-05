@@ -17,17 +17,32 @@ const AVATAR_IMAGES = {
     INTERACT: '/static/images/interact.webp'  // 點擊互動時
 };
 
-// ⚠️ 設定「互動動圖」的實際長度 (毫秒)。你要求為 6 秒。
 const INTERACT_DURATION = 6000;
-
 let currentAvatarState = 'IDLE';
 let interactTimer = null;
 
-// 預載入圖片，防止第一次切換時畫面閃爍
-Object.values(AVATAR_IMAGES).forEach(src => {
-    const img = new Image();
-    img.src = src;
-});
+// 🚀 核心升級：使用 Blob 記憶體快取技術，解決切換圖片時的「殘影/延遲」問題
+const avatarBlobs = {};
+let currentObjectURL = null;
+
+// 在網頁載入時，直接將三張圖片下載為二進位檔案 (Blob) 存入記憶體
+async function preloadAvatars() {
+    for (const [key, url] of Object.entries(AVATAR_IMAGES)) {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            avatarBlobs[key] = blob;
+
+            // 如果剛好是初始狀態，載入完成後就先顯示
+            if (key === currentAvatarState && !avatar.src.includes('blob:')) {
+                changeAvatarState(key);
+            }
+        } catch (e) {
+            console.error(`無法預載入圖片: ${url}`, e);
+        }
+    }
+}
+preloadAvatars();
 
 function changeAvatarState(newState) {
     // 如果正在播放「點擊互動」，強制不允許被「說話」打斷
@@ -36,15 +51,20 @@ function changeAvatarState(newState) {
     }
 
     currentAvatarState = newState;
-    const targetUrl = AVATAR_IMAGES[newState];
 
-    // 💡 核心技巧：強制 WebP 從頭播放
-    // 加上時間戳記 (?t=...) 強迫瀏覽器把動圖當作新的，從第 0 幀開始播
-    if (newState === 'INTERACT') {
-        avatar.src = `${targetUrl}?t=${new Date().getTime()}`;
+    // 💡 釋放上一次產生的記憶體連結，避免記憶體洩漏 (Memory Leak)
+    if (currentObjectURL) {
+        URL.revokeObjectURL(currentObjectURL);
+        currentObjectURL = null;
+    }
+
+    // 💡 從記憶體 (RAM) 直接產生圖片連結，達成 0 延遲且強制重播
+    if (avatarBlobs[newState]) {
+        currentObjectURL = URL.createObjectURL(avatarBlobs[newState]);
+        avatar.src = currentObjectURL;
     } else {
-        // 待機跟說話因為本來就是循環播放，直接給網址就好
-        avatar.src = targetUrl;
+        // 如果還沒載入完成，退回使用傳統網址 (Fallback)
+        avatar.src = AVATAR_IMAGES[newState];
     }
 }
 
@@ -392,9 +412,8 @@ characterLayer.addEventListener('touchend', (e) => { if (e.touches.length === 0)
 let clickCount = 0;
 let clickResetTimer = null;
 let interactAudioPlayer = null;
-let interactAudioTimer = null; // 🎵 新增：控制音效延遲的計時器
+let interactAudioTimer = null;
 
-// 將點擊事件綁定在 characterLayer 上，這樣即使沒有完全點在圖片上也算數
 characterLayer.addEventListener('click', () => {
     clickCount++;
 
@@ -409,7 +428,7 @@ characterLayer.addEventListener('click', () => {
         clearTimeout(clickResetTimer); // 取消重置計時
         clickCount = 0;                // 歸零以備下次點擊
 
-        // 1. 切換成互動圖
+        // 1. 切換成互動圖 (透過 Blob 從記憶體無縫切換)
         changeAvatarState('INTERACT');
 
         // 🎵 2. 延遲 0.5 秒播放專屬互動音檔
@@ -428,7 +447,6 @@ characterLayer.addEventListener('click', () => {
         clearTimeout(interactTimer);
         interactTimer = setTimeout(() => {
             // 時間到了，檢查現在是不是還在說話？
-            // 如果還在說話，就切回 SPEAKING；如果沒說話了，就切回 IDLE
             if (isSpeaking) {
                 changeAvatarState('SPEAKING');
             } else {
