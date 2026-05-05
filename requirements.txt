@@ -1,95 +1,110 @@
-#! 基礎環境與資料庫
+#! 核心框架與伺服器部署
+#* Web 應用程式核心框架
 django==6.0.4
-mysqlclient==2.2.8
-django-environ==0.13.0
-pyodbc==5.3.0
-
-#! OAuth 2.0 與認證 (Google 登入核心)
-django-allauth==65.16.1
-requests==2.33.1
-PyJWT==2.12.1
-cryptography==47.0.0
-
-#! 靜態檔案與生產環境伺服器
+#* 生產環境用的 Python WSGI HTTP 伺服器
 gunicorn==25.3.0
+#* 協助 Django 在生產環境中高效伺服靜態檔案
 whitenoise==6.12.0
+#* 管理環境變數與機密資訊
+django-environ==0.13.0
+#! -------------------
 
-#! 圖片處理
-Pillow==12.2.0
+#! 資料庫連接
+#* 連接 MySQL/MariaDB 資料庫
+mysqlclient==2.2.8
+#* 透過 ODBC 連接 SQL Server 等資料庫
+pyodbc==5.3.0
+#! -------------------
 
-#! 影片處理
-ffmpeg-python==0.2.0
-
-#! 前端 UI 快速開發
-django-crispy-forms==2.6
-crispy-bootstrap5==2026.3
-
-#! 開發工具 (僅建議開發階段使用)，提供 shell_plus 等強大除錯工具
-django-extensions==4.1
-
-#! 串接 gemini ai
-google-genai==1.73.1
-
-#! 處理 log
-concurrent-log-handler==0.9.29
-
-#! 處理 Excel 資料
-pandas==3.0.2
-openpyxl==3.1.5
-
-#! 安全性檢查套件
+#! 認證與安全性
+#* 處理會員註冊與 OAuth 2.0 (Google) 登入
+django-allauth==65.16.1
+#* 處理 JSON Web Tokens 的編碼與解碼
+PyJWT==2.12.1
+#* 提供加密演算法支援
+cryptography==47.0.0
+#* 發送 HTTP 請求與管理 SSL 憑證
+requests==2.33.1
+certifi==2026.4.22
+#* 專案程式碼與依賴套件的安全漏洞掃描
 bandit==1.9.4
 safety==3.7.0
+#! -------------------
 
-#! 金融資訊
-yfinance==1.3.0
-
-#! 排程
-django-apscheduler==0.7.0
-
-#! 處理 PDF 和 WORD 文件
-pdfplumber==0.11.9
-python-docx==1.2.0
-
-#! 物件偵測用
-ultralytics==8.4.42
-
-#! OCR 辨識
+#! AI 與機器學習 (雲端 API 與邊緣運算)
+#* 串接 Google Gemini 模型
+google-genai==1.74.0
+#* 本地端語音轉文字模型
+openai-whisper==20250625
+#* 執行 YOLO 模型進行物件偵測
+ultralytics==8.4.46
+#* 執行 PaddleOCR 進行光學字元辨識
 paddlepaddle==3.3.1
 paddleocr==3.5.0
+#* 封裝 Tesseract OCR 引擎的 Python 介面
 pytesseract==0.3.13
-
-#! requests 憑證
-certifi==2026.4.22
-
-#! 遞迴深度計算缺失導致的 DoS 漏洞
-protobuf>=5.29.6,<6.0.0
-
-#! 下載器解壓縮時的「路徑穿越」漏洞（Zip Slip）
-nltk==3.9.4
-
-#! 套件指定舊版不然會有衝突
-urllib3==2.6.3
-charset-normalizer==3.3.2
-chardet==5.2.0
-
-#! youtube 相關
-yt-dlp==2026.3.17
-youtube-transcript-api==1.2.4
-
-#! 語音轉文字
-openai-whisper==20250625
-
-#! 解決影片檔問題
-django-ranged-response==0.2.0
-
-#! websocket
-channels==4.3.2
-daphne==4.2.1
-
-#! 文字轉語音
-edge-tts==7.2.8
-
-#! 世祥辨識專用
+#* 模型效能評估與訓練視覺化 (世祥辨識專用)
 faster-coco-eval==1.7.2
 tensorboard==2.20.0
+#! -------------------
+
+#! 媒體與影音處理
+#* 基礎圖片讀取與處理
+Pillow==12.2.0
+#* 透過 Python 呼叫 FFmpeg 處理影片轉檔
+ffmpeg-python==0.2.0
+#* 微軟 Edge 語音合成 (文字轉語音)
+edge-tts==7.2.8
+#* 支援影片串流播放時的位元組範圍請求 (Byte-Range)
+django-ranged-response==0.2.0
+#! -------------------
+
+#! 文件與資料處理
+#* 讀寫與分析 Excel 試算表資料
+pandas==3.0.2
+openpyxl==3.1.5
+#* 解析 PDF 文件與擷取文字/表格
+pdfplumber==0.11.9
+#* 讀寫 Microsoft Word 文件
+python-docx==1.2.0
+#! -------------------
+
+#! 外部資料抓取與處理
+#* 獲取 Yahoo Finance 金融數據
+yfinance==1.3.0
+#* 下載 YouTube 影片與音訊
+yt-dlp==2026.3.17
+#* 擷取 YouTube 影片字幕
+youtube-transcript-api==1.2.4
+#* 整合多種翻譯引擎的文字翻譯工具
+deep-translator==1.11.4
+#! -------------------
+
+#! 即時通訊與排程 (非同步任務)
+#* 實作 WebSocket 以支援即時雙向通訊
+channels==4.3.2
+daphne==4.2.1
+#* 處理定時排程任務
+django-apscheduler==0.7.0
+#! -------------------
+
+#! 開發輔助與 UI 渲染
+#* 快速渲染與美化前端表單
+django-crispy-forms==2.6
+crispy-bootstrap5==2026.3
+#* 提供 shell_plus 等強大開發與除錯指令
+django-extensions==4.1
+#* 處理多執行緒/多進程環境下的日誌記錄
+concurrent-log-handler==0.9.29
+#! -------------------
+
+#! 依賴相容與漏洞修補鎖定版
+#* 避免舊版遞迴深度計算導致的 DoS 漏洞
+protobuf>=5.29.6,<6.0.0
+#* 修補下載器解壓縮時的 Zip Slip 路徑穿越漏洞
+nltk==3.9.4
+#* 鎖定特定版本以避免與其他套件產生依賴衝突
+urllib3==2.6.3 
+charset-normalizer==3.3.2
+chardet==5.2.0
+#! -------------------

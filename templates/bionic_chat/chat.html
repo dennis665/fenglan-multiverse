@@ -1,3 +1,4 @@
+{# templates/bionic_chat/chat.html #}
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="zh-hant">
@@ -5,28 +6,51 @@
     <meta charset="UTF-8">
     <title>{% trans "仿生人通訊終端" %}</title>
     <link rel="stylesheet" href="/static/css/bionic_chat.css">
-    {# 引入 Markdown 解析套件 #}
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    {# 遊戲主視窗容器 #}
     <div id="visual-novel-container">
-
-        {# 角色立繪展示區 #}
         <div id="character-layer">
             <img id="avatar" src="/static/images/character_idle.webp" alt="{% trans '角色立繪' %}">
         </div>
 
         {# 底部對話系統 #}
         <div id="dialogue-system">
+
+            {# 處理中的狀態提示 (預設隱藏) #}
+            <div id="loading-status" style="display: none;">⚙️ 系統處理中...</div>
+
             <div id="chat-history"></div>
+
+            {# 語言控制面板 #}
+            <div id="language-settings">
+                <label>{% trans "字幕" %}:
+                    <select id="sub-lang">
+                        <option value="zh-TW" selected>中文</option>
+                        <option value="ja">日本語</option>
+                        <option value="ko">한국어</option>
+                        <option value="en">English</option>
+                    </select>
+                </label>
+                <label>{% trans "語音" %}:
+                    <select id="voice-lang">
+                        <option value="zh-TW" selected>中文</option>
+                        <option value="ja">日本語</option>
+                        <option value="ko">한국어</option>
+                        <option value="en">English</option>
+                    </select>
+                </label>
+                {# 音量控制 #}
+                <label style="margin-left: auto;">
+                    🔊 <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1">
+                </label>
+            </div>
 
             <div id="control-panel">
                 <input type="text" id="user-input" placeholder="{% trans '輸入對話...' %}">
                 <button id="send-btn">{% trans "發送" %}</button>
             </div>
         </div>
-        
     </div>
     <script src="/static/js/bionic_chat.js"></script>
 </body>
