@@ -8,6 +8,47 @@ const volumeSlider = document.getElementById('volume-slider');
 const loadingStatus = document.getElementById('loading-status');
 
 // ==========================================
+// 立繪狀態與切換系統 (WebP 動態圖控制)
+// ==========================================
+// ⚠️ 請確認這些圖片路徑與你的 Django 專案 static 設定一致
+const AVATAR_IMAGES = {
+    IDLE: '/static/images/idle.webp',         // 平常待機
+    SPEAKING: '/static/images/speaking.webp', // 說話時
+    INTERACT: '/static/images/interact.webp'  // 點擊互動時
+};
+
+// ⚠️ 設定「互動動圖」的實際長度 (毫秒)。你要求為 6 秒。
+const INTERACT_DURATION = 6000;
+
+let currentAvatarState = 'IDLE';
+let interactTimer = null;
+
+// 預載入圖片，防止第一次切換時畫面閃爍
+Object.values(AVATAR_IMAGES).forEach(src => {
+    const img = new Image();
+    img.src = src;
+});
+
+function changeAvatarState(newState) {
+    // 如果正在播放「點擊互動」，強制不允許被「說話」打斷
+    if (currentAvatarState === 'INTERACT' && newState === 'SPEAKING') {
+        return;
+    }
+
+    currentAvatarState = newState;
+    const targetUrl = AVATAR_IMAGES[newState];
+
+    // 💡 核心技巧：強制 WebP 從頭播放
+    // 加上時間戳記 (?t=...) 強迫瀏覽器把動圖當作新的，從第 0 幀開始播
+    if (newState === 'INTERACT') {
+        avatar.src = `${targetUrl}?t=${new Date().getTime()}`;
+    } else {
+        // 待機跟說話因為本來就是循環播放，直接給網址就好
+        avatar.src = targetUrl;
+    }
+}
+
+// ==========================================
 // 系統狀態防呆控管 (Loading State)
 // ==========================================
 function setLoading(isLoading) {
@@ -93,6 +134,9 @@ function forceStopAudio() {
     audioQueue.length = 0;
     isAudioPlaying = false;
     isSpeaking = false;
+
+    // 🛑 語音被強制中斷時，立繪切回待機
+    changeAvatarState('IDLE');
 }
 
 function playNextAudio() {
@@ -100,6 +144,9 @@ function playNextAudio() {
         isSpeaking = false; 
         isAudioPlaying = false;
         currentAudioPlayer = null;
+
+        // 🛑 所有音檔播完後，切回待機
+        changeAvatarState('IDLE');
         return;
     }
 
@@ -111,6 +158,8 @@ function playNextAudio() {
 
     currentAudioPlayer.play().then(() => {
         isSpeaking = true;
+        // 🗣️ 開始發出聲音，切換成說話圖
+        changeAvatarState('SPEAKING');
     }).catch((e) => {
         playNextAudio();
     });
@@ -336,3 +385,55 @@ characterLayer.addEventListener('touchmove', (e) => {
 }, { passive: false });
 
 characterLayer.addEventListener('touchend', (e) => { if (e.touches.length === 0) isDragging = false; });
+
+// ==========================================
+// 連擊偵測系統 (1秒內點擊2次)
+// ==========================================
+let clickCount = 0;
+let clickResetTimer = null;
+let interactAudioPlayer = null;
+let interactAudioTimer = null; // 🎵 新增：控制音效延遲的計時器
+
+// 將點擊事件綁定在 characterLayer 上，這樣即使沒有完全點在圖片上也算數
+characterLayer.addEventListener('click', () => {
+    clickCount++;
+
+    if (clickCount === 1) {
+        // 第一次點擊，啟動 1 秒的重置計時器
+        clickResetTimer = setTimeout(() => {
+            clickCount = 0; // 1秒沒點第2下，就歸零
+        }, 1000);
+    }
+    else if (clickCount === 2) {
+        // 成功達成 1 秒內連擊 2 次！
+        clearTimeout(clickResetTimer); // 取消重置計時
+        clickCount = 0;                // 歸零以備下次點擊
+
+        // 1. 切換成互動圖
+        changeAvatarState('INTERACT');
+
+        // 🎵 2. 延遲 0.5 秒播放專屬互動音檔
+        clearTimeout(interactAudioTimer); // 防止連擊累積多個計時器
+        interactAudioTimer = setTimeout(() => {
+            if (interactAudioPlayer) {
+                interactAudioPlayer.pause();
+                interactAudioPlayer.currentTime = 0; // 重置到開頭
+            }
+            interactAudioPlayer = new Audio('/static/voice/angry.mp3');
+            interactAudioPlayer.volume = currentVolume; // 套用系統目前的音量，避免爆音
+            interactAudioPlayer.play().catch(e => console.log('互動音效播放失敗:', e));
+        }, 500); // 這裡設定延遲 500 毫秒 (0.5 秒)
+
+        // 3. 設定 6 秒倒數計時，時間到後恢復原狀
+        clearTimeout(interactTimer);
+        interactTimer = setTimeout(() => {
+            // 時間到了，檢查現在是不是還在說話？
+            // 如果還在說話，就切回 SPEAKING；如果沒說話了，就切回 IDLE
+            if (isSpeaking) {
+                changeAvatarState('SPEAKING');
+            } else {
+                changeAvatarState('IDLE');
+            }
+        }, INTERACT_DURATION);
+    }
+});
