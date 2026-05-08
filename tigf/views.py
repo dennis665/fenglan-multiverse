@@ -90,8 +90,8 @@ def is_value_matched(
     rule_tolerance=True,
 ):
     #! 基礎清理與正規化
-    str_r = str(val_r).strip().replace("nan", "").replace("None", "")
-    str_db = str(val_db).strip().replace("nan", "").replace("None", "")
+    str_r = str(val_r).strip().replace("nan", "").replace("None", "").replace("\r", "")
+    str_db = str(val_db).strip().replace("nan", "").replace("None", "").replace("\r", "")
 
     #! 字串完全相同 (包含兩者皆為空字串)
     if rule_str_match and str_r == str_db:
@@ -232,8 +232,11 @@ def tigf_dashboard(request):
                     try:
                         ignore_rows = set()
                         ignore_data = ""
+                        ignore_data2 = ""
                         ignore_column_num = 0
+                        ignore_column_num2 = 0
                         ignore_column_name = ""
+                        ignore_column_name2 = ""
                         start_row = 8
 
                         #! 讀取範本 Config
@@ -241,10 +244,15 @@ def tigf_dashboard(request):
                         if pd.notna(df_config.iloc[3, 1]):
                             start_row = int(df_config.iloc[3, 1])
 
-                        #! 抓取忽略檢查值的行 (通常是A-合計)
+                        #! 抓取忽略檢查值的行B19 (通常是A-合計)
                         if pd.notna(df_config.iloc[18, 1]):
                             ignore_column, *_, ignore_data = str(df_config.iloc[18, 1]).split("-")
                             ignore_column_num = excel_column_to_number(ignore_column)
+
+                        #! 抓取忽略檢查值的行B20
+                        if pd.notna(df_config.iloc[19, 1]):
+                            ignore_column, *_, ignore_data2 = str(df_config.iloc[19, 1]).split("-")
+                            ignore_column_num2 = excel_column_to_number(ignore_column)
 
                         val_ignore = str(df_config.iloc[10, 1])
                         if val_ignore and val_ignore.lower() != "nan":
@@ -258,8 +266,19 @@ def tigf_dashboard(request):
                         df_r = smart_read_excel(report_obj, header=None)
                         row_upper = df_r.iloc[start_row - 4]
                         row_lower = df_r.iloc[start_row - 3]
+                        #! F023 有3層
+                        if fid == "F023":
+                            row_upper = df_r.iloc[start_row - 5]
 
-                        if row_upper.astype(str).str.strip().replace(["nan", "None"], "").eq("").all():
+                        #! 正常和B102 特殊格式
+                        if (
+                            row_upper.astype(str)
+                            .str.strip()
+                            .replace(["nan", "None"], "")
+                            .eq("")
+                            .all()
+                            or fid == "B102"
+                        ):
                             df_r.columns = row_lower
                         else:
                             new_columns = []
@@ -294,23 +313,41 @@ def tigf_dashboard(request):
                             )
                             continue
 
-                        #! === 核心優化：建立 DB 字典 (支援重複主鍵) ===
-                        pk_ch = target_cols[0]
-                        pk_en = mapping[pk_ch]
+                        #! === 建立 DB 字典 (動態支援單一與複合主鍵) ===
+
+                        #! 定義各報表的主鍵數量 (字典配置)
+                        #! 如果未來有報表需要複合主鍵，直接加在這裡；沒寫在裡面的，預設都是 1 (單主鍵)
+                        pk_config_map = {
+                            "L153": 3,  # * L153 使用前 3 個欄位 (代碼, 名稱, 年度) 作為複合主鍵
+                        }
+                        #! 根據現在的報表 (fid) 動態取得要切幾個主鍵欄位
+                        num_pks = pk_config_map.get(fid, 1)  # * 如果 fid 找不到，預設回傳 1
+
+                        pk_cols_ch = target_cols[:num_pks]
+                        pk_cols_en = [mapping[c] for c in pk_cols_ch]
 
                         #! 忽略欄位名
                         if ignore_column_num:
                             ignore_column_name = target_cols[ignore_column_num - 1]
+                        #! 忽略欄位名 v2
+                        if ignore_column_num2:
+                            ignore_column_name2 = target_cols[ignore_column_num2 - 1]
 
-                        #! 將字典的值改為 List，用來存放相同 Key 的多筆資料，並加入 used 標記
+                        #! 將字典的 Key 改為 Tuple，用來精準對應 (單主鍵也會變成 1 個元素的 Tuple)
                         db_lookup = {}
                         for _, row in df_db.iterrows():
-                            k = str(row[pk_en]).strip().replace("nan", "").replace("None", "")
-                            if k:
-                                if k not in db_lookup:
-                                    db_lookup[k] = []
+                            #! 將多個主鍵的值組成一個 Tuple，例如 ('AE1', 'AE19', 'T-3年')
+                            k_parts = tuple(
+                                str(row[en]).strip().replace("nan", "").replace("None", "")
+                                for en in pk_cols_en
+                            )
+
+                            #! 只要複合主鍵不是全空，就加入字典
+                            if any(k_parts):
+                                if k_parts not in db_lookup:
+                                    db_lookup[k_parts] = []
                                 #! 將資料與使用狀態打包存入
-                                db_lookup[k].append({"data": row, "used": False})
+                                db_lookup[k_parts].append({"data": row, "used": False})
 
                         #! 開始比對
                         diff_list = []
@@ -320,48 +357,69 @@ def tigf_dashboard(request):
                                 continue
 
                             row_r = df_r.iloc[i]
-                            r_key_val = (
-                                str(row_r[pk_ch]).strip().replace("nan", "").replace("None", "")
+
+                            #! 組合申報檔的複合主鍵
+                            r_key_parts = tuple(
+                                str(row_r[ch]).strip().replace("nan", "").replace("None", "")
+                                for ch in pk_cols_ch
                             )
 
-                            if not r_key_val:
+                            #! 如果主鍵全空，跳過
+                            if not any(r_key_parts):
                                 continue
 
-                            #! 判斷是否忽略行
-                            if (
-                                ignore_column_name
-                                and ignore_column_name == pk_ch
-                                and r_key_val == ignore_data
-                            ):
-                                continue
+                            #! 用於錯誤紀錄顯示的字串
+                            r_key_display = " | ".join(r_key_parts)
 
-                            #! 檢查主鍵是否存在於 DB
-                            if r_key_val not in db_lookup:
+                            #! 判斷是否忽略行 (直接抓取該指定欄位的值來比對)
+                            if ignore_column_name:
+                                val_ignore1 = (
+                                    str(row_r[ignore_column_name])
+                                    .strip()
+                                    .replace("nan", "")
+                                    .replace("None", "")
+                                )
+                                if val_ignore1 == ignore_data:
+                                    continue
+
+                            #! 判斷是否忽略行v2
+                            if ignore_column_name2:
+                                val_ignore2 = (
+                                    str(row_r[ignore_column_name2])
+                                    .strip()
+                                    .replace("nan", "")
+                                    .replace("None", "")
+                                )
+                                if val_ignore2 == ignore_data2:
+                                    continue
+
+                            #! 檢查複合主鍵是否存在於 DB
+                            if r_key_parts not in db_lookup:
                                 diff_list.append(
                                     {
                                         "行號": i + 1,
-                                        "中文欄位": pk_ch,
-                                        "英文欄位": pk_en,
-                                        "申報值": r_key_val,
+                                        "中文欄位": "複合主鍵",
+                                        "英文欄位": "Composite PK",
+                                        "申報值": r_key_display,
                                         "DB值": "DB 此行無對應資料",
                                     }
                                 )
                                 continue
 
-                            #! 找出 DB 中該主鍵「尚未被比對過」的資料
+                            #! 找出 DB 中該複合主鍵「尚未被比對過」的資料
                             available_db_items = [
-                                item for item in db_lookup[r_key_val] if not item["used"]
+                                item for item in db_lookup[r_key_parts] if not item["used"]
                             ]
 
                             if not available_db_items:
-                                #! 代表申報檔裡該主鍵的數量，比 DB 裡的還要多
+                                #! 代表申報檔裡該組合的數量，比 DB 裡的還要多
                                 diff_list.append(
                                     {
                                         "行號": i + 1,
-                                        "中文欄位": pk_ch,
-                                        "英文欄位": pk_en,
-                                        "申報值": r_key_val,
-                                        "DB值": "DB 缺漏此行資料",
+                                        "中文欄位": "複合主鍵",
+                                        "英文欄位": "Composite PK",
+                                        "申報值": r_key_display,
+                                        "DB值": "DB 缺漏此行資料 (或重複行數不足)",
                                     }
                                 )
                                 continue
@@ -369,9 +427,9 @@ def tigf_dashboard(request):
                             #! 取出第一筆可用的 DB 資料，並標記為已使用
                             db_item = available_db_items[0]
                             row_db = db_item["data"]
-                            db_item["used"] = True  # * 關鍵：上鎖，下一行申報檔就不會再比對到同一筆
+                            db_item["used"] = True  # * 關鍵：上鎖
 
-                            #! 逐欄比對 (保持原本的邏輯)
+                            #! 逐欄比對
                             for ch_col in target_cols:
                                 en_col = mapping[ch_col]
                                 if en_col not in row_db:
@@ -397,6 +455,8 @@ def tigf_dashboard(request):
                                             "DB值": val_db,
                                         }
                                     )
+                                    print(f"值1：{repr(val_r)}")
+                                    print(f"值2：{repr(val_db)}\n")
 
                         diff_count = len(diff_list)
                         if diff_count > 0:
