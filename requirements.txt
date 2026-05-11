@@ -1,8 +1,8 @@
 #! 核心框架與伺服器部署
 #* Web 應用程式核心框架
-django==6.0.4
+django==6.0.5
 #* 生產環境用的 Python WSGI HTTP 伺服器
-gunicorn==25.3.0
+gunicorn==26.0.0
 #* 協助 Django 在生產環境中高效伺服靜態檔案
 whitenoise==6.12.0
 #* 管理環境變數與機密資訊
@@ -22,7 +22,7 @@ django-allauth==65.16.1
 #* 處理 JSON Web Tokens 的編碼與解碼
 PyJWT==2.12.1
 #* 提供加密演算法支援
-cryptography==47.0.0
+cryptography==48.0.0
 #* 發送 HTTP 請求與管理 SSL 憑證
 requests==2.33.1
 certifi==2026.4.22
@@ -33,11 +33,11 @@ safety==3.7.0
 
 #! AI 與機器學習 (雲端 API 與邊緣運算)
 #* 串接 Google Gemini 模型
-google-genai==1.74.0
+google-genai==2.0.1
 #* 本地端語音轉文字模型
 openai-whisper==20250625
 #* 執行 YOLO 模型進行物件偵測
-ultralytics==8.4.46
+ultralytics==8.4.48
 #* 執行 PaddleOCR 進行光學字元辨識
 paddlepaddle==3.3.1
 paddleocr==3.5.0
