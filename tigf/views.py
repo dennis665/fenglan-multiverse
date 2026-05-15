@@ -88,10 +88,36 @@ def is_value_matched(
     rule_date_check=True,
     rule_empty_zero=True,
     rule_tolerance=True,
+    has_ics=False,
+    ignore_list=[],
 ):
     #! 基礎清理與正規化
     str_r = str(val_r).strip().replace("nan", "").replace("None", "").replace("\r", "")
     str_db = str(val_db).strip().replace("nan", "").replace("None", "").replace("\r", "")
+
+    #! ICS
+    if has_ics:
+        str_r = str_r.strip("[]")
+        str_db = str_db.strip("[]")
+        if str_r == "-":
+            str_r = ""
+        if str_db == "-":
+            str_db = ""
+        if str_r == "True":
+            str_r = "1"
+        if str_r == "False":
+            str_r = "0"
+        if str_r == "%":
+            str_r = ""
+        if str_db == "%":
+            str_db = ""
+        if str_r == "永續" and str_db == "99991231":
+            return True
+        if ignore_list:
+            for ignore_str in ignore_list:
+                if str_r == ignore_str:
+                    str_r = ""
+                    break
 
     #! 字串完全相同 (包含兩者皆為空字串)
     if rule_str_match and str_r == str_db:
@@ -102,6 +128,12 @@ def is_value_matched(
         #! 移除所有非數字字元後嘗試進行日期長度檢查
         date_r = re.sub(r"[^0-9]", "", str_r)
         date_db = re.sub(r"[^0-9]", "", str_db)
+
+        #! 若包含了時間 (例如 20260101000000)，我們只取前 8 碼的日期部分 (YYYYMMDD)
+        if len(date_r) >= 8:
+            date_r = date_r[:8]
+        if len(date_db) >= 8:
+            date_db = date_db[:8]
 
         #! 若兩者清理後皆為 8 位數字且內容相同，視為日期匹配
         if len(date_r) == 8 and len(date_db) == 8 and date_r == date_db:
@@ -124,8 +156,20 @@ def is_value_matched(
             dec_db = Decimal(str_db)
 
         if rule_tolerance:
-            #! 誤差小於 1e-5 視為相同
-            if abs(dec_r - dec_db) < Decimal("1e-5"):
+            #! 動態容差：取兩數小數點最小位數，進行標準四捨五入後比對
+            #! .as_tuple().exponent 可以取得小數位數 (例如 12.34 的 exponent 是 -2)
+            #! max(0, ...) 是為了防止整數或科學記號造成的正數 exponent
+            dp_r = max(0, -dec_r.as_tuple().exponent)  # pyright: ignore[reportOperatorIssue]
+            dp_db = max(0, -dec_db.as_tuple().exponent)  # pyright: ignore[reportOperatorIssue]
+
+            #! 決定最小小數位數
+            min_dp = min(dp_r, dp_db)
+
+            #! 設定容忍誤差為「最小小數位數的 0.6 個單位」
+            #! (涵蓋了恰好差 0.5 的四捨五入/無條件捨去/浮點數精度遺失落差)
+            tolerance = Decimal("0.6") * (Decimal("10") ** -min_dp)
+
+            if abs(dec_r - dec_db) <= tolerance:
                 return True
         else:
             #! 關閉容差：必須絕對相等
@@ -154,6 +198,33 @@ def excel_column_to_number(column_str):
             return 0
 
     return number
+
+
+#! 主鍵正規化
+def normalize_key(val):
+    """
+    將主鍵(如 RowNo 或 ItemCode)進行正規化：
+    1. 解決 0.00 == ""
+    2. 解決 5.10 == 5.1
+    3. 解決 5.00 == 5
+    """
+    s_val = str(val).strip().replace("nan", "").replace("None", "")
+    s_val = s_val.strip("[]")
+
+    #! 處理空值與 0 等效的問題
+    if not s_val or s_val in ("0", "0.0", "0.00", "-", "False"):
+        return ""
+
+    #! 處理小數點後多餘的 0
+    try:
+        f_val = float(s_val)
+        if f_val.is_integer():
+            return str(int(f_val))  # * 例如 5.00 -> "5"
+        else:
+            return str(f_val)  # * 例如 5.10 -> "5.1"
+    except ValueError:
+        #! 如果是純文字代號 (例如 "CP01")，無法轉數字，就原封不動回傳
+        return s_val
 
 
 @staff_required
@@ -187,11 +258,83 @@ def tigf_dashboard(request):
                 if cno not in file_status_map:
                     file_status_map[cno] = {}
 
+                #! 判斷是否有範本檔
+                has_template = fid in global_templates
+                has_db = False
+
+                #! ========================================================
+                #! 新增：針對 ICS 系列進行多 DB 驗證
+                #! ========================================================
+                if fid.startswith("ICS") and dict_db:
+                    if has_template:
+                        try:
+                            #! 讀取範本檔 Config 頁籤 (第一張工作表)
+                            df_config_raw = smart_read_excel(
+                                global_templates[fid], sheet_name=0, header=None
+                            )
+
+                            #! (安全機制) 讀取完畢後重置檔案指標，避免若需要重新讀取時報錯
+                            if hasattr(global_templates[fid], "seek"):
+                                global_templates[fid].seek(0)
+
+                            #! 動態定位標題列
+                            cfg_header_idx = df_config_raw[
+                                df_config_raw.eq("工作表名稱").any(axis=1)
+                            ].index
+                            if len(cfg_header_idx) > 0:
+                                df_config = df_config_raw.iloc[cfg_header_idx[0] + 1 :].copy()
+                                df_config.columns = df_config_raw.iloc[cfg_header_idx[0]]
+
+                                if "Table Name" in df_config.columns:
+                                    #! 取出所有 Table Name 並過濾空值
+                                    table_names = (
+                                        df_config["Table Name"]
+                                        .dropna()
+                                        .astype(str)
+                                        .str.strip()
+                                        .tolist()
+                                    )
+                                    table_names = [
+                                        t for t in table_names if t and t.lower() != "nan"
+                                    ]
+
+                                    missing_dbs = []
+                                    #! 檢查每個 Table Name 是否都有上傳對應的 DB
+                                    for t_name in table_names:
+                                        #! Table Name 格式如 "ew_01_CP0010_ParticipantInfo"
+                                        #! 你的 global_dbs 的 Key 是由檔名 n.split("_")[2] 取得，即 "CP0010"
+                                        parts = t_name.split("_")
+                                        db_key = parts[2] if len(parts) > 2 else t_name
+
+                                        if db_key not in global_dbs:
+                                            missing_dbs.append(t_name)
+
+                                    #! 判斷是否所有定義的 DB 表都有上傳
+                                    if table_names and not missing_dbs:
+                                        has_db = True
+                                    elif missing_dbs:
+                                        error_files.append(
+                                            f"{name} 缺少關聯的 DB 檔：{', '.join(missing_dbs)}"
+                                        )
+                                else:
+                                    error_files.append(
+                                        f"範本檔 {fid} config 找不到 'Table Name' 欄位"
+                                    )
+                            else:
+                                error_files.append(
+                                    f"範本檔 {fid} config 找不到 '工作表名稱' 標題行"
+                                )
+                        except Exception as e:
+                            error_files.append(f"解析範本檔 {fid} 時發生錯誤：{e}")
+                else:
+                    #! 一般報表直接用 fid 檢查 (例如 L153)
+                    has_db = fid in global_dbs
+
                 #! 檢查這張報表是否具備共用的 template 與 db
                 file_status_map[cno][fid] = {
                     "report": True,
-                    "template": fid in global_templates,
-                    "db": fid in global_dbs,
+                    "template": has_template,
+                    "db": has_db,
                 }
 
             #! 排序與驗證是否全部齊全
@@ -228,7 +371,408 @@ def tigf_dashboard(request):
                 cno = name[7:14]
                 fid = name[14:18]
 
-                if fid in global_templates and fid in global_dbs:
+                # ! ========================================================
+                # ! ICS 專屬比對邏輯
+                # ! ========================================================
+                if "ICS" in fid:
+                    try:
+                        has_ics = True
+                        #! 讀取 ICSQ 範本第一張表 (Config)，使用 header=None 以防標題不在第一列
+                        df_config_raw = smart_read_excel(
+                            global_templates[fid], sheet_name=0, header=None
+                        )
+
+                        #! 動態尋找 "工作表名稱" 所在的列作為 DataFrame 的 Header
+                        cfg_header_idx = df_config_raw[
+                            df_config_raw.eq("工作表名稱").any(axis=1)
+                        ].index
+                        if not len(cfg_header_idx):
+                            print("ICSQ Config 表找不到 '工作表名稱' 標題行")
+                            continue
+
+                        df_config = df_config_raw.iloc[cfg_header_idx[0] + 1 :].copy()
+                        df_config.columns = df_config_raw.iloc[cfg_header_idx[0]]
+
+                        diff_list = []  # * 收集此檔案所有 Sheet 的差異
+
+                        #! 逐列讀取 Config，解析每張工作表
+                        for _, cfg in df_config.iterrows():
+                            sheet_name = str(cfg.get("工作表名稱", "")).strip()
+                            tag = str(cfg.get("Tag", "")).strip()
+
+                            if not sheet_name or sheet_name.lower() == "nan" or not tag:
+                                continue
+
+                            start_row = int(cfg.get("Start RowNo", 1))
+                            start_col = int(cfg.get("Start ColNo", 1))
+                            end_row = int(cfg.get("End RowNo", start_row))
+                            end_col = int(cfg.get("End ColNo", start_col))
+
+                            #! 特殊表不做比對
+                            if tag in (
+                                "T038",
+                                "T039",
+                                "T040",
+                                "T041",
+                                "T042",
+                                "T051",
+                                "T053",
+                                "T102",
+                                "Y320",
+                                "Y330",
+                            ):
+                                diff_list.append(
+                                    {
+                                        "工作表": sheet_name,
+                                        "行號": f"{start_row}：{end_row}",
+                                        "中文欄位": "",
+                                        "英文欄位": "",
+                                        "申報值": "",
+                                        "DB值": "特殊格式請人工比對",
+                                    }
+                                )
+                                continue
+
+                            #! 取得要比對的 DB 資料表名稱 (Table Name)
+                            db_table_name = str(cfg.get("Table Name", "")).strip().split("_")[2]
+                            if not db_table_name or db_table_name.lower() == "nan":
+                                print(f"工作表 {sheet_name} 找不到 Table Name，跳過比對")
+                                continue
+
+                            #! 取得定義 Row No 的欄位 (通常是 2，代表 Excel 第 2 欄)
+                            row_no_excel_col = str(cfg.get("rowNoColumn", "")).strip()
+                            row_no_idx = (
+                                int(row_no_excel_col) - 1 if row_no_excel_col.isdigit() else None
+                            )
+
+                            #! 解析「忽略列(相對行數)」格式為：X1:X2,Y1:Y2
+                            ignore_str = str(cfg.get("忽略列(相對行數)", "")).strip()
+                            ignore_tag_map = {
+                                "T016": "1",
+                                "T026": "1",
+                                "T027": "1",
+                                "T030": "1",
+                                "T043": "1:2",
+                                "T044": "1:2",
+                                "T045": "1:2",
+                                "T046": "1:2",
+                                "T047": "1:2",
+                                "T048": "1:3",
+                                "T049": "1:2",
+                                "T050": "1:2",
+                                "T052": "1:2",
+                                "T054": "1:2",
+                                "T055": "1:2",
+                                "T056": "1:2",
+                                "T057": "1:2",
+                                "T058": "1:2",
+                                "T059": "1:2",
+                                "T060": "1:2",
+                                "T061": "1:2",
+                                "T062": "1:2",
+                                "T063": "1:2",
+                                "T064": "1:2",
+                                "T065": "1:2",
+                                "T066": "1",
+                                "T067": "1:2",
+                                "T068": "1:2",
+                                "T069": "1:2",
+                                "T070": "1:2",
+                                "T071": "1:2",
+                                "T073": "1:2",
+                                "T074": "1:2",
+                            }
+                            if tag in ignore_tag_map:
+                                ignore_str = ignore_tag_map[tag]
+                            ignore_rows = set()
+                            if ignore_str and ignore_str.lower() != "nan":
+                                for part in ignore_str.split(","):
+                                    part = part.strip()
+                                    if ":" in part:
+                                        s, e = part.split(":")
+                                        ignore_rows.update(range(int(s), int(e) + 1))
+                                    elif part.isdigit():
+                                        ignore_rows.add(int(part))
+
+                            #! 忽略檢核關鍵字(以,隔開)
+                            ignore_str = str(cfg.get("忽略檢核關鍵字(以,隔開)", "")).strip()
+                            ignore_list = ignore_str.split(",") if ignore_str else []
+
+                            #! 讀取申報檔對應的 sheet_name
+                            try:
+                                df_r = smart_read_excel(
+                                    report_obj, sheet_name=sheet_name, header=None
+                                )
+                            except Exception:
+                                print(f"找不到申報檔 Sheet: {sheet_name}")
+                                continue
+
+                            #! 讀取範本檔對應的 Tag sheet (獲取 Schema 規則)
+                            try:
+                                df_schema_raw = smart_read_excel(
+                                    global_templates[fid], sheet_name=tag, header=None
+                                )
+                                #! 動態尋找 COLUMN_NAME 所在的列
+                                sch_header_idx = df_schema_raw[
+                                    df_schema_raw.eq("COLUMN_NAME").any(axis=1)
+                                ].index
+                                if not len(sch_header_idx):
+                                    continue
+                                df_schema = df_schema_raw.iloc[sch_header_idx[0] + 1 :].copy()
+                                df_schema.columns = df_schema_raw.iloc[sch_header_idx[0]]
+                            except Exception:
+                                print(f"找不到範本檔 Schema Sheet: {tag}")
+                                continue
+
+                            #! 建立欄位 Mapping: (Excel欄位 Index -> DB欄位名稱)
+                            #! 注意：Excel欄位 1 代表 A 欄，轉換成 pandas 索引需 -1
+                            col_mapping = {}
+                            db_pk_col = "RowNo"
+                            for _, s_row in df_schema.iterrows():
+                                excel_col = s_row.get("對應excel column")
+                                db_col = s_row.get("COLUMN_NAME")
+                                ch_col = s_row.get("中文欄位名稱")
+
+                                if (
+                                    pd.notna(excel_col)
+                                    and str(excel_col).strip().isdigit()
+                                    and pd.notna(db_col)
+                                ):
+                                    col_idx = int(excel_col) - 1
+                                    col_mapping[col_idx] = {
+                                        "en": str(db_col).strip(),
+                                        "ch": str(ch_col).strip(),
+                                    }
+                                    #! 如果這個欄位剛好是 rowNoColumn，記下它的 DB 欄位名作為主鍵
+                                    if row_no_idx is not None and col_idx == row_no_idx:
+                                        db_pk_col = str(db_col).strip()
+
+                            #! ========================================================
+                            #! 新增：動態抓取要比對的「第一個欄位」(作為主鍵備案)
+                            #! ========================================================
+                            first_col_idx = min(col_mapping.keys()) if col_mapping else 0
+                            first_col_db_name = (
+                                col_mapping[first_col_idx]["en"] if col_mapping else ""
+                            )
+
+                            #! ========================================================
+                            #! 讀取對應的 DB 表 (依照 Table Name 抓取)
+                            #! ========================================================
+                            #! 假設你的 global_dbs 已經以 db_table_name 為 key 存入 (如：global_dbs["ew_01_CP0010_ParticipantInfo"])
+                            #! 若不是，請依你的路徑讀取，例如：smart_read_csv(os.path.join(DB_DIR, f"{db_table_name}.csv"))
+                            if db_table_name not in global_dbs:
+                                print(f"警告：找不到 {db_table_name} 的 DB 檔案來源，跳過比對")
+                                continue
+
+                            df_db_full = smart_read_csv(global_dbs[db_table_name])
+
+                            #! 過濾出該公司、未刪除的資料
+                            df_db_full["Cno"] = df_db_full["Cno"].astype(str).str.strip()
+                            df_db = df_db_full[df_db_full["Cno"] == str(cno)]
+                            if "isdel" in df_db.columns:
+                                df_db = df_db[
+                                    df_db["isdel"].isna()
+                                    | (df_db["isdel"].astype(str).str.strip() == "")
+                                ]
+
+                            #! ========================================================
+                            #! 建立 (第一欄位, RowNo) 的複合主鍵字典
+                            #! ========================================================
+                            db_lookup = {}
+                            for _, db_row in df_db.iterrows():
+                                #! 取得第一個欄位的值
+                                val_first = ""
+                                if first_col_db_name in df_db.columns:
+                                    val_first = normalize_key(db_row[first_col_db_name])
+
+                                #! 取得 RowNo 的值
+                                val_row_no = ""
+                                if db_pk_col in df_db.columns:
+                                    val_row_no = normalize_key(db_row[db_pk_col])
+
+                                #! 組成 Tuple: 例如 ('CP01', '10') 或 ('CP02', '')
+                                if tag == "T082":
+                                    k = (val_first, "")
+                                else:
+                                    k = (val_first, val_row_no)
+
+                                #! 因為 (第一欄位, RowNo) 可能會重複（例如都是空值），所以存成 List
+                                if k not in db_lookup:
+                                    db_lookup[k] = []
+                                db_lookup[k].append(db_row)
+
+                            #! 擷取資料並逐行進行比對
+                            for r_idx in range(start_row - 1, end_row):
+                                if r_idx >= len(df_r):
+                                    break
+
+                                #! 計算相對行數 (從 1 開始算)
+                                rel_row = r_idx - (start_row - 1) + 1
+                                if rel_row in ignore_rows:
+                                    continue
+
+                                row_data = df_r.iloc[r_idx]
+
+                                #! ========================================================
+                                #! 新增防呆：檢查該行是否「全部都是空的或 0」
+                                #! ========================================================
+                                is_empty_row = True
+                                for c_idx in col_mapping.keys():
+                                    if c_idx < len(row_data):
+                                        #! 取出每個要比對的欄位值
+                                        val = (
+                                            str(row_data.iloc[c_idx])
+                                            .strip()
+                                            .replace("nan", "")
+                                            .replace("None", "")
+                                        )
+
+                                        #! 如果發現任何一個欄位有「非空、非0」的有效字元，就代表這行有意義！
+                                        if val and val not in ("0", "0.0", "0.00"):
+                                            is_empty_row = False
+                                            break
+
+                                #! 如果整行都是空值或0，這行沒有比對價值，直接跳過！
+                                #! 這樣才不會消耗掉 unkeyed_db_rows 裡真正有意義的資料
+                                if is_empty_row:
+                                    continue
+
+                                #! ========================================================
+                                #! 改良：組合申報行的複合主鍵，並去 DB 尋找
+                                #! ========================================================
+                                #! 取得第一個欄位的值
+                                r_val_first = ""
+                                if first_col_idx < len(row_data):
+                                    r_val_first = normalize_key(row_data.iloc[first_col_idx])
+                                    if (
+                                        tag in ("X110", "X120", "X130", "X140", "Y110")
+                                        and r_val_first == ""
+                                    ):
+                                        r_val_first = "TAL"
+                                    else:
+                                        if (
+                                            tag == "T048"
+                                            and r_val_first == "對不動產風險敏感之資產減負債"
+                                        ):
+                                            r_val_first = "對不動產風險敏感之資產減負債      台灣↓7.81%、其他↓25%"
+
+                                #! 取得 RowNo 的值
+                                r_val_row_no = ""
+                                if row_no_idx is not None and row_no_idx < len(row_data):
+                                    if (
+                                        tag in ("X110", "X120", "X130", "X140", "Y110")
+                                        and r_val_first == "TAL"
+                                    ):
+                                        r_val_row_no = "TAL"
+                                    else:
+                                        r_val_row_no = normalize_key(row_data.iloc[row_no_idx])
+
+                                r_key = (r_val_first, r_val_row_no)
+
+                                #! 從 DB 字典中尋找對應的資料並取出 (pop)
+                                row_db = None
+                                if r_key in db_lookup and db_lookup[r_key]:
+                                    #! 使用 pop(0) 拿出第一筆
+                                    #! 若有唯一主鍵，List 內只會有 1 筆；若有多筆空 RowNo 但代號相同，能安全依序消耗
+                                    row_db = db_lookup[r_key].pop(0)
+
+                                if row_db is None:
+                                    #! DB 找不到這行資料，整行報錯
+                                    display_key = (
+                                        f"{r_val_first} | {r_val_row_no}"
+                                        if r_val_row_no
+                                        else r_val_first
+                                    )
+                                    diff_list.append(
+                                        {
+                                            "工作表": sheet_name,
+                                            "行號": r_idx + 1,
+                                            "中文欄位": f"主鍵({display_key})",
+                                            "英文欄位": f"{first_col_db_name} | {db_pk_col}",
+                                            "申報值": "有資料",
+                                            "DB值": "DB 無對應列資料",
+                                        }
+                                    )
+                                    print(
+                                        f"報表：{tag}\n工作表：{sheet_name}\n行號：{r_idx + 1}\n主鍵：{display_key}\n"
+                                    )
+                                    continue
+
+                                #! 取出這行需比對的數值
+                                for c_idx, cols in col_mapping.items():
+                                    #! 檢查該欄位是否在指定的 Start ColNo ~ End ColNo 範圍內
+                                    if start_col - 1 <= c_idx <= end_col - 1 and c_idx < len(
+                                        row_data
+                                    ):
+                                        val_r = (
+                                            str(row_data.iloc[c_idx])
+                                            .strip()
+                                            .replace("nan", "")
+                                            .replace("None", "")
+                                        )
+
+                                        #! DB 如果沒有這個欄位，給空值
+                                        val_db = (
+                                            str(row_db.get(cols["en"], ""))
+                                            .strip()
+                                            .replace("nan", "")
+                                            .replace("None", "")
+                                        )
+
+                                        #! 呼叫共用的比對函數
+                                        if not is_value_matched(
+                                            val_r,
+                                            val_db,
+                                            rule_str_match,
+                                            rule_date_check,
+                                            rule_empty_zero,
+                                            rule_tolerance,
+                                            has_ics,
+                                            ignore_list,
+                                        ):
+                                            if (
+                                                val_r == ""
+                                                and val_db == "TAL"
+                                                and tag in ("X110", "X120", "X130", "X140", "Y110")
+                                                and cols["ch"] == "編號"
+                                            ):
+                                                continue
+                                            diff_list.append(
+                                                {
+                                                    "工作表": sheet_name,
+                                                    "行號": r_idx + 1,
+                                                    "中文欄位": cols["ch"],
+                                                    "英文欄位": cols["en"],
+                                                    "申報值": val_r,
+                                                    "DB值": val_db,
+                                                }
+                                            )
+                                            print(
+                                                f"[{sheet_name}] 行號 {r_idx + 1} | {cols['ch']} ({cols['en']}) 不符"
+                                            )
+                                            print(f"申報值：{repr(val_r)}")
+                                            print(f" DB值：{repr(val_db)}\n")
+
+                        #! 單檔 ICS 比對完成，處理結果輸出 (寫入 Cache / Excel)
+                        diff_count = len(diff_list)
+                        if diff_count > 0:
+                            df_diff = pd.DataFrame(diff_list)
+                            excel_buf = io.BytesIO()
+                            df_diff.to_excel(excel_buf, index=False, engine="openpyxl")
+                            cache.set(f"diff_{session_key}_{cno}_{fid}", excel_buf.getvalue(), 3600)
+
+                        diff_summary.append(
+                            {
+                                "cno": cno,
+                                "fid": fid,
+                                "diff_count": diff_count,
+                                "schema_error": False,
+                            }
+                        )
+
+                    except Exception as e:
+                        print(f"處理 ICSQ {cno}-{fid} 時發生錯誤: {e}")
+                elif fid in global_templates and fid in global_dbs:
                     try:
                         ignore_rows = set()
                         ignore_data = ""
