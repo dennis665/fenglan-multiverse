@@ -35,7 +35,14 @@ def transfer_create(request):
         messages.success(request, _("轉移請求已建立"))
         return redirect("transfer_history")
 
-    items = Item.objects.all()
+    #! 找出所有目前正處於待處理狀態的轉移紀錄物品 ID
+    pending_item_ids = TransferRecord.objects.filter(status="pending").values_list(
+        "item_id", flat=True
+    )
+
+    #! 查詢物品時，直接排除上述已被鎖定的待處理物品
+    items = Item.objects.exclude(id__in=pending_item_ids)
+
     users = User.objects.all()
     return render(request, "transfer_system/transfer_create.html", {"items": items, "users": users})
 
