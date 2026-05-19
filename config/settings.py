@@ -100,6 +100,7 @@ LOCAL_APPS = [
     "media_studio",
     "bionic_chat",
     "sh_recognition",
+    "transfer_system",
 ]
 
 INSTALLED_APPS = WEBSOCKET_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -161,6 +162,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "notices.context_processors.external_tools_processor",
                 "notices.context_processors.visit_stats",
+                "transfer_system.context_processors.pending_transfers",
             ],
         },
     },

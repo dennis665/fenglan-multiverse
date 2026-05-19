@@ -15,6 +15,7 @@ with time_tracker("core"):
 
     from finance.models import PointTransaction, UserPoints
     from notices.models import AISystemSetting, Announcement, TicketRecord
+    from transfer_system.models import Item
     from utils.decorators import staff_required
 
     from .models import EnterpriseInfo, FeatureStatus
@@ -50,9 +51,13 @@ def profile_view(request):
     page_number = request.GET.get("page")  # * 從網址抓取 ?page=2
     page_obj = paginator.get_page(page_number)  # * 抓取該頁的資料物件
 
+    #! 取得目前登入使用者所擁有的所有物品，依據建立時間反向排序
+    user_items = Item.objects.filter(owner=request.user).order_by("-created_at")
+
     context = {
         "wallet": wallet,
         "page_obj": page_obj,
+        "user_items": user_items,
     }
     return render(request, "core/profile.html", context)
 

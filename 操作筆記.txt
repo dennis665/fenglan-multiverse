@@ -111,7 +111,7 @@ ngrok http 8000 --domain=kiwi-loved-slug.ngrok-free.app
 https://github.com/vslavik/gettext-tools-windows/releases
 
 #! 產生繁中、英文、日文翻譯檔(裡面要自填)
-python manage.py makemessages -l zh_Hant -l en -l ja -i ".venv" -i "*.txt"
+PYTHONIOENCODING=utf-8 python manage.py makemessages -l zh_Hant -l en -l ja -i ".venv" -i "*.txt" -i "test*"
 
 #! 執行編譯（包含繁中、英文、日文）
 python manage.py compilemessages -l zh_Hant -l en -l ja -i .venv

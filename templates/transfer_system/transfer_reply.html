@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="transfer-container shadow-lg p-5 rounded-4 bg-white mx-auto mt-5 text-center" style="max-width: 480px;">
+    <div class="mb-4">
+        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+            <i class="fas fa-gift fa-3x text-primary"></i>
+        </div>
+        <h2 class="text-primary fw-bold mb-3">{% trans "物品轉移確認" %}</h2>
+    </div>
+    
+    <div class="card border-0 bg-light mb-5 text-start rounded-3">
+        <div class="card-body p-4">
+            <p class="mb-3 fs-5">
+                <i class="fas fa-user-circle me-2 text-secondary"></i>
+                <span class="fw-bold text-dark">{% trans "發送者：" %}</span> 
+                {{ record.sender.username }}
+            </p>
+            <p class="mb-0 fs-5">
+                <i class="fas fa-box-open me-2 text-secondary"></i>
+                <span class="fw-bold text-dark">{% trans "物品名稱：" %}</span> 
+                <span class="text-primary fw-bold">{{ record.item.name }}</span>
+            </p>
+        </div>
+    </div>
+
+    {# * 新增 onsubmit 監聽，送出時立即把該紀錄 ID 存入會話快取 #}
+    <form method="POST" class="d-flex justify-content-between gap-3" onsubmit="markAsProcessed('{{ record.id }}')">
+        {% csrf_token %}
+        <button type="submit" name="action" value="accept" class="btn btn-success btn-lg rounded-pill flex-grow-1 shadow-sm">
+            <i class="fas fa-check me-2"></i>{% trans "接受" %}
+        </button>
+        <button type="submit" name="action" value="reject" class="btn btn-outline-danger btn-lg rounded-pill flex-grow-1 shadow-sm">
+            <i class="fas fa-times me-2"></i>{% trans "拒絕" %}
+        </button>
+    </form>
+</div>
+
+<script>
+    // 記錄已被當前使用者處理完畢的轉移物件 ID
+    function markAsProcessed(recordId) {
+        sessionStorage.setItem('processed_transfer_' + recordId, 'true');
+    }
+</script>
+{% endblock %}

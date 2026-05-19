@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div>
+        <label>{% trans "選擇 CSV 檔案：" %}</label>
+        <input type="file" name="csv_file" accept=".csv" required>
+    </div>
+    <br>
+    <button type="submit" class="button">{% trans "上傳並匯入" %}</button>
+</form>
+{% endblock %}

@@ -13,6 +13,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
+    {# 加入 jQuery (Select2 依賴) #}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    {# 加入 Select2 #}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     {% block extra_css %}{% endblock %}
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -61,6 +67,35 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'js/base.js' %}"></script>
+
+{# 判斷是否有待處理轉移，且目前不在處理頁面，才顯示浮動通知 #}
+{% if pending_transfers and request.resolver_match.url_name != 'transfer_reply' %}
+    {% with first_pending=pending_transfers|first %}
+    {# * 新增 data-record-id 屬性以供前端標記 #}
+    <div id="transfer-notify-widget" class="floating-widget shadow-lg" data-record-id="{{ first_pending.id }}">
+        <div class="widget-header d-flex justify-content-between align-items-center" id="transfer-notify-widget-header">
+            <span class="fw-bold"><i class="fas fa-bell text-warning me-2"></i>{% trans "新轉移通知" %}</span>
+            <div>
+                <button class="btn btn-sm text-white p-0 me-2" onclick="toggleMinimizeWidget()">
+                    <i id="minimize-icon" class="fas fa-minus"></i>
+                </button>
+                <button class="btn btn-sm text-white p-0" onclick="closeWidget()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="widget-body bg-white p-3" id="widget-body">
+            <p class="mb-3 text-dark">
+                <strong>{{ first_pending.sender.username }}</strong> {% trans "想將" %} 
+                <strong class="text-primary">{{ first_pending.item.name }}</strong> {% trans "轉移給您" %}
+            </p>
+            <div class="d-grid">
+                <a href="{% url 'transfer_reply' first_pending.id %}" class="btn btn-primary btn-sm rounded-pill">{% trans "前往處理" %}</a>
+            </div>
+        </div>
+    </div>
+    {% endwith %}
+{% endif %}
 
 {% block extra_js %}{% endblock %}
 

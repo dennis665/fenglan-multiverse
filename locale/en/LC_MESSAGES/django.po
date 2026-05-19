@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-28 14:38+0800\n"
+"POT-Creation-Date: 2026-05-18 10:34+0800\n"
 "PO-Revision-Date: 2026-02-25 09:10+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: English\n"
@@ -35,7 +35,8 @@ msgstr "Bionic Response"
 #: .\bionic_chat\models.py:17 .\core\models.py:9 .\finance\models.py:38
 #: .\finance\models.py:76 .\finance\models.py:149 .\invest\models.py:58
 #: .\invest\models.py:93 .\sh_recognition\models.py:41
-#: .\study_brain\models.py:11 .\tube_hub\models.py:20 .\tube_hub\models.py:60
+#: .\study_brain\models.py:11 .\transfer_system\models.py:16
+#: .\tube_hub\models.py:20 .\tube_hub\models.py:60
 msgid "建立時間"
 msgstr "Created At"
 
@@ -47,15 +48,15 @@ msgstr "Chat History"
 msgid "伺服器已收到"
 msgstr "Server Received"
 
-#: .\config\settings.py:295
+#: .\config\settings.py:304
 msgid "繁體中文"
 msgstr "Traditional Chinese"
 
-#: .\config\settings.py:296
+#: .\config\settings.py:305
 msgid "英文"
 msgstr "English"
 
-#: .\config\settings.py:297
+#: .\config\settings.py:306
 msgid "日文"
 msgstr "Japanese"
 
@@ -272,11 +273,11 @@ msgstr "Corporate Information"
 msgid "企業資訊管理"
 msgstr "Corporate Information Management"
 
-#: .\core\views.py:36
+#: .\core\views.py:40
 msgid "Avatar updated successfully!"
 msgstr ""
 
-#: .\core\views.py:138 .\core\views.py:141
+#: .\core\views.py:147 .\core\views.py:150
 msgid "AI is currently resting, please try again later."
 msgstr ""
 
@@ -990,11 +991,11 @@ msgstr "Scale Resolution"
 msgid "原始尺寸"
 msgstr "Original Size"
 
-#: .\media_studio\views.py:25 .\templates\media_studio\studio.html:6
+#: .\media_studio\views.py:27 .\templates\media_studio\studio.html:6
 msgid "多媒體處理工作室"
 msgstr "Multimedia Processing Studio"
 
-#: .\media_studio\views.py:199
+#: .\media_studio\views.py:203
 msgid "原始解析度"
 msgstr "Original Resolution"
 
@@ -1203,15 +1204,15 @@ msgstr "Image Recognition Record"
 msgid "圖片辨識紀錄管理"
 msgstr "Recognition Record Management"
 
-#: .\sh_recognition\views.py:69
+#: .\sh_recognition\views.py:73
 msgid "部分圖片辨識失敗："
 msgstr "Failed to recognize some images:"
 
-#: .\sh_recognition\views.py:110
+#: .\sh_recognition\views.py:114
 msgid "請至少勾選一筆要刪除的資料。"
 msgstr "Please select at least one record to delete."
 
-#: .\sh_recognition\views.py:184
+#: .\sh_recognition\views.py:189
 msgid "已使用新模型完成重新辨識！"
 msgstr "Re-recognition completed using the new model!"
 
@@ -1360,62 +1361,62 @@ msgstr "Generation Time"
 msgid "AI 深度解析"
 msgstr "AI In-depth Analysis"
 
-#: .\study_brain\utils.py:179
+#: .\study_brain\utils.py:178
 msgid "此為歷屆考題匯入，無重點摘要。請直接前往「測驗練習」進行刷題！"
 msgstr ""
 "This is a past paper import; no key summaries are available. Please go "
 "directly to \"Practice Quiz\" to start practicing!"
 
-#: .\study_brain\utils.py:195
+#: .\study_brain\utils.py:194
 msgid "AI 忙碌中或檔案解析發生錯誤，請稍後再試！"
 msgstr "AI is busy or a file parsing error occurred. Please try again later!"
 
-#: .\study_brain\views.py:50
+#: .\study_brain\views.py:62
 msgid "教材上傳成功！您可以開始進行 AI 訓練。"
 msgstr "Material uploaded successfully! You can now start AI training."
 
-#: .\study_brain\views.py:52
+#: .\study_brain\views.py:64
 msgid "請填寫完整資訊並上傳檔案。"
 msgstr "Please fill in all information and upload the file."
 
-#: .\study_brain\views.py:66
+#: .\study_brain\views.py:78
 msgid "此為歷屆考題，題目內容固定，無法重複呼叫 AI 擴充新題！"
 msgstr ""
 "This is a past paper with fixed content; cannot call AI to expand new "
 "questions repeatedly!"
 
-#: .\study_brain\views.py:78
+#: .\study_brain\views.py:90
 msgid "檔案解析失敗或內容為空，無法進行訓練。"
 msgstr "File parsing failed or content is empty; training cannot proceed."
 
-#: .\study_brain\views.py:104
+#: .\study_brain\views.py:116
 msgid "AI 首次分析完成！已產生重點摘要與初始練習題。"
 msgstr ""
 "Initial AI analysis complete! Key summaries and practice questions have been "
 "generated."
 
-#: .\study_brain\views.py:106
+#: .\study_brain\views.py:118
 msgid "AI 產出過程發生未知錯誤，請稍後再試。"
 msgstr ""
 "An unknown error occurred during AI generation. Please try again later."
 
-#: .\study_brain\views.py:122
+#: .\study_brain\views.py:134
 msgid "該教材尚未產生分析資料。"
 msgstr "No analysis data has been generated for this material yet."
 
-#: .\study_brain\views.py:229
+#: .\study_brain\views.py:241
 msgid "未作答"
 msgstr "Not Answered"
 
-#: .\study_brain\views.py:238
+#: .\study_brain\views.py:250
 msgid "此為舊版題目，無提供解析。"
 msgstr "This is a legacy question; no explanation is provided."
 
-#: .\study_brain\views.py:244
+#: .\study_brain\views.py:256
 msgid "沒有送出任何有效答案！"
 msgstr "No valid answers were submitted!"
 
-#: .\study_brain\views.py:294
+#: .\study_brain\views.py:306
 msgid "檔案不存在或已遺失"
 msgstr "File does not exist or has been lost."
 
@@ -1568,39 +1569,75 @@ msgstr ""
 msgid "Contact Support"
 msgstr ""
 
-#: .\templates\base.html:39
+#: .\templates\admin\csv_upload.html:8
+msgid "選擇 CSV 檔案："
+msgstr "Select CSV File:"
+
+#: .\templates\admin\csv_upload.html:12
+msgid "上傳並匯入"
+msgstr "Upload and Import"
+
+#: .\templates\admin\item_changelist.html:6
+msgid "匯入 CSV"
+msgstr "Import CSV"
+
+#: .\templates\base.html:45
 msgid "CSI Smart Assistant"
 msgstr ""
 
-#: .\templates\base.html:43
+#: .\templates\base.html:49
 msgid "Hello! I am the CSI Portal assistant, how can I help you today?"
 msgstr ""
 
-#: .\templates\base.html:46
+#: .\templates\base.html:52
 msgid "Type a message..."
 msgstr ""
 
-#: .\templates\base.html:56
+#: .\templates\base.html:62
 msgid "Sorry, the system cannot respond at the moment."
 msgstr ""
 
-#: .\templates\base.html:57
+#: .\templates\base.html:63
 msgid "Connection failed, please check your network."
 msgstr ""
 
-#: .\templates\bionic_chat\chat.html:6
+#: .\templates\base.html:77
+msgid "新轉移通知"
+msgstr "New Transfer Notification"
+
+#: .\templates\base.html:89
+msgid "想將"
+msgstr "wants to transfer"
+
+#: .\templates\base.html:90
+msgid "轉移給您"
+msgstr "to you"
+
+#: .\templates\base.html:93
+msgid "前往處理"
+msgstr "Proceed to Handle"
+
+#: .\templates\bionic_chat\chat.html:7
 msgid "仿生人通訊終端"
 msgstr "Bionic Comm Terminal"
 
-#: .\templates\bionic_chat\chat.html:15
+#: .\templates\bionic_chat\chat.html:14
 msgid "角色立繪"
 msgstr "Character Portrait"
 
-#: .\templates\bionic_chat\chat.html:23
+#: .\templates\bionic_chat\chat.html:27
+msgid "字幕"
+msgstr "Subtitles"
+
+#: .\templates\bionic_chat\chat.html:35
+msgid "語音"
+msgstr "Voice"
+
+#: .\templates\bionic_chat\chat.html:50
 msgid "輸入對話..."
 msgstr "Type a message..."
 
-#: .\templates\bionic_chat\chat.html:24
+#: .\templates\bionic_chat\chat.html:51
 msgid "發送"
 msgstr "Send"
 
@@ -1830,23 +1867,39 @@ msgid "Go Shopping"
 msgstr ""
 
 #: .\templates\core\profile.html:87
-msgid "Transaction History"
+msgid "My Items"
 msgstr ""
 
-#: .\templates\core\profile.html:93 .\templates\core\ticket_pull.html:40
-#: .\templates\study_brain\quiz_history.html:26
-msgid "Date"
+#: .\templates\core\profile.html:93
+msgid "Item Name"
 msgstr ""
 
-#: .\templates\core\profile.html:94
+#: .\templates\core\profile.html:94 .\templates\core\profile.html:133
 msgid "Description"
 msgstr ""
 
 #: .\templates\core\profile.html:95
+msgid "Acquired Date"
+msgstr ""
+
+#: .\templates\core\profile.html:114
+msgid "You don't have any items yet."
+msgstr ""
+
+#: .\templates\core\profile.html:126
+msgid "Transaction History"
+msgstr ""
+
+#: .\templates\core\profile.html:132 .\templates\core\ticket_pull.html:40
+#: .\templates\study_brain\quiz_history.html:26
+msgid "Date"
+msgstr ""
+
+#: .\templates\core\profile.html:134
 msgid "Amount"
 msgstr ""
 
-#: .\templates\core\profile.html:117
+#: .\templates\core\profile.html:156
 msgid "No records found."
 msgstr ""
 
@@ -2870,7 +2923,7 @@ msgstr "Latest Recognition Result"
 msgid "版本"
 msgstr "Version"
 
-#: .\templates\sh_recognition\index.html:71
+#: .\templates\sh_recognition\index.html:71 .\transfer_system\models.py:43
 msgid "狀態"
 msgstr "Status"
 
@@ -2944,7 +2997,8 @@ msgstr "Recalculating..."
 
 #: .\templates\sh_recognition\record_detail.html:56
 msgid "此原圖已使用過所有現有模型進行辨識。"
-msgstr "This original image has already been processed with all available models."
+msgstr ""
+"This original image has already been processed with all available models."
 
 #: .\templates\sh_recognition\record_detail.html:64
 msgid "原始上傳圖片"
@@ -3252,6 +3306,122 @@ msgstr ""
 msgid "Submit Answers"
 msgstr ""
 
+#: .\templates\transfer_system\transfer_create.html:10
+msgid "發起轉移"
+msgstr "Initiate Transfer"
+
+#: .\templates\transfer_system\transfer_create.html:13
+msgid "歷史清單"
+msgstr "History List"
+
+#: .\templates\transfer_system\transfer_create.html:21
+msgid "選擇物品"
+msgstr "Select Item"
+
+#: .\templates\transfer_system\transfer_create.html:23
+msgid "請輸入或選擇物品..."
+msgstr "Please enter or select an item..."
+
+#: .\templates\transfer_system\transfer_create.html:32
+msgid "選擇接收者"
+msgstr "Select Recipient"
+
+#: .\templates\transfer_system\transfer_create.html:34
+msgid "請輸入或選擇使用者..."
+msgstr "Please enter or select a user..."
+
+#: .\templates\transfer_system\transfer_create.html:43
+msgid "送出轉移"
+msgstr "Submit Transfer"
+
+#: .\templates\transfer_system\transfer_history.html:9
+msgid "物品轉移歷史紀錄總覽 (Admin)"
+msgstr "Item Transfer History Overview (Admin)"
+
+#: .\templates\transfer_system\transfer_history.html:12
+msgid "發起新轉移"
+msgstr "Initiate New Transfer"
+
+#: .\templates\transfer_system\transfer_history.html:20
+#: .\transfer_system\models.py:45
+msgid "發起時間"
+msgstr "Initiated At"
+
+#: .\templates\transfer_system\transfer_history.html:21
+#: .\transfer_system\models.py:11
+msgid "物品名稱"
+msgstr "Item Name"
+
+#: .\templates\transfer_system\transfer_history.html:22
+#: .\transfer_system\models.py:37
+msgid "轉出者"
+msgstr "Transferor"
+
+#: .\templates\transfer_system\transfer_history.html:23
+#: .\transfer_system\models.py:40
+msgid "接收者"
+msgstr "Recipient"
+
+#: .\templates\transfer_system\transfer_history.html:24
+msgid "當前狀態"
+msgstr "Current Status"
+
+#: .\templates\transfer_system\transfer_history.html:25
+msgid "管理操作"
+msgstr "Management Actions"
+
+#: .\templates\transfer_system\transfer_history.html:41
+#: .\transfer_system\models.py:30
+msgid "待處理"
+msgstr "Pending"
+
+#: .\templates\transfer_system\transfer_history.html:43
+#: .\transfer_system\models.py:31
+msgid "已接受"
+msgstr "Accepted"
+
+#: .\templates\transfer_system\transfer_history.html:45
+#: .\transfer_system\models.py:32
+msgid "已拒絕"
+msgstr "Rejected"
+
+#: .\templates\transfer_system\transfer_history.html:47
+#: .\transfer_system\models.py:33
+msgid "已取消"
+msgstr "Cancelled"
+
+#: .\templates\transfer_system\transfer_history.html:53
+msgid "確定要取消此筆物品轉移請求嗎？"
+msgstr "Are you sure you want to cancel this item transfer request?"
+
+#: .\templates\transfer_system\transfer_history.html:56
+msgid "取消轉移"
+msgstr "Cancel Transfer"
+
+#: .\templates\transfer_system\transfer_history.html:68
+msgid "目前全系統尚無任何轉移紀錄。"
+msgstr "There are currently no transfer records in the system."
+
+#: .\templates\transfer_system\transfer_reply.html:10
+msgid "物品轉移確認"
+msgstr "Item Transfer Confirmation"
+
+#: .\templates\transfer_system\transfer_reply.html:17
+msgid "發送者："
+msgstr "Sender:"
+
+#: .\templates\transfer_system\transfer_reply.html:22
+msgid "物品名稱："
+msgstr "Item Name:"
+
+#: .\templates\transfer_system\transfer_reply.html:32
+msgid "接受"
+msgstr "Accept"
+
+#: .\templates\transfer_system\transfer_reply.html:35
+msgid "拒絕"
+msgstr "Reject"
+
 #: .\templates\tube_hub\player.html:28
 msgid "返回清單"
 msgstr "Back to List"
@@ -3444,6 +3614,64 @@ msgstr "Confirm Download & Auto-analyze Subtitles"
 msgid "安定基金"
 msgstr "TIGF"
 
+#: .\transfer_system\admin.py:34
+msgid "請上傳正確的 CSV 檔案"
+msgstr "Please upload a valid CSV file"
+
+#: .\transfer_system\admin.py:51
+msgid "CSV 匯入成功"
+msgstr "CSV imported successfully"
+
+#: .\transfer_system\apps.py:9
+msgid "物品轉移系統"
+msgstr "Item Transfer System"
+
+#: .\transfer_system\models.py:13 .\tube_hub\models.py:14
+#: .\tube_hub\models.py:39
+msgid "擁有者"
+msgstr "Owner"
+
+#: .\transfer_system\models.py:15
+msgid "物品描述"
+msgstr "Item Description"
+
+#: .\transfer_system\models.py:19 .\transfer_system\models.py:20
+msgid "物品"
+msgstr "Item"
+
+#: .\transfer_system\models.py:35
+msgid "轉移物品"
+msgstr "Transfer Item"
+
+#: .\transfer_system\models.py:48 .\transfer_system\models.py:49
+msgid "轉移紀錄"
+msgstr "Transfer Record"
+
+#: .\transfer_system\views.py:17 .\transfer_system\views.py:47
+#: .\transfer_system\views.py:65
+msgid "僅限管理員操作"
+msgstr "Admin access only"
+
+#: .\transfer_system\views.py:31
+msgid "該物品目前已有進行中的轉移請求，無法同時發起第二筆轉移。"
+msgstr "This item already has a pending transfer request. Another transfer cannot be initiated."
+
+#: .\transfer_system\views.py:35
+msgid "轉移請求已建立"
+msgstr "Transfer request created successfully"
+
+#: .\transfer_system\views.py:72
+msgid "已成功取消該筆轉移請求"
+msgstr "Transfer request cancelled successfully"
+
+#: .\transfer_system\views.py:92
+msgid "已接受物品轉移"
+msgstr "Item transfer accepted"
+
+#: .\transfer_system\views.py:96
+msgid "已拒絕物品轉移"
+msgstr "Item transfer rejected"
+
 #: .\tube_hub\apps.py:7
 msgid "影音資源中心"
 msgstr "Media Resource Center"
@@ -3455,10 +3683,6 @@ msgstr "Video Folders"
 #: .\tube_hub\models.py:10
 msgid "音樂歌單"
 msgstr "Music Playlists"
-
-#: .\tube_hub\models.py:14 .\tube_hub\models.py:39
-msgid "擁有者"
-msgstr "Owner"
 
 #: .\tube_hub\models.py:16
 msgid "資料夾名稱"

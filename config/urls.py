@@ -119,6 +119,8 @@ urlpatterns = [
     path("bionic_chat/", include("bionic_chat.urls")),
     #! 世祥辨識專用
     path("sh_recognition/", include("sh_recognition.urls")),
+    #! 轉移系統
+    path("transfer/", include("transfer_system.urls")),
     # ? ======================================================================
 ]
 
