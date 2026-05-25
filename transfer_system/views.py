@@ -74,7 +74,7 @@ def transfer_cancel(request, record_id):
 
     if request.method == "POST":
         record = get_object_or_404(TransferRecord, id=record_id, status="pending")
-        record.status = "cancelled"
+        record.cancel()
         record.save()
         messages.success(request, _("已成功取消該筆轉移請求"))
 
@@ -92,13 +92,13 @@ def transfer_reply(request, record_id):
         action = request.POST.get("action")
         if action == "accept":
             #! 更新紀錄狀態與物品所屬擁有者
-            record.status = "accepted"
+            record.accept()
             record.item.owner = request.user
             record.item.save()
             record.save()
             messages.success(request, _("已接受物品轉移"))
         elif action == "reject":
-            record.status = "rejected"
+            record.reject()
             record.save()
             messages.success(request, _("已拒絕物品轉移"))
         return redirect("/")

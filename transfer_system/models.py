@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django_fsm import FSMField, transition
 
 User = get_user_model()
 
@@ -26,12 +27,6 @@ class Item(models.Model):
 class TransferRecord(models.Model):
     """轉移紀錄資料表"""
 
-    STATUS_CHOICES = (
-        ("pending", _("待處理")),
-        ("accepted", _("已接受")),
-        ("rejected", _("已拒絕")),
-        ("cancelled", _("已取消")),
-    )
     item = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name=_("轉移物品"))
     sender = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="transfers_sent", verbose_name=_("轉出者")
@@ -39,9 +34,11 @@ class TransferRecord(models.Model):
     receiver = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="transfers_received", verbose_name=_("接收者")
     )
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="pending", verbose_name=_("狀態")
-    )
+    status = FSMField(
+        default="pending",
+        protected=True,  # * 禁止非狀態機方法直接修改此欄位
+        verbose_name=_("狀態"),
+    )  # pyright: ignore[reportCallIssue]
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("發起時間"))
 
     class Meta:
@@ -50,3 +47,19 @@ class TransferRecord(models.Model):
 
     def __str__(self):
         return f"{self.item.name} - {self.status}"
+
+    @transition(field=status, source="pending", target="accepted")
+    def accept(self):
+        """接受轉移：推進狀態並連動更新物品擁有者"""
+        self.item.owner = self.receiver
+        self.item.save()
+
+    @transition(field=status, source="pending", target="rejected")
+    def reject(self):
+        """拒絕轉移：僅變更工作流狀態"""
+        pass
+
+    @transition(field=status, source="pending", target="cancelled")
+    def cancel(self):
+        """管理員取消：僅變更工作流狀態"""
+        pass
