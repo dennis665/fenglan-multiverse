@@ -84,6 +84,8 @@ THIRD_PARTY_APPS = [
     "crispy_bootstrap5",
     "django_apscheduler",
     "channels",
+    "rest_framework",
+    "rest_framework.authtoken",
 ]
 
 LOCAL_APPS = [
@@ -146,6 +148,13 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",  # * allauth 必備
 ]
+
+#! 設定 REST Framework 預設使用 Token 認證
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+}
 # ? ==============================================================================
 
 #! 模板、靜態檔案與媒體檔案

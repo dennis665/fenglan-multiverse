@@ -4,9 +4,13 @@ from utils.logger_utils import time_tracker
 with time_tracker("games"):
     import json
 
+    from django.contrib.auth import authenticate
     from django.contrib.auth.decorators import login_required
     from django.http import JsonResponse
     from django.shortcuts import render
+    from rest_framework.authtoken.models import Token
+    from rest_framework.decorators import api_view, permission_classes
+    from rest_framework.permissions import AllowAny, IsAuthenticated
 
     from .models import (
         GameProfile,
@@ -17,6 +21,76 @@ with time_tracker("games"):
         SurvivorMonster,
         VirtualLifeEvent,
     )
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def api_login(request):
+    """供 Godot .exe 呼叫的登入端點，驗證成功後核發 Token"""
+    try:
+        data = json.loads(request.body)
+        username = data.get("username")
+        password = data.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            # * 取得或建立該使用者的永久 Token
+            token, _ = Token.objects.get_or_create(user=user)
+            profile, _ = GameProfile.objects.get_or_create(user=user)
+
+            return JsonResponse(
+                {
+                    "status": "success",
+                    "token": token.key,
+                    "username": user.username,
+                    "total_coins": profile.total_coins,
+                    "survivor_hp_lv": profile.survivor_hp_lv,
+                    "survivor_atk_lv": profile.survivor_atk_lv,
+                    "survivor_speed_lv": profile.survivor_speed_lv,
+                }
+            )
+        else:
+            return JsonResponse({"status": "failed", "message": "帳號或密碼錯誤"}, status=400)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])  # * 必須帶有正確 Token 才能進入
+def api_survivor_save(request):
+    """接收 Godot 結算資料並同步至資料庫"""
+    try:
+        data = json.loads(request.body)
+        kills = int(data.get("kills", 0))
+        time_sec = int(data.get("time", 0))
+        is_win = data.get("is_win", False)
+        win_bonus = int(data.get("win_bonus", 0))
+
+        # * 因為有 IsAuthenticated 裝飾器，request.user 會自動被識別為 Token 對應的玩家
+        profile = request.user.game_profile
+        is_new_record = False
+
+        if time_sec > profile.survivor_max_time:
+            profile.survivor_max_time = time_sec
+            is_new_record = True
+        if kills > profile.survivor_max_kills:
+            profile.survivor_max_kills = kills
+
+        earned_coins = (kills // 5) + (win_bonus if is_win else 0)
+        profile.total_coins += earned_coins
+        profile.save()
+
+        return JsonResponse(
+            {
+                "status": "success",
+                "earned_coins": earned_coins,
+                "total_coins": profile.total_coins,
+                "is_new_record": is_new_record,
+            }
+        )
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 
 @login_required

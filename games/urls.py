@@ -20,4 +20,7 @@ urlpatterns = [
     path("api/magictower/save/", views.mt_save_api, name="mt_save_api"),
     path("api/magictower/reward/", views.mt_reward_api, name="mt_reward_api"),
     path("api/magictower/reset/", views.mt_reset_api, name="mt_reset_api"),
+    #! 專供 Godot .exe 呼叫的 REST API 端點
+    path("api/exe/login/", views.api_login, name="api_exe_login"),
+    path("api/exe/survivor/save/", views.api_survivor_save, name="api_exe_survivor_save"),
 ]

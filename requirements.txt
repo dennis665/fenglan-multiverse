@@ -37,7 +37,7 @@ google-genai==2.6.0
 #* 本地端語音轉文字模型
 openai-whisper==20250625
 #* 執行 YOLO 模型進行物件偵測
-ultralytics==8.4.53
+ultralytics==8.4.54
 #* 執行 PaddleOCR 進行光學字元辨識
 paddlepaddle==3.3.1
 paddleocr==3.5.0
@@ -97,6 +97,7 @@ crispy-bootstrap5==2026.3
 django-extensions==4.1
 #* 處理多執行緒/多進程環境下的日誌記錄
 concurrent-log-handler==0.9.29
+djangorestframework==3.17.1
 #! -------------------
 
 #! 依賴相容與漏洞修補鎖定版
