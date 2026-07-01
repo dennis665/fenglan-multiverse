@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block head_title %}{% trans "ICS Sheet 結構淨化工具" %} - CSI Portal{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/ics_cleaner.css' %}">
+
+<div class="container py-5">
+    {# 頂部抬頭 #}
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark"><i class="fas fa-eraser text-danger me-2"></i>{% trans "ICS 工作表結構淨化工具" %}</h3>
+            <p class="text-muted small mb-0">{% trans "自動清除除了 config、rowNumber 以及 config 內定義的所有 Tag 名稱以外的冗餘工作表" %}</p>
+        </div>
+        <a href="/tigf-comparison/" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>{% trans "返回數據比對儀表板" %}
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {# 左側檔案上傳輸入 #}
+        <div class="col-lg-5">
+            <form id="ics-clean-form" class="card shadow-sm border-0 p-4">
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-danger">
+                        <i class="fas fa-file-import me-1"></i>{% trans "上傳待整理之 ICS 原始檔案" %} (.xlsx)
+                    </label>
+                    <div class="clean-drop-zone p-4 text-center rounded">
+                        <i class="fas fa-file-excel fs-1 text-danger mb-2"></i>
+                        <input type="file" id="dirty_excel" name="dirty_excel" class="form-control form-control-sm" accept=".xlsx" required>
+                        <div class="small text-muted mt-2">{% trans "系統將在記憶體中解析白名單工作表" %}</div>
+                    </div>
+                </div>
+
+                <div id="clean-error-msg" class="alert alert-danger p-2 small fw-bold mb-3" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-1"></i><span id="clean-error-text"></span>
+                </div>
+
+                <button type="submit" id="btn-start-clean" class="btn btn-danger w-100 py-2 fw-bold">
+                    <i class="fas fa-magic me-1"></i> {% trans "執行冗餘工作表全面清除" %}
+                </button>
+            </form>
+        </div>
+
+        {# 右側即時執行日誌與下載結果 #}
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 p-4 h-100 bg-light">
+                <h5 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-terminal text-secondary me-2"></i>{% trans "執行狀態監控日誌" %}</h5>
+                
+                <div id="clean-log-box" class="log-terminal p-3 rounded mb-3 small text-white-50" style="background-color: #212529; min-height: 150px; max-height: 250px; overflow-y: auto;">
+                    <div>[INFO] {% trans "等待使用者上傳單據..." %}</div>
+                </div>
+
+                <div id="clean-success-box" class="p-3 bg-white border border-success rounded text-center" style="display: none;">
+                    <h6 class="text-success fw-bold mb-2"><i class="fas fa-check-double me-1"></i>{% trans "結構過濾完成！" %}</h6>
+                    <p class="small text-muted mb-3">{% trans "已成功移除非白名單中的工作表共" %} <span id="lbl-removed-count" class="badge bg-danger">0</span> {% trans "個。" %}</p>
+                    <a href="{% url 'tigf:download_cleaned_ics' %}" id="btn-download-cleaned" class="btn btn-sm btn-primary px-4 fw-bold">
+                        <i class="fas fa-download me-1"></i>{% trans "下載淨化後的 Excel 報表" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const CLEAN_CONFIG = {
+        csrfToken: "{{ csrf_token }}",
+        cleanUrl: "{% url 'tigf:ics_cleaner_dashboard' %}"
+    };
+    const CLEAN_I18N = {
+        cleaningText: "{% trans '正在動態提取白名單標籤並過濾結構...' %}",
+        btnOriginText: "{% trans '執行冗餘工作表全面清除' %}",
+        readyText: "{% trans '等待使用者上傳單據...' %}"
+    };
+</script>
+<script src="{% static 'js/ics_cleaner.js' %}"></script>
+{% endblock %}

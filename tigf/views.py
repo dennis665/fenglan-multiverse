@@ -2,6 +2,7 @@ from utils.logger_utils import time_tracker
 
 #! 包裝整個 import 區塊或初始化邏輯
 with time_tracker("tigf"):
+    import copy
     import io
     import re
     import warnings
@@ -14,6 +15,8 @@ with time_tracker("tigf"):
     from django.core.cache import cache
     from django.http import HttpResponse, JsonResponse
     from django.shortcuts import render
+    from openpyxl import load_workbook
+    from openpyxl.utils import get_column_letter
 
     from utils.decorators import staff_required
 
@@ -88,15 +91,15 @@ def is_value_matched(
     rule_date_check=True,
     rule_empty_zero=True,
     rule_tolerance=True,
-    has_ics=False,
+    has_tis=False,
     ignore_list=[],
 ):
     #! 基礎清理與正規化
     str_r = str(val_r).strip().replace("nan", "").replace("None", "").replace("\r", "")
     str_db = str(val_db).strip().replace("nan", "").replace("None", "").replace("\r", "")
 
-    #! ICS
-    if has_ics:
+    #! TIS
+    if has_tis:
         str_r = str_r.strip("[]")
         str_db = str_db.strip("[]")
         if str_r == "-":
@@ -107,6 +110,10 @@ def is_value_matched(
             str_r = "1"
         if str_r == "False":
             str_r = "0"
+        if str_db == "True":
+            str_db = "1"
+        if str_db == "False":
+            str_db = "0"
         if str_r == "%":
             str_r = ""
         if str_db == "%":
@@ -263,9 +270,9 @@ def tigf_dashboard(request):
                 has_db = False
 
                 #! ========================================================
-                #! 新增：針對 ICS 系列進行多 DB 驗證
+                #! 針對 TIS 系列進行多 DB 驗證
                 #! ========================================================
-                if fid.startswith("ICS") and dict_db:
+                if fid.startswith("TIS") and dict_db:
                     if has_template:
                         try:
                             #! 讀取範本檔 Config 頁籤 (第一張工作表)
@@ -372,12 +379,25 @@ def tigf_dashboard(request):
                 fid = name[14:18]
 
                 # ! ========================================================
-                # ! ICS 專屬比對邏輯
+                # ! TIS 專屬比對邏輯
                 # ! ========================================================
-                if "ICS" in fid:
+                if "TIS" in fid:
                     try:
-                        has_ics = True
-                        #! 讀取 ICSQ 範本第一張表 (Config)，使用 header=None 以防標題不在第一列
+                        has_tis = True
+
+                        #! 1. 【效能優化關鍵】在進入迴圈前，一次性將申報檔的所有工作表載入記憶體字典
+                        #! 使用 sheet_name=None，pandas 會自動讀取整份活頁簿，report_obj 只會被解開這一次
+                        with warnings.catch_warnings():
+                            warnings.filterwarnings(
+                                "ignore", category=UserWarning, module="openpyxl"
+                            )
+                            if hasattr(report_obj, "seek"):
+                                report_obj.seek(0)
+                            all_report_sheets = pd.read_excel(
+                                report_obj, sheet_name=None, header=None, dtype=str
+                            )
+
+                        #! 讀取 TIS 範本第一張表 (Config)，使用 header=None 以防標題不在第一列
                         df_config_raw = smart_read_excel(
                             global_templates[fid], sheet_name=0, header=None
                         )
@@ -387,7 +407,7 @@ def tigf_dashboard(request):
                             df_config_raw.eq("工作表名稱").any(axis=1)
                         ].index
                         if not len(cfg_header_idx):
-                            print("ICSQ Config 表找不到 '工作表名稱' 標題行")
+                            print("TIS Config 表找不到 '工作表名稱' 標題行")
                             continue
 
                         df_config = df_config_raw.iloc[cfg_header_idx[0] + 1 :].copy()
@@ -416,14 +436,14 @@ def tigf_dashboard(request):
                                 "T041",
                                 "T042",
                                 "T051",
-                                "T053",
-                                "T102",
+                                # "T053",
+                                "T103",
                                 "Y320",
                                 "Y330",
                             ):
                                 diff_list.append(
                                     {
-                                        "工作表": sheet_name,
+                                        "工作表": f"{sheet_name}：{tag}",
                                         "行號": f"{start_row}：{end_row}",
                                         "中文欄位": "",
                                         "英文欄位": "",
@@ -448,39 +468,40 @@ def tigf_dashboard(request):
                             #! 解析「忽略列(相對行數)」格式為：X1:X2,Y1:Y2
                             ignore_str = str(cfg.get("忽略列(相對行數)", "")).strip()
                             ignore_tag_map = {
+                                "T015": "1",
                                 "T016": "1",
                                 "T026": "1",
                                 "T027": "1",
                                 "T030": "1",
-                                "T043": "1:2",
-                                "T044": "1:2",
-                                "T045": "1:2",
-                                "T046": "1:2",
-                                "T047": "1:2",
-                                "T048": "1:3",
-                                "T049": "1:2",
-                                "T050": "1:2",
-                                "T052": "1:2",
-                                "T054": "1:2",
-                                "T055": "1:2",
-                                "T056": "1:2",
-                                "T057": "1:2",
-                                "T058": "1:2",
-                                "T059": "1:2",
-                                "T060": "1:2",
-                                "T061": "1:2",
-                                "T062": "1:2",
-                                "T063": "1:2",
-                                "T064": "1:2",
-                                "T065": "1:2",
-                                "T066": "1",
-                                "T067": "1:2",
-                                "T068": "1:2",
-                                "T069": "1:2",
-                                "T070": "1:2",
-                                "T071": "1:2",
-                                "T073": "1:2",
-                                "T074": "1:2",
+                                # "T043": "1:2",
+                                # "T044": "1:2",
+                                # "T045": "1:2",
+                                # "T046": "1:2",
+                                # "T047": "1:2",
+                                # "T048": "1:3",
+                                # "T049": "1:2",
+                                # "T050": "1:2",
+                                # "T052": "1:2",
+                                # "T054": "1:2",
+                                # "T055": "1:2",
+                                # "T056": "1:2",
+                                # "T057": "1:2",
+                                # "T058": "1:2",
+                                # "T059": "1:2",
+                                # "T060": "1:2",
+                                # "T061": "1:2",
+                                # "T062": "1:2",
+                                # "T063": "1:2",
+                                # "T064": "1:2",
+                                # "T065": "1:2",
+                                # "T066": "1",
+                                # "T067": "1:2",
+                                # "T068": "1:2",
+                                # "T069": "1:2",
+                                # "T070": "1:2",
+                                # "T071": "1:2",
+                                # "T073": "1:2",
+                                # "T074": "1:2",
                             }
                             if tag in ignore_tag_map:
                                 ignore_str = ignore_tag_map[tag]
@@ -499,13 +520,19 @@ def tigf_dashboard(request):
                             ignore_list = ignore_str.split(",") if ignore_str else []
 
                             #! 讀取申報檔對應的 sheet_name
-                            try:
-                                df_r = smart_read_excel(
-                                    report_obj, sheet_name=sheet_name, header=None
-                                )
-                            except Exception:
+                            # try:
+                            #     df_r = smart_read_excel(
+                            #         report_obj, sheet_name=sheet_name, header=None
+                            #     )
+                            # except Exception:
+                            #     print(f"找不到申報檔 Sheet: {sheet_name}")
+                            #     continue
+
+                            #! 2. 【效能優化關鍵】從記憶體字典直接撈取 DataFrame，取代原本的 smart_read_excel
+                            if sheet_name not in all_report_sheets:
                                 print(f"找不到申報檔 Sheet: {sheet_name}")
                                 continue
+                            df_r = all_report_sheets[sheet_name]
 
                             #! 讀取範本檔對應的 Tag sheet (獲取 Schema 規則)
                             try:
@@ -591,15 +618,39 @@ def tigf_dashboard(request):
                                     val_row_no = normalize_key(db_row[db_pk_col])
 
                                 #! 組成 Tuple: 例如 ('CP01', '10') 或 ('CP02', '')
-                                if tag == "T082":
-                                    k = (val_first, "")
-                                else:
-                                    k = (val_first, val_row_no)
+                                # if tag == "T082":
+                                #     k = (val_first, "")
+                                # else:
+                                #     k = (val_first, val_row_no)
+                                k = (val_first, val_row_no)
 
                                 #! 因為 (第一欄位, RowNo) 可能會重複（例如都是空值），所以存成 List
                                 if k not in db_lookup:
                                     db_lookup[k] = []
                                 db_lookup[k].append(db_row)
+
+                            #! 1. 拉出 config 實際筆數
+                            actual_report_row_count = int(cfg.get("實際筆數", ""))
+
+                            #! 2. 計算 DB 端的總資料筆數 (該公司未刪除的總筆數)
+                            total_db_row_count = sum(len(rows) for rows in db_lookup.values())
+
+                            #! 3. 進行總筆數比對驗證
+                            if actual_report_row_count != total_db_row_count:
+                                diff_list.append(
+                                    {
+                                        "工作表": f"{sheet_name}：{tag}",
+                                        "行號": f"{start_row}：{end_row}",
+                                        "中文欄位": "資料總筆數核對",
+                                        "英文欄位": "",
+                                        "申報值": f"實際有效資料共 {actual_report_row_count} 筆",
+                                        "DB值": f"DB 總資料共 {total_db_row_count} 筆",
+                                    }
+                                )
+                                print(
+                                    f"[{sheet_name}：{tag}] 筆數不一致！申報實際筆數：{actual_report_row_count}，DB總筆數：{total_db_row_count}\n"
+                                )
+                                continue
 
                             #! 擷取資料並逐行進行比對
                             for r_idx in range(start_row - 1, end_row):
@@ -649,12 +700,12 @@ def tigf_dashboard(request):
                                         and r_val_first == ""
                                     ):
                                         r_val_first = "TAL"
-                                    else:
-                                        if (
-                                            tag == "T048"
-                                            and r_val_first == "對不動產風險敏感之資產減負債"
-                                        ):
-                                            r_val_first = "對不動產風險敏感之資產減負債      台灣↓7.81%、其他↓25%"
+                                    # else:
+                                    #     if (
+                                    #         tag == "T048"
+                                    #         and r_val_first == "對不動產風險敏感之資產減負債"
+                                    #     ):
+                                    #         r_val_first = "對不動產風險敏感之資產減負債      台灣↓7.81%、其他↓25%"
 
                                 #! 取得 RowNo 的值
                                 r_val_row_no = ""
@@ -666,6 +717,12 @@ def tigf_dashboard(request):
                                         r_val_row_no = "TAL"
                                     else:
                                         r_val_row_no = normalize_key(row_data.iloc[row_no_idx])
+
+                                #! 3. 【修正 T082 錯誤】申報端的 Key 組裝邏輯必須與 DB 端對稱
+                                if tag == "T082":
+                                    r_key = (r_val_first, "")
+                                else:
+                                    r_key = (r_val_first, r_val_row_no)
 
                                 r_key = (r_val_first, r_val_row_no)
 
@@ -685,7 +742,7 @@ def tigf_dashboard(request):
                                     )
                                     diff_list.append(
                                         {
-                                            "工作表": sheet_name,
+                                            "工作表": f"{sheet_name}：{tag}",
                                             "行號": r_idx + 1,
                                             "中文欄位": f"主鍵({display_key})",
                                             "英文欄位": f"{first_col_db_name} | {db_pk_col}",
@@ -727,7 +784,7 @@ def tigf_dashboard(request):
                                             rule_date_check,
                                             rule_empty_zero,
                                             rule_tolerance,
-                                            has_ics,
+                                            has_tis,
                                             ignore_list,
                                         ):
                                             if (
@@ -739,7 +796,7 @@ def tigf_dashboard(request):
                                                 continue
                                             diff_list.append(
                                                 {
-                                                    "工作表": sheet_name,
+                                                    "工作表": f"{sheet_name}：{tag}",
                                                     "行號": r_idx + 1,
                                                     "中文欄位": cols["ch"],
                                                     "英文欄位": cols["en"],
@@ -748,12 +805,12 @@ def tigf_dashboard(request):
                                                 }
                                             )
                                             print(
-                                                f"[{sheet_name}] 行號 {r_idx + 1} | {cols['ch']} ({cols['en']}) 不符"
+                                                f"[{sheet_name}：{tag}] 行號 {r_idx + 1} | {cols['ch']} ({cols['en']}) 不符"
                                             )
                                             print(f"申報值：{repr(val_r)}")
                                             print(f" DB值：{repr(val_db)}\n")
 
-                        #! 單檔 ICS 比對完成，處理結果輸出 (寫入 Cache / Excel)
+                        #! 單檔 TIS 比對完成，處理結果輸出 (寫入 Cache / Excel)
                         diff_count = len(diff_list)
                         if diff_count > 0:
                             df_diff = pd.DataFrame(diff_list)
@@ -771,7 +828,7 @@ def tigf_dashboard(request):
                         )
 
                     except Exception as e:
-                        print(f"處理 ICSQ {cno}-{fid} 時發生錯誤: {e}")
+                        print(f"處理 TIS {cno}-{fid} 時發生錯誤: {e}")
                 elif fid in global_templates and fid in global_dbs:
                     try:
                         ignore_rows = set()
@@ -1023,7 +1080,9 @@ def tigf_dashboard(request):
 
             return JsonResponse({"action": "compare_results", "diff_results": diff_summary})
 
-    return render(request, "core/tigf_dashboard.html", {"status_map": file_status_map, "all_matched": False})
+    return render(
+        request, "tigf/tigf_dashboard.html", {"status_map": file_status_map, "all_matched": False}
+    )
 
 
 @staff_required
@@ -1057,3 +1116,339 @@ def download_diff_csv(request, cno, fid):
     response["Content-Disposition"] = f"attachment; filename*=utf-8''{quote(filename)}"
 
     return response
+
+
+def ics_merger_dashboard(request):
+    """渲染 ICS Excel 報表合併主頁面"""
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+        main_file = request.FILES.get("main_excel")
+        sub_file = request.FILES.get("sub_excel")
+
+        if not main_file or not sub_file:
+            return JsonResponse({"success": False, "error": "請同時上傳主 Excel 檔與副 Excel 檔"})
+
+        try:
+            #! 讀取主副 Excel 活頁簿
+            wb_main = load_workbook(main_file)
+            wb_sub = load_workbook(sub_file, data_only=False)  # * 保留公式與完整樣式
+
+            #! 逐一將副檔的 sheet 複製進主檔
+            for sheet_name in wb_sub.sheetnames:
+                ws_sub = wb_sub[sheet_name]
+
+                #! 處理工作表名稱重複衝突
+                new_sheet_name = sheet_name
+                counter = 1
+                while new_sheet_name in wb_main.sheetnames:
+                    new_sheet_name = f"{sheet_name}_{counter}"
+                    counter += 1
+
+                #! 在主檔後方建立新工作表
+                ws_main = wb_main.create_sheet(title=new_sheet_name)
+
+                #! 複製所有儲存格的值、公式與樣式
+                for row in ws_sub.iter_rows():
+                    for cell in row:
+                        new_cell = ws_main.cell(row=cell.row, column=cell.column, value=cell.value)
+
+                        #! 複製細胞格核心樣式 (字體、填滿、對齊、框線、數字格式)
+                        if cell.has_style:
+                            new_cell.font = copy.copy(cell.font)
+                            new_cell.fill = copy.copy(cell.fill)
+                            new_cell.alignment = copy.copy(cell.alignment)
+                            new_cell.border = copy.copy(cell.border)
+                            new_cell.number_format = cell.number_format
+
+                #! 複製合併儲存格的範圍
+                for merged_range in ws_sub.merged_cells.ranges:
+                    ws_main.merge_cells(str(merged_range))
+
+                #! 複製列高與欄寬樣式
+                for col_idx in range(1, ws_sub.max_column + 1):
+                    col_letter = get_column_letter(col_idx)
+                    ws_main.column_dimensions[col_letter].width = ws_sub.column_dimensions[
+                        col_letter
+                    ].width
+
+                for row_idx in range(1, ws_sub.max_row + 1):
+                    ws_main.row_dimensions[row_idx].height = ws_sub.row_dimensions[row_idx].height
+
+            #! 將合併後的 Excel 寫入記憶體中準備導出
+            output = io.BytesIO()
+            wb_main.save(output)
+            output.seek(0)
+
+            #! 暫存回 Session 供後續下載，或直接回傳成功訊號
+            request.session["merged_ics_file"] = output.getvalue().hex()
+            return JsonResponse({"success": True, "message": "報表合併成功，準備開始下載"})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": f"合併程序失敗：{str(e)}"})
+
+    return render(request, "tigf/ics_merger_dashboard.html")
+
+
+def download_merged_ics(request):
+    """提供使用者下載合併完成後的檔案"""
+    file_hex = request.session.get("merged_ics_file")
+    if not file_hex:
+        return HttpResponse("找不到可供下載的報表檔案", status=404)
+
+    file_bytes = bytes.fromhex(file_hex)
+    response = HttpResponse(
+        file_bytes, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="ICS_Merged_Report.xlsx"'
+
+    #! 下載後清除 Session 釋放記憶體
+    del request.session["merged_ics_file"]
+    return response
+
+
+def ics_cleaner_dashboard(request):
+    """處理 ICS Excel 結構淨化與無效工作表清除"""
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+        excel_file = request.FILES.get("dirty_excel")
+
+        if not excel_file:
+            return JsonResponse({"success": False, "error": "請選取要執行清除的 Excel 檔案"})
+
+        try:
+            # * 載入活頁簿 (保留公式與樣式不變)
+            wb = load_workbook(excel_file, data_only=False)
+
+            # * 基本檢查：必須存在核心設定工作表
+            if "config" not in wb.sheetnames:
+                return JsonResponse(
+                    {"success": False, "error": "規格錯誤：找不到核心 'config' 工作表"}
+                )
+
+            # * 1. 初始化白名單工作表名稱集合
+            preserved_sheets = {"config", "rowNumber"}
+            ws_config = wb["config"]
+
+            # * 2. 動態從 config 工作表內掃描撈取所有的 Tag 名稱 (例如 T001, T002...)
+            # * 遍歷 config 工作表中的前幾欄所有儲存格，只要數值符合 T 加上數字或自訂 Tag 格式就納入白名單
+            for row in ws_config.iter_rows(values_only=True):
+                for val in row:
+                    if val and isinstance(val, str):
+                        val_strip = val.strip()
+                        # * 匹配常見的 Tag 格式 (例如 T001, BS03 等大寫代碼開頭)
+                        if val_strip.isalnum() and len(val_strip) == 4:
+                            preserved_sheets.add(val_strip)
+
+            # * 3. 安全過濾清除：找出不在白名單內的 Sheet 並將其移除
+            all_sheet_names = list(wb.sheetnames)
+            removed_count = 0
+            removed_list = []
+
+            for sheet_name in all_sheet_names:
+                if sheet_name not in preserved_sheets:
+                    wb.remove(wb[sheet_name])
+                    removed_list.append(sheet_name)
+                    removed_count += 1
+
+            # * 如果全部都被刪光了防呆機制
+            if len(wb.sheetnames) == 0:
+                return JsonResponse(
+                    {"success": False, "error": "清除異常：過濾後沒有保留任何有效工作表"}
+                )
+
+            # * 將過濾完成後的 Excel 寫入記憶體中準備導出
+            output = io.BytesIO()
+            wb.save(output)
+            output.seek(0)
+
+            # * 儲存進 Session 供前端點擊下載
+            request.session["cleaned_ics_file"] = output.getvalue().hex()
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": "結構淨化完成",
+                    "removed_count": removed_count,
+                    "removed_sheets": removed_list,
+                }
+            )
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": f"清除程序執行失敗：{str(e)}"})
+
+    return render(request, "tigf/ics_cleaner_dashboard.html")
+
+
+def download_cleaned_ics(request):
+    """提供使用者下載淨化完成後的 Excel 檔案"""
+    file_hex = request.session.get("cleaned_ics_file")
+    if not file_hex:
+        return HttpResponse("找不到可供下載的檔案", status=404)
+
+    file_bytes = bytes.fromhex(file_hex)
+    response = HttpResponse(
+        file_bytes, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="ICS_Cleaned_Report.xlsx"'
+
+    # * 下載完成後即刻釋放 Session
+    del request.session["cleaned_ics_file"]
+    return response
+
+
+def ics_validator_dashboard(request):
+    """處理 config 與 rowNumber 結構指標的交叉驗證"""
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+        excel_file = request.FILES.get("check_excel")
+
+        if not excel_file:
+            return JsonResponse({"success": False, "error": "請選擇要執行驗證的 Excel 檔案"})
+
+        try:
+            wb = load_workbook(excel_file, data_only=True)
+
+            # * 基本檢查：核心驗證工作表必須存在
+            if "config" not in wb.sheetnames or "rowNumber" not in wb.sheetnames:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": "錯誤：檔案中必須同時包含 'config' 與 'rowNumber' 工作表",
+                    }
+                )
+
+            ws_config = wb["config"]
+            ws_rownum = wb["rowNumber"]
+
+            # * 1. 解析 rowNumber 工作表（讀取首行首名作為 Tag 指標，並收集底下的編號）
+            rownum_data = {}
+            # * 取得 rowNumber 所有的欄位
+            for col in ws_rownum.iter_cols(values_only=True):
+                if not col or col[0] is None:
+                    continue
+                tag_header = str(col[0]).strip()
+                # * 收集該欄底下所有非空的行號編號（排除首行）
+                row_ids = [str(v).strip() for v in col[1:] if v is not None]
+                rownum_data[tag_header] = row_ids
+
+            validation_errors = []
+            passed_logs = []
+
+            # * 2. 依序讀取 config 每筆設定（排除前三行標頭，資料自第4行開始）
+            for idx, row in enumerate(ws_config.iter_rows(min_row=4, values_only=True), start=4):
+                sheet_name = row[0]  # * A欄: 工作表名稱
+                tag_name = row[1]  # * B欄: Tag
+                start_row = row[2]  # * C欄: Start RowNo
+                start_col = row[3]  # * D欄: Start ColNo
+                end_row = row[4]  # * E欄: End RowNo
+                end_col = row[5]  # * F欄: End ColNo
+                row_type = row[6]  # * G欄: Row Type
+                row_count = row[7]  # * H欄: Row Count
+                up_end_row_key_word = row[8]  # * I欄: Up End Row Key Word  # noqa: F841
+                bottom_start_row_key_word = row[9]  # * J欄: Bottom Start Row Key Word  # noqa: F841
+                row_shift = row[10]  # * K欄: Row Shift  # noqa: F841
+                rownum_col = row[14]  # * O欄: rowNoColumn
+                ignore_rows = row[16]  # * Q欄: Ignore Rows  # noqa: F841
+
+                # * 略過完全空白的設定行
+                if not sheet_name and not tag_name:
+                    continue
+
+                sheet_name = str(sheet_name).strip()
+                tag_name = str(tag_name).strip() if tag_name else None
+
+                # * 驗證 A 欄工作表是否存在於活頁簿
+                if sheet_name not in wb.sheetnames:
+                    validation_errors.append(
+                        f"Line {idx}: 工作表 [{sheet_name}] 不存在於此 Excel 檔案中"
+                    )
+                    continue
+
+                ws_target = wb[sheet_name]
+
+                # * 驗證 D 欄與 F 欄之間的指定欄位範圍是否「整行/整區塊都是空的」
+                if start_col and end_col:
+                    try:
+                        s_col = int(start_col)  # pyright: ignore[reportArgumentType]
+                        e_col = int(end_col)  # pyright: ignore[reportArgumentType]
+                        is_block_empty = True
+
+                        # * 遍歷目標工作表指定範圍，檢查是否至少有一個儲存格有值
+                        for r_idx in range(1, ws_target.max_row + 1):
+                            for c_idx in range(s_col, e_col + 1):
+                                if ws_target.cell(row=r_idx, column=c_idx).value is not None:
+                                    is_block_empty = False
+                                    break
+                            if not is_block_empty:
+                                break
+
+                        if is_block_empty:
+                            validation_errors.append(
+                                f"[{sheet_name}] Line {idx}: "
+                                f"欄位範圍 {s_col} ~ {e_col} "
+                                f"查無任何數值（整區塊皆為空，不符合規範）"
+                            )
+                    except ValueError:
+                        validation_errors.append(
+                            f"[{sheet_name}] Line {idx}: 欄位指標 Start/End ColNo 必須為整數"
+                        )
+
+                # * 條件分支：如果 Row Type (G欄) 為 2，跳過 rowNumber 的對應比對
+                if str(row_type).strip() == "2":
+                    passed_logs.append(f"[{sheet_name}] Row Type 為 2，略過 rowNumber 檢核")
+                    continue
+
+                # * 驗證 H 欄 Row Count 是否正確
+                if row_count == (int(end_row) - int(start_row) + 1):  # pyright: ignore[reportArgumentType]
+                    pass
+
+                # * 驗證 B 欄 Tag 是否存在於 rowNumber 的欄位首行中
+                if not tag_name or tag_name not in rownum_data:
+                    validation_errors.append(
+                        f"[{sheet_name}] Line {idx}: "
+                        f"設定的 Tag [{tag_name}] "
+                        f"未在 rowNumber 工作表首行中找到"
+                    )
+                    continue
+
+                # * 驗證 C 欄與 E 欄對應的目標欄（O欄指定）內容是否與 rowNumber 對應欄底下的編號一致
+                if start_row and end_row and rownum_col:
+                    try:
+                        s_row = int(start_row)  # pyright: ignore[reportArgumentType]
+                        e_row = int(end_row)  # pyright: ignore[reportArgumentType]
+                        r_col = int(rownum_col)  # pyright: ignore[reportArgumentType]
+
+                        # * 從目標工作表撈出實際填列的行號編號集合
+                        actual_row_ids = []
+                        for r_idx in range(s_row, e_row + 1):
+                            cell_val = ws_target.cell(row=r_idx, column=r_col).value
+                            if cell_val is not None:
+                                actual_row_ids.append(str(cell_val).strip())
+
+                        expected_row_ids = rownum_data[tag_name]
+
+                        # * 交叉核對兩者是否完全一致
+                        mismatched_ids = [x for x in actual_row_ids if x not in expected_row_ids]
+                        if mismatched_ids:
+                            validation_errors.append(
+                                f"[{sheet_name}] Line {idx}: "
+                                f"工作表內撈到的編號 {mismatched_ids} "
+                                f"未包含在 rowNumber 的白名單內"
+                            )
+                    except ValueError:
+                        validation_errors.append(
+                            f"[{sheet_name}] Line {idx}: 行號或 rowNoColumn 格式錯誤，必須為整數"
+                        )
+
+            if validation_errors:
+                return JsonResponse({"success": True, "valid": False, "errors": validation_errors})
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "valid": True,
+                    "message": "恭喜！工作表指標與 rowNumber 資料完全核對正確！",
+                }
+            )
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": f"結構驗證程序失敗：{str(e)}"})
+
+    return render(request, "tigf/ics_validator_dashboard.html")

@@ -1,0 +1,25 @@
+/*! ics_merger.css - ICS 報表合併專用樣式 */
+.drop-zone {
+    border: 2px dashed #ced4da;
+    background-color: #ffffff;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.drop-zone:hover {
+    background-color: #f8f9fa;
+    border-color: #6c757d;
+}
+
+.drop-zone input[type="file"] {
+    margin: 10px auto 0 auto;
+    max-width: 90%;
+}
+
+form.card {
+    border-radius: 8px;
+}
+
+code {
+    font-family: Consolas, monospace;
+    color: #d63384;
+}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block head_title %}{% trans "ICS Excel Report Merger" %} - CSI Portal{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/ics_merger.css' %}">
+
+<div class="container py-5">
+    {# 頂部標題與返回首頁導覽 #}
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark"><i class="fas fa-file-excel text-success me-2"></i>{% trans "ICS Excel 報表合併系統" %}</h3>
+            <p class="text-muted small mb-0">{% trans "將副檔內的所有工作表及其原始格式樣式，往後串合至主檔中" %}</p>
+        </div>
+        <a href="/tigf-comparison/" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>{% trans "返回數據比對儀表板" %}
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {# 左側上傳控制卡片 #}
+        <div class="col-lg-5">
+            <form id="ics-merge-form" class="card shadow-sm border-0 p-4">
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-primary">
+                        <i class="fas fa-heading me-1"></i>1. {% trans "上傳主 Excel 檔案" %} (.xlsx)
+                    </label>
+                    <div class="drop-zone p-3 text-center rounded">
+                        <i class="fas fa-cloud-upload-alt fs-2 text-primary mb-2"></i>
+                        <input type="file" id="main_excel" name="main_excel" class="form-control form-control-sm" accept=".xlsx" required>
+                        <div class="small text-muted mt-1">{% trans "此檔案將作為合併後的基底表" %}</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-success">
+                        <i class="fas fa-folder-plus me-1"></i>2. {% trans "上傳副 Excel 檔案" %} (.xlsx)
+                    </label>
+                    <div class="drop-zone p-3 text-center rounded">
+                        <i class="fas fa-cloud-upload-alt fs-2 text-success mb-2"></i>
+                        <input type="file" id="sub_excel" name="sub_excel" class="form-control form-control-sm" accept=".xlsx" required>
+                        <div class="small text-muted mt-1">{% trans "此檔內的所有工作表將會被完整抽出來併入主檔" %}</div>
+                    </div>
+                </div>
+
+                <div id="merge-error-msg" class="alert alert-danger p-2 small fw-bold mb-3" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-1"></i><span id="merge-error-text"></span>
+                </div>
+
+                <button type="submit" id="btn-start-merge" class="btn btn-success w-100 py-2 fw-bold">
+                    <i class="fas fa-compress-alt me-1"></i> {% trans "執行 ICS 報表樣式無損合併" %}
+                </button>
+            </form>
+        </div>
+
+        {# 右側工作流歷史與說明說明卡片 #}
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 p-4 h-100 bg-light">
+                <h5 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-info-circle text-info me-2"></i>{% trans "合併技術與規範說明" %}</h5>
+                <div class="small text-secondary">
+                    <p class="mb-2 fw-bold text-dark">❖ 格式無損複製技術 (Style Fidelity)：</p>
+                    <ul class="ps-3 mb-3">
+                        <li>系統將對副檔內部的儲存格底色 (Fill)、字體外觀 (Font)、對齊線、自訂邊框進行深拷貝複製。</li>
+                        <li>自動偵測並維持原報表之「直向欄寬」與「橫向列高」，確保合併後的列印版面不跑位。</li>
+                    </ul>
+                    
+                    <p class="mb-2 fw-bold text-dark">❖ 衝突處理機制：</p>
+                    <ul class="ps-3 mb-3">
+                        <li>若副檔的工作表名稱與主檔既有頁籤「名稱重複」，系統將自動以底線加數字進行重命名 (例如: <code class="bg-white p-1 rounded">Sheet1_1</code>)。</li>
+                        <li>支援複雜的合併儲存格 (Merged Cells) 的跨範圍重構。</li>
+                    </ul>
+                </div>
+                
+                <div id="success-download-box" class="mt-auto p-3 bg-white border border-success rounded text-center" style="display: none;">
+                    <h6 class="text-success fw-bold mb-2"><i class="fas fa-check-circle me-1"></i>{% trans "合併作業已順利完成！" %}</h6>
+                    <a href="{% url 'tigf:download_merged_ics' %}" id="btn-download-file" class="btn btn-sm btn-primary px-4 fw-bold">
+                        <i class="fas fa-download me-1"></i>{% trans "下載已合併的 Excel 報表" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ICS_CONFIG = {
+        csrfToken: "{{ csrf_token }}",
+        mergeUrl: "{% url 'tigf:ics_merger_dashboard' %}"
+    };
+    const ICS_I18N = {
+        mergingText: "{% trans '正在讀取並轉移樣式格式中...' %}",
+        btnOriginText: "{% trans '執行 ICS 報表樣式無損合併' %}"
+    };
+</script>
+<script src="{% static 'js/ics_merger.js' %}"></script>
+{% endblock %}

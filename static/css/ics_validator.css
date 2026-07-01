@@ -1,0 +1,21 @@
+/*! ics_validator.css - 交叉驗證控制台樣式 */
+.validator-drop-zone {
+    border: 2px dashed #0d6efd;
+    background-color: #ffffff;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.validator-drop-zone:hover {
+    background-color: #f1f7ff;
+    border-color: #0a58ca;
+}
+
+.validator-console {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.validator-console div {
+    margin-bottom: 6px;
+}

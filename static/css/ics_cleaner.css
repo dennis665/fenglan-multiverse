@@ -1,0 +1,20 @@
+/*! ics_cleaner.css - 工作表淨化外觀設計 */
+.clean-drop-zone {
+    border: 2px dashed #dc3545;
+    background-color: #ffffff;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.clean-drop-zone:hover {
+    background-color: #fff5f5;
+    border-color: #bd2130;
+}
+
+.log-terminal {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.log-terminal div {
+    margin-bottom: 4px;
+    line-height: 1.4;
+}

@@ -109,6 +109,8 @@ urlpatterns = [
     path("study_brain/", include("study_brain.urls")),
     #! 視覺頭腦
     path("vision_brain/", include("vision_brain.urls")),
+    #! 安定基金
+    path("tigf/", include("tigf.urls")),
     #! 遊戲中心
     path("games/", include("games.urls")),
     #! yt 應用

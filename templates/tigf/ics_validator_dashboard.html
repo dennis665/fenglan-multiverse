@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block head_title %}{% trans "ICS 指標雙向交叉驗證系統" %} - CSI Portal{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/ics_validator.css' %}">
+
+<div class="container py-5">
+    {# 頂部導覽列 #}
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark"><i class="fas fa-shield-alt text-primary me-2"></i>{% trans "ICS 報表指標交叉驗證系統" %}</h3>
+            <p class="text-muted small mb-0">{% trans "檢核 config 內各表行寬、Row Type 與 rowNumber 的資料關聯性與完整性" %}</p>
+        </div>
+        <a href="/tigf-comparison/" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>{% trans "返回數據比對儀表板" %}
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {# 左側表單發送卡片 #}
+        <div class="col-lg-5">
+            <form id="ics-validator-form" class="card shadow-sm border-0 p-4">
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-primary">
+                        <i class="fas fa-file-excel me-1"></i>{% trans "上傳待驗證之已合併報表" %} (.xlsx)
+                    </label>
+                    <div class="validator-drop-zone p-4 text-center rounded">
+                        <i class="fas fa-cloud-upload-alt fs-1 text-primary mb-2"></i>
+                        <input type="file" id="check_excel" name="check_excel" class="form-control form-control-sm" accept=".xlsx" required>
+                        <div class="small text-muted mt-2">{% trans "系統將自動解析 config、rowNumber 與所有子表" %}</div>
+                    </div>
+                </div>
+
+                <div id="validator-error-box" class="alert alert-danger p-2 small fw-bold mb-3" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-1"></i><span id="validator-error-text"></span>
+                </div>
+
+                <button type="submit" id="btn-start-validate" class="btn btn-primary w-100 py-2 fw-bold">
+                    <i class="fas fa-check-circle me-1"></i> {% trans "開始執行跨表關聯安全性驗證" %}
+                </button>
+            </form>
+        </div>
+
+        {# 右側即時核對回報面板 #}
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 p-4 h-100 bg-light">
+                <h5 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-clipboard-list text-secondary me-2"></i>{% trans "驗證回報與錯誤日誌清單" %}</h5>
+                
+                <div id="validator-result-box" class="validator-console p-3 rounded" style="min-height: 250px; max-height: 350px; overflow-y: auto; background-color: #212529;">
+                    <div class="text-white-50 small">[READY] {% trans "等待活頁簿上傳以進行指標矩陣掃描..." %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const VALIDATOR_CONFIG = {
+        csrfToken: "{{ csrf_token }}",
+        url: "{% url 'tigf:ics_validator_dashboard' %}"
+    };
+    const VALIDATOR_I18N = {
+        runningText: "{% trans '正在執行關聯比對、區塊空值檢索中...' %}",
+        btnOriginText: "{% trans '開始執行跨表關聯安全性驗證' %}"
+    };
+</script>
+<script src="{% static 'js/ics_validator.js' %}"></script>
+{% endblock %}
