@@ -8,6 +8,15 @@
 
 ---
 
+## [1.15.1] - 2026-07-02
+### Changed (變更)
+* **專案文件與開發指南優化整理**：
+    * 重寫 `README.md`，新增整個專案 13 個 App 子應用的模組架構說明，詳細描繪 core, finance, invest, study_brain, vision_brain, media_studio 等模組功能與依賴關係。
+    * 補全各 App 的核心技術依賴說明，包括 Gemini, YOLOv11, PaddleOCR, Edge-TTS, rembg, yt-dlp 等。
+    * 整理並精煉 Local 環境建立流程、Docker 開發指引、資料庫管理命令與排程更新指令，提升多人協同開發效率。
+
+---
+
 ## [1.15.0] - 2026-05-19
 ### Added (新增)
 * **物品轉移系統核心與資料模型**：
