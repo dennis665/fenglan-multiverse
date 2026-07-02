@@ -636,7 +636,8 @@ def tigf_dashboard(request):
                             total_db_row_count = sum(len(rows) for rows in db_lookup.values())
 
                             #! 3. 進行總筆數比對驗證
-                            if actual_report_row_count != total_db_row_count:
+                            row_type = int(cfg.get("Row Type", ""))
+                            if actual_report_row_count != total_db_row_count and row_type != 2:
                                 diff_list.append(
                                     {
                                         "工作表": f"{sheet_name}：{tag}",
