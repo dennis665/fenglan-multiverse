@@ -110,3 +110,7 @@ urllib3==2.6.3
 charset-normalizer==3.3.2
 chardet==5.2.0
 #! -------------------
+
+#! LINE Bot 與欄位加密
+line-bot-sdk==3.7.0
+django-encrypted-model-fields==0.6.5

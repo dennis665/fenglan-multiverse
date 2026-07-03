@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行程小幫手</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        .btn-line {
+            background-color: #1DB446;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-line:hover {
+            background-color: #158b32;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .nav-tabs {
+            border-bottom: none;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            font-weight: bold;
+            border-radius: 50px;
+            margin: 0 5px;
+            padding: 8px 20px;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #1DB446;
+            color: white;
+        }
+        .badge-eat { background-color: #ff9f43; }
+        .badge-exhibit { background-color: #5f27cd; }
+        .badge-sport { background-color: #ff6b6b; }
+        .badge-travel { background-color: #10ac84; }
+        .badge-other { background-color: #8395a7; }
+        .schedule-item {
+            border-left: 5px solid #1DB446;
+            transition: transform 0.2s ease;
+        }
+        .schedule-item:hover {
+            transform: scale(1.02);
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #1DB446;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="py-4">
+    <div class="container" style="max-width: 500px;">
+        <!-- 載入中畫面 -->
+        <div id="loading-section" class="text-center py-5">
+            <div class="loader d-inline-block"></div>
+            <p class="mt-3 text-muted fw-bold">正在讀取 LINE 個人檔案與行程中...</p>
+        </div>
+
+        <!-- 主要列表畫面 -->
+        <div id="main-section" class="d-none">
+            <!-- 帳號未綁定提示橫幅 -->
+            <div id="bind-warning-banner" class="alert alert-warning py-2 px-3 mb-3 small d-none" style="border-radius: 12px; border: 1px solid #ffeeba; background-color: #fff3cd; color: #856404;">
+                <i class="fa-solid fa-triangle-exclamation me-1 text-warning"></i> 
+                目前使用臨時帳號。
+                <a href="/line/liff/bind/" id="bind-link" class="alert-link text-decoration-none fw-bold ms-1" style="color: #533f03;"><i class="fa-solid fa-link me-1"></i>點此安全連結 Google 帳號</a>
+            </div>
+
+            <!-- 頂部 Header -->
+            <div class="glass-card p-4 mb-4 text-center position-relative">
+                <h3 class="fw-bold mb-1"><i class="fa-regular fa-calendar-check text-success me-2"></i>行程小幫手</h3>
+                <p id="group-title" class="text-muted small mb-0"><i class="fa-solid fa-users me-1"></i>個人行程看板</p>
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">Hi, <span id="user-display-name" class="fw-bold text-success">LINE 用戶</span></span>
+                    <a href="/line/liff/create/" id="add-btn" class="btn btn-sm btn-line px-3"><i class="fa-solid fa-plus me-1"></i>新增行程</a>
+                </div>
+            </div>
+
+            <!-- 分頁 Tab -->
+            <ul class="nav nav-tabs justify-content-center mb-3" id="scheduleTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-panel" type="button" role="tab">即將到來</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-panel" type="button" role="tab">歷史紀錄</button>
+                </li>
+            </ul>
+
+            <!-- 行程清單 Panel -->
+            <div class="tab-content" id="scheduleTabContent">
+                <!-- 即將到來行程 -->
+                <div class="tab-pane fade show active" id="upcoming-panel" role="tabpanel">
+                    <div id="upcoming-list" class="d-flex flex-column gap-3">
+                        <!-- 動態插入 -->
+                    </div>
+                </div>
+
+                <!-- 歷史紀錄 -->
+                <div class="tab-pane fade" id="history-panel" role="tabpanel">
+                    <div id="history-list" class="d-flex flex-column gap-3">
+                        <!-- 動態插入 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let liffId = "{{ liff_id }}";
+        let userAccessToken = null;
+        let lineContext = null;
+
+        // 解析 URL 中的 groupId 參數 (防止 LINE 內外瀏覽器重導向造成 Context 遺失)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlGroupId = urlParams.get("groupId");
+
+        document.addEventListener("DOMContentLoaded", function() {
+            initLiff();
+        });
+
+        function initLiff() {
+            liff.init({ liffId: liffId })
+                .then(() => {
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                    } else {
+                        userAccessToken = liff.getAccessToken();
+                        lineContext = liff.getContext();
+                        
+                        // 更新行程新增按鈕 of URL 參數，以便攜帶 groupId
+                        const addBtn = document.getElementById("add-btn");
+                        const currentGroupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+                        if (currentGroupId) {
+                            addBtn.href = `/line/liff/create/?groupId=${currentGroupId}`;
+                            document.getElementById("group-title").innerHTML = `<i class="fa-solid fa-users me-1"></i>群組共享行程`;
+                        }
+
+                        fetchItineraries();
+                    }
+                })
+                .catch((err) => {
+                    console.error("LIFF initialization failed", err);
+                    alert("LIFF 啟動失敗，請於 LINE 內開啟！");
+                });
+        }
+
+        function fetchItineraries() {
+            let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+            
+            fetch("/line/api/itineraries/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    group_id: groupId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("loading-section").classList.add("d-none");
+                
+                if (data.error) {
+                    alert("取得資料失敗: " + data.error);
+                    return;
+                }
+
+                if (!data.is_bound) {
+                    // 尚未綁定，跳轉至帳號綁定頁
+                    let bindUrl = `/line/liff/bind/`;
+                    if (groupId) {
+                        bindUrl += `?groupId=${groupId}`;
+                    }
+                    window.location.href = bindUrl;
+                    return;
+                }
+
+                document.getElementById("user-display-name").innerText = data.username;
+                document.getElementById("main-section").classList.remove("d-none");
+
+                // 如果是臨時用戶，顯示綁定提示
+                if (data.is_temporary) {
+                    const bindLink = document.getElementById("bind-link");
+                    if (groupId) {
+                        bindLink.href = `/line/liff/bind/?groupId=${groupId}`;
+                    } else {
+                        bindLink.href = `/line/liff/bind/`;
+                    }
+                    document.getElementById("bind-warning-banner").classList.remove("d-none");
+                } else {
+                    document.getElementById("bind-warning-banner").classList.add("d-none");
+                }
+
+                renderList(data.upcoming, "upcoming-list", true);
+                renderList(data.history, "history-list", false);
+            })
+            .catch(err => {
+                console.error("Error fetching data:", err);
+                alert("伺服器連線失敗");
+            });
+        }
+
+        function renderList(list, elementId, isUpcoming) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = "";
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card p-4 text-center text-muted">
+                        <i class="fa-solid fa-calendar-xmark fa-2x mb-2 text-secondary"></i>
+                        <p class="mb-0 small">目前沒有任何行程紀錄</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.forEach(item => {
+                // 決定 Badge 樣式
+                let badgeClass = "badge-other";
+                if (item.activity_type.includes("吃飯")) badgeClass = "badge-eat";
+                else if (item.activity_type.includes("逛街")) badgeClass = "badge-exhibit";
+                else if (item.activity_type.includes("運動")) badgeClass = "badge-sport";
+                else if (item.activity_type.includes("旅遊")) badgeClass = "badge-travel";
+
+                let deleteBtn = "";
+                if (isUpcoming) {
+                    deleteBtn = `
+                        <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteItinerary(${item.id})">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    `;
+                }
+
+                const html = `
+                    <div class="glass-card p-3 schedule-item d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1 me-2">
+                            <div class="d-flex align-items-center mb-1 gap-2">
+                                <span class="badge ${badgeClass} small">${item.activity_type}</span>
+                                <span class="text-muted" style="font-size: 0.75rem;"><i class="fa-regular fa-clock me-1"></i>${item.date_time}</span>
+                            </div>
+                            <h5 class="fw-bold mb-1" style="font-size: 1.05rem; color: #2c3e50;">${item.title}</h5>
+                            <div class="text-muted small mb-1"><i class="fa-solid fa-location-dot me-1 text-danger"></i>${item.location}</div>
+                            ${item.notes ? `<div class="bg-light p-2 rounded text-secondary" style="font-size: 0.8rem; border-left: 2px solid #ccc;">${item.notes}</div>` : ""}
+                            <div class="text-muted" style="font-size: 0.7rem; margin-top: 5px;">
+                                <i class="fa-regular fa-user me-1"></i>發起人: ${item.creator}
+                                ${item.notify_text ? ` | 🔔 ${item.notify_text}` : ""}
+                            </div>
+                        </div>
+                        <div>
+                            ${deleteBtn}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function deleteItinerary(id) {
+            if (!confirm("確定要刪除這筆行程嗎？")) return;
+
+            fetch(`/line/api/itineraries/delete/${id}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    access_token: userAccessToken
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    fetchItineraries();
+                } else {
+                    alert("刪除失敗: " + data.error);
+                }
+            })
+            .catch(err => {
+                console.error("Delete error:", err);
+                alert("伺服器連線失敗");
+            });
+        }
+    </script>
+</body>
+</html>

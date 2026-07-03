@@ -20,6 +20,98 @@ def update_prices_job():
         print(f"❌ [排程任務] 執行失敗: {e}")
 
 
+def check_itinerary_reminders_job():
+    print("⏳ [排程任務] 開始檢查行程提醒...")
+    try:
+        from django.conf import settings
+        from django.utils.timezone import now, localtime
+        from linebot.v3.messaging import (
+            ApiClient,
+            Configuration,
+            MessagingApi,
+            PushMessageRequest,
+            TextMessage,
+        )
+
+        from line_manager.models import Itinerary
+
+        current_time = now()
+        # 查詢未通知行程
+        itineraries = Itinerary.objects.filter(is_notified=False)
+
+        configuration = Configuration(access_token=settings.LINE_CHANNEL_ACCESS_TOKEN)
+
+        with ApiClient(configuration) as api_client:
+            api_instance = MessagingApi(api_client)
+
+            for item in itineraries:
+                from datetime import timedelta
+                # 計算應該提醒的時間點
+                reminder_time = item.date_time - timedelta(minutes=item.notify_minutes_before)
+
+                # 判定是否達到通知時間（且行程開始時間未過去超過 15 分鐘，以防過期推播）
+                if current_time >= reminder_time and current_time <= item.date_time + timedelta(minutes=15):
+                    target_id = None
+                    if item.group_id:
+                        target_id = item.group_id
+                    else:
+                        try:
+                            target_id = item.user.line_profile.line_user_id
+                        except AttributeError:
+                            print(f"⚠️ 行程 #{item.pk} 找不到綁定的 LINE 用戶，無法發送通知。")
+                            continue
+
+                    if not target_id:
+                        continue
+
+                    # 驗證是否為符合 LINE 格式的有效 ID（避免開發或測試環境中的 UUID 等模擬 ID 導致 LINE API 報錯）
+                    import re
+                    if not re.match(r"^[UCR][0-9a-fA-F]{32}$", target_id):
+                        print(f"⚠️ 行程 #{item.pk} 的目標 ID [{target_id}] 格式不符合 LINE 規範，自動忽略並標記為已處理。")
+                        item.is_notified = True
+                        item.save()
+                        continue
+
+                    # 讀取解密資料
+                    title_dec = item.title
+                    location_dec = item.location
+                    notes_dec = item.notes
+
+                    # 取得發起人的 LINE 顯示名稱
+                    try:
+                        creator_name = item.user.line_profile.line_display_name or item.user.username
+                    except AttributeError:
+                        creator_name = item.user.username
+
+                    msg_content = (
+                        f"🔔 行程提醒\n"
+                        f"================\n"
+                        f"【{title_dec}】將於 {localtime(item.date_time).strftime('%Y-%m-%d %H:%M')} 開始！\n"
+                        f"📍 地點：{location_dec}\n"
+                        f"📝 備註：{notes_dec or '無'}"
+                    )
+
+                    if item.group_id:
+                        msg_content += f"\n\n(由 {creator_name} 發起)"
+
+                    try:
+                        api_instance.push_message_with_http_info(
+                            PushMessageRequest(
+                                to=target_id, messages=[TextMessage(text=msg_content)]
+                            )
+                        )
+                        # 標記為已通知
+                        item.is_notified = True
+                        item.save()
+                        print(f"✅ 已成功推播行程 #{item.pk} 通知至 {target_id}")
+                    except Exception as e:
+                        print(f"❌ 推播行程 #{item.pk} 通知失敗: {e}")
+
+        print("✅ [排程任務] 行程提醒檢查完成！")
+    except Exception as e:
+        print(f"❌ [排程任務] 執行行程提醒檢查時發生錯誤: {e}")
+
+
 # def test_job():
 #     print("🤖 測試排程執行中... 滴答！(每 5 秒觸發)")
 
@@ -38,6 +130,15 @@ class Command(BaseCommand):
                 update_prices_job,  # * 直接呼叫外面的函式
                 trigger=CronTrigger(day_of_week="mon-fri", hour=14, minute=30),
                 id="daily_stock_update",
+                max_instances=1,
+                replace_existing=True,
+            )
+
+            #! 新增：行程提醒排程，每 1 分鐘檢查一次
+            scheduler.add_job(
+                check_itinerary_reminders_job,
+                trigger=CronTrigger(minute="*"),
+                id="itinerary_reminder_check",
                 max_instances=1,
                 replace_existing=True,
             )

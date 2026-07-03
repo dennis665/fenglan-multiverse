@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-18 10:34+0800\n"
+"POT-Creation-Date: 2026-07-03 16:22+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -39,8 +39,9 @@ msgstr ""
 
 #: .\bionic_chat\models.py:17 .\core\models.py:9 .\finance\models.py:38
 #: .\finance\models.py:76 .\finance\models.py:149 .\invest\models.py:58
-#: .\invest\models.py:93 .\sh_recognition\models.py:41
-#: .\study_brain\models.py:11 .\transfer_system\models.py:16
+#: .\invest\models.py:93 .\line_manager\models.py:17
+#: .\line_manager\models.py:61 .\sh_recognition\models.py:41
+#: .\study_brain\models.py:11 .\transfer_system\models.py:17
 #: .\tube_hub\models.py:20 .\tube_hub\models.py:60
 msgid "建立時間"
 msgstr ""
@@ -53,15 +54,15 @@ msgstr ""
 msgid "伺服器已收到"
 msgstr ""
 
-#: .\config\settings.py:304
+#: .\config\settings.py:321
 msgid "繁體中文"
 msgstr ""
 
-#: .\config\settings.py:305
+#: .\config\settings.py:322
 msgid "英文"
 msgstr ""
 
-#: .\config\settings.py:306
+#: .\config\settings.py:323
 msgid "日文"
 msgstr ""
 
@@ -198,7 +199,7 @@ msgid "任務執行期間發生異常的追蹤紀錄 (若有的話)。"
 msgstr ""
 
 #: .\core\models.py:10 .\finance\models.py:12 .\invest\models.py:37
-#: .\notices\models.py:57
+#: .\line_manager\models.py:62 .\notices\models.py:57
 msgid "更新時間"
 msgstr ""
 
@@ -287,7 +288,8 @@ msgid "財務與商城"
 msgstr ""
 
 #: .\finance\models.py:9 .\finance\models.py:31 .\finance\models.py:60
-#: .\finance\models.py:133 .\study_brain\models.py:67
+#: .\finance\models.py:133 .\line_manager\models.py:11
+#: .\line_manager\models.py:78 .\study_brain\models.py:67
 #: .\study_brain\models.py:83 .\users\models.py:16
 msgid "使用者"
 msgstr ""
@@ -914,6 +916,90 @@ msgstr ""
 msgid "股"
 msgstr ""
 
+#: .\line_manager\models.py:13
+msgid "LINE 用戶識別碼"
+msgstr ""
+
+#: .\line_manager\models.py:15
+msgid "LINE 顯示名稱"
+msgstr ""
+
+#: .\line_manager\models.py:20 .\line_manager\models.py:21
+msgid "LINE 個人檔案"
+msgstr ""
+
+#: .\line_manager\models.py:31
+msgid "吃飯聚餐"
+msgstr ""
+
+#: .\line_manager\models.py:32
+msgid "逛街展覽"
+msgstr ""
+
+#: .\line_manager\models.py:33
+msgid "運動健身"
+msgstr ""
+
+#: .\line_manager\models.py:34
+msgid "旅遊踏青"
+msgstr ""
+
+#: .\line_manager\models.py:35
+msgid "其他活動"
+msgstr ""
+
+#: .\line_manager\models.py:39
+msgid "發起人"
+msgstr ""
+
+#: .\line_manager\models.py:44
+msgid "LINE 群組識別碼"
+msgstr ""
+
+#: .\line_manager\models.py:48
+msgid "行程標題"
+msgstr ""
+
+#: .\line_manager\models.py:49
+msgid "活動地點"
+msgstr ""
+
+#: .\line_manager\models.py:50
+msgid "備註說明"
+msgstr ""
+
+#: .\line_manager\models.py:54
+msgid "活動類型"
+msgstr ""
+
+#: .\line_manager\models.py:56
+msgid "行程時間"
+msgstr ""
+
+#: .\line_manager\models.py:58
+msgid "提前通知時間(分鐘)"
+msgstr ""
+
+#: .\line_manager\models.py:59
+msgid "是否已發送通知"
+msgstr ""
+
+#: .\line_manager\models.py:65 .\line_manager\models.py:66
+msgid "行程管理"
+msgstr ""
+
+#: .\line_manager\models.py:80
+msgid "LINE 群組 ID"
+msgstr ""
+
+#: .\line_manager\models.py:81
+msgid "加入時間"
+msgstr ""
+
+#: .\line_manager\models.py:84 .\line_manager\models.py:85
+msgid "群組成員關係"
+msgstr ""
+
 #: .\media_studio\forms.py:27
 msgid "選擇圖片"
 msgstr ""
@@ -1440,6 +1526,7 @@ msgstr ""
 #: .\templates\account\email_confirm.html:49 .\templates\account\login.html:60
 #: .\templates\account\logout.html:39 .\templates\account\signup.html:68
 #: .\templates\account\verification_sent.html:39
+#: .\templates\socialaccount\connections.html:58
 msgid "Back to Home"
 msgstr "返回首頁"
 
@@ -1478,7 +1565,9 @@ msgid "您確定要登出 <strong>CSI Portal</strong> 嗎？"
 msgstr ""
 
 #: .\templates\account\signup.html:6 .\templates\account\signup.html:15
-#: .\templates\account\signup.html:48
+#: .\templates\account\signup.html:48 .\templates\socialaccount\signup.html:5
+#: .\templates\socialaccount\signup.html:18
+#: .\templates\socialaccount\signup.html:38
 msgid "Sign Up"
 msgstr "註冊"
 
@@ -1945,124 +2034,6 @@ msgstr "注意：請妥善保存此號碼以供日後查詢。"
 #: .\templates\core\ticket_success.html:75
 msgid "Serial number copied to clipboard"
 msgstr "發文字號已複製到剪貼簿"
-
-#: .\templates\core\tigf_dashboard.html:4
-msgid "Data Verification Dashboard"
-msgstr "數據核對儀表板"
-
-#: .\templates\core\tigf_dashboard.html:12
-msgid "Report File"
-msgstr "報告檔案"
-
-#: .\templates\core\tigf_dashboard.html:18
-msgid "Template File"
-msgstr "範本檔案"
-
-#: .\templates\core\tigf_dashboard.html:24
-msgid "Database File"
-msgstr "資料庫檔案"
-
-#: .\templates\core\tigf_dashboard.html:41
-msgid "Mapping Check"
-msgstr "映射檢查"
-
-#: .\templates\core\tigf_dashboard.html:44
-msgid "Comparison Results"
-msgstr "比對結果"
-
-#: .\templates\core\tigf_dashboard.html:63
-#: .\templates\core\tigf_dashboard.html:188
-msgid "No files detected"
-msgstr "未偵測到檔案"
-
-#: .\templates\core\tigf_dashboard.html:75
-msgid "比對規則說明與設定"
-msgstr ""
-
-#: .\templates\core\tigf_dashboard.html:78
-#: .\templates\core\tigf_dashboard.html:193
-msgid "Start Data Comparison"
-msgstr "開始數據比對"
-
-#: .\templates\core\tigf_dashboard.html:86
-msgid "ID"
-msgstr "識別碼"
-
-#: .\templates\core\tigf_dashboard.html:87
-#: .\templates\core\tigf_dashboard.html:189
-msgid "Report"
-msgstr "報告"
-
-#: .\templates\core\tigf_dashboard.html:88
-msgid "Template"
-msgstr "範本"
-
-#: .\templates\core\tigf_dashboard.html:89
-msgid "Database"
-msgstr "資料庫"
-
-#: .\templates\core\tigf_dashboard.html:102
-#, python-format
-msgid "編號 %(fid)s 的差異數：%(count)s"
-msgstr ""
-
-#: .\templates\core\tigf_dashboard.html:103
-msgid "Download CSV"
-msgstr "下載 CSV"
-
-#: .\templates\core\tigf_dashboard.html:106
-#: .\templates\core\tigf_dashboard.html:194
-msgid "No comparison data"
-msgstr "還未比對"
-
-#: .\templates\core\tigf_dashboard.html:122
-msgid "資料比對規則說明與設定"
-msgstr ""
-
-#: .\templates\core\tigf_dashboard.html:174
-msgid "關閉並儲存設定"
-msgstr ""
-
-#: .\templates\core\tigf_dashboard.html:187
-msgid "Upload Error"
-msgstr "上傳錯誤"
-
-#: .\templates\core\tigf_dashboard.html:190
-msgid "Company"
-msgstr "公司"
-
-#: .\templates\core\tigf_dashboard.html:191
-msgid "Comparing..."
-msgstr "比對中..."
-
-#: .\templates\core\tigf_dashboard.html:192
-msgid "Comparison failed, please re-upload modified files"
-msgstr "比對失敗，請重新上傳修改後的檔案"
-
-#: .\templates\core\tigf_dashboard.html:195
-msgid "Download Difference List"
-msgstr "下載差異清單"
-
-#: .\templates\core\tigf_dashboard.html:196
-msgid "Data Consistent"
-msgstr "數據一致"
-
-#: .\templates\core\tigf_dashboard.html:197
-#, python-brace-format
-msgid "Detected {count} cell differences"
-msgstr "偵測到 {count} 處單元格差異"
-
-#: .\templates\core\tigf_dashboard.html:198
-msgid "Content matches database perfectly"
-msgstr "內容與資料庫完全吻合"
-
-#: .\templates\core\tigf_dashboard.html:199
-msgid "Has Differences"
-msgstr "存在差異"
-
-#: .\templates\core\tigf_dashboard.html:200
-msgid "Fully Matched"
-msgstr "完全匹配"
 
 #: .\templates\csi_info\csi_info.html:11
 msgid "CSI 企業內部資訊"
@@ -2871,7 +2842,7 @@ msgstr ""
 msgid "版本"
 msgstr ""
 
-#: .\templates\sh_recognition\index.html:71 .\transfer_system\models.py:43
+#: .\templates\sh_recognition\index.html:71 .\transfer_system\models.py:40
 msgid "狀態"
 msgstr ""
 
@@ -3020,6 +2991,30 @@ msgstr ""
 msgid "查無紀錄，可嘗試清空日期查詢全部"
 msgstr ""
 
+#: .\templates\socialaccount\connections.html:5
+msgid "Account Connections"
+msgstr ""
+
+#: .\templates\socialaccount\connections.html:18
+msgid "Social Accounts"
+msgstr ""
+
+#: .\templates\socialaccount\connections.html:21
+msgid "您目前已連結以下第三方帳戶，可用於登入系統："
+msgstr ""
+
+#: .\templates\socialaccount\connections.html:40
+msgid "Remove"
+msgstr ""
+
+#: .\templates\socialaccount\connections.html:45
+msgid "目前沒有連結任何第三方帳號。"
+msgstr ""
+
+#: .\templates\socialaccount\connections.html:50
+msgid "連結其他帳號"
+msgstr ""
+
 #: .\templates\socialaccount\login.html:21
 msgid ""
 "\n"
@@ -3039,6 +3034,21 @@ msgstr "取消並返回登入頁面"
 #: .\templates\socialaccount\login.html:42
 msgid "Your connection is encrypted and secure."
 msgstr "您的連線已加密且安全。"
+
+#: .\templates\socialaccount\signup.html:21
+#, python-format
+msgid ""
+"\n"
+"                        您即將使用 %(provider_name)s 帳號建立新的 CSI Portal "
+"帳戶。請確認以下註冊資訊：\n"
+"                        "
+msgstr ""
+
+#: .\templates\socialaccount\signup.html:45
+#, fuzzy
+#| msgid "Cancel and return to login page"
+msgid "Cancel and return to home"
+msgstr "取消並返回登入頁面"
 
 # * 針對教材上傳儀表板與 AI 學習室介面的繁體中文翻譯檔
 #: .\templates\study_brain\dashboard.html:4
@@ -3247,6 +3257,272 @@ msgstr "測驗進度"
 msgid "Submit Answers"
 msgstr "提交答案"
 
+#: .\templates\tigf\ics_cleaner_dashboard.html:4
+msgid "ICS Sheet 結構淨化工具"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:13
+msgid "ICS 工作表結構淨化工具"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:14
+msgid ""
+"自動清除除了 config、rowNumber 以及 config 內定義的所有 Tag 名稱以外的冗餘工"
+"作表"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:17
+#: .\templates\tigf\ics_merger_dashboard.html:17
+#: .\templates\tigf\ics_validator_dashboard.html:17
+msgid "返回數據比對儀表板"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:27
+msgid "上傳待整理之 ICS 原始檔案"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:32
+msgid "系統將在記憶體中解析白名單工作表"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:41
+#: .\templates\tigf\ics_cleaner_dashboard.html:74
+msgid "執行冗餘工作表全面清除"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:49
+msgid "執行狀態監控日誌"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:52
+#: .\templates\tigf\ics_cleaner_dashboard.html:75
+msgid "等待使用者上傳單據..."
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:56
+msgid "結構過濾完成！"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:57
+msgid "已成功移除非白名單中的工作表共"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:57
+msgid "個。"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:59
+msgid "下載淨化後的 Excel 報表"
+msgstr ""
+
+#: .\templates\tigf\ics_cleaner_dashboard.html:73
+msgid "正在動態提取白名單標籤並過濾結構..."
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:4
+msgid "ICS Excel Report Merger"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:13
+msgid "ICS Excel 報表合併系統"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:14
+msgid "將副檔內的所有工作表及其原始格式樣式，往後串合至主檔中"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:27
+msgid "上傳主 Excel 檔案"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:32
+msgid "此檔案將作為合併後的基底表"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:38
+msgid "上傳副 Excel 檔案"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:43
+msgid "此檔內的所有工作表將會被完整抽出來併入主檔"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:52
+#: .\templates\tigf\ics_merger_dashboard.html:93
+msgid "執行 ICS 報表樣式無損合併"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:60
+msgid "合併技術與規範說明"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:76
+msgid "合併作業已順利完成！"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:78
+msgid "下載已合併的 Excel 報表"
+msgstr ""
+
+#: .\templates\tigf\ics_merger_dashboard.html:92
+msgid "正在讀取並轉移樣式格式中..."
+msgstr ""
+
+#: .\templates\tigf\ics_validator_dashboard.html:4
+msgid "ICS 指標雙向交叉驗證系統"
+msgstr ""
+
+#: .\templates\tigf\ics_validator_dashboard.html:13
+msgid "ICS 報表指標交叉驗證系統"
+msgstr ""
+
+#: .\templates\tigf\ics_validator_dashboard.html:14
+msgid "檢核 config 內各表行寬、Row Type 與 rowNumber 的資料關聯性與完整性"
+msgstr ""
+
+#: .\templates\tigf\ics_validator_dashboard.html:27
+msgid "上傳待驗證之已合併報表"
+msgstr ""
+
+#: .\templates\tigf\ics_validator_dashboard.html:32
+msgid "系統將自動解析 config、rowNumber 與所有子表"
+msgstr ""
+
+#: .\templates\tigf\ics_validator_dashboard.html:41
+#: .\templates\tigf\ics_validator_dashboard.html:66
+msgid "開始執行跨表關聯安全性驗證"
+msgstr ""
+
+#: .\templates\tigf\ics_validator_dashboard.html:49
+msgid "驗證回報與錯誤日誌清單"
+msgstr ""
+
+#: .\templates\tigf\ics_validator_dashboard.html:52
+msgid "等待活頁簿上傳以進行指標矩陣掃描..."
+msgstr ""
+
+#: .\templates\tigf\ics_validator_dashboard.html:65
+msgid "正在執行關聯比對、區塊空值檢索中..."
+msgstr ""
+
+#: .\templates\tigf\tigf_dashboard.html:4
+msgid "Data Verification Dashboard"
+msgstr "數據核對儀表板"
+
+#: .\templates\tigf\tigf_dashboard.html:26
+msgid "Report File"
+msgstr "報告檔案"
+
+#: .\templates\tigf\tigf_dashboard.html:32
+msgid "Template File"
+msgstr "範本檔案"
+
+#: .\templates\tigf\tigf_dashboard.html:38
+msgid "Database File"
+msgstr "資料庫檔案"
+
+#: .\templates\tigf\tigf_dashboard.html:55
+msgid "Mapping Check"
+msgstr "映射檢查"
+
+#: .\templates\tigf\tigf_dashboard.html:58
+msgid "Comparison Results"
+msgstr "比對結果"
+
+#: .\templates\tigf\tigf_dashboard.html:77
+#: .\templates\tigf\tigf_dashboard.html:202
+msgid "No files detected"
+msgstr "未偵測到檔案"
+
+#: .\templates\tigf\tigf_dashboard.html:89
+msgid "比對規則說明與設定"
+msgstr ""
+
+#: .\templates\tigf\tigf_dashboard.html:92
+#: .\templates\tigf\tigf_dashboard.html:207
+msgid "Start Data Comparison"
+msgstr "開始數據比對"
+
+#: .\templates\tigf\tigf_dashboard.html:100
+msgid "ID"
+msgstr "識別碼"
+
+#: .\templates\tigf\tigf_dashboard.html:101
+#: .\templates\tigf\tigf_dashboard.html:203
+msgid "Report"
+msgstr "報告"
+
+#: .\templates\tigf\tigf_dashboard.html:102
+msgid "Template"
+msgstr "範本"
+
+#: .\templates\tigf\tigf_dashboard.html:103
+msgid "Database"
+msgstr "資料庫"
+
+#: .\templates\tigf\tigf_dashboard.html:116
+#, python-format
+msgid "編號 %(fid)s 的差異數：%(count)s"
+msgstr ""
+
+#: .\templates\tigf\tigf_dashboard.html:117
+msgid "Download CSV"
+msgstr "下載 CSV"
+
+#: .\templates\tigf\tigf_dashboard.html:120
+#: .\templates\tigf\tigf_dashboard.html:208
+msgid "No comparison data"
+msgstr "還未比對"
+
+#: .\templates\tigf\tigf_dashboard.html:136
+msgid "資料比對規則說明與設定"
+msgstr ""
+
+#: .\templates\tigf\tigf_dashboard.html:188
+msgid "關閉並儲存設定"
+msgstr ""
+
+#: .\templates\tigf\tigf_dashboard.html:201
+msgid "Upload Error"
+msgstr "上傳錯誤"
+
+#: .\templates\tigf\tigf_dashboard.html:204
+msgid "Company"
+msgstr "公司"
+
+#: .\templates\tigf\tigf_dashboard.html:205
+msgid "Comparing..."
+msgstr "比對中..."
+
+#: .\templates\tigf\tigf_dashboard.html:206
+msgid "Comparison failed, please re-upload modified files"
+msgstr "比對失敗，請重新上傳修改後的檔案"
+
+#: .\templates\tigf\tigf_dashboard.html:209
+msgid "Download Difference List"
+msgstr "下載差異清單"
+
+#: .\templates\tigf\tigf_dashboard.html:210
+msgid "Data Consistent"
+msgstr "數據一致"
+
+#: .\templates\tigf\tigf_dashboard.html:211
+#, python-brace-format
+msgid "Detected {count} cell differences"
+msgstr "偵測到 {count} 處單元格差異"
+
+#: .\templates\tigf\tigf_dashboard.html:212
+msgid "Content matches database perfectly"
+msgstr "內容與資料庫完全吻合"
+
+#: .\templates\tigf\tigf_dashboard.html:213
+msgid "Has Differences"
+msgstr "存在差異"
+
+#: .\templates\tigf\tigf_dashboard.html:214
+msgid "Fully Matched"
+msgstr "完全匹配"
+
 #: .\templates\transfer_system\transfer_create.html:10
 msgid "發起轉移"
 msgstr ""
@@ -3284,22 +3560,22 @@ msgid "發起新轉移"
 msgstr ""
 
 #: .\templates\transfer_system\transfer_history.html:20
-#: .\transfer_system\models.py:45
+#: .\transfer_system\models.py:42
 msgid "發起時間"
 msgstr ""
 
 #: .\templates\transfer_system\transfer_history.html:21
-#: .\transfer_system\models.py:11
+#: .\transfer_system\models.py:12
 msgid "物品名稱"
 msgstr ""
 
 #: .\templates\transfer_system\transfer_history.html:22
-#: .\transfer_system\models.py:37
+#: .\transfer_system\models.py:32
 msgid "轉出者"
 msgstr ""
 
 #: .\templates\transfer_system\transfer_history.html:23
-#: .\transfer_system\models.py:40
+#: .\transfer_system\models.py:35
 msgid "接收者"
 msgstr ""
 
@@ -3312,22 +3588,22 @@ msgid "管理操作"
 msgstr ""
 
 #: .\templates\transfer_system\transfer_history.html:41
-#: .\transfer_system\models.py:30
+#: .\transfer_system\admin.py:29
 msgid "待處理"
 msgstr ""
 
 #: .\templates\transfer_system\transfer_history.html:43
-#: .\transfer_system\models.py:31
+#: .\transfer_system\admin.py:30
 msgid "已接受"
 msgstr ""
 
 #: .\templates\transfer_system\transfer_history.html:45
-#: .\transfer_system\models.py:32
+#: .\transfer_system\admin.py:31
 msgid "已拒絕"
 msgstr ""
 
 #: .\templates\transfer_system\transfer_history.html:47
-#: .\transfer_system\models.py:33
+#: .\transfer_system\admin.py:32
 msgid "已取消"
 msgstr ""
 
@@ -3555,41 +3831,65 @@ msgstr ""
 msgid "安定基金"
 msgstr ""
 
-#: .\transfer_system\admin.py:34
-msgid "請上傳正確的 CSV 檔案"
+#: .\transfer_system\admin.py:46
+msgid "工作流狀態"
 msgstr ""
 
-#: .\transfer_system\admin.py:51
-msgid "CSV 匯入成功"
+#: .\transfer_system\admin.py:61
+msgid "核准轉移"
+msgstr ""
+
+#: .\transfer_system\admin.py:62
+msgid "駁回請求"
+msgstr ""
+
+#: .\transfer_system\admin.py:63
+msgid "強制取消"
+msgstr ""
+
+#: .\transfer_system\admin.py:80
+msgid "流程已結束"
+msgstr ""
+
+#: .\transfer_system\admin.py:82
+msgid "FSM 自動化操作"
+msgstr ""
+
+#: .\transfer_system\admin.py:104
+msgid "工作流狀態轉換成功。"
+msgstr ""
+
+#: .\transfer_system\admin.py:106
+msgid "轉換失敗：當前狀態不允許此操作。"
 msgstr ""
 
 #: .\transfer_system\apps.py:9
 msgid "物品轉移系統"
 msgstr ""
 
-#: .\transfer_system\models.py:13 .\tube_hub\models.py:14
+#: .\transfer_system\models.py:14 .\tube_hub\models.py:14
 #: .\tube_hub\models.py:39
 msgid "擁有者"
 msgstr ""
 
-#: .\transfer_system\models.py:15
+#: .\transfer_system\models.py:16
 msgid "物品描述"
 msgstr ""
 
-#: .\transfer_system\models.py:19 .\transfer_system\models.py:20
+#: .\transfer_system\models.py:20 .\transfer_system\models.py:21
 msgid "物品"
 msgstr ""
 
-#: .\transfer_system\models.py:35
+#: .\transfer_system\models.py:30
 msgid "轉移物品"
 msgstr ""
 
-#: .\transfer_system\models.py:48 .\transfer_system\models.py:49
+#: .\transfer_system\models.py:45 .\transfer_system\models.py:46
 msgid "轉移紀錄"
 msgstr ""
 
-#: .\transfer_system\views.py:17 .\transfer_system\views.py:47
-#: .\transfer_system\views.py:65
+#: .\transfer_system\views.py:17 .\transfer_system\views.py:54
+#: .\transfer_system\views.py:72
 msgid "僅限管理員操作"
 msgstr ""
 
@@ -3601,15 +3901,15 @@ msgstr ""
 msgid "轉移請求已建立"
 msgstr ""
 
-#: .\transfer_system\views.py:72
+#: .\transfer_system\views.py:79
 msgid "已成功取消該筆轉移請求"
 msgstr ""
 
-#: .\transfer_system\views.py:92
+#: .\transfer_system\views.py:99
 msgid "已接受物品轉移"
 msgstr ""
 
-#: .\transfer_system\views.py:96
+#: .\transfer_system\views.py:103
 msgid "已拒絕物品轉移"
 msgstr ""
 

@@ -4,7 +4,7 @@
 
 這是一個基於 **Django 6.0.x** 與 **MySQL 8.x** 建立的多功能整合入口網站系統（CSI Portal），具備豐富的商業管理與 AI 應用模組。專案支援 **Google OAuth 2.0** 登入、**WebSocket (Daphne)** 即時通訊與 **Docker** 容器化部署，並結合了多種先進的機器學習與雲端 AI 引擎。
 
-*   **最新版本**：`v1.15.1`
+*   **最新版本**：`v1.16.0`
 *   **更新摘要**：[點此查看完整變更歷程 (CHANGELOG.md)](CHANGELOG.md)
 
 ---
@@ -45,7 +45,7 @@ graph TD
     A --> D[理財與學習 invest, study_brain]
     A --> E[視覺與辨識 vision_brain, sh_recognition]
     A --> F[多媒體與編輯 media_studio, tube_hub]
-    A --> G[對話與遊戲 bionic_chat, games]
+    A --> G[對話、遊戲與 LINE bionic_chat, games, line_manager]
 ```
 
 ### 1. 核心與權限管理
@@ -69,9 +69,10 @@ graph TD
 *   **[media_studio](file:///d:/SI1403/dennis/csi_server/media_studio/)**：多媒體剪輯工作室。支援圖片無損壓縮、WEBP 轉檔、AI 背景去背（整合 `rembg`），以及多段影片的時間軸裁切與 libx264/AAC 轉碼拼接。
 *   **[tube_hub](file:///d:/SI1403/dennis/csi_server/tube_hub/)**：YouTube 影音下載工具。利用 `yt-dlp` 下載影片或 KTV 音訊檔，並透過 `youtube-transcript-api` 自動抓取中、英、日字幕，提供線上隨堂學習筆記功能。
 
-### 6. AI 對話與遊戲
+### 6. AI 對話、遊戲與 LINE 整合
 *   **[bionic_chat](file:///d:/SI1403/dennis/csi_server/bionic_chat/)**：虛擬人物語音對話系統。以 `llama-cpp-python` 載入本地 LLM 模型，透過 SSE (Server-Sent Events) 串流輸出文字，並於斷句時自動將繁體中文回覆翻譯並生成 `edge-tts` 語音音檔串流播放。
 *   **[games](file:///d:/SI1403/dennis/csi_server/games/)**：綜合網頁遊戲中心與 Godot API 接口。提供「倖存者生存」（Vampire Survivor 網頁版/ Godot Token 驗證存檔）、「虛擬人生」（大富翁地圖事件）以及「魔塔 RPG」（五層地圖、存檔資料序列化與局外金幣升級）三款遊戲。
+*   **[line_manager](file:///d:/SI1403/dennis/csi_server/line_manager/)**：LINE 官方帳號行程管理與隱私防護系統。支援 Google 帳戶合併綁定、歷史行程自動移轉、`GroupMembership` 成員關係動態追蹤（群組行程自動同步共享）、LINE LIFF 網頁端行程面板，且核心行程資料欄位在資料庫層進行對稱加密，以防後台窺探。
 
 ---
 
@@ -80,6 +81,8 @@ graph TD
 *   **Web 核心**：Django 6.0.5, Gunicorn 26.0.0, WhiteNoise 6.12.0
 *   **即時通訊**：Daphne 4.2.1, Django Channels 4.3.2
 *   **資料庫連接**：MySQLClient 2.2.8, PyODBC 5.3.0
+*   **LINE 整合**：LINE Messaging API SDK (line-bot-sdk 3.7.0)
+*   **資料庫加密**：django-encrypted-model-fields 0.6.5 (對稱式 Fernet 加密)
 *   **AI 與 OCR**：
     *   Google GenAI SDK (google-genai 2.6.0)
     *   YOLOv11 Object Detection (ultralytics 8.4.54)

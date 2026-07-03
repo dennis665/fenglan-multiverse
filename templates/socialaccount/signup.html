@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}{% trans "Sign Up" %} - CSI Portal{% endblock %}
+
+{% block content %}
+{# --- 第三方登入初次註冊確認頁面 --- #}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-plus fa-3x text-primary" style="filter: drop-shadow(0 0 10px rgba(13, 110, 253, 0.2));"></i>
+                    </div>
+
+                    <h2 class="text-center fw-bold mb-3">{% trans "Sign Up" %}</h2>
+
+                    <p class="text-muted text-center mb-4">
+                        {% blocktrans with provider_name=account.get_provider.name %}
+                        您即將使用 {{ provider_name }} 帳號建立新的 CSI Portal 帳戶。請確認以下註冊資訊：
+                        {% endblocktrans %}
+                    </p>
+
+                    <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
+                        {% csrf_token %}
+                        
+                        {# 使用 crispy 渲染表單，維持統一的 Bootstrap 5 輸入框樣式 #}
+                        {{ form|crispy }}
+                        
+                        {% if redirect_field_value %}
+                        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                        {% endif %}
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm py-2">
+                                <i class="fas fa-check me-2"></i>{% trans "Sign Up" %}
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a href="/" class="text-decoration-none text-muted small">
+                            <i class="fas fa-chevron-left me-1"></i>{% trans "Cancel and return to home" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

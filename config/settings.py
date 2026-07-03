@@ -48,6 +48,12 @@ HASH_KEY = env("HASH_KEY")
 HASH_IV = env("HASH_IV")
 LLM_MODEL_PATH = env("LLM_MODEL_PATH")
 
+#! LINE Bot 與欄位加密設定
+LINE_CHANNEL_SECRET = env("LINE_CHANNEL_SECRET")
+LINE_CHANNEL_ACCESS_TOKEN = env("LINE_CHANNEL_ACCESS_TOKEN")
+LINE_LIFF_ID = env("LINE_LIFF_ID")
+FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY")
+
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
@@ -86,6 +92,7 @@ THIRD_PARTY_APPS = [
     "channels",
     "rest_framework",
     "rest_framework.authtoken",
+    "encrypted_model_fields",  # * 欄位加密套件
 ]
 
 LOCAL_APPS = [
@@ -103,6 +110,7 @@ LOCAL_APPS = [
     "bionic_chat",
     "sh_recognition",
     "transfer_system",
+    "line_manager",  # * LINE 行程管理 app
 ]
 
 INSTALLED_APPS = WEBSOCKET_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

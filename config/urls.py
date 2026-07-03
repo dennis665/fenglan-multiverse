@@ -123,6 +123,8 @@ urlpatterns = [
     path("sh_recognition/", include("sh_recognition.urls")),
     #! 轉移系統
     path("transfer/", include("transfer_system.urls")),
+    #! LINE 行程管理
+    path("line/", include("line_manager.urls")),
     # ? ======================================================================
 ]
 

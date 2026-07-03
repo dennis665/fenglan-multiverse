@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增行程 - 行程小幫手</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        .btn-line {
+            background-color: #1DB446;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-line:hover {
+            background-color: #158b32;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #1DB446;
+            box-shadow: 0 0 0 0.2rem rgba(29, 180, 70, 0.25);
+        }
+    </style>
+</head>
+<body class="py-4">
+    <div class="container" style="max-width: 500px;">
+        <div class="glass-card p-4">
+            <h4 class="fw-bold mb-4 text-center text-success"><i class="fa-solid fa-calendar-plus me-2"></i>安排新行程</h4>
+            
+            <form id="create-form">
+                <!-- 標題 -->
+                <div class="mb-3">
+                    <label for="title" class="form-label fw-bold">行程名稱 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="title" placeholder="如：與好友吃拉麵、密室逃脫" required>
+                </div>
+
+                <!-- 活動類型 -->
+                <div class="mb-3">
+                    <label for="activity_type" class="form-label fw-bold">活動類型</label>
+                    <select class="form-select" id="activity_type">
+                        <option value="EAT">🍴 吃飯聚餐</option>
+                        <option value="EXHIBIT">🎨 逛街展覽</option>
+                        <option value="SPORT">🏸 運動健身</option>
+                        <option value="TRAVEL">🚗 旅遊踏青</option>
+                        <option value="OTHER" selected>🌟 其他活動</option>
+                    </select>
+                </div>
+
+                <!-- 時間 -->
+                <div class="mb-3">
+                    <label for="date_time" class="form-label fw-bold">行程時間 <span class="text-danger">*</span></label>
+                    <input type="datetime-local" class="form-control" id="date_time" required>
+                </div>
+
+                <!-- 地點 -->
+                <div class="mb-3">
+                    <label for="location" class="form-label fw-bold">活動地點</label>
+                    <input type="text" class="form-control" id="location" placeholder="如：捷運中山站、台北小巨蛋">
+                </div>
+
+                <!-- 提前通知時間 -->
+                <div class="mb-3">
+                    <label for="notify_minutes_before" class="form-label fw-bold">提前通知時間</label>
+                    <select class="form-select" id="notify_minutes_before">
+                        <option value="0">行程開始時通知</option>
+                        <option value="10">10 分鐘前</option>
+                        <option value="30">30 分鐘前</option>
+                        <option value="60">1 小時前</option>
+                        <option value="120">2 小時前</option>
+                        <option value="180">3 小時前</option>
+                        <option value="360">6 小時前</option>
+                        <option value="720">12 小時前</option>
+                        <option value="1440" selected>1 天前 (24 小時)</option>
+                        <option value="2880">2 天前</option>
+                        <option value="4320">3 天前</option>
+                        <option value="10080">1 週前</option>
+                    </select>
+                </div>
+
+                <!-- 備註說明 -->
+                <div class="mb-4">
+                    <label for="notes" class="form-label fw-bold">備註說明</label>
+                    <textarea class="form-control" id="notes" rows="3" placeholder="如：記得帶錢包、每人預算 500 元..."></option></textarea>
+                </div>
+
+                <!-- 按鈕 -->
+                <div class="d-flex gap-3">
+                    <button type="button" class="btn btn-outline-secondary w-50" style="border-radius: 50px;" onclick="history.back()">取消</button>
+                    <button type="submit" class="btn btn-line w-50">確認排定</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let liffId = "{{ liff_id }}";
+        let userAccessToken = null;
+        let lineContext = null;
+
+        // 從 URL 抓取 groupId
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlGroupId = urlParams.get("groupId");
+
+        document.addEventListener("DOMContentLoaded", function() {
+            initLiff();
+            
+            // 設定日期時間預設為當前時間的一小時後
+            const dtInput = document.getElementById("date_time");
+            const now = new Date();
+            now.setHours(now.getHours() + 1);
+            now.setMinutes(0);
+            
+            // 轉為 local datetime-local 格式 (YYYY-MM-DDTHH:MM)
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            dtInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        });
+
+        function initLiff() {
+            liff.init({ liffId: liffId })
+                .then(() => {
+                    if (liff.isLoggedIn()) {
+                        userAccessToken = liff.getAccessToken();
+                        lineContext = liff.getContext();
+                    }
+                })
+                .catch((err) => {
+                    console.error("LIFF failed to initialize", err);
+                });
+        }
+
+        document.getElementById("create-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            if (!userAccessToken) {
+                alert("LINE 帳號未授權，無法新增");
+                return;
+            }
+
+            const title = document.getElementById("title").value.trim();
+            const activity_type = document.getElementById("activity_type").value;
+            const date_time = document.getElementById("date_time").value;
+            const location = document.getElementById("location").value.trim();
+            const notify_minutes_before = document.getElementById("notify_minutes_before").value;
+            const notes = document.getElementById("notes").value.trim();
+
+            const groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+
+            fetch("/line/api/itineraries/create/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    group_id: groupId,
+                    title: title,
+                    activity_type: activity_type,
+                    date_time: date_time,
+                    location: location,
+                    notify_minutes_before: notify_minutes_before,
+                    notes: notes
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    // 新增成功，返回清單頁
+                    let listUrl = `/line/liff/`;
+                    if (groupId) {
+                        listUrl += `?groupId=${groupId}`;
+                    }
+                    window.location.href = listUrl;
+                } else {
+                    alert("建立失敗: " + data.error);
+                }
+            })
+            .catch(err => {
+                console.error("Submit error:", err);
+                alert("伺服器連線失敗");
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}{% trans "Account Connections" %} - CSI Portal{% endblock %}
+
+{% block content %}
+{# --- 第三方帳號關聯/綁定管理頁面 --- #}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-link fa-3x text-success" style="filter: drop-shadow(0 0 10px rgba(25, 135, 84, 0.2));"></i>
+                    </div>
+
+                    <h2 class="text-center fw-bold mb-4">{% trans "Social Accounts" %}</h2>
+
+                    {% if form.accounts %}
+                    <p class="text-muted mb-3">{% blocktrans %}您目前已連結以下第三方帳戶，可用於登入系統：{% endblocktrans %}</p>
+                    
+                    <form method="post" action="{% url 'socialaccount_connections' %}">
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+                        
+                        <div class="list-group mb-4 shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                            {% for radio in form.accounts %}
+                            <label class="list-group-item d-flex align-items-center gap-3 p-3">
+                                <input type="radio" name="account" value="{{ radio.data.value }}" {% if radio.data.selected %}checked="checked"{% endif %} />
+                                <span class="fw-bold">{{ radio.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-outline-danger rounded-pill py-2">
+                                <i class="fas fa-trash-alt me-2"></i>{% trans "Remove" %}
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <p class="text-center text-muted mb-4">{% trans "目前沒有連結任何第三方帳號。" %}</p>
+                    {% endif %}
+                    
+                    <hr class="my-4" />
+                    
+                    <h4 class="fw-bold mb-3"><i class="fas fa-plus-circle text-primary me-2"></i>{% trans "連結其他帳號" %}</h4>
+                    
+                    <div class="d-grid gap-2">
+                        {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="/" class="text-decoration-none text-muted small">
+                            <i class="fas fa-chevron-left me-1"></i>{% trans "Back to Home" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
