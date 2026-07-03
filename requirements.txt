@@ -24,7 +24,7 @@ PyJWT==2.13.0
 #* 提供加密演算法支援
 cryptography==48.0.0
 #* 發送 HTTP 請求與管理 SSL 憑證
-requests==2.31.0
+requests==2.34.2
 certifi==2026.5.20
 #* 專案程式碼與依賴套件的安全漏洞掃描
 bandit==1.9.4
@@ -112,5 +112,5 @@ chardet==5.2.0
 #! -------------------
 
 #! LINE Bot 與欄位加密
-line-bot-sdk==3.7.0
+line-bot-sdk==3.24.0
 django-encrypted-model-fields==0.6.5
