@@ -286,15 +286,26 @@
             // 儲存狀態至 localStorage，跨越 Google 與 LINE 登入多次重導向依然有效
             localStorage.setItem("pending_action", "google_bind");
 
-            if (liff.isInClient()) {
-                liff.openWindow({
-                    url: googleLoginUrl,
-                    external: true
-                });
-            } else {
-                // 如果本來就在外部瀏覽器，直接重導向
-                window.location.href = googleLoginUrl;
-            }
+            Swal.fire({
+                title: '引導至外部瀏覽器',
+                text: '因 Google 安全政策限制，即將為您在外部瀏覽器開啟 Google 安全登入。本網頁將自動關閉，請在外部網頁完成登入後，返回 LINE 重新開啟行程看板即可！',
+                icon: 'info',
+                confirmButtonColor: '#1DB446',
+                confirmButtonText: '確定並關閉網頁'
+            }).then(() => {
+                if (liff.isInClient()) {
+                    liff.openWindow({
+                        url: googleLoginUrl,
+                        external: true
+                    });
+                    setTimeout(() => {
+                        liff.closeWindow();
+                    }, 500); // 延遲半秒關閉 WebView，確保外部瀏覽器已成功開啟
+                } else {
+                    // 如果本來就在外部瀏覽器，直接重導向
+                    window.location.href = googleLoginUrl;
+                }
+            });
         });
     </script>
 </body>
