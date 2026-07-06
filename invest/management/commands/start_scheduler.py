@@ -21,7 +21,6 @@ def update_prices_job():
 
 
 def check_itinerary_reminders_job():
-    print("⏳ [排程任務] 開始檢查行程提醒...")
     try:
         from django.conf import settings
         from django.utils.timezone import now, localtime
@@ -103,11 +102,21 @@ def check_itinerary_reminders_job():
                         # 標記為已通知
                         item.is_notified = True
                         item.save()
-                        print(f"✅ 已成功推播行程 #{item.pk} 通知至 {target_id}")
+
+                        # 取得推播對象資訊 (如果有群組則嘗試抓取群組名稱)
+                        target_info = f"個人 [{target_id}]"
+                        if item.group_id:
+                            try:
+                                group_summary = api_instance.get_group_summary(item.group_id)
+                                target_info = f"群組 [{group_summary.group_name}] ({item.group_id})"
+                            except Exception:
+                                target_info = f"群組 [{item.group_id}]"
+
+                        push_time_str = localtime(now()).strftime("%Y-%m-%d %H:%M:%S")
+                        print(f"✅ 已成功推播行程 #{item.pk} 通知至 {target_info} (時間: {push_time_str})")
                     except Exception as e:
                         print(f"❌ 推播行程 #{item.pk} 通知失敗: {e}")
 
-        print("✅ [排程任務] 行程提醒檢查完成！")
     except Exception as e:
         print(f"❌ [排程任務] 執行行程提醒檢查時發生錯誤: {e}")
 

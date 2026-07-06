@@ -32,6 +32,7 @@ class Itinerary(models.Model):
         ("EXHIBIT", _("逛街展覽")),
         ("SPORT", _("運動健身")),
         ("TRAVEL", _("旅遊踏青")),
+        ("MOVIE", _("看電影")),
         ("OTHER", _("其他活動")),
     ]
 

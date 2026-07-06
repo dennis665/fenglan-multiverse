@@ -53,6 +53,7 @@ LINE_CHANNEL_SECRET = env("LINE_CHANNEL_SECRET")
 LINE_CHANNEL_ACCESS_TOKEN = env("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_LIFF_ID = env("LINE_LIFF_ID")
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY")
+LINE_MAINTENANCE_MODE = env.bool("LINE_MAINTENANCE_MODE", default=False)
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -256,6 +257,11 @@ LOGGING = {
         "daphne": {
             "handlers": ["console"],
             "level": "WARNING",  # * 將等級設為 WARNING，隱藏 INFO 訊息
+            "propagate": False,
+        },
+        "apscheduler": {
+            "handlers": ["console", "concurrent_file"],
+            "level": "WARNING",
             "propagate": False,
         },
     },

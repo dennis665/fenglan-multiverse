@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- LINE LIFF SDK -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -49,7 +51,7 @@
 <body class="py-4">
     <div class="container" style="max-width: 500px;">
         <div class="glass-card p-4">
-            <h4 class="fw-bold mb-4 text-center text-success"><i class="fa-solid fa-calendar-plus me-2"></i>安排新行程</h4>
+            <h4 class="fw-bold mb-4 text-center text-success" id="form-title"><i class="fa-solid fa-calendar-plus me-2"></i>安排新行程</h4>
             
             <form id="create-form">
                 <!-- 標題 -->
@@ -66,6 +68,7 @@
                         <option value="EXHIBIT">🎨 逛街展覽</option>
                         <option value="SPORT">🏸 運動健身</option>
                         <option value="TRAVEL">🚗 旅遊踏青</option>
+                        <option value="MOVIE">🎬 看電影</option>
                         <option value="OTHER" selected>🌟 其他活動</option>
                     </select>
                 </div>
@@ -79,7 +82,12 @@
                 <!-- 地點 -->
                 <div class="mb-3">
                     <label for="location" class="form-label fw-bold">活動地點</label>
-                    <input type="text" class="form-control" id="location" placeholder="如：捷運中山站、台北小巨蛋">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="location" placeholder="如：捷運中山站、台北小巨蛋">
+                        <button class="btn btn-outline-success" type="button" id="geo-btn" onclick="saveFormAndSelectLocation()">
+                            <i class="fa-solid fa-location-crosshairs"></i> 定位
+                        </button>
+                    </div>
                 </div>
 
                 <!-- 提前通知時間 -->
@@ -104,13 +112,13 @@
                 <!-- 備註說明 -->
                 <div class="mb-4">
                     <label for="notes" class="form-label fw-bold">備註說明</label>
-                    <textarea class="form-control" id="notes" rows="3" placeholder="如：記得帶錢包、每人預算 500 元..."></option></textarea>
+                    <textarea class="form-control" id="notes" rows="3" placeholder="如：記得帶錢包、每人預算 500 元..."></textarea>
                 </div>
 
                 <!-- 按鈕 -->
                 <div class="d-flex gap-3">
                     <button type="button" class="btn btn-outline-secondary w-50" style="border-radius: 50px;" onclick="history.back()">取消</button>
-                    <button type="submit" class="btn btn-line w-50">確認排定</button>
+                    <button type="submit" class="btn btn-line w-50" id="submit-btn">確認排定</button>
                 </div>
             </form>
         </div>
@@ -121,26 +129,62 @@
         let userAccessToken = null;
         let lineContext = null;
 
-        // 從 URL 抓取 groupId
+        // 從 URL 抓取 groupId 與 editId
         const urlParams = new URLSearchParams(window.location.search);
         const urlGroupId = urlParams.get("groupId");
+        const urlEditId = urlParams.get("editId");
 
         document.addEventListener("DOMContentLoaded", function() {
             initLiff();
             
-            // 設定日期時間預設為當前時間的一小時後
-            const dtInput = document.getElementById("date_time");
-            const now = new Date();
-            now.setHours(now.getHours() + 1);
-            now.setMinutes(0);
+            // 如果是修改模式，移除定位按鈕以避免傳送定位後點卡片重新建立行程
+            if (urlEditId) {
+                const geoBtn = document.getElementById("geo-btn");
+                if (geoBtn) {
+                    geoBtn.remove();
+                }
+            }
             
-            // 轉為 local datetime-local 格式 (YYYY-MM-DDTHH:MM)
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            dtInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            const urlLocation = urlParams.get("location");
+            
+            if (urlLocation) {
+                // 填入定位地址
+                document.getElementById("location").value = urlLocation;
+                
+                // 嘗試恢復暫存的行程內容
+                const tempStr = localStorage.getItem("temp_itinerary");
+                if (tempStr) {
+                    try {
+                        const temp = JSON.parse(tempStr);
+                        document.getElementById("title").value = temp.title || "";
+                        document.getElementById("activity_type").value = temp.activity_type || "OTHER";
+                        document.getElementById("date_time").value = temp.date_time || "";
+                        document.getElementById("notify_minutes_before").value = temp.notify_minutes_before || "1440";
+                        document.getElementById("notes").value = temp.notes || "";
+                    } catch (e) {
+                        console.error("Failed to parse temp itinerary", e);
+                    } finally {
+                        localStorage.removeItem("temp_itinerary");
+                    }
+                }
+            } else {
+                // 如果不是定位返回，清除舊的暫存，並做新增時的時間初始化
+                localStorage.removeItem("temp_itinerary");
+                
+                if (!urlEditId) {
+                    const dtInput = document.getElementById("date_time");
+                    const now = new Date();
+                    now.setHours(now.getHours() + 1);
+                    now.setMinutes(0);
+                    
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    dtInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+                }
+            }
         });
 
         function initLiff() {
@@ -149,6 +193,13 @@
                     if (liff.isLoggedIn()) {
                         userAccessToken = liff.getAccessToken();
                         lineContext = liff.getContext();
+
+                        // 如果是修改模式，則在載入時先拉取行程詳細資料預填
+                        if (urlEditId) {
+                            fetchItineraryDetail(urlEditId);
+                        }
+                    } else {
+                        liff.login();
                     }
                 })
                 .catch((err) => {
@@ -156,11 +207,58 @@
                 });
         }
 
+        function fetchItineraryDetail(id) {
+            fetch(`/line/api/itineraries/detail/${id}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    access_token: userAccessToken
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    // 動態切換為修改標題與按鈕
+                    document.getElementById("form-title").innerHTML = `<i class="fa-solid fa-pen-to-square me-2"></i>修改行程`;
+                    document.getElementById("submit-btn").innerText = "確認修改";
+                    document.title = "修改行程 - 行程小幫手";
+
+                    // 預填表單欄位
+                    document.getElementById("title").value = data.title;
+                    document.getElementById("activity_type").value = data.activity_type;
+                    document.getElementById("date_time").value = data.date_time;
+                    document.getElementById("location").value = data.location;
+                    document.getElementById("notify_minutes_before").value = data.notify_minutes_before;
+                    document.getElementById("notes").value = data.notes;
+
+                    if (data.is_expired) {
+                        Swal.fire({
+                            title: '提醒',
+                            text: '此行程已開始或已過期，無法再進行修改。',
+                            icon: 'warning',
+                            confirmButtonColor: '#1DB446',
+                            confirmButtonText: '確定'
+                        }).then(() => {
+                            document.getElementById("submit-btn").disabled = true;
+                        });
+                    }
+                } else {
+                    Swal.fire('錯誤', '載入行程失敗: ' + data.error, 'error');
+                }
+            })
+            .catch(err => {
+                console.error("Fetch detail error:", err);
+                Swal.fire('錯誤', '伺服器連線失敗', 'error');
+            });
+        }
+
         document.getElementById("create-form").addEventListener("submit", function(e) {
             e.preventDefault();
 
             if (!userAccessToken) {
-                alert("LINE 帳號未授權，無法新增");
+                Swal.fire('未授權', 'LINE 帳號未授權，無法進行此操作', 'warning');
                 return;
             }
 
@@ -173,7 +271,10 @@
 
             const groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
 
-            fetch("/line/api/itineraries/create/", {
+            // 根據是否為修改模式，切換呼叫的 API 端點
+            const apiUrl = urlEditId ? `/line/api/itineraries/update/${urlEditId}/` : "/line/api/itineraries/create/";
+
+            fetch(apiUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -192,21 +293,88 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success") {
-                    // 新增成功，返回清單頁
-                    let listUrl = `/line/liff/`;
-                    if (groupId) {
-                        listUrl += `?groupId=${groupId}`;
-                    }
-                    window.location.href = listUrl;
+                    Swal.fire({
+                        title: '成功',
+                        text: urlEditId ? '行程修改成功！' : '行程安排成功！',
+                        icon: 'success',
+                        confirmButtonColor: '#1DB446',
+                        confirmButtonText: '確定'
+                    }).then(() => {
+                        let listUrl = `/line/liff/`;
+                        if (groupId) {
+                            listUrl += `?groupId=${groupId}`;
+                        }
+                        window.location.href = listUrl;
+                    });
                 } else {
-                    alert("建立失敗: " + data.error);
+                    Swal.fire('錯誤', '操作失敗: ' + data.error, 'error');
                 }
-            })
-            .catch(err => {
-                console.error("Submit error:", err);
-                alert("伺服器連線失敗");
             });
         });
+
+        function saveFormAndSelectLocation() {
+            const formData = {
+                title: document.getElementById("title").value.trim(),
+                activity_type: document.getElementById("activity_type").value,
+                date_time: document.getElementById("date_time").value,
+                notify_minutes_before: document.getElementById("notify_minutes_before").value,
+                notes: document.getElementById("notes").value.trim()
+            };
+            localStorage.setItem("temp_itinerary", JSON.stringify(formData));
+            
+            Swal.fire({
+                title: '引導定位分享',
+                html: '請依照以下步驟進行定位分享：<br><br>' +
+                      '1. 點擊下方確認按鈕<b>關閉本網頁</b>返回聊天室。<br>' +
+                      '2. LINE 機器人會即時發送定位教學提醒訊息。<br>' +
+                      '3. 選擇 <b>「位置資訊」</b> 選取地點並傳送。<br>' +
+                      '4. 傳送後點擊新出現的卡片按鈕，即可自動帶回所有資料！',
+                icon: 'info',
+                confirmButtonColor: '#1DB446',
+                confirmButtonText: '確定關閉並定位'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+                    
+                    Swal.fire({
+                        title: '發送引導中...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    fetch("/line/api/itineraries/send_guide/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            access_token: userAccessToken,
+                            group_id: groupId
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        Swal.close();
+                        if (typeof liff !== 'undefined' && liff.isInClient()) {
+                            liff.closeWindow();
+                        } else {
+                            Swal.fire('提示', '非 LINE App 環境，已將資料暫存並嘗試發送引導。', 'info');
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Send guide error:", err);
+                        Swal.close();
+                        if (typeof liff !== 'undefined' && liff.isInClient()) {
+                            liff.closeWindow();
+                        } else {
+                            Swal.fire('提示', '非 LINE App 環境，已將資料暫存。', 'info');
+                        }
+                    });
+                }
+            });
+        }
     </script>
 </body>
 </html>

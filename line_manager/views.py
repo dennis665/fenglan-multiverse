@@ -17,8 +17,13 @@ from linebot.v3.messaging import (
     MessagingApi,
     ReplyMessageRequest,
     TextMessage,
+    FlexMessage,
+    FlexContainer,
+    QuickReply,
+    QuickReplyItem,
+    LocationAction,
 )
-from linebot.v3.webhooks import JoinEvent, MessageEvent, TextMessageContent
+from linebot.v3.webhooks import JoinEvent, MessageEvent, TextMessageContent, LocationMessageContent
 
 from django.db.models import Q
 from .models import Itinerary, LineProfile, GroupMembership
@@ -251,6 +256,18 @@ def line_webhook(request):
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
     """處理收到的文字訊息：暫停 Gemini AI 解析，改為直接回傳看板連結"""
+    # 檢查是否開啟維護模式
+    if getattr(settings, "LINE_MAINTENANCE_MODE", False):
+        with ApiClient(configuration) as api_client:
+            api_instance = MessagingApi(api_client)
+            api_instance.reply_message(
+                ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[TextMessage(text="🤖 行程小幫手目前系統維護中，暫停服務，敬請見諒。")]
+                )
+            )
+        return
+
     text = event.message.text.strip()
     user_id = event.source.user_id
     group_id = getattr(event.source, "group_id", None)
@@ -288,7 +305,19 @@ def handle_message(event):
         api_instance = MessagingApi(api_client)
         api_instance.reply_message_with_http_info(
             ReplyMessageRequest(
-                reply_token=event.reply_token, messages=[TextMessage(text=reply_text)]
+                reply_token=event.reply_token,
+                messages=[
+                    TextMessage(
+                        text=reply_text,
+                        quick_reply=QuickReply(
+                            items=[
+                                QuickReplyItem(
+                                    action=LocationAction(label="📍 傳送定位以建立行程")
+                                )
+                            ]
+                        )
+                    )
+                ]
             )
         )
 
@@ -296,6 +325,18 @@ def handle_message(event):
 @handler.add(JoinEvent)
 def handle_join(event):
     """當 Bot 被邀請入群時發送歡迎語與公告教學建議"""
+    # 檢查是否開啟維護模式
+    if getattr(settings, "LINE_MAINTENANCE_MODE", False):
+        with ApiClient(configuration) as api_client:
+            api_instance = MessagingApi(api_client)
+            api_instance.reply_message(
+                ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[TextMessage(text="🤖 行程小幫手目前系統維護中，暫停服務，敬請見諒。")]
+                )
+            )
+        return
+
     group_id = getattr(event.source, "group_id", None)
     liff_url = f"https://liff.line.me/{settings.LINE_LIFF_ID}"
     if group_id:
@@ -311,9 +352,6 @@ def handle_join(event):
             "請群組成員點擊下方連結完成綁定：\n"
             f"🔗 連結：{liff_url}\n"
             "（您可以選擇綁定既有的網站帳戶，或一鍵建立新帳戶。稍後亦可在選單中進行綁定。）\n\n"
-            "✍️ 如何新增行程(此功能施工中)：\n"
-            "在對話中呼叫「小幫手」加上行程內容，我會自動用語意分析幫大家記錄，例如：\n"
-            "「小幫手 下週六晚上 6 點約在中山區吃飯聚餐，前 2 天通知我」\n\n"
             "📅 共享日曆看板：\n"
             "完成綁定的成員可以點擊上方連結直接打開群組共享行事曆與時間軸，共同新增、編輯備註或刪除行程。\n\n"
             "📌 溫馨提醒：\n"
@@ -324,6 +362,135 @@ def handle_join(event):
                 reply_token=event.reply_token, messages=[TextMessage(text=welcome_text)]
             )
         )
+
+
+@handler.add(MessageEvent, message=LocationMessageContent)
+def handle_location(event):
+    """當使用者傳送 LINE 原生定位時，回傳一鍵代入該地點的安排行程 Flex 訊息"""
+    # 檢查是否開啟維護模式
+    if getattr(settings, "LINE_MAINTENANCE_MODE", False):
+        with ApiClient(configuration) as api_client:
+            api_instance = MessagingApi(api_client)
+            api_instance.reply_message(
+                ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[TextMessage(text="🤖 行程小幫手目前系統維護中，暫停服務，敬請見諒。")]
+                )
+            )
+        return
+
+    address = event.message.address
+    user_id = event.source.user_id
+    group_id = getattr(event.source, "group_id", None)
+
+    # 清理地址字串，移除「台灣」、「臺灣」、郵遞區號與逗號
+    import re
+    clean_address = re.sub(r'^\d+\s*(台灣|臺灣|Taiwan)?', '', address)
+    clean_address = clean_address.replace("台灣", "").replace("臺灣", "").replace("Taiwan", "")
+    clean_address = clean_address.replace(",", " ").strip()
+    clean_address = re.sub(r'\b\d{3,5}\b', '', clean_address)
+    clean_address = re.sub(r'\s+', ' ', clean_address).strip()
+
+    if not clean_address:
+        clean_address = "未指定地點"
+
+    # 建立包含 location 的 LIFF 連結
+    import urllib.parse
+    liff_url = f"https://liff.line.me/{settings.LINE_LIFF_ID}/create/?location={urllib.parse.quote(clean_address)}"
+    if group_id:
+        liff_url += f"&groupId={group_id}"
+        # 自動註冊群組關係
+        profile = LineProfile.objects.filter(line_user_id=user_id).first()
+        if profile:
+            GroupMembership.objects.get_or_create(user=profile.user, group_id=group_id)
+
+    # 建立精美的定位確認 Flex Message 卡片
+    flex_contents = {
+        "type": "bubble",
+        "size": "giga",
+        "header": {
+            "type": "box",
+            "layout": "vertical",
+            "backgroundColor": "#1DB446",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": "📍 定位成功",
+                    "color": "#ffffff",
+                    "weight": "bold",
+                    "size": "lg"
+                }
+            ]
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "spacing": "md",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": "您已傳送了以下位置：",
+                    "size": "sm",
+                    "color": "#666666"
+                },
+                {
+                    "type": "text",
+                    "text": clean_address,
+                    "weight": "bold",
+                    "size": "md",
+                    "wrap": True,
+                    "color": "#2c3e50"
+                },
+                {
+                    "type": "text",
+                    "text": "點擊下方按鈕，即可自動帶入此地點並快速安排行程！",
+                    "size": "xs",
+                    "color": "#999999",
+                    "wrap": True
+                }
+            ]
+        },
+        "footer": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "button",
+                    "action": {
+                        "type": "uri",
+                        "label": "📅 點此安排行程",
+                        "uri": liff_url
+                    },
+                    "style": "primary",
+                    "color": "#1DB446"
+                }
+            ]
+        }
+    }
+
+    try:
+        flex_container = FlexContainer.from_dict(flex_contents)
+        flex_message = FlexMessage(alt_text="📍 行程小幫手 - 定位確認", contents=flex_container)
+
+        with ApiClient(configuration) as api_client:
+            api_instance = MessagingApi(api_client)
+            api_instance.reply_message(
+                ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[flex_message]
+                )
+            )
+    except Exception as e:
+        print(f"❌ 傳送定位確認 Flex Message 失敗: {e}")
+        # 降級使用文字回覆
+        with ApiClient(configuration) as api_client:
+            api_instance = MessagingApi(api_client)
+            api_instance.reply_message(
+                ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[TextMessage(text=f"📍 定位成功！\n地址：{clean_address}\n👉 點此安排行程：{liff_url}")]
+                )
+            )
 
 
 # ==============================================================================
@@ -395,23 +562,46 @@ def api_get_itineraries(request):
     # 取得該用戶加入的所有群組 ID
     user_group_ids = list(GroupMembership.objects.filter(user=user).values_list("group_id", flat=True))
 
-    # 撈取行程：清單一律顯示自己的（包含個人行程以及該用戶所屬群組的所有行程）
-    itineraries_qs = Itinerary.objects.filter(
-        Q(user=user) | Q(group_id__in=user_group_ids)
-    ).distinct().order_by("date_time")
+    tab = data.get("tab", "upcoming")
+    try:
+        page = int(data.get("page", 1))
+        if page < 1:
+            page = 1
+    except ValueError:
+        page = 1
 
-    upcoming = []
-    history = []
+    # 撈取行程：清單一律顯示自己的（包含個人行程以及該用戶所屬群組的所有行程）
+    # 依用戶要求：日期新至舊排序 (date_time 降序)
+    base_qs = Itinerary.objects.filter(
+        Q(user=user) | Q(group_id__in=user_group_ids)
+    ).distinct()
+
+    if tab == "upcoming":
+        itineraries_qs = base_qs.filter(date_time__gte=current_time).order_by("-date_time")
+    else:
+        itineraries_qs = base_qs.filter(date_time__lt=current_time).order_by("-date_time")
+
+    total_count = itineraries_qs.count()
+    page_size = 5
+    start = (page - 1) * page_size
+    end = start + page_size
+
+    # 資料庫層級分頁：只取出該頁面的 5 筆，節省效能
+    sliced_qs = itineraries_qs[start:end]
+    has_more = total_count > end
+
+    list_data = []
 
     type_map = {
         "EAT": "🍴 吃飯聚餐",
         "EXHIBIT": "🎨 逛街展覽",
         "SPORT": "🏸 運動健身",
         "TRAVEL": "🚗 旅遊踏青",
+        "MOVIE": "🎬 看電影",
         "OTHER": "🌟 其他活動",
     }
 
-    for item in itineraries_qs:
+    for item in sliced_qs:
         # 解密加密欄位
         title_dec = item.title
         location_dec = item.location
@@ -448,11 +638,7 @@ def api_get_itineraries(request):
             "is_notified": item.is_notified,
             "creator": creator_name,
         }
-
-        if item.date_time >= current_time:
-            upcoming.append(schedule_data)
-        else:
-            history.append(schedule_data)
+        list_data.append(schedule_data)
 
     is_temporary = user.username.startswith("line_")
 
@@ -461,8 +647,8 @@ def api_get_itineraries(request):
             "is_bound": True,
             "is_temporary": is_temporary,
             "username": line_profile.line_display_name,
-            "upcoming": upcoming,
-            "history": history,
+            "list": list_data,
+            "has_more": has_more,
         }
     )
 
@@ -674,3 +860,180 @@ def api_bind_account(request):
         return JsonResponse({"status": "success", "username": user.username})
 
     return JsonResponse({"error": "Invalid Action"}, status=400)
+
+
+@csrf_exempt
+def api_get_itinerary_detail(request, pk):
+    """API 端點：取得單一行程詳細資料（供修改頁面預填使用）"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    # 驗證 LINE Token
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get("https://api.line.me/v2/profile", headers=headers)
+    if res.status_code != 200:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_user_id = res.json()["userId"]
+    line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
+    if not line_profile:
+        return JsonResponse({"error": "Account not bound"}, status=403)
+
+    itinerary = Itinerary.objects.filter(pk=pk).first()
+    if not itinerary:
+        return JsonResponse({"error": "Itinerary not found"}, status=404)
+
+    # 檢查是否為該群組成員或本人
+    can_view = False
+    if itinerary.user == line_profile.user:
+        can_view = True
+    elif itinerary.group_id:
+        if GroupMembership.objects.filter(user=line_profile.user, group_id=itinerary.group_id).exists():
+            can_view = True
+
+    if not can_view:
+        return JsonResponse({"error": "Permission Denied"}, status=403)
+
+    from django.utils.timezone import localtime
+    return JsonResponse({
+        "status": "success",
+        "id": itinerary.pk,
+        "title": itinerary.title,
+        "location": itinerary.location,
+        "notes": itinerary.notes,
+        "activity_type": itinerary.activity_type,
+        "date_time": localtime(itinerary.date_time).strftime("%Y-%m-%dT%H:%M"),
+        "notify_minutes_before": itinerary.notify_minutes_before,
+        "is_expired": itinerary.date_time <= now()
+    })
+
+
+@csrf_exempt
+def api_update_itinerary(request, pk):
+    """API 端點：修改行程"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        title = data.get("title")
+        location = data.get("location")
+        activity_type = data.get("activity_type", "OTHER")
+        date_time_str = data.get("date_time")
+        notify_minutes = int(data.get("notify_minutes_before", 1440))
+        notes = data.get("notes", "")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not title or not date_time_str:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    # 驗證 LINE Token
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get("https://api.line.me/v2/profile", headers=headers)
+    if res.status_code != 200:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_user_id = res.json()["userId"]
+    line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
+    if not line_profile:
+        return JsonResponse({"error": "Account not bound"}, status=403)
+
+    itinerary = Itinerary.objects.filter(pk=pk).first()
+    if not itinerary:
+        return JsonResponse({"error": "Itinerary not found"}, status=404)
+
+    # 檢查權限
+    can_edit = False
+    if itinerary.user == line_profile.user:
+        can_edit = True
+    elif itinerary.group_id:
+        if GroupMembership.objects.filter(user=line_profile.user, group_id=itinerary.group_id).exists():
+            can_edit = True
+
+    if not can_edit:
+        return JsonResponse({"error": "Permission Denied"}, status=403)
+
+    # 檢查是否過期
+    if itinerary.date_time <= now():
+        return JsonResponse({"error": "Cannot edit expired itineraries"}, status=400)
+
+    try:
+        dt = parse_datetime(date_time_str)
+        if not dt:
+            dt = datetime.fromisoformat(date_time_str)
+        if dt.tzinfo is None:
+            dt = make_aware(dt)
+    except Exception:
+        return JsonResponse({"error": "Invalid date_time format"}, status=400)
+
+    # 更新欄位
+    itinerary.title = title
+    itinerary.location = location if location else "待定"
+    itinerary.notes = notes
+    itinerary.activity_type = activity_type
+    itinerary.date_time = dt
+    itinerary.notify_minutes_before = notify_minutes
+    itinerary.is_notified = False  # 重設通知標記以重新輪詢發送
+    itinerary.save()
+
+    return JsonResponse({"status": "success"})
+
+
+@csrf_exempt
+def api_send_guide_message(request):
+    """API 端點：點擊定位時由 Bot 發送步驟引導訊息到聊天室"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        group_id = data.get("group_id")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    # 驗證 Access Token
+    import requests
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get("https://api.line.me/v2/profile", headers=headers)
+    if res.status_code != 200:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    profile_data = res.json()
+    line_user_id = profile_data["userId"]
+
+    # 決定目標 (優先發送到群組，否則發送給個人)
+    target_id = group_id if group_id else line_user_id
+
+    # 引導文字
+    guide_text = (
+        "📢 行程小幫手引導定位中...\n\n"
+        "請點選對話框左下角「+」 ➡️ 「位置資訊」選取地點並傳送。\n\n"
+        "傳送位置後，點擊對話框中新出現的卡片按鈕，即可自動帶回所有剛才填寫的行程資訊！"
+    )
+
+    try:
+        from linebot.v3.messaging import PushMessageRequest, TextMessage
+        with ApiClient(configuration) as api_client:
+            api_instance = MessagingApi(api_client)
+            api_instance.push_message(
+                PushMessageRequest(
+                    to=target_id,
+                    messages=[TextMessage(text=guide_text)]
+                )
+            )
+        return JsonResponse({"status": "success"})
+    except Exception as e:
+        print(f"❌ 發送定位引導訊息失敗: {e}")
+        return JsonResponse({"error": str(e)}, status=500)

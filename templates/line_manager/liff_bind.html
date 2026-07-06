@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- LINE LIFF SDK -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -140,15 +142,22 @@
             .then(res => res.json())
             .then(data => {
                 if (data.error) {
-                    alert("Google 帳號合併綁定失敗: " + data.error);
+                    Swal.fire('錯誤', "Google 帳號合併綁定失敗: " + data.error, 'error');
                 } else {
-                    alert("Google 帳號合併與歷史行程移轉成功！");
-                    redirectToList();
+                    Swal.fire({
+                        title: '成功',
+                        text: 'Google 帳號合併與歷史行程移轉成功！',
+                        icon: 'success',
+                        confirmButtonColor: '#1DB446',
+                        confirmButtonText: '確定'
+                    }).then(() => {
+                        redirectToList();
+                    });
                 }
             })
             .catch(err => {
                 console.error("Google bind error:", err);
-                alert("伺服器連線失敗");
+                Swal.fire('錯誤', "伺服器連線失敗", 'error');
             });
         }
 
@@ -157,7 +166,7 @@
             e.preventDefault();
 
             if (!userAccessToken) {
-                alert("LINE 未授權，請重試");
+                Swal.fire('未授權', 'LINE 未授權，請重試', 'warning');
                 return;
             }
 
@@ -180,50 +189,75 @@
             .then(res => res.json())
             .then(data => {
                 if (data.error) {
-                    alert("綁定失敗: " + data.error);
+                    Swal.fire('錯誤', "綁定失敗: " + data.error, 'error');
                 } else {
-                    alert("帳號安全綁定成功！");
-                    redirectToList();
+                    Swal.fire({
+                        title: '成功',
+                        text: '帳號安全綁定成功！',
+                        icon: 'success',
+                        confirmButtonColor: '#1DB446',
+                        confirmButtonText: '確定'
+                    }).then(() => {
+                        redirectToList();
+                    });
                 }
             })
             .catch(err => {
                 console.error("Bind error:", err);
-                alert("伺服器連線失敗");
+                Swal.fire('錯誤', "伺服器連線失敗", 'error');
             });
         });
 
         // 處理一鍵自動註冊
         document.getElementById("auto-register-btn").addEventListener("click", function() {
             if (!userAccessToken) {
-                alert("LINE 未授權，請重試");
+                Swal.fire('未授權', 'LINE 未授權，請重試', 'warning');
                 return;
             }
 
-            if (!confirm("系統將會為您建立一個專屬的 LINE 登入帳號，確定要繼續嗎？")) return;
-
-            fetch("/line/api/bind/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    access_token: userAccessToken,
-                    action: "auto_register",
-                    group_id: urlGroupId || (lineContext ? lineContext.groupId : null)
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    alert("一鍵建立帳號失敗: " + data.error);
-                } else {
-                    alert("專屬帳號建立並綁定成功！");
-                    redirectToList();
+            Swal.fire({
+                title: '建立專屬帳號',
+                text: '系統將會為您建立一個專屬的 LINE 登入帳號，確定要繼續嗎？',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1DB446',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '確定',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch("/line/api/bind/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            access_token: userAccessToken,
+                            action: "auto_register",
+                            group_id: urlGroupId || (lineContext ? lineContext.groupId : null)
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.error) {
+                            Swal.fire('錯誤', "一鍵建立帳號失敗: " + data.error, 'error');
+                        } else {
+                            Swal.fire({
+                                title: '成功',
+                                text: '專屬帳號建立並綁定成功！',
+                                icon: 'success',
+                                confirmButtonColor: '#1DB446',
+                                confirmButtonText: '確定'
+                            }).then(() => {
+                                redirectToList();
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Auto register error:", err);
+                        Swal.fire('錯誤', "伺服器連線失敗", 'error');
+                    });
                 }
-            })
-            .catch(err => {
-                console.error("Auto register error:", err);
-                alert("伺服器連線失敗");
             });
         });
 

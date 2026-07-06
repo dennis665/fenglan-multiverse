@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- LINE LIFF SDK -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -55,6 +57,7 @@
         .badge-exhibit { background-color: #5f27cd; }
         .badge-sport { background-color: #ff6b6b; }
         .badge-travel { background-color: #10ac84; }
+        .badge-movie { background-color: #0abde3; }
         .badge-other { background-color: #8395a7; }
         .schedule-item {
             border-left: 5px solid #1DB446;
@@ -121,12 +124,22 @@
                     <div id="upcoming-list" class="d-flex flex-column gap-3">
                         <!-- 動態插入 -->
                     </div>
+                    <div id="upcoming-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
+                        <button class="btn btn-sm btn-outline-success px-3" id="upcoming-prev-btn" onclick="changePage('upcoming', -1)" style="border-radius: 50px;">上一頁</button>
+                        <span class="small text-muted fw-bold">第 <span id="upcoming-page-num" class="text-success">1</span> 頁</span>
+                        <button class="btn btn-sm btn-outline-success px-3" id="upcoming-next-btn" onclick="changePage('upcoming', 1)" style="border-radius: 50px;">下一頁</button>
+                    </div>
                 </div>
 
                 <!-- 歷史紀錄 -->
                 <div class="tab-pane fade" id="history-panel" role="tabpanel">
                     <div id="history-list" class="d-flex flex-column gap-3">
                         <!-- 動態插入 -->
+                    </div>
+                    <div id="history-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
+                        <button class="btn btn-sm btn-outline-success px-3" id="history-prev-btn" onclick="changePage('history', -1)" style="border-radius: 50px;">上一頁</button>
+                        <span class="small text-muted fw-bold">第 <span id="history-page-num" class="text-success">1</span> 頁</span>
+                        <button class="btn btn-sm btn-outline-success px-3" id="history-next-btn" onclick="changePage('history', 1)" style="border-radius: 50px;">下一頁</button>
                     </div>
                 </div>
             </div>
@@ -139,6 +152,10 @@
         let liffId = "{{ liff_id }}";
         let userAccessToken = null;
         let lineContext = null;
+
+        // 分頁狀態變數
+        let upcomingPage = 1;
+        let historyPage = 1;
 
         // 解析 URL 中的 groupId 參數 (防止 LINE 內外瀏覽器重導向造成 Context 遺失)
         const urlParams = new URLSearchParams(window.location.search);
@@ -165,7 +182,9 @@
                             document.getElementById("group-title").innerHTML = `<i class="fa-solid fa-users me-1"></i>群組共享行程`;
                         }
 
-                        fetchItineraries();
+                        // 首次載入：各自分別請求第一頁，節省效能
+                        fetchItineraries("upcoming", 1);
+                        fetchItineraries("history", 1);
                     }
                 })
                 .catch((err) => {
@@ -174,8 +193,17 @@
                 });
         }
 
-        function fetchItineraries() {
+        function fetchItineraries(tab, page) {
             let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+            
+            const listContainer = document.getElementById(`${tab}-list`);
+            listContainer.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
             
             fetch("/line/api/itineraries/", {
                 method: "POST",
@@ -184,7 +212,9 @@
                 },
                 body: JSON.stringify({
                     access_token: userAccessToken,
-                    group_id: groupId
+                    group_id: groupId,
+                    tab: tab,
+                    page: page
                 })
             })
             .then(res => res.json())
@@ -222,13 +252,48 @@
                     document.getElementById("bind-warning-banner").classList.add("d-none");
                 }
 
-                renderList(data.upcoming, "upcoming-list", true);
-                renderList(data.history, "history-list", false);
+                // 渲染清單
+                renderList(data.list, `${tab}-list`, tab === "upcoming");
+                
+                // 更新分頁按鈕狀態
+                updatePaginationControls(tab, page, data.has_more);
             })
             .catch(err => {
                 console.error("Error fetching data:", err);
-                alert("伺服器連線失敗");
+                listContainer.innerHTML = `
+                    <div class="alert alert-danger text-center small my-2">
+                        伺服器連線失敗，請重試！
+                    </div>
+                `;
             });
+        }
+
+        function updatePaginationControls(tab, page, hasMore) {
+            const paginationDiv = document.getElementById(`${tab}-pagination`);
+            const pageNumSpan = document.getElementById(`${tab}-page-num`);
+            const prevBtn = document.getElementById(`${tab}-prev-btn`);
+            const nextBtn = document.getElementById(`${tab}-next-btn`);
+            
+            pageNumSpan.innerText = page;
+            
+            // 啟用/停用按鈕
+            prevBtn.disabled = (page <= 1);
+            nextBtn.disabled = !hasMore;
+            
+            // 顯示分頁按鈕區
+            paginationDiv.classList.remove("d-none");
+        }
+
+        function changePage(tab, offset) {
+            if (tab === "upcoming") {
+                upcomingPage += offset;
+                if (upcomingPage < 1) upcomingPage = 1;
+                fetchItineraries("upcoming", upcomingPage);
+            } else {
+                historyPage += offset;
+                if (historyPage < 1) historyPage = 1;
+                fetchItineraries("history", historyPage);
+            }
         }
 
         function renderList(list, elementId, isUpcoming) {
@@ -252,9 +317,16 @@
                 else if (item.activity_type.includes("逛街")) badgeClass = "badge-exhibit";
                 else if (item.activity_type.includes("運動")) badgeClass = "badge-sport";
                 else if (item.activity_type.includes("旅遊")) badgeClass = "badge-travel";
+                else if (item.activity_type.includes("電影")) badgeClass = "badge-movie";
 
+                let editBtn = "";
                 let deleteBtn = "";
                 if (isUpcoming) {
+                    editBtn = `
+                        <button class="btn btn-sm btn-outline-primary border-0 me-1" onclick="editItinerary(${item.id})">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </button>
+                    `;
                     deleteBtn = `
                         <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteItinerary(${item.id})">
                             <i class="fa-regular fa-trash-can"></i>
@@ -277,7 +349,8 @@
                                 ${item.notify_text ? ` | 🔔 ${item.notify_text}` : ""}
                             </div>
                         </div>
-                        <div>
+                        <div class="d-flex align-items-center">
+                            ${editBtn}
                             ${deleteBtn}
                         </div>
                     </div>
@@ -287,29 +360,57 @@
         }
 
         function deleteItinerary(id) {
-            if (!confirm("確定要刪除這筆行程嗎？")) return;
-
-            fetch(`/line/api/itineraries/delete/${id}/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    access_token: userAccessToken
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    fetchItineraries();
-                } else {
-                    alert("刪除失敗: " + data.error);
+            Swal.fire({
+                title: '確定要刪除嗎？',
+                text: "刪除後將無法恢復此行程與提醒！",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '確定刪除',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/line/api/itineraries/delete/${id}/`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            access_token: userAccessToken
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            Swal.fire({
+                                title: '已刪除',
+                                text: '行程已成功刪除！',
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                fetchItineraries();
+                            });
+                        } else {
+                            Swal.fire('錯誤', "刪除失敗: " + data.error, 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Delete error:", err);
+                        Swal.fire('錯誤', "伺服器連線失敗", 'error');
+                    });
                 }
-            })
-            .catch(err => {
-                console.error("Delete error:", err);
-                alert("伺服器連線失敗");
             });
+        }
+
+        function editItinerary(id) {
+            let editUrl = `/line/liff/create/?editId=${id}`;
+            let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+            if (groupId) {
+                editUrl += `&groupId=${groupId}`;
+            }
+            window.location.href = editUrl;
         }
     </script>
 </body>
