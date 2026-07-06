@@ -296,7 +296,7 @@ def handle_message(event):
             GroupMembership.objects.get_or_create(user=profile.user, group_id=group_id)
 
     reply_text = (
-        "💡 您好！目前已暫停使用文字自動分析行程功能。\n\n"
+        "💡 您好！歡迎使用行程小幫手！\n\n"
         "請直接點擊以下連結進入專屬看板，即可手動新增、編輯備註，或瀏覽您的行程安排：\n"
         f"🔗 行程看板：{liff_url}"
     )
