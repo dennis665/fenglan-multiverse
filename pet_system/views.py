@@ -174,12 +174,18 @@ def api_get_dashboard_data(request):
     # 取得背包道具
     inventory = []
     for inv in UserInventory.objects.filter(user=user, quantity__gt=0).select_related("product"):
+        default_img = "/static/pet_system/images/pet_feed.webp"
+        if inv.product.name == "奇蹟進化藥水":
+            default_img = "/static/pet_system/images/pixel_potion.webp"
+        elif inv.product.category == "PET_EGG":
+            default_img = "/static/pet_system/images/pet_egg.webp"
+
         inventory.append({
             "id": inv.id,
             "product_id": inv.product.id,
             "name": inv.product.name,
             "description": inv.product.description,
-            "image_url": inv.product.image.url if inv.product.image else "/static/pet_system/images/pet_feed.webp",
+            "image_url": inv.product.image.url if inv.product.image else default_img,
             "quantity": inv.quantity,
             "category": inv.product.category,
         })

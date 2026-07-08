@@ -156,7 +156,15 @@
                                     {% if item.image %}
                                         <img src="{{ item.image.url }}" alt="{{ item.name }}" class="product-img h-100" style="object-fit: contain;">
                                     {% else %}
-                                        <i class="fas fa-egg fa-4x text-success opacity-25"></i>
+                                        {% if item.category == 'PET_EGG' %}
+                                            <img src="/static/pet_system/images/pet_egg.webp" alt="{{ item.name }}" class="product-img h-100 animate__animated animate__pulse animate__infinite" style="object-fit: contain; width: 80px; height: 80px;">
+                                        {% elif item.name == '美味寵物乾糧' %}
+                                            <img src="/static/pet_system/images/pet_feed.webp" alt="{{ item.name }}" class="product-img h-100" style="object-fit: contain; width: 80px; height: 80px;">
+                                        {% elif item.name == '奇蹟進化藥水' %}
+                                            <img src="/static/pet_system/images/pixel_potion.webp" alt="{{ item.name }}" class="product-img h-100 animate__animated animate__bounce animate__infinite animate__slow" style="object-fit: contain; width: 80px; height: 80px; filter: drop-shadow(0 0 5px rgba(186,85,211,0.6));">
+                                        {% else %}
+                                            <i class="fas fa-egg fa-4x text-success opacity-25"></i>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                                 <div class="card-body p-4 d-flex flex-column">
