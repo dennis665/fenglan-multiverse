@@ -1,10 +1,10 @@
 # CSI Server Portal - 入口網站開發說明
 
-![Django Version](https://img.shields.io/badge/Django-6.0.5-green) ![Python Version](https://img.shields.io/badge/Python-3.13+-blue) ![Docker](https://img.shields.io/badge/Docker-Supported-blue)
+![Django Version](https://img.shields.io/badge/Django-6.0.7-green) ![Python Version](https://img.shields.io/badge/Python-3.13+-blue) ![Docker](https://img.shields.io/badge/Docker-Supported-blue)
 
 這是一個基於 **Django 6.0.x** 與 **MySQL 8.x** 建立的多功能整合入口網站系統（CSI Portal），具備豐富的商業管理與 AI 應用模組。專案支援 **Google OAuth 2.0** 登入、**WebSocket (Daphne)** 即時通訊與 **Docker** 容器化部署，並結合了多種先進的機器學習與雲端 AI 引擎。
 
-*   **最新版本**：`v1.17.2`
+*   **最新版本**：`v1.17.3`
 *   **更新摘要**：[點此查看完整變更歷程 (CHANGELOG.md)](CHANGELOG.md)
 
 ---
@@ -69,31 +69,34 @@ graph TD
 *   **[media_studio](file:///d:/SI1403/dennis/csi_server/media_studio/)**：多媒體剪輯工作室。支援圖片無損壓縮、WEBP 轉檔、AI 背景去背（整合 `rembg`），以及多段影片的時間軸裁切與 libx264/AAC 轉碼拼接。
 *   **[tube_hub](file:///d:/SI1403/dennis/csi_server/tube_hub/)**：YouTube 影音下載工具。利用 `yt-dlp` 下載影片或 KTV 音訊檔，並透過 `youtube-transcript-api` 自動抓取中、英、日字幕，提供線上隨堂學習筆記功能。
 
-### 6. AI 對話、遊戲與 LINE 整合
+### 6. AI 對話、遊戲、寵物與 LINE 整合
 *   **[bionic_chat](file:///d:/SI1403/dennis/csi_server/bionic_chat/)**：虛擬人物語音對話系統。以 `llama-cpp-python` 載入本地 LLM 模型，透過 SSE (Server-Sent Events) 串流輸出文字，並於斷句時自動將繁體中文回覆翻譯並生成 `edge-tts` 語音音檔串流播放。
 *   **[games](file:///d:/SI1403/dennis/csi_server/games/)**：綜合網頁遊戲中心與 Godot API 接口。提供「倖存者生存」（Vampire Survivor 網頁版/ Godot Token 驗證存檔）、「虛擬人生」（大富翁地圖事件）以及「魔塔 RPG」（五層地圖、存檔資料序列化與局外金幣升級）三款遊戲。
+*   **[pet_system](file:///d:/SI1403/dennis/csi_server/pet_system/)**：Q 版像素寵物養成遊戲化系統。支援神秘蛋隨機孵化（幻獸綠龍 / 烈火幼犬）、點數餵食、登入天數進化與多元性格分支、裝備更衣配件、1h~20h 探索派遣及自動爬塔回合制 Canvas 戰鬥。出戰寵物支援全站 Shimeji 漫遊與任意拖曳定位；其餘倉庫寵物群聚於培育室畫布，可點擊進行 360 度互動迴旋跳躍。
 *   **[line_manager](file:///d:/SI1403/dennis/csi_server/line_manager/)**：LINE 官方帳號行程管理與隱私防護系統。支援 Google 帳戶合併綁定、歷史行程自動移轉、`GroupMembership` 成員關係動態追蹤（群組行程自動同步共享）、LINE LIFF 網頁端行程面板，且核心行程資料欄位在資料庫層進行對稱加密，以防後台窺探。
 
 ---
 
 ## 核心技術與依賴元件
 
-*   **Web 核心**：Django 6.0.5, Gunicorn 26.0.0, WhiteNoise 6.12.0
-*   **即時通訊**：Daphne 4.2.1, Django Channels 4.3.2
+*   **Web 核心**：Django 6.0.7, Gunicorn 26.0.0, WhiteNoise 6.12.0
+*   **即時通訊**：Daphne 4.2.2, Django Channels 4.3.2
 *   **資料庫連接**：MySQLClient 2.2.8, PyODBC 5.3.0
-*   **LINE 整合**：LINE Messaging API SDK (line-bot-sdk 3.7.0)
+*   **LINE 整合**：LINE Messaging API SDK (line-bot-sdk 3.25.0)
 *   **資料庫加密**：django-encrypted-model-fields 0.6.5 (對稱式 Fernet 加密)
 *   **AI 與 OCR**：
-    *   Google GenAI SDK (google-genai 2.6.0)
-    *   YOLOv11 Object Detection (ultralytics 8.4.54)
-    *   PaddleOCR 3.5.0, PaddlePaddle 3.3.1
+    *   Google GenAI SDK (google-genai 2.10.0)
+    *   YOLOv11 Object Detection (ultralytics 8.4.90)
+    *   PaddleOCR 3.7.0, PaddlePaddle 3.3.1
     *   PyTesseract 0.3.13 (需安裝 Tesseract-OCR 執行檔)
     *   Llama.cpp Python bindings (llama-cpp-python)
-*   **多媒體處理**：
+*   **多媒體與文件處理**：
     *   FFmpeg-Python 0.2.0 (系統需安裝 FFmpeg)
-    *   Edge-TTS 7.2.8 (微軟語音合成)
+    *   Edge-TTS (edge-tts 7.2.8) (微軟語音合成)
     *   Rembg 1.4.0 (AI 圖片去背)
-    *   YTDL-P 2026.03.17, YouTube-Transcript-API 1.2.4
+    *   Pillow 12.3.0, pdfplumber 0.11.10
+    *   YTDL-P 2026.07.04, YouTube-Transcript-API 1.2.4
+    *   Yahoo Finance Data Scraper (yfinance 1.5.1)
 
 ---
 

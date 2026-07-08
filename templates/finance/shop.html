@@ -15,6 +15,14 @@
             <i class="fas fa-store text-success me-2"></i>{% trans "CSI Point Shop" %}
         </h2>
         <p class="text-muted">{% trans "Redeem your points for rich products and exclusive rights" %}</p>
+        
+        {% if request.user.is_staff %}
+        <div class="mt-3">
+            <button class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm" onclick="setupShopProducts()">
+                <i class="fas fa-magic me-1"></i>一鍵建立/初始化寵物商城商品 (限管理員)
+            </button>
+        </div>
+        {% endif %}
     </div>
 
     {# 錢包餘額顯示區 #}
@@ -247,4 +255,41 @@
 
 {% block extra_js %}
 <script src="{% static 'js/shop.js' %}"></script>
+{% if request.user.is_staff %}
+<script>
+function setupShopProducts() {
+    Swal.fire({
+        title: '確定要建立預設寵物商品？',
+        text: "系統將會自動在資料庫建立：神秘寵物蛋、美味寵物乾糧、奇蹟進化藥水。",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '確定建立',
+        cancelButtonText: '取消'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.showLoading();
+            fetch("{% url 'pet_system:api_setup_shop_products' %}", {
+                method: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire("成功", data.message, "success").then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire("錯誤", data.message, "error");
+                }
+            })
+            .catch(err => {
+                Swal.fire("錯誤", "網路連線失敗或權限不足！", "error");
+            });
+        }
+    });
+}
+</script>
+{% endif %}
 {% endblock %}

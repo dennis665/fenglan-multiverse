@@ -69,18 +69,25 @@ class PetRenderer {
                 imgsLoaded: { body: false, head: false, face: false, back: false }
             };
 
-            // 根據階段與性格解析 WebP 像素圖片
+            // 根據寵物種類、階段與性格解析 WebP 像素圖片
             let imageUrl = "/static/pet_system/images/pet_egg.webp";
-            if (petData.stage === 1) imageUrl = "/static/pet_system/images/baby_dragon.webp";
-            else if (petData.stage === 2) imageUrl = "/static/pet_system/images/growth_dragon.webp";
-            else if (petData.stage === 3) imageUrl = "/static/pet_system/images/complete_dragon.webp";
-            else if (petData.stage === 4) {
-                if (petData.personality === "CHUBBY") {
-                    imageUrl = "/static/pet_system/images/pixel_chubby_dragon.webp";
-                } else if (petData.personality === "BRAVE") {
-                    imageUrl = "/static/pet_system/images/pixel_star_dragon.webp";
-                } else {
-                    imageUrl = "/static/pet_system/images/pixel_emerald_dragon.webp";
+            if (petData.pet_type === "DRAGON") {
+                if (petData.stage === 1) imageUrl = "/static/pet_system/images/baby_dragon.webp";
+                else if (petData.stage === 2) imageUrl = "/static/pet_system/images/growth_dragon.webp";
+                else if (petData.stage === 3) imageUrl = "/static/pet_system/images/complete_dragon.webp";
+                else if (petData.stage === 4) {
+                    if (petData.personality === "CHUBBY") imageUrl = "/static/pet_system/images/pixel_chubby_dragon.webp";
+                    else if (petData.personality === "BRAVE") imageUrl = "/static/pet_system/images/pixel_star_dragon.webp";
+                    else imageUrl = "/static/pet_system/images/pixel_emerald_dragon.webp";
+                }
+            } else { // PUPPY
+                if (petData.stage === 1) imageUrl = "/static/pet_system/images/baby_puppy.webp";
+                else if (petData.stage === 2) imageUrl = "/static/pet_system/images/growth_puppy.webp";
+                else if (petData.stage === 3) imageUrl = "/static/pet_system/images/complete_puppy.webp";
+                else if (petData.stage === 4) {
+                    if (petData.personality === "CHUBBY") imageUrl = "/static/pet_system/images/pixel_chubby_puppy.webp";
+                    else if (petData.personality === "BRAVE") imageUrl = "/static/pet_system/images/pixel_star_puppy.webp";
+                    else imageUrl = "/static/pet_system/images/pixel_emerald_puppy.webp";
                 }
             }
 

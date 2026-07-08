@@ -756,13 +756,24 @@
 
             // 大頭照
             let petAvatar = "/static/pet_system/images/pet_egg.webp";
-            if (pet.stage === 1) petAvatar = "/static/pet_system/images/baby_dragon.webp";
-            else if (pet.stage === 2) petAvatar = "/static/pet_system/images/growth_dragon.webp";
-            else if (pet.stage === 3) petAvatar = "/static/pet_system/images/complete_dragon.webp";
-            else if (pet.stage === 4) {
-                if (pet.personality === "CHUBBY") petAvatar = "/static/pet_system/images/pixel_chubby_dragon.webp";
-                else if (pet.personality === "BRAVE") petAvatar = "/static/pet_system/images/pixel_star_dragon.webp";
-                else petAvatar = "/static/pet_system/images/pixel_emerald_dragon.webp";
+            if (pet.pet_type === "DRAGON") {
+                if (pet.stage === 1) petAvatar = "/static/pet_system/images/baby_dragon.webp";
+                else if (pet.stage === 2) petAvatar = "/static/pet_system/images/growth_dragon.webp";
+                else if (pet.stage === 3) petAvatar = "/static/pet_system/images/complete_dragon.webp";
+                else if (pet.stage === 4) {
+                    if (pet.personality === "CHUBBY") petAvatar = "/static/pet_system/images/pixel_chubby_dragon.webp";
+                    else if (pet.personality === "BRAVE") petAvatar = "/static/pet_system/images/pixel_star_dragon.webp";
+                    else petAvatar = "/static/pet_system/images/pixel_emerald_dragon.webp";
+                }
+            } else { // PUPPY
+                if (pet.stage === 1) petAvatar = "/static/pet_system/images/baby_puppy.webp";
+                else if (pet.stage === 2) petAvatar = "/static/pet_system/images/growth_puppy.webp";
+                else if (pet.stage === 3) petAvatar = "/static/pet_system/images/complete_puppy.webp";
+                else if (pet.stage === 4) {
+                    if (pet.personality === "CHUBBY") petAvatar = "/static/pet_system/images/pixel_chubby_puppy.webp";
+                    else if (pet.personality === "BRAVE") petAvatar = "/static/pet_system/images/pixel_star_puppy.webp";
+                    else petAvatar = "/static/pet_system/images/pixel_emerald_puppy.webp";
+                }
             }
 
             const avatarBorder = pet.is_active 
@@ -1135,13 +1146,24 @@
         // 載入主體 WebP 與裝飾
         const petImg = new Image();
         let imageUrl = "/static/pet_system/images/pet_egg.webp";
-        if (activePet.stage === 1) imageUrl = "/static/pet_system/images/baby_dragon.webp";
-        else if (activePet.stage === 2) imageUrl = "/static/pet_system/images/growth_dragon.webp";
-        else if (activePet.stage === 3) imageUrl = "/static/pet_system/images/complete_dragon.webp";
-        else if (activePet.stage === 4) {
-            if (activePet.personality === "CHUBBY") imageUrl = "/static/pet_system/images/pixel_chubby_dragon.webp";
-            else if (activePet.personality === "BRAVE") imageUrl = "/static/pet_system/images/pixel_star_dragon.webp";
-            else imageUrl = "/static/pet_system/images/pixel_emerald_dragon.webp";
+        if (activePet.pet_type === "DRAGON") {
+            if (activePet.stage === 1) imageUrl = "/static/pet_system/images/baby_dragon.webp";
+            else if (activePet.stage === 2) imageUrl = "/static/pet_system/images/growth_dragon.webp";
+            else if (activePet.stage === 3) imageUrl = "/static/pet_system/images/complete_dragon.webp";
+            else if (activePet.stage === 4) {
+                if (activePet.personality === "CHUBBY") imageUrl = "/static/pet_system/images/pixel_chubby_dragon.webp";
+                else if (activePet.personality === "BRAVE") imageUrl = "/static/pet_system/images/pixel_star_dragon.webp";
+                else imageUrl = "/static/pet_system/images/pixel_emerald_dragon.webp";
+            }
+        } else { // PUPPY
+            if (activePet.stage === 1) imageUrl = "/static/pet_system/images/baby_puppy.webp";
+            else if (activePet.stage === 2) imageUrl = "/static/pet_system/images/growth_puppy.webp";
+            else if (activePet.stage === 3) imageUrl = "/static/pet_system/images/complete_puppy.webp";
+            else if (activePet.stage === 4) {
+                if (activePet.personality === "CHUBBY") imageUrl = "/static/pet_system/images/pixel_chubby_puppy.webp";
+                else if (activePet.personality === "BRAVE") imageUrl = "/static/pet_system/images/pixel_star_puppy.webp";
+                else imageUrl = "/static/pet_system/images/pixel_emerald_puppy.webp";
+            }
         }
         petImg.src = imageUrl;
 

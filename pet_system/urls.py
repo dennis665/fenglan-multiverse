@@ -19,4 +19,5 @@ urlpatterns = [
     path("api/buy_accessory/", views.api_buy_accessory, name="api_buy_accessory"),
     path("api/equip_accessory/", views.api_equip_accessory, name="api_equip_accessory"),
     path("api/tower_battle_result/", views.api_tower_battle_result, name="api_tower_battle_result"),
+    path("api/setup_shop_products/", views.api_setup_shop_products, name="api_setup_shop_products"),
 ]

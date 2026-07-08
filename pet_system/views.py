@@ -39,6 +39,34 @@ DRAGON_STORIES = {
     }
 }
 
+PUPPY_STORIES = {
+    0: {
+        "title": "神秘蛋",
+        "illustration": "/static/pet_system/images/pet_egg.webp",
+        "text": "在炙熱的火山岩洞深處，你發現了一顆散發著溫熱微光、隱約有著橘紅色火焰紋理的寵物蛋。它頑強地在熱浪中跳動，正等待著勇氣與溫暖將它喚醒..."
+    },
+    1: {
+        "title": "烈火破殼",
+        "illustration": "/static/pet_system/images/baby_puppy.webp",
+        "text": "咔嚓！蛋殼碎裂，一隻全身橘紅、尾巴帶有小火苗的幼犬滾了出來！牠興奮地繞著你轉圈，一邊發出清脆的汪汪聲，一邊伸出熱呼呼的舌頭舔你的手。烈火幼犬正式加入你的旅程！"
+    },
+    2: {
+        "title": "初展犬威",
+        "illustration": "/static/pet_system/images/growth_puppy.webp",
+        "text": "烈火幼犬在你的細心培育下，已經長成了體型健壯的烈火犬。牠身上的火焰毛髮燃燒得更為旺盛，奔跑時會留下一道道美麗的紅光殘影。牠已經學會用熱情和叫聲嚇退森林邊緣的小怪獸了！"
+    },
+    3: {
+        "title": "烈火神君",
+        "illustration": "/static/pet_system/images/complete_puppy.webp",
+        "text": "烈火犬完成了完全體的蛻變，成為了威風凜凜的烈火神犬。牠身上環繞著金紅色的護體火焰，眼神變得堅毅無比。現在的牠，不僅是你忠心耿耿的冒險夥伴，更是足以獨當一面的守護神犬！"
+    },
+    4: {
+        "title": "神話覺醒",
+        "illustration": "/static/pet_system/images/pixel_emerald_puppy.webp",
+        "text": "小火犬與自然精靈靈魂共鳴，火焰化為了神聖溫和的青綠之火。牠的額頭長出了神獸麒麟般的小角，足踏祥雲。作為祥瑞的麒麟火犬，牠發誓將以溫柔與幸運護佑您的前程。"
+    }
+}
+
 # 配件清單與價格
 ACCESSORY_SHOP = {
     "pixel_straw_hat": {"name": "草帽", "price": 100, "slot": "head"},
@@ -197,16 +225,28 @@ def api_get_active_shimeji(request):
         
     # 定義像素化渲染路徑
     pixel_img = "/static/pet_system/images/pet_egg.webp"
-    if active_pet.stage == 1: pixel_img = "/static/pet_system/images/baby_dragon.webp"
-    elif active_pet.stage == 2: pixel_img = "/static/pet_system/images/growth_dragon.webp"
-    elif active_pet.stage == 3: pixel_img = "/static/pet_system/images/complete_dragon.webp"
-    elif active_pet.stage == 4:
-        if active_pet.personality == "CHUBBY":
-            pixel_img = "/static/pet_system/images/pixel_chubby_dragon.webp"
-        elif active_pet.personality == "BRAVE":
-            pixel_img = "/static/pet_system/images/pixel_star_dragon.webp"
-        else:
-            pixel_img = "/static/pet_system/images/pixel_emerald_dragon.webp"
+    if active_pet.pet_type == "DRAGON":
+        if active_pet.stage == 1: pixel_img = "/static/pet_system/images/baby_dragon.webp"
+        elif active_pet.stage == 2: pixel_img = "/static/pet_system/images/growth_dragon.webp"
+        elif active_pet.stage == 3: pixel_img = "/static/pet_system/images/complete_dragon.webp"
+        elif active_pet.stage == 4:
+            if active_pet.personality == "CHUBBY":
+                pixel_img = "/static/pet_system/images/pixel_chubby_dragon.webp"
+            elif active_pet.personality == "BRAVE":
+                pixel_img = "/static/pet_system/images/pixel_star_dragon.webp"
+            else:
+                pixel_img = "/static/pet_system/images/pixel_emerald_dragon.webp"
+    else: # PUPPY
+        if active_pet.stage == 1: pixel_img = "/static/pet_system/images/baby_puppy.webp"
+        elif active_pet.stage == 2: pixel_img = "/static/pet_system/images/growth_puppy.webp"
+        elif active_pet.stage == 3: pixel_img = "/static/pet_system/images/complete_puppy.webp"
+        elif active_pet.stage == 4:
+            if active_pet.personality == "CHUBBY":
+                pixel_img = "/static/pet_system/images/pixel_chubby_puppy.webp"
+            elif active_pet.personality == "BRAVE":
+                pixel_img = "/static/pet_system/images/pixel_star_puppy.webp"
+            else:
+                pixel_img = "/static/pet_system/images/pixel_emerald_puppy.webp"
 
     return JsonResponse({
         "status": "success",
@@ -267,26 +307,36 @@ def api_hatch_egg(request):
         egg_inv.quantity -= 1
         egg_inv.save()
         
-        # 預設孵化一隻幻獸綠龍
+        # 隨機決定孵化出幻獸綠龍或烈火幼犬
+        import random
+        pet_type = random.choice(["DRAGON", "PUPPY"])
+        
+        if pet_type == "DRAGON":
+            pet_name = "神秘的龍蛋"
+            story_dict = DRAGON_STORIES
+        else:
+            pet_name = "神秘的火犬蛋"
+            story_dict = PUPPY_STORIES
+
         new_pet = Pet.objects.create(
             user=user,
-            name="神秘的龍蛋",
-            pet_type="DRAGON",
+            name=pet_name,
+            pet_type=pet_type,
             stage=0,
             growth_progress=0,
             is_active=True
         )
         
-        unlock, _ = PetStoryUnlock.objects.get_or_create(user=user, pet_type="DRAGON")
+        unlock, _ = PetStoryUnlock.objects.get_or_create(user=user, pet_type=pet_type)
         if unlock.max_stage_reached < 0:
             unlock.max_stage_reached = 0
             unlock.save()
 
     return JsonResponse({
         "status": "success",
-        "message": "成功孵化了一顆神秘龍蛋！",
+        "message": f"成功孵化了一顆{new_pet.get_pet_type_display()}！",
         "pet_id": new_pet.id,
-        "story": DRAGON_STORIES[0]
+        "story": story_dict[0]
     })
 
 
@@ -356,23 +406,35 @@ def api_evolve_pet(request):
         else:
             pet.growth_progress = 100
         
-        if pet.stage == 1 and pet.name == "神秘的龍蛋":
-            pet.name = "綠色雛龍"
+        if pet.stage == 1:
+            if pet.pet_type == "DRAGON" and pet.name == "神秘的龍蛋":
+                pet.name = "綠色雛龍"
+            elif pet.pet_type == "PUPPY" and pet.name == "神秘的火犬蛋":
+                pet.name = "烈火幼犬"
             
         # 終極形態 (Stage 4) 分支進化判定：
         if pet.stage == 4:
-            # 1. 肥嘟嘟守護龍：如果完全沒有餵食任何道具 (全程靠登入天數)
+            # 1. 肥嘟嘟分支：如果完全沒有餵食任何道具 (全程靠登入天數)
             if pet.feed_items_consumed == 0 and pet.potions_consumed == 0:
                 pet.personality = "CHUBBY"
-                pet.name = "肥嘟嘟守護龍"
-            # 2. 烈焰星光龍：餵食進化藥水大於普通飼料
+                if pet.pet_type == "DRAGON":
+                    pet.name = "肥嘟嘟守護龍"
+                else:
+                    pet.name = "肥嘟嘟烈火犬"
+            # 2. 勇敢分支：餵食進化藥水大於普通飼料
             elif pet.potions_consumed > pet.feed_items_consumed:
                 pet.personality = "BRAVE"
-                pet.name = "烈焰星光龍"
-            # 3. 自然翡翠龍：其他正常餵食情況
+                if pet.pet_type == "DRAGON":
+                    pet.name = "烈焰星光龍"
+                else:
+                    pet.name = "地獄烈焰犬"
+            # 3. 普通分支：其他正常餵食情況
             else:
                 pet.personality = "NORMAL"
-                pet.name = "自然翡翠龍"
+                if pet.pet_type == "DRAGON":
+                    pet.name = "自然翡翠龍"
+                else:
+                    pet.name = "麒麟火犬"
         
         pet.save()
         
@@ -383,18 +445,28 @@ def api_evolve_pet(request):
             unlock.save()
 
     # 取得對應階段劇情
-    story = DRAGON_STORIES.get(pet.stage, {}).copy()
-    
-    # 根據不同分支變更 Evolved 圖片
-    if pet.stage == 4:
-        if pet.personality == "CHUBBY":
-            story["illustration"] = "/static/pet_system/images/pixel_chubby_dragon.webp"
-            story["title"] = "肥嘟嘟守護龍 降臨！"
-            story["text"] = "你採取了悠閒的佛系培育，小綠龍吃飽睡、睡飽吃，在一陣響亮的飽嗝聲中，牠膨脹成了一顆毛茸茸的圓形大綠球！雖然飛不太動，但牠開心地抱著一袋金幣對你傻笑。作為肥嘟嘟守護龍，牠決定每天為你帶來好運金幣！"
-        elif pet.personality == "BRAVE":
-            story["illustration"] = "/static/pet_system/images/pixel_star_dragon.webp"
-            story["title"] = "烈焰星光龍 覺醒！"
-            story["text"] = "在大量魔力藥水的洗禮下，龍蛋殼內部的熾烈核心被激發！牠的身軀燃起了蔚藍星焰，翅膀環繞著燃燒星斗。烈焰星光龍以英勇無比的姿態長嘯，這股強大的攻擊力將助你在塔頂所向披靡！"
+    if pet.pet_type == "DRAGON":
+        story = DRAGON_STORIES.get(pet.stage, {}).copy()
+        if pet.stage == 4:
+            if pet.personality == "CHUBBY":
+                story["illustration"] = "/static/pet_system/images/pixel_chubby_dragon.webp"
+                story["title"] = "肥嘟嘟守護龍 降臨！"
+                story["text"] = "你採取了悠閒的佛系培育，小綠龍吃飽睡、睡飽吃，在一陣響亮的飽嗝聲中，牠膨脹成了一顆毛茸茸的圓形大綠球！雖然飛不太動，但牠開心地抱著一袋金幣對你傻笑。作為肥嘟嘟守護龍，牠決定每天為你帶來好運金幣！"
+            elif pet.personality == "BRAVE":
+                story["illustration"] = "/static/pet_system/images/pixel_star_dragon.webp"
+                story["title"] = "烈焰星光龍 覺醒！"
+                story["text"] = "在大量魔力藥水的洗禮下，龍蛋殼內部的熾烈核心被激發！牠的身軀燃起了蔚藍星焰，翅膀環繞著燃燒星斗。烈焰星光龍以英勇無比的姿態長嘯，這股強大的攻擊力將助你在塔頂所向批靡！"
+    else:
+        story = PUPPY_STORIES.get(pet.stage, {}).copy()
+        if pet.stage == 4:
+            if pet.personality == "CHUBBY":
+                story["illustration"] = "/static/pet_system/images/pixel_chubby_puppy.webp"
+                story["title"] = "肥嘟嘟烈火犬 降臨！"
+                story["text"] = "小火犬在你的寵愛下吃飽就睡，最後竟然胖成了一個燃燒著微弱小火苗的圓滾滾毛球！雖然連跑路都用滾的，但牠非常溫順，每天趴在門口幫你叼著裝滿 50 寵物金幣的袋子。今天也是暖呼呼的一天！"
+            elif pet.personality == "BRAVE":
+                story["illustration"] = "/static/pet_system/images/pixel_star_puppy.webp"
+                story["title"] = "地獄烈焰星犬 覺醒！"
+                story["text"] = "在奇蹟進化藥水灌溉下，幼犬體內的遠古地獄之火被徹底點燃！牠的身軀化作黑曜石裝甲，雙眼閃爍著金紅神光，全身噴湧出熔岩般的紅星之焰！地獄烈焰犬將以無敵的英姿為你撕碎冒險塔的所有妖魔！"
 
     return JsonResponse({
         "status": "success",
@@ -451,6 +523,8 @@ def api_get_story(request):
     
     if pet_type == "DRAGON" and stage in DRAGON_STORIES:
         return JsonResponse({"status": "success", "story": DRAGON_STORIES[stage]})
+    elif pet_type == "PUPPY" and stage in PUPPY_STORIES:
+        return JsonResponse({"status": "success", "story": PUPPY_STORIES[stage]})
     return JsonResponse({"status": "error", "message": "故事章節不存在！"})
 
 
@@ -691,4 +765,58 @@ def api_tower_battle_result(request):
         "message": f"挑戰成功！闖入第 {tower.current_floor} 層！獲得寵物金幣 x{coins_reward}！",
         "coins_reward": coins_reward,
         "new_floor": tower.current_floor
+    })
+
+
+@login_required
+@require_POST
+def api_setup_shop_products(request):
+    """一鍵建立商城預設寵物商品（限管理員）"""
+    if not request.user.is_staff:
+        return JsonResponse({"status": "error", "message": "權限不足，必須是管理員！"})
+        
+    from finance.models import Product
+    
+    defaults = [
+        {
+            "name": "神秘寵物蛋",
+            "category": "PET_EGG",
+            "description": "孵化出像素綠龍幼獸的神秘蛋，能帶給您忠誠的陪伴與神奇的冒險！",
+            "price_in_points": 50,
+            "stock": 999,
+        },
+        {
+            "name": "美味寵物乾糧",
+            "category": "PET_FOOD",
+            "description": "像素寵物最愛吃的頂級乾糧，餵食能增加 15 點成長度！",
+            "price_in_points": 10,
+            "stock": 999,
+        },
+        {
+            "name": "奇蹟進化藥水",
+            "category": "PET_FOOD",
+            "description": "極其珍貴的魔力藥水，服用能瞬間暴增 50 點成長度，是快速進化不可或缺的秘寶！",
+            "price_in_points": 80,
+            "stock": 999,
+        }
+    ]
+    
+    created_count = 0
+    for item in defaults:
+        prod, created = Product.objects.get_or_create(
+            name=item["name"],
+            defaults={
+                "category": item["category"],
+                "description": item["description"],
+                "price_in_points": item["price_in_points"],
+                "stock": item["stock"],
+                "is_active": True
+            }
+        )
+        if created:
+            created_count += 1
+            
+    return JsonResponse({
+        "status": "success",
+        "message": f"商城初始化成功！已新建 {created_count} 項商品（神秘寵物蛋、美味寵物乾糧、奇蹟進化藥水）。"
     })
