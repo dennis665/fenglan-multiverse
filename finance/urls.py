@@ -15,4 +15,5 @@ urlpatterns = [
     path("shop/checkout/", views.checkout_cart, name="checkout_cart"),
     #! 💳 綠界金流共用回傳路由
     path("ecpay/return/", views.ecpay_return, name="ecpay_return"),
+    path("ecpay/client_back/", views.ecpay_client_back, name="ecpay_client_back"),
 ]

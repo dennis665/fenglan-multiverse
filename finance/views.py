@@ -61,6 +61,7 @@ def process_recharge(request, package_id):
             MerchantID=settings.MERCHANT_ID, HashKey=settings.HASH_KEY, HashIV=settings.HASH_IV
         )
         return_url = request.build_absolute_uri(reverse("finance:ecpay_return"))
+        client_back_url = request.build_absolute_uri(reverse("finance:ecpay_client_back"))
         back_url = request.build_absolute_uri(reverse("finance:shop"))
 
         #! 打包綠界參數
@@ -72,6 +73,8 @@ def process_recharge(request, package_id):
             "ItemName": f"{package.name} ({package.deposit_points}點)",
             #! 這裡填寫回 https 頁面
             "ReturnURL": return_url,
+            #! 本機開發測試利器：利用 OrderResultURL 把付款結果透過用戶瀏覽器 POST 回傳
+            "OrderResultURL": client_back_url,
             #! 結帳完成後，畫面上的「返回商店」導向回商店
             "ClientBackURL": back_url,
             "ChoosePayment": "ALL",
@@ -190,6 +193,7 @@ def checkout_product_ecpay(request, product_id):
             MerchantID=settings.MERCHANT_ID, HashKey=settings.HASH_KEY, HashIV=settings.HASH_IV
         )
         return_url = request.build_absolute_uri(reverse("finance:ecpay_return"))
+        client_back_url = request.build_absolute_uri(reverse("finance:ecpay_client_back"))
         back_url = request.build_absolute_uri(reverse("finance:shop"))
         order_params = {
             "MerchantTradeNo": trade_no,
@@ -198,6 +202,7 @@ def checkout_product_ecpay(request, product_id):
             "TradeDesc": f"購買 {product.name}",
             "ItemName": product.name,
             "ReturnURL": return_url,
+            "OrderResultURL": client_back_url,
             "ClientBackURL": back_url,
             "ChoosePayment": "ALL",
             "EncryptType": 1,
@@ -210,7 +215,6 @@ def checkout_product_ecpay(request, product_id):
     return HttpResponse("Method Not Allowed", status=405)
 
 
-#! 加上 csrf_exempt，因為這個 POST 是綠界發的，不會有你的 CSRF Token
 @csrf_exempt
 def ecpay_return(request):
     """處理綠界背景發送的付款結果通知"""
@@ -225,69 +229,211 @@ def ecpay_return(request):
         calculated_mac = ecpay_payment_sdk.generate_check_value(receive_data)
         is_valid = received_mac == calculated_mac
 
-        if is_valid and receive_data.get("RtnCode") == "1":
+        if is_valid:
             trade_no = receive_data.get("MerchantTradeNo")
+            rtn_code = receive_data.get("RtnCode")
 
-            #! 點數儲值處理
-            if trade_no.startswith("REC"):
-                order = RechargeOrder.objects.filter(merchant_trade_no=trade_no, status="PENDING").first()
-                if order:
-                    #! 更新訂單狀態
-                    order.status = "SUCCESS"
-                    order.save()
+            if rtn_code == "1":
+                #! 點數儲值處理
+                if trade_no.startswith("REC"):
+                    order = RechargeOrder.objects.filter(
+                        merchant_trade_no=trade_no, status="PENDING"
+                    ).first()
+                    if order:
+                        order.status = "SUCCESS"
+                        order.save()
 
-                    #! 找出他當初買的方案
-                    package = PointPackage.objects.filter(price=order.amount).first()
+                        package = PointPackage.objects.filter(price=order.amount).first()
 
-                    if package:
-                        #! 使用 Transaction 把點數加進錢包
+                        # 商業兜底容錯：若方案被刪除或修改，採用 1:1 點數比例儲值，保障付款使用者權益！
+                        if not package:
+                            deposit_pts = order.amount
+                            bonus_pts = 0
+                            package_name = f"自訂儲值方案 (NT${order.amount})"
+                        else:
+                            deposit_pts = package.deposit_points
+                            bonus_pts = package.bonus_points
+                            package_name = package.name
+
                         with transaction.atomic():
                             wallet, _ = UserPoints.objects.select_for_update().get_or_create(user=order.user)
-                            wallet.deposit_points += package.deposit_points
-                            wallet.bonus_points += package.bonus_points
+                            wallet.deposit_points += deposit_pts
+                            wallet.bonus_points += bonus_pts
                             wallet.save()
 
-                            #! 寫入流水帳 (儲值點數)
                             PointTransaction.objects.create(
                                 user=order.user,
                                 transaction_type="RECHARGE",
                                 point_type="DEPOSIT",
-                                amount=package.deposit_points,
+                                amount=deposit_pts,
                                 reference_id=trade_no,
                                 recharge_order=order,
-                                description=f"綠界儲值方案：{package.name}",
+                                description=f"綠界儲值方案：{package_name}",
                             )
-                            #! 如果有送紅利，額外記一筆紅利流水帳
-                            if package.bonus_points > 0:
+                            if bonus_pts > 0:
                                 PointTransaction.objects.create(
                                     user=order.user,
                                     transaction_type="REWARD",
                                     point_type="BONUS",
-                                    amount=package.bonus_points,
+                                    amount=bonus_pts,
                                     reference_id=trade_no,
                                     recharge_order=order,
-                                    description=f"儲值滿額贈紅利：{package.name}",
+                                    description=f"儲值滿額贈紅利：{package_name}",
                                 )
+                #! 直接刷卡買商品處理 (你保留的擴充功能)
+                elif trade_no.startswith("SHOP"):
+                    order = ShopOrder.objects.filter(
+                        ecpay_trade_no=trade_no, status="PENDING"
+                    ).first()
+                    if order and order.product:
+                        order.status = "PAID"
+                        order.product.stock -= order.quantity
+                        order.product.save()
 
-            #! 直接刷卡買商品處理 (你保留的擴充功能)
-            elif trade_no.startswith("SHOP"):
-                order = ShopOrder.objects.filter(ecpay_trade_no=trade_no, status="PENDING").first()
-                if order and order.product:
-                    order.status = "PAID"
-                    order.product.stock -= order.quantity
-                    order.product.save()
-                    
-                    # 如果商品是寵物相關商品，自動歸入玩家背包 (UserInventory)
-                    if order.product.category in ["PET_EGG", "PET_FOOD"]:
-                        from pet_system.models import UserInventory
-                        inv, _ = UserInventory.objects.get_or_create(user=order.user, product=order.product)
-                        inv.quantity += order.quantity
-                        inv.save()
-                        
-                    order.save()
+                        if order.product.category in ["PET_EGG", "PET_FOOD"]:
+                            from pet_system.models import UserInventory
 
-            #! 必須回傳 1|OK 給綠界，否則綠界會以為沒收到，一直重複發送！
+                            inv, _ = UserInventory.objects.get_or_create(
+                                user=order.user, product=order.product
+                            )
+                            inv.quantity += order.quantity
+                            inv.save()
+
+                        order.save()
+            else:
+                # 付款失敗，將訂單狀態更新為 FAILED 存入 DB
+                if trade_no.startswith("REC"):
+                    order = RechargeOrder.objects.filter(
+                        merchant_trade_no=trade_no, status="PENDING"
+                    ).first()
+                    if order:
+                        order.status = "FAILED"
+                        order.save()
+                elif trade_no.startswith("SHOP"):
+                    order = ShopOrder.objects.filter(
+                        ecpay_trade_no=trade_no, status="PENDING"
+                    ).first()
+                    if order:
+                        order.status = "FAILED"
+                        order.save()
+
             return HttpResponse("1|OK")
 
         return HttpResponse("0|ErrorMessage")
     return HttpResponse("Method Not Allowed", status=405)
+
+
+@csrf_exempt
+def ecpay_client_back(request):
+    """處理綠界瀏覽器 POST 導回 (OrderResultURL) 的付款結果通知，確保本機測試也能成功入帳"""
+    if request.method == "POST":
+        receive_data = request.POST.dict()
+
+        ecpay_payment_sdk = ECPayPaymentSdk(
+            MerchantID=settings.MERCHANT_ID, HashKey=settings.HASH_KEY, HashIV=settings.HASH_IV
+        )
+        received_mac = receive_data.get("CheckMacValue")
+        calculated_mac = ecpay_payment_sdk.generate_check_value(receive_data)
+        is_valid = received_mac == calculated_mac
+
+        if is_valid:
+            trade_no = receive_data.get("MerchantTradeNo")
+            rtn_code = receive_data.get("RtnCode")
+
+            if rtn_code == "1":
+                # 點數儲值處理
+                if trade_no.startswith("REC"):
+                    order = RechargeOrder.objects.filter(
+                        merchant_trade_no=trade_no, status="PENDING"
+                    ).first()
+                    if order:
+                        order.status = "SUCCESS"
+                        order.save()
+
+                        package = PointPackage.objects.filter(price=order.amount).first()
+                        if not package:
+                            deposit_pts = order.amount
+                            bonus_pts = 0
+                            package_name = f"自訂儲值方案 (NT${order.amount})"
+                        else:
+                            deposit_pts = package.deposit_points
+                            bonus_pts = package.bonus_points
+                            package_name = package.name
+
+                        with transaction.atomic():
+                            wallet, _ = UserPoints.objects.select_for_update().get_or_create(
+                                user=order.user
+                            )
+                            wallet.deposit_points += deposit_pts
+                            wallet.bonus_points += bonus_pts
+                            wallet.save()
+
+                            PointTransaction.objects.create(
+                                user=order.user,
+                                transaction_type="RECHARGE",
+                                point_type="DEPOSIT",
+                                amount=deposit_pts,
+                                reference_id=trade_no,
+                                recharge_order=order,
+                                description=f"綠界儲值方案：{package_name}",
+                            )
+                            if bonus_pts > 0:
+                                PointTransaction.objects.create(
+                                    user=order.user,
+                                    transaction_type="REWARD",
+                                    point_type="BONUS",
+                                    amount=bonus_pts,
+                                    reference_id=trade_no,
+                                    recharge_order=order,
+                                    description=f"儲值滿額贈紅利：{package_name}",
+                                )
+                        messages.success(request, f"儲值成功！已存入 {deposit_pts} 點數。")
+                    else:
+                        messages.info(request, "儲值已完成處理。")
+
+                # 直接卡片購買商品處理
+                elif trade_no.startswith("SHOP"):
+                    order = ShopOrder.objects.filter(
+                        ecpay_trade_no=trade_no, status="PENDING"
+                    ).first()
+                    if order and order.product:
+                        order.status = "PAID"
+                        order.product.stock -= order.quantity
+                        order.product.save()
+
+                        if order.product.category in ["PET_EGG", "PET_FOOD"]:
+                            from pet_system.models import UserInventory
+
+                            inv, _ = UserInventory.objects.get_or_create(
+                                user=order.user, product=order.product
+                            )
+                            inv.quantity += order.quantity
+                            inv.save()
+
+                        order.save()
+                        messages.success(request, f"商品 {order.product.name} 購買成功！")
+                    else:
+                        messages.info(request, "商品購買已完成處理。")
+            else:
+                # 付款失敗，將訂單狀態更新為 FAILED 存入 DB
+                if trade_no.startswith("REC"):
+                    order = RechargeOrder.objects.filter(
+                        merchant_trade_no=trade_no, status="PENDING"
+                    ).first()
+                    if order:
+                        order.status = "FAILED"
+                        order.save()
+                elif trade_no.startswith("SHOP"):
+                    order = ShopOrder.objects.filter(
+                        ecpay_trade_no=trade_no, status="PENDING"
+                    ).first()
+                    if order:
+                        order.status = "FAILED"
+                        order.save()
+                messages.error(request, "付款失敗，請重新嘗試！")
+        else:
+            messages.error(request, "金流驗證失敗！")
+
+        return redirect("finance:shop")
+
+    return redirect("finance:shop")
