@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 16:22+0800\n"
+"POT-Creation-Date: 2026-07-08 15:57+0800\n"
 "PO-Revision-Date: 2026-02-25 09:15+0800\n"
 "Last-Translator: Dennis <dennis1027685@gmail.com>\n"
 "Language-Team: Traditional Chinese\n"
@@ -19,261 +19,261 @@ msgstr ""
 
 #: .\bionic_chat\admin.py:31
 msgid "使用者內容截斷"
-msgstr ""
+msgstr "使用者內容截斷"
 
 #: .\bionic_chat\admin.py:36
 msgid "仿生人回覆截斷"
-msgstr ""
+msgstr "仿生人回覆截斷"
 
 #: .\bionic_chat\apps.py:7
 msgid "仿生人對話系統"
-msgstr ""
+msgstr "仿生人對話系統"
 
 #: .\bionic_chat\models.py:8
 msgid "使用者輸入"
-msgstr ""
+msgstr "使用者輸入"
 
 #: .\bionic_chat\models.py:12
 msgid "仿生人回覆"
-msgstr ""
+msgstr "仿生人回覆"
 
 #: .\bionic_chat\models.py:17 .\core\models.py:9 .\finance\models.py:38
-#: .\finance\models.py:76 .\finance\models.py:149 .\invest\models.py:58
+#: .\finance\models.py:76 .\finance\models.py:159 .\invest\models.py:58
 #: .\invest\models.py:93 .\line_manager\models.py:17
-#: .\line_manager\models.py:61 .\sh_recognition\models.py:41
+#: .\line_manager\models.py:62 .\sh_recognition\models.py:41
 #: .\study_brain\models.py:11 .\transfer_system\models.py:17
 #: .\tube_hub\models.py:20 .\tube_hub\models.py:60
 msgid "建立時間"
-msgstr ""
+msgstr "建立時間"
 
 #: .\bionic_chat\models.py:21 .\bionic_chat\models.py:22
 msgid "對話紀錄"
-msgstr ""
+msgstr "對話紀錄"
 
 #: .\config\consumers.py:23
 msgid "伺服器已收到"
-msgstr ""
+msgstr "伺服器已收到"
 
-#: .\config\settings.py:321
+#: .\config\settings.py:328
 msgid "繁體中文"
-msgstr ""
+msgstr "繁體中文"
 
-#: .\config\settings.py:322
+#: .\config\settings.py:329
 msgid "英文"
-msgstr ""
+msgstr "英文"
 
-#: .\config\settings.py:323
+#: .\config\settings.py:330
 msgid "日文"
-msgstr ""
+msgstr "日文"
 
 #: .\core\admin.py:40
 msgid "平均耗時 (秒)"
-msgstr ""
+msgstr "平均耗時 (秒)"
 
 #: .\core\admin.py:45 .\core\apps.py:30
 msgid "下次執行時間"
-msgstr ""
+msgstr "下次執行時間"
 
 #: .\core\admin.py:51
 msgid "立刻執行選定的任務"
-msgstr ""
+msgstr "立刻執行選定的任務"
 
 #: .\core\admin.py:59
 msgid "狀態標籤"
-msgstr ""
+msgstr "狀態標籤"
 
 #: .\core\admin.py:64
 msgid "本地執行時間"
-msgstr ""
+msgstr "本地執行時間"
 
 #: .\core\admin.py:69
 msgid "實際耗時"
-msgstr ""
+msgstr "實際耗時"
 
 #: .\core\admin.py:93 .\notices\models.py:10
 msgid "標題"
-msgstr ""
+msgstr "標題"
 
 #: .\core\admin.py:99 .\study_brain\models.py:27
 msgid "上傳者"
-msgstr ""
+msgstr "上傳者"
 
 #: .\core\admin.py:105
 msgid "建立日期"
-msgstr ""
+msgstr "建立日期"
 
 #: .\core\apps.py:7
 msgid "核心系統"
-msgstr ""
+msgstr "核心系統"
 
 #: .\core\apps.py:17
 msgid "排程任務管理"
-msgstr ""
+msgstr "排程任務管理"
 
 #: .\core\apps.py:21 .\core\apps.py:22
 msgid "背景任務"
-msgstr ""
+msgstr "背景任務"
 
 #: .\core\apps.py:26
 msgid "任務 ID"
-msgstr ""
+msgstr "任務 ID"
 
 #: .\core\apps.py:27
 msgid "此任務的唯一識別碼。"
-msgstr ""
+msgstr "此任務的唯一識別碼。"
 
 #: .\core\apps.py:31
 msgid "排定下次執行此任務的日期與時間。"
-msgstr ""
+msgstr "排定下次執行此任務的日期與時間。"
 
 #: .\core\apps.py:34
 msgid "任務狀態 (二進位)"
-msgstr ""
+msgstr "任務狀態 (二進位)"
 
 #: .\core\apps.py:38 .\core\apps.py:39
 msgid "執行紀錄"
-msgstr ""
+msgstr "執行紀錄"
 
 #: .\core\apps.py:43
 msgid "紀錄 ID"
-msgstr ""
+msgstr "紀錄 ID"
 
 #: .\core\apps.py:44
 msgid "此任務執行紀錄的唯一 ID。"
-msgstr ""
+msgstr "此任務執行紀錄的唯一 ID。"
 
 #: .\core\apps.py:47
 msgid "所屬任務"
-msgstr ""
+msgstr "所屬任務"
 
 #: .\core\apps.py:48
 msgid "此執行紀錄關聯的排程任務。"
-msgstr ""
+msgstr "此執行紀錄關聯的排程任務。"
 
 #: .\core\apps.py:51
 msgid "執行狀態"
-msgstr ""
+msgstr "執行狀態"
 
 #: .\core\apps.py:52
 msgid "此任務執行的當前狀態。"
-msgstr ""
+msgstr "此任務執行的當前狀態。"
 
 #: .\core\apps.py:55
 msgid "執行時間"
-msgstr ""
+msgstr "執行時間"
 
 #: .\core\apps.py:56
 msgid "此任務開始執行的日期與時間。"
-msgstr ""
+msgstr "此任務開始執行的日期與時間。"
 
 #: .\core\apps.py:59
 msgid "耗時 (秒)"
-msgstr ""
+msgstr "耗時 (秒)"
 
 #: .\core\apps.py:60
 msgid "此任務的總執行時間 (以秒為單位)。"
-msgstr ""
+msgstr "此任務的總執行時間 (以秒為單位)。"
 
 #: .\core\apps.py:63
 msgid "完成時間戳"
-msgstr ""
+msgstr "完成時間戳"
 
 #: .\core\apps.py:64
 msgid "此任務完成時的時間戳記。"
-msgstr ""
+msgstr "此任務完成時的時間戳記。"
 
 #: .\core\apps.py:67
 msgid "異常訊息"
-msgstr ""
+msgstr "異常訊息"
 
 #: .\core\apps.py:68
 msgid "任務執行期間發生的異常詳細資訊 (若有的話)。"
-msgstr ""
+msgstr "任務執行期間發生的異常詳細資訊 (若有的話)。"
 
 #: .\core\apps.py:71
 msgid "錯誤追蹤"
-msgstr ""
+msgstr "錯誤追蹤"
 
 #: .\core\apps.py:72
 msgid "任務執行期間發生異常的追蹤紀錄 (若有的話)。"
-msgstr ""
+msgstr "任務執行期間發生異常的追蹤紀錄 (若有的話)。"
 
 #: .\core\models.py:10 .\finance\models.py:12 .\invest\models.py:37
-#: .\line_manager\models.py:62 .\notices\models.py:57
+#: .\line_manager\models.py:63 .\notices\models.py:57
 msgid "更新時間"
-msgstr ""
+msgstr "更新時間"
 
 #: .\core\models.py:18
 msgid "幸運大轉盤"
-msgstr ""
+msgstr "幸運大轉盤"
 
 #: .\core\models.py:19
 msgid "發文簿系統"
-msgstr ""
+msgstr "發文簿系統"
 
 #: .\core\models.py:20
 msgid "個人化大頭貼"
-msgstr ""
+msgstr "個人化大頭貼"
 
 #: .\core\models.py:21
 msgid "AI 智能客服"
-msgstr ""
+msgstr "AI 智能客服"
 
 #: .\core\models.py:22
 msgid "公告系統"
-msgstr ""
+msgstr "公告系統"
 
 #: .\core\models.py:23
 msgid "管理後台"
-msgstr ""
+msgstr "管理後台"
 
 #: .\core\models.py:24
 msgid "安定系統"
-msgstr ""
+msgstr "安定系統"
 
 #: .\core\models.py:27
 msgid "功能名稱"
-msgstr ""
+msgstr "功能名稱"
 
 #: .\core\models.py:28
 msgid "全局啟用狀態"
-msgstr ""
+msgstr "全局啟用狀態"
 
 #: .\core\models.py:31
 msgid "訪客可用"
-msgstr ""
+msgstr "訪客可用"
 
 #: .\core\models.py:32
 msgid "一般用戶可用"
-msgstr ""
+msgstr "一般用戶可用"
 
 #: .\core\models.py:33
 msgid "工作人員可用"
-msgstr ""
+msgstr "工作人員可用"
 
 #: .\core\models.py:34
 msgid "管理員可用"
-msgstr ""
+msgstr "管理員可用"
 
 #: .\core\models.py:36
 msgid "功能簡介"
-msgstr ""
+msgstr "功能簡介"
 
 #: .\core\models.py:37
 msgid "顯示順序"
-msgstr ""
+msgstr "顯示順序"
 
 #: .\core\models.py:40 .\core\models.py:41
 msgid "功能權限管理"
-msgstr ""
+msgstr "功能權限管理"
 
 #: .\core\models.py:60
 msgid "企業資訊"
-msgstr ""
+msgstr "企業資訊"
 
 #: .\core\models.py:61
 msgid "企業資訊管理"
-msgstr ""
+msgstr "企業資訊管理"
 
 #: .\core\views.py:40
 msgid "Avatar updated successfully!"
@@ -285,1214 +285,1444 @@ msgstr "AI 目前正在休息，請稍後再試。"
 
 #: .\finance\apps.py:7
 msgid "財務與商城"
-msgstr ""
+msgstr "財務與商城"
 
 #: .\finance\models.py:9 .\finance\models.py:31 .\finance\models.py:60
-#: .\finance\models.py:133 .\line_manager\models.py:11
-#: .\line_manager\models.py:78 .\study_brain\models.py:67
+#: .\finance\models.py:143 .\line_manager\models.py:11
+#: .\line_manager\models.py:79 .\pet_system\models.py:70
+#: .\pet_system\models.py:84 .\pet_system\models.py:120
+#: .\pet_system\models.py:132 .\pet_system\models.py:146
+#: .\pet_system\models.py:159 .\study_brain\models.py:67
 #: .\study_brain\models.py:83 .\users\models.py:16
 msgid "使用者"
-msgstr ""
+msgstr "使用者"
 
 #: .\finance\models.py:10 .\finance\models.py:20 .\finance\models.py:56
 msgid "儲值點數"
-msgstr ""
+msgstr "儲值點數"
 
 #: .\finance\models.py:11 .\finance\models.py:20 .\finance\models.py:57
 msgid "紅利點數"
-msgstr ""
+msgstr "紅利點數"
 
 #: .\finance\models.py:15 .\finance\models.py:16
 msgid "錢包餘額"
-msgstr ""
+msgstr "錢包餘額"
 
-#: .\finance\models.py:27 .\finance\models.py:128
+#: .\finance\models.py:27 .\finance\models.py:138
 msgid "待付款"
-msgstr ""
+msgstr "待付款"
 
 #: .\finance\models.py:28
 msgid "付款成功"
-msgstr ""
+msgstr "付款成功"
 
-#: .\finance\models.py:29 .\finance\models.py:130
+#: .\finance\models.py:29 .\finance\models.py:140
 msgid "付款失敗"
-msgstr ""
+msgstr "付款失敗"
 
 #: .\finance\models.py:34
 msgid "特店交易編號"
-msgstr ""
+msgstr "特店交易編號"
 
 #: .\finance\models.py:35
 msgid "儲值金額"
-msgstr ""
+msgstr "儲值金額"
 
-#: .\finance\models.py:36 .\finance\models.py:143
+#: .\finance\models.py:36 .\finance\models.py:153
 msgid "訂單狀態"
-msgstr ""
+msgstr "訂單狀態"
 
 #: .\finance\models.py:37
 msgid "付款時間"
-msgstr ""
+msgstr "付款時間"
 
 #: .\finance\models.py:41 .\finance\models.py:42
 msgid "綠界儲值訂單"
-msgstr ""
+msgstr "綠界儲值訂單"
 
 #: .\finance\models.py:49
 msgid "儲值"
-msgstr ""
+msgstr "儲值"
 
 #: .\finance\models.py:50
 msgid "購物扣抵"
-msgstr ""
+msgstr "購物扣抵"
 
 #: .\finance\models.py:51
 msgid "活動贈送"
-msgstr ""
+msgstr "活動贈送"
 
 #: .\finance\models.py:52
 msgid "退貨返還"
-msgstr ""
+msgstr "退貨返還"
 
 #: .\finance\models.py:61 .\invest\models.py:81
 msgid "交易類型"
-msgstr ""
+msgstr "交易類型"
 
 #: .\finance\models.py:62
 msgid "點數類型"
-msgstr ""
+msgstr "點數類型"
 
 #: .\finance\models.py:65
 msgid "變動金額"
-msgstr ""
+msgstr "變動金額"
 
 #: .\finance\models.py:68
 msgid "關聯單號"
-msgstr ""
+msgstr "關聯單號"
 
 #: .\finance\models.py:72
 msgid "關聯儲值訂單"
-msgstr ""
+msgstr "關聯儲值訂單"
 
 #: .\finance\models.py:75
 msgid "備註"
-msgstr ""
+msgstr "備註"
 
 #: .\finance\models.py:79 .\finance\models.py:80
 msgid "點數交易紀錄"
-msgstr ""
+msgstr "點數交易紀錄"
 
 #: .\finance\models.py:87
 msgid "方案名稱"
-msgstr ""
+msgstr "方案名稱"
 
-#: .\finance\models.py:88 .\finance\models.py:108
+#: .\finance\models.py:88 .\finance\models.py:118
 msgid "台幣售價"
-msgstr ""
+msgstr "台幣售價"
 
 #: .\finance\models.py:89
 msgid "獲得儲值點數"
-msgstr ""
+msgstr "獲得儲值點數"
 
 #: .\finance\models.py:90
 msgid "加贈紅利點數"
-msgstr ""
+msgstr "加贈紅利點數"
 
-#: .\finance\models.py:91 .\finance\models.py:110
+#: .\finance\models.py:91 .\finance\models.py:120
 msgid "是否上架"
-msgstr ""
+msgstr "是否上架"
 
 #: .\finance\models.py:94 .\finance\models.py:95
 msgid "儲值方案"
-msgstr ""
+msgstr "儲值方案"
 
 #: .\finance\models.py:104
 msgid "商品名稱"
-msgstr ""
+msgstr "商品名稱"
 
-#: .\finance\models.py:105
+#: .\finance\models.py:108 .\templates\finance\shop.html:62
+msgid "一般商品"
+msgstr "一般商品"
+
+#: .\finance\models.py:109 .\pet_system\models.py:9
+#: .\templates\pet_system\dashboard.html:84
+msgid "寵物蛋"
+msgstr "寵物蛋"
+
+#: .\finance\models.py:110
+msgid "寵物成長道具"
+msgstr "寵物成長道具"
+
+#: .\finance\models.py:113
+msgid "商品分類"
+msgstr "商品分類"
+
+#: .\finance\models.py:115
 msgid "商品描述"
-msgstr ""
+msgstr "商品描述"
 
-#: .\finance\models.py:106
+#: .\finance\models.py:116
 msgid "商品圖片"
-msgstr ""
+msgstr "商品圖片"
 
-#: .\finance\models.py:107
+#: .\finance\models.py:117
 msgid "點數售價"
-msgstr ""
+msgstr "點數售價"
 
-#: .\finance\models.py:109
+#: .\finance\models.py:119
 msgid "庫存數量"
-msgstr ""
+msgstr "庫存數量"
 
-#: .\finance\models.py:113 .\finance\models.py:114
+#: .\finance\models.py:123 .\finance\models.py:124
 msgid "商城商品"
-msgstr ""
+msgstr "商城商品"
 
-#: .\finance\models.py:124
+#: .\finance\models.py:134
 msgid "點數全額扣抵"
-msgstr ""
+msgstr "點數全額扣抵"
 
-#: .\finance\models.py:125
+#: .\finance\models.py:135
 msgid "綠界金流付款"
-msgstr ""
+msgstr "綠界金流付款"
 
-#: .\finance\models.py:129
+#: .\finance\models.py:139
 msgid "已付款"
-msgstr ""
-
-#: .\finance\models.py:136
-msgid "購買商品"
-msgstr ""
-
-#: .\finance\models.py:137
-msgid "購買數量"
-msgstr ""
-
-#: .\finance\models.py:141
-msgid "付款方式"
-msgstr ""
-
-#: .\finance\models.py:145
-msgid "總點數花費"
-msgstr ""
+msgstr "已付款"
 
 #: .\finance\models.py:146
-msgid "使用儲值點數"
-msgstr ""
+msgid "購買商品"
+msgstr "購買商品"
 
 #: .\finance\models.py:147
+msgid "購買數量"
+msgstr "購買數量"
+
+#: .\finance\models.py:151
+msgid "付款方式"
+msgstr "付款方式"
+
+#: .\finance\models.py:155
+msgid "總點數花費"
+msgstr "總點數花費"
+
+#: .\finance\models.py:156
+msgid "使用儲值點數"
+msgstr "使用儲值點數"
+
+#: .\finance\models.py:157
 msgid "使用紅利點數"
-msgstr ""
+msgstr "使用紅利點數"
 
-#: .\finance\models.py:148
+#: .\finance\models.py:158
 msgid "台幣實付金額"
-msgstr ""
+msgstr "台幣實付金額"
 
-#: .\finance\models.py:152 .\finance\models.py:153
+#: .\finance\models.py:162 .\finance\models.py:163
 msgid "點數購物訂單"
-msgstr ""
+msgstr "點數購物訂單"
 
 #: .\games\admin.py:25
 msgid "基本資訊"
-msgstr ""
+msgstr "基本資訊"
 
 #: .\games\admin.py:27
 msgid "倖存者生存 - 紀錄與成長"
-msgstr ""
+msgstr "倖存者生存 - 紀錄與成長"
 
 #: .\games\admin.py:39
 msgid "虛擬人生 - 紀錄與成長"
-msgstr ""
+msgstr "虛擬人生 - 紀錄與成長"
 
 #: .\games\admin.py:82 .\games\admin.py:103 .\games\admin.py:116
 msgid "圖片預覽"
-msgstr ""
+msgstr "圖片預覽"
 
 #: .\games\apps.py:7 .\templates\games\lobby.html:29
 msgid "遊戲中心"
-msgstr ""
+msgstr "遊戲中心"
 
 #: .\games\models.py:10 .\games\models.py:146
 msgid "玩家"
-msgstr ""
+msgstr "玩家"
 
 #: .\games\models.py:13
 msgid "總遊戲幣"
-msgstr ""
+msgstr "總遊戲幣"
 
 #: .\games\models.py:16
 msgid "倖存者-最高存活秒數"
-msgstr ""
+msgstr "倖存者-最高存活秒數"
 
 #: .\games\models.py:17
 msgid "倖存者-最高擊殺數"
-msgstr ""
+msgstr "倖存者-最高擊殺數"
 
 #: .\games\models.py:18
 msgid "倖存者-血量等級"
-msgstr ""
+msgstr "倖存者-血量等級"
 
 #: .\games\models.py:19
 msgid "倖存者-攻擊等級"
-msgstr ""
+msgstr "倖存者-攻擊等級"
 
 #: .\games\models.py:20
 msgid "倖存者-移速等級"
-msgstr ""
+msgstr "倖存者-移速等級"
 
 #: .\games\models.py:23
 msgid "虛擬人生-最高持有金錢"
-msgstr ""
+msgstr "虛擬人生-最高持有金錢"
 
 #: .\games\models.py:24
 msgid "虛擬人生-通關地圖數"
-msgstr ""
+msgstr "虛擬人生-通關地圖數"
 
 #: .\games\models.py:25
 msgid "虛擬人生-初始資金等級"
-msgstr ""
+msgstr "虛擬人生-初始資金等級"
 
 #: .\games\models.py:26
 msgid "虛擬人生-控骰能力等級"
-msgstr ""
+msgstr "虛擬人生-控骰能力等級"
 
 #: .\games\models.py:29
 msgid "魔塔-血量等級"
-msgstr ""
+msgstr "魔塔-血量等級"
 
 #: .\games\models.py:30
 msgid "魔塔-攻擊等級"
-msgstr ""
+msgstr "魔塔-攻擊等級"
 
 #: .\games\models.py:31
 msgid "魔塔-防禦等級"
-msgstr ""
+msgstr "魔塔-防禦等級"
 
 #: .\games\models.py:33
 msgid "魔塔-最高到達樓層"
-msgstr ""
+msgstr "魔塔-最高到達樓層"
 
 #: .\games\models.py:37 .\games\models.py:38
 msgid "玩家遊戲存檔"
-msgstr ""
+msgstr "玩家遊戲存檔"
 
 #: .\games\models.py:47
 msgid "關卡名稱"
-msgstr ""
+msgstr "關卡名稱"
 
 #: .\games\models.py:48
 msgid "通關時間(秒)"
-msgstr ""
+msgstr "通關時間(秒)"
 
 #: .\games\models.py:49
 msgid "出怪頻率倍率(越高越快)"
-msgstr ""
+msgstr "出怪頻率倍率(越高越快)"
 
 #: .\games\models.py:50
 msgid "怪物屬性倍率(難度)"
-msgstr ""
+msgstr "怪物屬性倍率(難度)"
 
 #: .\games\models.py:51
 msgid "通關獎勵金幣"
-msgstr ""
+msgstr "通關獎勵金幣"
 
 #: .\games\models.py:54 .\games\models.py:55
 msgid "倖存者-關卡設定"
-msgstr ""
+msgstr "倖存者-關卡設定"
 
 #: .\games\models.py:64 .\games\models.py:124
 msgid "怪物名稱"
-msgstr ""
+msgstr "怪物名稱"
 
 #: .\games\models.py:65
 msgid "怪物圖片"
-msgstr ""
+msgstr "怪物圖片"
 
 #: .\games\models.py:66
 msgid "基礎血量"
-msgstr ""
+msgstr "基礎血量"
 
 #: .\games\models.py:67
 msgid "基礎攻擊力"
-msgstr ""
+msgstr "基礎攻擊力"
 
 #: .\games\models.py:68
 msgid "基礎跑速"
-msgstr ""
+msgstr "基礎跑速"
 
 #: .\games\models.py:69
 msgid "碰撞體積(半徑)"
-msgstr ""
+msgstr "碰撞體積(半徑)"
 
 #: .\games\models.py:72 .\games\models.py:73
 msgid "倖存者-怪物圖鑑"
-msgstr ""
+msgstr "倖存者-怪物圖鑑"
 
 #: .\games\models.py:83
 msgid "獲得金錢"
-msgstr ""
+msgstr "獲得金錢"
 
 #: .\games\models.py:84
 msgid "失去金錢"
-msgstr ""
+msgstr "失去金錢"
 
 #: .\games\models.py:85
 msgid "提升屬性"
-msgstr ""
+msgstr "提升屬性"
 
 #: .\games\models.py:86
 msgid "抽事件卡"
-msgstr ""
+msgstr "抽事件卡"
 
 #: .\games\models.py:89
 msgid "事件名稱"
-msgstr ""
+msgstr "事件名稱"
 
 #: .\games\models.py:91
 msgid "事件類型"
-msgstr ""
+msgstr "事件類型"
 
 #: .\games\models.py:93
 msgid "影響數值"
-msgstr ""
+msgstr "影響數值"
 
 #: .\games\models.py:94
 msgid "事件描述"
-msgstr ""
+msgstr "事件描述"
 
 #: .\games\models.py:97 .\games\models.py:98
 msgid "虛擬人生-事件設定"
-msgstr ""
+msgstr "虛擬人生-事件設定"
 
 #: .\games\models.py:106
 msgid "物件代碼"
-msgstr ""
+msgstr "物件代碼"
 
 #: .\games\models.py:107
 msgid "物件名稱"
-msgstr ""
+msgstr "物件名稱"
 
 #: .\games\models.py:109 .\games\models.py:126
 msgid "上傳圖片"
-msgstr ""
+msgstr "上傳圖片"
 
 #: .\games\models.py:113 .\games\models.py:114
 msgid "魔塔-地圖物件圖鑑"
-msgstr ""
+msgstr "魔塔-地圖物件圖鑑"
 
 #: .\games\models.py:123
 msgid "對應地圖代碼"
-msgstr ""
+msgstr "對應地圖代碼"
 
 #: .\games\models.py:128
 msgid "生命值"
-msgstr ""
+msgstr "生命值"
 
 #: .\games\models.py:129 .\games\models.py:151
 msgid "攻擊力"
-msgstr ""
+msgstr "攻擊力"
 
 #: .\games\models.py:130 .\games\models.py:152
 msgid "防禦力"
-msgstr ""
+msgstr "防禦力"
 
 #: .\games\models.py:131
 msgid "掉落經驗"
-msgstr ""
+msgstr "掉落經驗"
 
 #: .\games\models.py:132
 msgid "掉落金幣"
-msgstr ""
+msgstr "掉落金幣"
 
 #: .\games\models.py:135 .\games\models.py:136
 msgid "魔塔-怪物圖鑑"
-msgstr ""
+msgstr "魔塔-怪物圖鑑"
 
 #: .\games\models.py:148 .\templates\games\magic_tower.html:98
 msgid "職業"
-msgstr ""
+msgstr "職業"
 
 #: .\games\models.py:149 .\templates\games\magic_tower.html:101
 msgid "等級"
-msgstr ""
+msgstr "等級"
 
 #: .\games\models.py:150
 msgid "當前生命"
-msgstr ""
+msgstr "當前生命"
 
 #: .\games\models.py:153
 msgid "經驗值"
-msgstr ""
+msgstr "經驗值"
 
 #: .\games\models.py:154
 msgid "黃鑰匙"
-msgstr ""
+msgstr "黃鑰匙"
 
 #: .\games\models.py:155
 msgid "藍鑰匙"
-msgstr ""
+msgstr "藍鑰匙"
 
 #: .\games\models.py:156
 msgid "當前樓層"
-msgstr ""
+msgstr "當前樓層"
 
 #: .\games\models.py:159
 msgid "各地圖狀態紀錄"
-msgstr ""
+msgstr "各地圖狀態紀錄"
 
 #: .\games\models.py:160
 msgid "已通關樓層"
-msgstr ""
+msgstr "已通關樓層"
 
 #: .\games\models.py:163 .\games\models.py:164
 msgid "魔塔-玩家存檔"
-msgstr ""
+msgstr "魔塔-玩家存檔"
 
 #: .\invest\apps.py:7
 msgid "投資理財"
-msgstr ""
+msgstr "投資理財"
 
 #: .\invest\forms.py:12
 msgid "交易標的"
-msgstr ""
+msgstr "交易標的"
 
 #: .\invest\forms.py:16 .\invest\models.py:92
 msgid "交易日期"
-msgstr ""
+msgstr "交易日期"
 
 #: .\invest\forms.py:33
 msgid "保守型 (追求穩定，無法承受本金大幅波動)"
-msgstr ""
+msgstr "保守型 (追求穩定，無法承受本金大幅波動)"
 
 #: .\invest\forms.py:34
 #, python-format
 msgid "穩健型 (平衡風險與報酬，可接受 10%-20% 回檔)"
-msgstr ""
+msgstr "穩健型 (平衡風險與報酬，可接受 10%-20% 回檔)"
 
 #: .\invest\forms.py:35
 msgid "積極型 (追求高成長，能承受 30% 以上的市場波動)"
-msgstr ""
+msgstr "積極型 (追求高成長，能承受 30% 以上的市場波動)"
 
 #: .\invest\forms.py:39
 msgid "目前年齡"
-msgstr ""
+msgstr "目前年齡"
 
 #: .\invest\forms.py:44
 msgid "例如: 30"
-msgstr ""
+msgstr "例如: 30"
 
 #: .\invest\forms.py:48
 msgid "每月可定期定額投入 (NT$)"
-msgstr ""
+msgstr "每月可定期定額投入 (NT$)"
 
 #: .\invest\forms.py:55
 msgid "目標每月被動收入 (NT$)"
-msgstr ""
+msgstr "目標每月被動收入 (NT$)"
 
 #: .\invest\forms.py:62
 msgid "預計多少年後達成目標？"
-msgstr ""
+msgstr "預計多少年後達成目標？"
 
 #: .\invest\forms.py:66
 msgid "例如: 15"
-msgstr ""
+msgstr "例如: 15"
 
 #: .\invest\forms.py:70
 msgid "風險承受度"
-msgstr ""
+msgstr "風險承受度"
 
 #: .\invest\models.py:12
 msgid "股票"
-msgstr ""
+msgstr "股票"
 
 #: .\invest\models.py:13
 msgid "指數型基金"
-msgstr ""
+msgstr "指數型基金"
 
 #: .\invest\models.py:16
 msgid "代碼"
-msgstr ""
+msgstr "代碼"
 
 #: .\invest\models.py:17
 msgid "標的名稱"
-msgstr ""
+msgstr "標的名稱"
 
 #: .\invest\models.py:18
 msgid "交易所"
-msgstr ""
+msgstr "交易所"
 
 #: .\invest\models.py:19
 msgid "類別"
-msgstr ""
+msgstr "類別"
 
 #: .\invest\models.py:20
 msgid "啟用狀態"
-msgstr ""
+msgstr "啟用狀態"
 
 #: .\invest\models.py:23 .\invest\models.py:24
 msgid "標的資訊"
-msgstr ""
+msgstr "標的資訊"
 
 #: .\invest\models.py:33 .\invest\models.py:80 .\invest\models.py:140
 msgid "標的"
-msgstr ""
+msgstr "標的"
 
 #: .\invest\models.py:34
 msgid "當前股價"
-msgstr ""
+msgstr "當前股價"
 
 #: .\invest\models.py:35
 msgid "今日漲跌"
-msgstr ""
+msgstr "今日漲跌"
 
 #: .\invest\models.py:36
 msgid "漲跌幅(%)"
-msgstr ""
+msgstr "漲跌幅(%)"
 
 #: .\invest\models.py:40 .\invest\models.py:41
 msgid "行情快取"
-msgstr ""
+msgstr "行情快取"
 
 #: .\invest\models.py:48
 msgid "所屬用戶"
-msgstr ""
+msgstr "所屬用戶"
 
 #: .\invest\models.py:50
 msgid "組合名稱"
-msgstr ""
+msgstr "組合名稱"
 
 #: .\invest\models.py:51
 msgid "說明"
-msgstr ""
+msgstr "說明"
 
 #: .\invest\models.py:53
 msgid "每月被動收入目標"
-msgstr ""
+msgstr "每月被動收入目標"
 
 #: .\invest\models.py:56
 msgid "預估殖利率(%)"
-msgstr ""
+msgstr "預估殖利率(%)"
 
 #: .\invest\models.py:61 .\invest\models.py:62 .\invest\models.py:78
 #: .\invest\models.py:138
 msgid "投資組合"
-msgstr ""
+msgstr "投資組合"
 
 #: .\invest\models.py:72
 msgid "買入"
-msgstr ""
+msgstr "買入"
 
 #: .\invest\models.py:73
 msgid "賣出"
-msgstr ""
+msgstr "賣出"
 
 #: .\invest\models.py:74
 msgid "股息"
-msgstr ""
+msgstr "股息"
 
 #: .\invest\models.py:83
 msgid "成交股數"
-msgstr ""
+msgstr "成交股數"
 
 #: .\invest\models.py:84
 msgid "成交單價"
-msgstr ""
+msgstr "成交單價"
 
 #: .\invest\models.py:86
 msgid "手續費"
-msgstr ""
+msgstr "手續費"
 
 #: .\invest\models.py:87
 msgid "稅金"
-msgstr ""
+msgstr "稅金"
 
 #: .\invest\models.py:89
 msgid "已實現損益"
-msgstr ""
+msgstr "已實現損益"
 
 #: .\invest\models.py:126 .\invest\models.py:127
 msgid "交易紀錄"
-msgstr ""
+msgstr "交易紀錄"
 
 #: .\invest\models.py:143
 msgid "總持股數"
-msgstr ""
+msgstr "總持股數"
 
 #: .\invest\models.py:146
 msgid "平均成本"
-msgstr ""
+msgstr "平均成本"
 
 #: .\invest\models.py:149
 msgid "最後更新時間"
-msgstr ""
+msgstr "最後更新時間"
 
 #: .\invest\models.py:153 .\invest\models.py:154
 msgid "當前持股"
-msgstr ""
+msgstr "當前持股"
 
 #: .\invest\models.py:158
 msgid "股"
-msgstr ""
+msgstr "股"
 
 #: .\line_manager\models.py:13
 msgid "LINE 用戶識別碼"
-msgstr ""
+msgstr "LINE 用戶識別碼"
 
 #: .\line_manager\models.py:15
 msgid "LINE 顯示名稱"
-msgstr ""
+msgstr "LINE 顯示名稱"
 
 #: .\line_manager\models.py:20 .\line_manager\models.py:21
 msgid "LINE 個人檔案"
-msgstr ""
+msgstr "LINE 個人檔案"
 
 #: .\line_manager\models.py:31
 msgid "吃飯聚餐"
-msgstr ""
+msgstr "吃飯聚餐"
 
 #: .\line_manager\models.py:32
 msgid "逛街展覽"
-msgstr ""
+msgstr "逛街展覽"
 
 #: .\line_manager\models.py:33
 msgid "運動健身"
-msgstr ""
+msgstr "運動健身"
 
 #: .\line_manager\models.py:34
 msgid "旅遊踏青"
-msgstr ""
+msgstr "旅遊踏青"
 
 #: .\line_manager\models.py:35
+msgid "看電影"
+msgstr "看電影"
+
+#: .\line_manager\models.py:36
 msgid "其他活動"
-msgstr ""
+msgstr "其他活動"
 
-#: .\line_manager\models.py:39
+#: .\line_manager\models.py:40
 msgid "發起人"
-msgstr ""
+msgstr "發起人"
 
-#: .\line_manager\models.py:44
+#: .\line_manager\models.py:45
 msgid "LINE 群組識別碼"
-msgstr ""
-
-#: .\line_manager\models.py:48
-msgid "行程標題"
-msgstr ""
+msgstr "LINE 群組識別碼"
 
 #: .\line_manager\models.py:49
-msgid "活動地點"
-msgstr ""
+msgid "行程標題"
+msgstr "行程標題"
 
 #: .\line_manager\models.py:50
+msgid "活動地點"
+msgstr "活動地點"
+
+#: .\line_manager\models.py:51
 msgid "備註說明"
-msgstr ""
+msgstr "備註說明"
 
-#: .\line_manager\models.py:54
+#: .\line_manager\models.py:55
 msgid "活動類型"
-msgstr ""
+msgstr "活動類型"
 
-#: .\line_manager\models.py:56
+#: .\line_manager\models.py:57
 msgid "行程時間"
-msgstr ""
-
-#: .\line_manager\models.py:58
-msgid "提前通知時間(分鐘)"
-msgstr ""
+msgstr "行程時間"
 
 #: .\line_manager\models.py:59
+msgid "提前通知時間(分鐘)"
+msgstr "提前通知時間(分鐘)"
+
+#: .\line_manager\models.py:60
 msgid "是否已發送通知"
-msgstr ""
+msgstr "是否已發送通知"
 
-#: .\line_manager\models.py:65 .\line_manager\models.py:66
+#: .\line_manager\models.py:66 .\line_manager\models.py:67
 msgid "行程管理"
-msgstr ""
-
-#: .\line_manager\models.py:80
-msgid "LINE 群組 ID"
-msgstr ""
+msgstr "行程管理"
 
 #: .\line_manager\models.py:81
-msgid "加入時間"
-msgstr ""
+msgid "LINE 群組 ID"
+msgstr "LINE 群組 ID"
 
-#: .\line_manager\models.py:84 .\line_manager\models.py:85
+#: .\line_manager\models.py:82
+msgid "加入時間"
+msgstr "加入時間"
+
+#: .\line_manager\models.py:85 .\line_manager\models.py:86
 msgid "群組成員關係"
-msgstr ""
+msgstr "群組成員關係"
 
 #: .\media_studio\forms.py:27
 msgid "選擇圖片"
-msgstr ""
+msgstr "選擇圖片"
 
 #: .\media_studio\forms.py:31
 msgid "自動去背 (AI 移除背景)"
-msgstr ""
+msgstr "自動去背 (AI 移除背景)"
 
 #: .\media_studio\forms.py:34
 msgid "勾選後將使用 AI 智慧去背。建議輸出格式選擇 PNG 或 WebP 以保留透明背景。"
-msgstr ""
+msgstr "勾選後將使用 AI 智慧去背。建議輸出格式選擇 PNG 或 WebP 以保留透明背景。"
 
 #: .\media_studio\forms.py:38
 msgid "縮放比例 (%)"
-msgstr ""
+msgstr "縮放比例 (%)"
 
 #: .\media_studio\forms.py:42
 msgid "100% 代表不改變長寬像素，僅壓縮品質。"
-msgstr ""
+msgstr "100% 代表不改變長寬像素，僅壓縮品質。"
 
 #: .\media_studio\forms.py:45
 msgid "壓縮品質 (1-100)"
-msgstr ""
+msgstr "壓縮品質 (1-100)"
 
 #: .\media_studio\forms.py:49
 msgid "數值越低檔案越小，畫質越差。對 PNG 無效。"
-msgstr ""
+msgstr "數值越低檔案越小，畫質越差。對 PNG 無效。"
 
 #: .\media_studio\forms.py:52
 msgid "輸出格式"
-msgstr ""
+msgstr "輸出格式"
 
 #: .\media_studio\forms.py:66
 msgid "選擇影片檔"
-msgstr ""
+msgstr "選擇影片檔"
 
 #: .\media_studio\forms.py:66
 msgid "可一次選擇多個影片進行拼接"
-msgstr ""
+msgstr "可一次選擇多個影片進行拼接"
 
 #: .\media_studio\forms.py:70
 msgid "裁切開始時間 (秒)"
-msgstr ""
+msgstr "裁切開始時間 (秒)"
 
 #: .\media_studio\forms.py:70
 msgid "若不裁切請保持 0"
-msgstr ""
+msgstr "若不裁切請保持 0"
 
 #: .\media_studio\forms.py:73
 msgid "裁切持續時間 (秒)"
-msgstr ""
+msgstr "裁切持續時間 (秒)"
 
 #: .\media_studio\forms.py:73
 msgid "設為 0 代表取至影片結束"
-msgstr ""
+msgstr "設為 0 代表取至影片結束"
 
 #: .\media_studio\forms.py:76
 msgid "輸出品質 (0-100)"
-msgstr ""
+msgstr "輸出品質 (0-100)"
 
 #: .\media_studio\forms.py:80
 msgid "數值越高畫質越好，但檔案越大 (建議 50-80)"
-msgstr ""
+msgstr "數值越高畫質越好，但檔案越大 (建議 50-80)"
 
 #: .\media_studio\forms.py:83
 msgid "縮放解析度"
-msgstr ""
+msgstr "縮放解析度"
 
 #: .\media_studio\forms.py:85
 msgid "原始尺寸"
-msgstr ""
+msgstr "原始尺寸"
 
 #: .\media_studio\views.py:27 .\templates\media_studio\studio.html:6
 msgid "多媒體處理工作室"
-msgstr ""
+msgstr "多媒體處理工作室"
 
 #: .\media_studio\views.py:203
 msgid "原始解析度"
-msgstr ""
+msgstr "原始解析度"
 
 #: .\notices\apps.py:7
 msgid "系統公告"
-msgstr ""
+msgstr "系統公告"
 
 #: .\notices\models.py:11
 msgid "內容"
-msgstr ""
+msgstr "內容"
 
 #: .\notices\models.py:12
 msgid "發布者"
-msgstr ""
+msgstr "發布者"
 
 #: .\notices\models.py:13 .\notices\models.py:32 .\notices\models.py:56
 msgid "是否啟用"
-msgstr ""
+msgstr "是否啟用"
 
 #: .\notices\models.py:14
 msgid "是否置頂"
-msgstr ""
+msgstr "是否置頂"
 
 #: .\notices\models.py:17
 msgid "公告"
-msgstr ""
+msgstr "公告"
 
 #: .\notices\models.py:18
 msgid "公告管理"
-msgstr ""
+msgstr "公告管理"
 
 #: .\notices\models.py:26
 msgid "工具名稱"
-msgstr ""
+msgstr "工具名稱"
 
 #: .\notices\models.py:27
 msgid "網址"
-msgstr ""
+msgstr "網址"
 
 #: .\notices\models.py:29
 msgid "FontAwesome 圖示碼"
-msgstr ""
+msgstr "FontAwesome 圖示碼"
 
 #: .\notices\models.py:31
 msgid "排序"
-msgstr ""
+msgstr "排序"
 
 #: .\notices\models.py:35
 msgid "外部工具"
-msgstr ""
+msgstr "外部工具"
 
 #: .\notices\models.py:36
 msgid "外部工具管理"
-msgstr ""
+msgstr "外部工具管理"
 
 #: .\notices\models.py:45
 msgid "未登入訪客"
-msgstr ""
+msgstr "未登入訪客"
 
 #: .\notices\models.py:46
 msgid "一般使用者"
-msgstr ""
+msgstr "一般使用者"
 
 #: .\notices\models.py:47
 msgid "工作人員"
-msgstr ""
+msgstr "工作人員"
 
 #: .\notices\models.py:48
 msgid "超級管理員"
-msgstr ""
+msgstr "超級管理員"
 
 #: .\notices\models.py:49
 msgid "專屬公司職員"
-msgstr ""
+msgstr "專屬公司職員"
 
 #: .\notices\models.py:52
 msgid "適用權限"
-msgstr ""
+msgstr "適用權限"
 
 #: .\notices\models.py:53
 msgid "系統基本指令"
-msgstr ""
+msgstr "系統基本指令"
 
 #: .\notices\models.py:54
 msgid "網站功能資訊"
-msgstr ""
+msgstr "網站功能資訊"
 
 #: .\notices\models.py:55
 msgid "內部政策"
-msgstr ""
+msgstr "內部政策"
 
 #: .\notices\models.py:60 .\notices\models.py:61
 msgid "AI 客服設定"
-msgstr ""
+msgstr "AI 客服設定"
 
 #: .\notices\models.py:75
 msgid "✅啟用中"
-msgstr ""
+msgstr "✅啟用中"
 
 #: .\notices\models.py:75
 msgid "❌停用"
-msgstr ""
+msgstr "❌停用"
 
 #: .\notices\models.py:76
 msgid "更新於"
-msgstr ""
+msgstr "更新於"
 
 #: .\notices\models.py:81
 msgid "總瀏覽量"
-msgstr ""
+msgstr "總瀏覽量"
 
 #: .\notices\models.py:82
 msgid "統計日期"
-msgstr ""
+msgstr "統計日期"
 
 #: .\notices\models.py:83
 msgid "當日瀏覽量"
-msgstr ""
+msgstr "當日瀏覽量"
 
 #: .\notices\models.py:86 .\notices\models.py:87
 msgid "網站瀏覽統計"
-msgstr ""
+msgstr "網站瀏覽統計"
 
 #: .\notices\models.py:90
 msgid "統計"
-msgstr ""
+msgstr "統計"
 
 #: .\notices\models.py:95
 msgid "日期"
-msgstr ""
+msgstr "日期"
 
 #: .\notices\models.py:96
 msgid "發文字號"
-msgstr ""
+msgstr "發文字號"
 
 #: .\notices\models.py:97
 msgid "事由"
-msgstr ""
+msgstr "事由"
 
 #: .\notices\models.py:98
 msgid "取號人"
-msgstr ""
+msgstr "取號人"
 
 #: .\notices\models.py:102 .\notices\models.py:103
 msgid "發文簿紀錄"
-msgstr ""
+msgstr "發文簿紀錄"
+
+#: .\pet_system\models.py:10
+msgid "幼年體"
+msgstr "幼年體"
+
+#: .\pet_system\models.py:11
+msgid "成長體"
+msgstr "成長體"
+
+#: .\pet_system\models.py:12
+msgid "完全體"
+msgstr "完全體"
+
+#: .\pet_system\models.py:13
+msgid "進化體"
+msgstr "進化體"
+
+#: .\pet_system\models.py:17
+msgid "幻獸綠龍"
+msgstr "幻獸綠龍"
+
+#: .\pet_system\models.py:18
+msgid "烈火幼犬"
+msgstr "烈火幼犬"
+
+#: .\pet_system\models.py:22
+msgid "普通"
+msgstr "普通"
+
+#: .\pet_system\models.py:23
+msgid "勇敢"
+msgstr "勇敢"
+
+#: .\pet_system\models.py:24
+msgid "懶散"
+msgstr "懶散"
+
+#: .\pet_system\models.py:25
+msgid "聰明"
+msgstr "聰明"
+
+#: .\pet_system\models.py:26
+msgid "肥嘟嘟"
+msgstr "肥嘟嘟"
+
+#: .\pet_system\models.py:29 .\transfer_system\models.py:14
+#: .\tube_hub\models.py:14 .\tube_hub\models.py:39
+msgid "擁有者"
+msgstr "擁有者"
+
+#: .\pet_system\models.py:30
+msgid "未命名寵物"
+msgstr "未命名寵物"
+
+#: .\pet_system\models.py:30
+msgid "寵物名字"
+msgstr "寵物名字"
+
+#: .\pet_system\models.py:31 .\pet_system\models.py:133
+msgid "寵物種類"
+msgstr "寵物種類"
+
+#: .\pet_system\models.py:32
+msgid "成長階段"
+msgstr "成長階段"
+
+#: .\pet_system\models.py:35
+msgid "是否出戰"
+msgstr "是否出戰"
+
+#: .\pet_system\models.py:38
+msgid "成長進度"
+msgstr "成長進度"
+
+#: .\pet_system\models.py:39
+msgid "已消耗登入天數"
+msgstr "已消耗登入天數"
+
+#: .\pet_system\models.py:41
+msgid "普通乾糧消耗數"
+msgstr "普通乾糧消耗數"
+
+#: .\pet_system\models.py:42
+msgid "奇蹟藥水消耗數"
+msgstr "奇蹟藥水消耗數"
+
+#: .\pet_system\models.py:44
+msgid "寵物性格"
+msgstr "寵物性格"
+
+#: .\pet_system\models.py:47
+msgid "頭部裝飾"
+msgstr "頭部裝飾"
+
+#: .\pet_system\models.py:48
+msgid "臉部裝飾"
+msgstr "臉部裝飾"
+
+#: .\pet_system\models.py:49
+msgid "背部裝飾"
+msgstr "背部裝飾"
+
+#: .\pet_system\models.py:51
+msgid "領養時間"
+msgstr "領養時間"
+
+#: .\pet_system\models.py:52
+msgid "最後互動時間"
+msgstr "最後互動時間"
+
+#: .\pet_system\models.py:55 .\pet_system\models.py:56
+msgid "寵物"
+msgstr "寵物"
+
+#: .\pet_system\models.py:71
+msgid "寵物金幣"
+msgstr "寵物金幣"
+
+#: .\pet_system\models.py:72
+msgid "最後每日金幣領取日期"
+msgstr "最後每日金幣領取日期"
+
+#: .\pet_system\models.py:75 .\pet_system\models.py:76
+msgid "玩家寵物存摺"
+msgstr "玩家寵物存摺"
+
+#: .\pet_system\models.py:85
+msgid "配件ID"
+msgstr "配件ID"
+
+#: .\pet_system\models.py:86 .\pet_system\models.py:161
+msgid "擁有數量"
+msgstr "擁有數量"
+
+#: .\pet_system\models.py:90 .\pet_system\models.py:91
+msgid "玩家解鎖配件"
+msgstr "玩家解鎖配件"
+
+#: .\pet_system\models.py:100
+msgid "探索中"
+msgstr "探索中"
+
+#: .\pet_system\models.py:101
+msgid "探索完成"
+msgstr "探索完成"
+
+#: .\pet_system\models.py:102
+msgid "已領取獎勵"
+msgstr "已領取獎勵"
+
+#: .\pet_system\models.py:104
+msgid "派遣寵物"
+msgstr "派遣寵物"
+
+#: .\pet_system\models.py:105
+msgid "探索時長(小時)"
+msgstr "探索時長(小時)"
+
+#: .\pet_system\models.py:106
+msgid "出發時間"
+msgstr "出發時間"
+
+#: .\pet_system\models.py:107
+msgid "預計結束時間"
+msgstr "預計結束時間"
+
+#: .\pet_system\models.py:108 .\templates\sh_recognition\index.html:71
+#: .\transfer_system\models.py:40
+msgid "狀態"
+msgstr "狀態"
+
+#: .\pet_system\models.py:111 .\pet_system\models.py:112
+msgid "探索派遣任務"
+msgstr "探索派遣任務"
+
+#: .\pet_system\models.py:121
+msgid "當前爬塔層數"
+msgstr "當前爬塔層數"
+
+#: .\pet_system\models.py:124 .\pet_system\models.py:125
+msgid "爬塔進度"
+msgstr "爬塔進度"
+
+#: .\pet_system\models.py:134
+msgid "已解鎖最高成長階段"
+msgstr "已解鎖最高成長階段"
+
+#: .\pet_system\models.py:138 .\pet_system\models.py:139
+msgid "劇情解鎖紀錄"
+msgstr "劇情解鎖紀錄"
+
+#: .\pet_system\models.py:147
+msgid "登入日期"
+msgstr "登入日期"
+
+#: .\pet_system\models.py:151 .\pet_system\models.py:152
+msgid "每日登入日誌"
+msgstr "每日登入日誌"
+
+#: .\pet_system\models.py:160
+msgid "道具商品"
+msgstr "道具商品"
+
+#: .\pet_system\models.py:165 .\pet_system\models.py:166
+msgid "使用者背包道具"
+msgstr "使用者背包道具"
 
 #: .\sh_recognition\apps.py:7
 msgid "世祥辨識"
-msgstr ""
+msgstr "世祥辨識"
 
 #: .\sh_recognition\models.py:9
 msgid "模型版本名稱"
-msgstr ""
+msgstr "模型版本名稱"
 
 #: .\sh_recognition\models.py:12
 msgid "模型檔案 (.pth)"
-msgstr ""
+msgstr "模型檔案 (.pth)"
 
 #: .\sh_recognition\models.py:14 .\study_brain\models.py:35
 msgid "上傳時間"
-msgstr ""
+msgstr "上傳時間"
 
 #: .\sh_recognition\models.py:17
 msgid "AI 模型"
-msgstr ""
+msgstr "AI 模型"
 
 #: .\sh_recognition\models.py:18
 msgid "AI 模型管理"
-msgstr ""
+msgstr "AI 模型管理"
 
 #: .\sh_recognition\models.py:26
 msgid "原始圖片"
-msgstr ""
+msgstr "原始圖片"
 
 #: .\sh_recognition\models.py:28
 msgid "辨識結果圖片"
-msgstr ""
+msgstr "辨識結果圖片"
 
 #: .\sh_recognition\models.py:33
 msgid "辨識文字結果"
-msgstr ""
+msgstr "辨識文字結果"
 
 #: .\sh_recognition\models.py:35
 msgid "是否有辨識到物體"
-msgstr ""
+msgstr "是否有辨識到物體"
 
 #: .\sh_recognition\models.py:36
 msgid "使用信心閥值"
-msgstr ""
+msgstr "使用信心閥值"
 
 #: .\sh_recognition\models.py:37
 #: .\templates\sh_recognition\record_detail.html:29
 msgid "使用者註記"
-msgstr ""
+msgstr "使用者註記"
 
 #: .\sh_recognition\models.py:39
 msgid "使用模型"
-msgstr ""
+msgstr "使用模型"
 
 #: .\sh_recognition\models.py:44
 msgid "圖片辨識紀錄"
-msgstr ""
+msgstr "圖片辨識紀錄"
 
 #: .\sh_recognition\models.py:45
 msgid "圖片辨識紀錄管理"
-msgstr ""
+msgstr "圖片辨識紀錄管理"
 
 #: .\sh_recognition\views.py:73
 msgid "部分圖片辨識失敗："
-msgstr ""
+msgstr "部分圖片辨識失敗："
 
 #: .\sh_recognition\views.py:114
 msgid "請至少勾選一筆要刪除的資料。"
-msgstr ""
+msgstr "請至少勾選一筆要刪除的資料。"
 
 #: .\sh_recognition\views.py:189
 msgid "已使用新模型完成重新辨識！"
-msgstr ""
+msgstr "已使用新模型完成重新辨識！"
 
 #: .\study_brain\apps.py:9
 msgid "AI 教材大腦"
-msgstr ""
+msgstr "AI 教材大腦"
 
 #: .\study_brain\models.py:9
 msgid "分類名稱"
-msgstr ""
+msgstr "分類名稱"
 
 #: .\study_brain\models.py:10
 msgid "分類描述"
-msgstr ""
+msgstr "分類描述"
 
 #: .\study_brain\models.py:14 .\study_brain\models.py:15
 msgid "教材分類"
-msgstr ""
+msgstr "教材分類"
 
 #: .\study_brain\models.py:25
 msgid "所屬分類"
-msgstr ""
+msgstr "所屬分類"
 
 #: .\study_brain\models.py:29
 msgid "收藏的使用者"
-msgstr ""
+msgstr "收藏的使用者"
 
 #: .\study_brain\models.py:31
 msgid "是否為歷屆考題"
-msgstr ""
+msgstr "是否為歷屆考題"
 
 #: .\study_brain\models.py:33
 msgid "教材標題"
-msgstr ""
+msgstr "教材標題"
 
 #: .\study_brain\models.py:34 .\study_brain\models.py:38
 #: .\study_brain\models.py:39
 msgid "教材檔案"
-msgstr ""
+msgstr "教材檔案"
 
 #: .\study_brain\models.py:49
 msgid "關聯教材"
-msgstr ""
+msgstr "關聯教材"
 
 #: .\study_brain\models.py:51
 msgid "重點整理"
-msgstr ""
+msgstr "重點整理"
 
 #: .\study_brain\models.py:52
 msgid "練習題資料"
-msgstr ""
+msgstr "練習題資料"
 
 #: .\study_brain\models.py:53
 msgid "產出時間"
-msgstr ""
+msgstr "產出時間"
 
 #: .\study_brain\models.py:56 .\study_brain\models.py:57
 msgid "AI 分析結果"
-msgstr ""
+msgstr "AI 分析結果"
 
 #: .\study_brain\models.py:68
 msgid "閱讀教材"
-msgstr ""
+msgstr "閱讀教材"
 
 #: .\study_brain\models.py:69
 msgid "閱讀時間"
-msgstr ""
+msgstr "閱讀時間"
 
 #: .\study_brain\models.py:72 .\study_brain\models.py:73
 msgid "閱讀紀錄"
-msgstr ""
+msgstr "閱讀紀錄"
 
 #: .\study_brain\models.py:84
 msgid "測驗來源"
-msgstr ""
+msgstr "測驗來源"
 
 #: .\study_brain\models.py:85
 msgid "總題數"
-msgstr ""
+msgstr "總題數"
 
 #: .\study_brain\models.py:86
 msgid "答對題數"
-msgstr ""
+msgstr "答對題數"
 
 #: .\study_brain\models.py:87
 msgid "錯誤率"
-msgstr ""
+msgstr "錯誤率"
 
 #: .\study_brain\models.py:88
 msgid "已作答題目"
-msgstr ""
+msgstr "已作答題目"
 
 #: .\study_brain\models.py:89
 msgid "測驗時間"
-msgstr ""
+msgstr "測驗時間"
 
 #: .\study_brain\models.py:92 .\study_brain\models.py:93
 msgid "測驗紀錄"
-msgstr ""
+msgstr "測驗紀錄"
 
 #: .\study_brain\models.py:104
 msgid "所屬測驗紀錄"
-msgstr ""
+msgstr "所屬測驗紀錄"
 
 #: .\study_brain\models.py:106
 msgid "題目內容"
-msgstr ""
+msgstr "題目內容"
 
 #: .\study_brain\models.py:107
 msgid "使用者答案"
-msgstr ""
+msgstr "使用者答案"
 
 #: .\study_brain\models.py:108
 msgid "正確答案"
-msgstr ""
+msgstr "正確答案"
 
 #: .\study_brain\models.py:109
 msgid "解析說明"
-msgstr ""
+msgstr "解析說明"
 
 #: .\study_brain\models.py:112 .\study_brain\models.py:113
 msgid "錯題明細"
-msgstr ""
+msgstr "錯題明細"
 
 #: .\study_brain\models.py:122
 msgid "對應測驗卷"
-msgstr ""
+msgstr "對應測驗卷"
 
 #: .\study_brain\models.py:124
 msgid "題目索引(原題號)"
-msgstr ""
+msgstr "題目索引(原題號)"
 
 #: .\study_brain\models.py:126
 msgid "觀念深度解析(Markdown)"
-msgstr ""
+msgstr "觀念深度解析(Markdown)"
 
 #: .\study_brain\models.py:127
 msgid "3題相關練習題"
-msgstr ""
+msgstr "3題相關練習題"
 
 #: .\study_brain\models.py:129
 msgid "生成時間"
-msgstr ""
+msgstr "生成時間"
 
 #: .\study_brain\models.py:134 .\study_brain\models.py:135
 msgid "AI 深度解析"
-msgstr ""
+msgstr "AI 深度解析"
 
 #: .\study_brain\utils.py:178
 msgid "此為歷屆考題匯入，無重點摘要。請直接前往「測驗練習」進行刷題！"
-msgstr ""
+msgstr "此為歷屆考題匯入，無重點摘要。請直接前往「測驗練習」進行刷題！"
 
 #: .\study_brain\utils.py:194
 msgid "AI 忙碌中或檔案解析發生錯誤，請稍後再試！"
-msgstr ""
+msgstr "AI 忙碌中或檔案解析發生錯誤，請稍後再試！"
 
 #: .\study_brain\views.py:62
 msgid "教材上傳成功！您可以開始進行 AI 訓練。"
-msgstr ""
+msgstr "教材上傳成功！您可以開始進行 AI 訓練。"
 
 #: .\study_brain\views.py:64
 msgid "請填寫完整資訊並上傳檔案。"
-msgstr ""
+msgstr "請填寫完整資訊並上傳檔案。"
 
 #: .\study_brain\views.py:78
 msgid "此為歷屆考題，題目內容固定，無法重複呼叫 AI 擴充新題！"
-msgstr ""
+msgstr "此為歷屆考題，題目內容固定，無法重複呼叫 AI 擴充新題！"
 
 #: .\study_brain\views.py:90
 msgid "檔案解析失敗或內容為空，無法進行訓練。"
-msgstr ""
+msgstr "檔案解析失敗或內容為空，無法進行訓練。"
 
 #: .\study_brain\views.py:116
 msgid "AI 首次分析完成！已產生重點摘要與初始練習題。"
-msgstr ""
+msgstr "AI 首次分析完成！已產生重點摘要與初始練習題。"
 
 #: .\study_brain\views.py:118
 msgid "AI 產出過程發生未知錯誤，請稍後再試。"
-msgstr ""
+msgstr "AI 產出過程發生未知錯誤，請稍後再試。"
 
 #: .\study_brain\views.py:134
 msgid "該教材尚未產生分析資料。"
-msgstr ""
+msgstr "該教材尚未產生分析資料。"
 
 #: .\study_brain\views.py:241
 msgid "未作答"
-msgstr ""
+msgstr "未作答"
 
 #: .\study_brain\views.py:250
 msgid "此為舊版題目，無提供解析。"
-msgstr ""
+msgstr "此為舊版題目，無提供解析。"
 
 #: .\study_brain\views.py:256
 msgid "沒有送出任何有效答案！"
-msgstr ""
+msgstr "沒有送出任何有效答案！"
 
 #: .\study_brain\views.py:306
 msgid "檔案不存在或已遺失"
-msgstr ""
+msgstr "檔案不存在或已遺失"
 
 #: .\templates\account\email_confirm.html:5
 #: .\templates\account\email_confirm.html:18
@@ -1510,7 +1740,7 @@ msgid ""
 "                            "
 msgstr ""
 
-#: .\templates\account\email_confirm.html:33 .\templates\finance\shop.html:139
+#: .\templates\account\email_confirm.html:33 .\templates\finance\shop.html:229
 msgid "Confirm"
 msgstr "確認"
 
@@ -1562,7 +1792,7 @@ msgstr "確認登出"
 
 #: .\templates\account\logout.html:22
 msgid "您確定要登出 <strong>CSI Portal</strong> 嗎？"
-msgstr ""
+msgstr "您確定要登出 <strong>CSI Portal</strong> 嗎？"
 
 #: .\templates\account\signup.html:6 .\templates\account\signup.html:15
 #: .\templates\account\signup.html:48 .\templates\socialaccount\signup.html:5
@@ -1623,15 +1853,15 @@ msgstr "聯繫支援"
 
 #: .\templates\admin\csv_upload.html:8
 msgid "選擇 CSV 檔案："
-msgstr ""
+msgstr "選擇 CSV 檔案："
 
 #: .\templates\admin\csv_upload.html:12
 msgid "上傳並匯入"
-msgstr ""
+msgstr "上傳並匯入"
 
 #: .\templates\admin\item_changelist.html:6
 msgid "匯入 CSV"
-msgstr ""
+msgstr "匯入 CSV"
 
 #: .\templates\base.html:45
 msgid "CSI Smart Assistant"
@@ -1655,43 +1885,43 @@ msgstr "連線失敗，請檢查您的網路。"
 
 #: .\templates\base.html:77
 msgid "新轉移通知"
-msgstr ""
+msgstr "新轉移通知"
 
 #: .\templates\base.html:89
 msgid "想將"
-msgstr ""
+msgstr "想將"
 
 #: .\templates\base.html:90
 msgid "轉移給您"
-msgstr ""
+msgstr "轉移給您"
 
 #: .\templates\base.html:93
 msgid "前往處理"
-msgstr ""
+msgstr "前往處理"
 
 #: .\templates\bionic_chat\chat.html:7
 msgid "仿生人通訊終端"
-msgstr ""
+msgstr "仿生人通訊終端"
 
 #: .\templates\bionic_chat\chat.html:14
 msgid "角色立繪"
-msgstr ""
+msgstr "角色立繪"
 
 #: .\templates\bionic_chat\chat.html:27
 msgid "字幕"
-msgstr ""
+msgstr "字幕"
 
 #: .\templates\bionic_chat\chat.html:35
 msgid "語音"
-msgstr ""
+msgstr "語音"
 
 #: .\templates\bionic_chat\chat.html:50
 msgid "輸入對話..."
-msgstr ""
+msgstr "輸入對話..."
 
 #: .\templates\bionic_chat\chat.html:51
 msgid "發送"
-msgstr ""
+msgstr "發送"
 
 #: .\templates\core\feature_list.html:5 .\templates\core\feature_list.html:11
 msgid "System Feature Permissions"
@@ -1897,11 +2127,11 @@ msgstr "最後登入時間"
 msgid "My Wallet"
 msgstr "我的錢包"
 
-#: .\templates\core\profile.html:62 .\templates\finance\shop.html:28
+#: .\templates\core\profile.html:62 .\templates\finance\shop.html:36
 msgid "Deposit Points"
 msgstr "儲值點數"
 
-#: .\templates\core\profile.html:68 .\templates\finance\shop.html:33
+#: .\templates\core\profile.html:68 .\templates\finance\shop.html:41
 msgid "Bonus Points"
 msgstr "紅利點數"
 
@@ -2037,7 +2267,7 @@ msgstr "發文字號已複製到剪貼簿"
 
 #: .\templates\csi_info\csi_info.html:11
 msgid "CSI 企業內部資訊"
-msgstr ""
+msgstr "CSI 企業內部資訊"
 
 #: .\templates\finance\recharge_store.html:4
 #: .\templates\includes\navbar.html:46
@@ -2100,255 +2330,282 @@ msgstr "CSI 點數商城"
 msgid "Redeem your points for rich products and exclusive rights"
 msgstr "使用您的點數兌換豐富商品與專屬權益"
 
-#: .\templates\finance\shop.html:25
+#: .\templates\finance\shop.html:33
 msgid "Asset Overview"
 msgstr "資產概覽"
 
-#: .\templates\finance\shop.html:29 .\templates\finance\shop.html:34
-#: .\templates\finance\shop.html:76
+#: .\templates\finance\shop.html:37 .\templates\finance\shop.html:42
+#: .\templates\finance\shop.html:101 .\templates\finance\shop.html:175
 msgid "Points"
 msgstr "點數"
 
-#: .\templates\finance\shop.html:40
+#: .\templates\finance\shop.html:48
+msgid "寵物培育室"
+msgstr "寵物培育室"
+
+#: .\templates\finance\shop.html:51
 msgid "Go to Recharge"
 msgstr "前往儲值"
 
-#: .\templates\finance\shop.html:56
+#: .\templates\finance\shop.html:67
+msgid "Q版寵物專區"
+msgstr "Q版寵物專區"
+
+#: .\templates\finance\shop.html:84 .\templates\finance\shop.html:151
 #, python-format
 msgid "Almost Sold Out (%(stock)s left)"
 msgstr "即將售罄 (剩餘 %(stock)s)"
 
-#: .\templates\finance\shop.html:59
+#: .\templates\finance\shop.html:87 .\templates\finance\shop.html:154
 msgid "Sold Out"
 msgstr "已售完"
 
-#: .\templates\finance\shop.html:87
+#: .\templates\finance\shop.html:109 .\templates\finance\shop.html:183
 msgid "Bonus Deduction"
 msgstr "紅利抵扣"
 
-#: .\templates\finance\shop.html:88
+#: .\templates\finance\shop.html:110 .\templates\finance\shop.html:184
 #, python-format
 msgid "Max %(price)s points"
 msgstr "最高 %(price)s 點"
 
-#: .\templates\finance\shop.html:97
-#, python-format
+#: .\templates\finance\shop.html:118
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                    獲得 <strong>%(points)s</strong> 點\n"
+#| "                                "
 msgid ""
 "\n"
-"                                    將扣除 <strong class=\"text-primary "
-"deposit-calc\">%(points)s</strong> 儲值點\n"
-"                                "
+"                                                    將扣除 <strong "
+"class=\"text-primary deposit-calc\">%(points)s</strong> 儲值點\n"
+"                                                "
 msgstr ""
+"\n"
+"                                    獲得 <strong>%(points)s</strong> 點\n"
+"                                "
 
-#: .\templates\finance\shop.html:107
+#: .\templates\finance\shop.html:127 .\templates\finance\shop.html:201
 msgid "Restocking"
 msgstr "補貨中"
 
-#: .\templates\finance\shop.html:109
+#: .\templates\finance\shop.html:129 .\templates\finance\shop.html:203
 msgid "Redeem Now"
 msgstr "立即兌換"
 
-#: .\templates\finance\shop.html:120
-msgid "The shop is currently under preparation, please stay tuned!"
-msgstr "商城正在籌備中，敬請期待！"
+#: .\templates\finance\shop.html:192
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                    獲得 <strong>%(points)s</strong> 點\n"
+#| "                                "
+msgid ""
+"\n"
+"                                                    將扣除 <strong "
+"class=\"text-success deposit-calc\">%(points)s</strong> 儲值點\n"
+"                                                "
+msgstr ""
+"\n"
+"                                    獲得 <strong>%(points)s</strong> 點\n"
+"                                "
 
-#: .\templates\finance\shop.html:135
+#: .\templates\finance\shop.html:225
 msgid "Confirm Redemption?"
 msgstr "確認兌換？"
 
-#: .\templates\finance\shop.html:136
+#: .\templates\finance\shop.html:226
 msgid "You are about to redeem <span id=\"modal-prod-name\"></span>"
 msgstr "您即將兌換 <span id=\"modal-prod-name\"></span>"
 
-#: .\templates\finance\shop.html:138
+#: .\templates\finance\shop.html:228
 msgid "Cancel"
 msgstr "取消"
 
-#: .\templates\finance\shop.html:155
+#: .\templates\finance\shop.html:245
 msgid "Redeemed Successfully!"
 msgstr "兌換成功！"
 
-#: .\templates\finance\shop.html:156
+#: .\templates\finance\shop.html:246
 msgid "Click anywhere to close"
 msgstr "點擊任意處關閉"
 
 #: .\templates\games\lobby.html:7
 msgid "遊戲大廳"
-msgstr ""
+msgstr "遊戲大廳"
 
 #: .\templates\games\lobby.html:47 .\templates\games\survivor.html:7
 #: .\templates\games\survivor.html:30
 msgid "倖存者生存"
-msgstr ""
+msgstr "倖存者生存"
 
 #: .\templates\games\lobby.html:48
 msgid "在無盡的怪物浪潮中生存，利用局外養成提升基礎戰力。"
-msgstr ""
+msgstr "在無盡的怪物浪潮中生存，利用局外養成提升基礎戰力。"
 
 #: .\templates\games\lobby.html:50
 msgid "最高存活"
-msgstr ""
+msgstr "最高存活"
 
 #: .\templates\games\lobby.html:50
 msgid "秒"
-msgstr ""
+msgstr "秒"
 
 #: .\templates\games\lobby.html:51 .\templates\games\lobby.html:67
 msgid "進入大廳"
-msgstr ""
+msgstr "進入大廳"
 
 #: .\templates\games\lobby.html:63
 msgid "虛擬人生 (輕量版)"
-msgstr ""
+msgstr "虛擬人生 (輕量版)"
 
 #: .\templates\games\lobby.html:64
 msgid "擲骰子決定命運，經歷各種隨機事件，賺取金錢並培養角色。"
-msgstr ""
+msgstr "擲骰子決定命運，經歷各種隨機事件，賺取金錢並培養角色。"
 
 #: .\templates\games\lobby.html:66
 msgid "通關關卡等級"
-msgstr ""
+msgstr "通關關卡等級"
 
 #: .\templates\games\lobby.html:79 .\templates\games\magic_tower.html:38
 msgid "魔塔冒險"
-msgstr ""
+msgstr "魔塔冒險"
 
 #: .\templates\games\lobby.html:80
 msgid "精算血量與資源，選擇合適的職業挑戰深邃的魔塔。"
-msgstr ""
+msgstr "精算血量與資源，選擇合適的職業挑戰深邃的魔塔。"
 
 #: .\templates\games\lobby.html:82
 msgid "最高探索"
-msgstr ""
+msgstr "最高探索"
 
 #: .\templates\games\lobby.html:82 .\templates\games\magic_tower.html:45
 msgid "樓"
-msgstr ""
+msgstr "樓"
 
 #: .\templates\games\lobby.html:83 .\templates\games\magic_tower.html:80
 msgid "進入魔塔"
-msgstr ""
+msgstr "進入魔塔"
 
 #: .\templates\games\magic_tower.html:7 .\templates\games\magic_tower.html:93
 msgid "魔塔"
-msgstr ""
+msgstr "魔塔"
 
 #: .\templates\games\magic_tower.html:42 .\templates\games\virtual_life.html:34
 msgid "持有金幣"
-msgstr ""
+msgstr "持有金幣"
 
 #: .\templates\games\magic_tower.html:45
 msgid "目前最高突破"
-msgstr ""
+msgstr "目前最高突破"
 
 #: .\templates\games\magic_tower.html:52
 msgid "血量"
-msgstr ""
+msgstr "血量"
 
 #: .\templates\games\magic_tower.html:61
 msgid "攻擊"
-msgstr ""
+msgstr "攻擊"
 
 #: .\templates\games\magic_tower.html:70
 msgid "防禦"
-msgstr ""
+msgstr "防禦"
 
 #: .\templates\games\magic_tower.html:83
 msgid "返回遊戲中心"
-msgstr ""
+msgstr "返回遊戲中心"
 
 #: .\templates\games\magic_tower.html:118
 msgid "黃鑰"
-msgstr ""
+msgstr "黃鑰"
 
 #: .\templates\games\magic_tower.html:121
 msgid "藍鑰"
-msgstr ""
+msgstr "藍鑰"
 
 #: .\templates\games\magic_tower.html:129
 msgid "存檔"
-msgstr ""
+msgstr "存檔"
 
 #: .\templates\games\magic_tower.html:130
 msgid "重置"
-msgstr ""
+msgstr "重置"
 
 #: .\templates\games\magic_tower.html:131
 msgid "圖鑑"
-msgstr ""
+msgstr "圖鑑"
 
 #: .\templates\games\magic_tower.html:132
 msgid "離開"
-msgstr ""
+msgstr "離開"
 
 #: .\templates\games\magic_tower.html:156
 msgid "選擇你的職業"
-msgstr ""
+msgstr "選擇你的職業"
 
 #: .\templates\games\magic_tower.html:157
 msgid "將會加上你局外的能力加成"
-msgstr ""
+msgstr "將會加上你局外的能力加成"
 
 #: .\templates\games\magic_tower.html:160
 msgid "聖騎士 (高血防)"
-msgstr ""
+msgstr "聖騎士 (高血防)"
 
 #: .\templates\games\magic_tower.html:163
 msgid "戰士 (能力平均)"
-msgstr ""
+msgstr "戰士 (能力平均)"
 
 #: .\templates\games\magic_tower.html:166
 msgid "魔法師 (高攻擊)"
-msgstr ""
+msgstr "魔法師 (高攻擊)"
 
 #: .\templates\games\survivor.html:34
 msgid "金幣"
-msgstr ""
+msgstr "金幣"
 
 #: .\templates\games\survivor.html:38
 msgid "選擇挑戰關卡"
-msgstr ""
+msgstr "選擇挑戰關卡"
 
 #: .\templates\games\survivor.html:70 .\templates\games\virtual_life.html:67
 msgid "回到遊戲中心"
-msgstr ""
+msgstr "回到遊戲中心"
 
 #: .\templates\games\virtual_life.html:7 .\templates\games\virtual_life.html:30
 msgid "虛擬人生 RPG"
-msgstr ""
+msgstr "虛擬人生 RPG"
 
 #: .\templates\games\virtual_life.html:37
 msgid "目前關卡等級"
-msgstr ""
+msgstr "目前關卡等級"
 
 #: .\templates\games\virtual_life.html:44
 msgid "初始血量"
-msgstr ""
+msgstr "初始血量"
 
 #: .\templates\games\virtual_life.html:47
 #: .\templates\games\virtual_life.html:56
 msgid "升級"
-msgstr ""
+msgstr "升級"
 
 #: .\templates\games\virtual_life.html:53
 msgid "初始攻擊"
-msgstr ""
+msgstr "初始攻擊"
 
 #: .\templates\games\virtual_life.html:63
 msgid "開始冒險"
-msgstr ""
+msgstr "開始冒險"
 
 #: .\templates\games\virtual_life.html:97
 msgid "擲骰子"
-msgstr ""
+msgstr "擲骰子"
 
 #: .\templates\games\virtual_life.html:105
 msgid "離開遊戲"
-msgstr ""
+msgstr "離開遊戲"
 
 #: .\templates\games\virtual_life.html:117
 msgid "怪物 HP"
-msgstr ""
+msgstr "怪物 HP"
 
 #: .\templates\includes\footer.html:7
 msgid "All Rights Reserved."
@@ -2374,64 +2631,68 @@ msgstr "公告訊息"
 msgid "Member Zone"
 msgstr "會員專區"
 
-#: .\templates\includes\navbar.html:60
+#: .\templates\includes\navbar.html:56
+msgid "Q版寵物培育"
+msgstr "Q版寵物培育"
+
+#: .\templates\includes\navbar.html:65
 msgid "Investment"
 msgstr "投資理財"
 
-#: .\templates\includes\navbar.html:65
+#: .\templates\includes\navbar.html:70
 #: .\templates\study_brain\dashboard.html:14
 msgid "AI Study Brain"
 msgstr "AI 教材大腦"
 
-#: .\templates\includes\navbar.html:70
+#: .\templates\includes\navbar.html:75
 msgid "Vision Brain"
 msgstr "影像辨識大腦"
 
-#: .\templates\includes\navbar.html:75
+#: .\templates\includes\navbar.html:80
 msgid "多媒體工具"
-msgstr ""
+msgstr "多媒體工具"
 
-#: .\templates\includes\navbar.html:88
+#: .\templates\includes\navbar.html:93
 msgid "CSI 專屬"
-msgstr ""
+msgstr "CSI 專屬"
 
-#: .\templates\includes\navbar.html:91
+#: .\templates\includes\navbar.html:96
 msgid "企業資源"
-msgstr ""
+msgstr "企業資源"
 
-#: .\templates\includes\navbar.html:94
+#: .\templates\includes\navbar.html:99
 msgid "企業內部資訊"
-msgstr ""
+msgstr "企業內部資訊"
 
-#: .\templates\includes\navbar.html:105
+#: .\templates\includes\navbar.html:110
 msgid "Tester Zone"
 msgstr "測試員專區"
 
-#: .\templates\includes\navbar.html:108
+#: .\templates\includes\navbar.html:113
 msgid "Test Management System"
 msgstr "測試管理系統"
 
-#: .\templates\includes\navbar.html:116
+#: .\templates\includes\navbar.html:121
 msgid "No tools available"
 msgstr "目前無可用工具"
 
-#: .\templates\includes\navbar.html:149
+#: .\templates\includes\navbar.html:154
 msgid "Admin"
 msgstr "管理者後台"
 
-#: .\templates\includes\navbar.html:169
+#: .\templates\includes\navbar.html:174
 msgid "Profile"
 msgstr "個人檔案"
 
-#: .\templates\includes\navbar.html:174
+#: .\templates\includes\navbar.html:179
 msgid "Logout"
 msgstr "登出"
 
-#: .\templates\includes\navbar.html:181
+#: .\templates\includes\navbar.html:186
 msgid "Login"
 msgstr "登入"
 
-#: .\templates\includes\navbar.html:184
+#: .\templates\includes\navbar.html:189
 msgid "Register"
 msgstr "註冊"
 
@@ -2674,60 +2935,60 @@ msgstr "請先輸入股票代號！"
 
 #: .\templates\media_studio\studio.html:11
 msgid "圖片處理"
-msgstr ""
+msgstr "圖片處理"
 
 #: .\templates\media_studio\studio.html:16
 msgid "影片編輯"
-msgstr ""
+msgstr "影片編輯"
 
 #: .\templates\media_studio\studio.html:35
 msgid "預計輸出解析度"
-msgstr ""
+msgstr "預計輸出解析度"
 
 #: .\templates\media_studio\studio.html:40
 msgid "開始處理圖片"
-msgstr ""
+msgstr "開始處理圖片"
 
 #: .\templates\media_studio\studio.html:52
 #: .\templates\media_studio\studio.html:116
 msgid "處理完成"
-msgstr ""
+msgstr "處理完成"
 
 #: .\templates\media_studio\studio.html:58
 msgid "原始大小"
-msgstr ""
+msgstr "原始大小"
 
 #: .\templates\media_studio\studio.html:62
 msgid "處理後大小"
-msgstr ""
+msgstr "處理後大小"
 
 #: .\templates\media_studio\studio.html:71
 msgid "解析度已變更"
-msgstr ""
+msgstr "解析度已變更"
 
 #: .\templates\media_studio\studio.html:80
 msgid "下載處理後的圖片"
-msgstr ""
+msgstr "下載處理後的圖片"
 
 #: .\templates\media_studio\studio.html:105
 msgid "開始處理影片"
-msgstr ""
+msgstr "開始處理影片"
 
 #: .\templates\media_studio\studio.html:119
 msgid "總原始大小"
-msgstr ""
+msgstr "總原始大小"
 
 #: .\templates\media_studio\studio.html:120
 msgid "壓縮後大小"
-msgstr ""
+msgstr "壓縮後大小"
 
 #: .\templates\media_studio\studio.html:121
 msgid "輸出規格"
-msgstr ""
+msgstr "輸出規格"
 
 #: .\templates\media_studio\studio.html:126
 msgid "下載處理後的影片"
-msgstr ""
+msgstr "下載處理後的影片"
 
 #: .\templates\notices\detail.html:12 .\templates\notices\list.html:4
 msgid "Notice List"
@@ -2760,7 +3021,7 @@ msgstr "返回列表"
 #: .\templates\notices\list.html:14
 #, python-format
 msgid "共 %(count)s 則公告"
-msgstr ""
+msgstr "共 %(count)s 則公告"
 
 #: .\templates\notices\list.html:23
 msgid "Type"
@@ -2782,238 +3043,294 @@ msgstr "一般公告"
 msgid "No notices available."
 msgstr "目前沒有公告。"
 
+#: .\templates\pet_system\dashboard.html:11
+msgid "Q版像素寵物王國"
+msgstr "Q版像素寵物王國"
+
+#: .\templates\pet_system\dashboard.html:13
+msgid "培育像素幻獸、穿戴裝飾配件、派往遺跡探索並挑戰冒險塔！"
+msgstr "培育像素幻獸、穿戴裝飾配件、派往遺跡探索並挑戰冒險塔！"
+
+#: .\templates\pet_system\dashboard.html:17
+msgid "點數商城"
+msgstr "點數商城"
+
+#: .\templates\pet_system\dashboard.html:20
+msgid "返回大廳"
+msgstr "返回大廳"
+
+#: .\templates\pet_system\dashboard.html:46
+msgid "餵食/道具背包"
+msgstr "餵食/道具背包"
+
+#: .\templates\pet_system\dashboard.html:52
+msgid "汲取登入能量"
+msgstr "汲取登入能量"
+
+#: .\templates\pet_system\dashboard.html:58
+msgid "寵物庫與更衣"
+msgstr "寵物庫與更衣"
+
+#: .\templates\pet_system\dashboard.html:64
+msgid "裝飾配件商城"
+msgstr "裝飾配件商城"
+
+#: .\templates\pet_system\dashboard.html:74
+msgid "狀態與冒險看板"
+msgstr "狀態與冒險看板"
+
+#: .\templates\pet_system\dashboard.html:79
+msgid "加載中..."
+msgstr "加載中..."
+
+#: .\templates\pet_system\dashboard.html:95
+msgid "成長值進度"
+msgstr "成長值進度"
+
+#: .\templates\pet_system\dashboard.html:103
+msgid "進化覺醒"
+msgstr "進化覺醒"
+
+#: .\templates\pet_system\dashboard.html:274
+msgid "跳過 (Skip)"
+msgstr "跳過 (Skip)"
+
+#: .\templates\pet_system\dashboard.html:622
+msgid "背包空空如也，快去商城採購點飼料或神秘蛋吧！"
+msgstr "背包空空如也，快去商城採購點飼料或神秘蛋吧！"
+
+#: .\templates\pet_system\dashboard.html:807
+msgid "目前沒有任何寵物，快去孵化您的第一隻寵物蛋吧！"
+msgstr "目前沒有任何寵物，快去孵化您的第一隻寵物蛋吧！"
+
 #: .\templates\sh_recognition\index.html:7
 msgid "世祥辨識系統 - 首頁"
-msgstr ""
+msgstr "世祥辨識系統 - 首頁"
 
 #: .\templates\sh_recognition\index.html:13
 msgid "世祥圖片辨識系統"
-msgstr ""
+msgstr "世祥圖片辨識系統"
 
 #: .\templates\sh_recognition\index.html:15
 msgid "返回系統主頁"
-msgstr ""
+msgstr "返回系統主頁"
 
 #: .\templates\sh_recognition\index.html:16
 msgid "歷史紀錄"
-msgstr ""
+msgstr "歷史紀錄"
 
 #: .\templates\sh_recognition\index.html:29
 msgid "圖片辨識推論"
-msgstr ""
+msgstr "圖片辨識推論"
 
 #: .\templates\sh_recognition\index.html:34
 msgid "選擇模型版本"
-msgstr ""
+msgstr "選擇模型版本"
 
 #: .\templates\sh_recognition\index.html:36
 msgid "請選擇"
-msgstr ""
+msgstr "請選擇"
 
 #: .\templates\sh_recognition\index.html:43
 msgid "辨識註記"
-msgstr ""
+msgstr "辨識註記"
 
 #: .\templates\sh_recognition\index.html:44
 msgid "輸入對這批圖片的說明"
-msgstr ""
+msgstr "輸入對這批圖片的說明"
 
 #: .\templates\sh_recognition\index.html:47
 msgid "信心閥值 (0.1 - 1.0)"
-msgstr ""
+msgstr "信心閥值 (0.1 - 1.0)"
 
 #: .\templates\sh_recognition\index.html:51
 msgid "上傳待辨識圖片 (可複選多張)"
-msgstr ""
+msgstr "上傳待辨識圖片 (可複選多張)"
 
 #: .\templates\sh_recognition\index.html:56
 msgid "開始辨識"
-msgstr ""
+msgstr "開始辨識"
 
 #: .\templates\sh_recognition\index.html:59
 msgid "批次模型運算中，請耐心稍候..."
-msgstr ""
+msgstr "批次模型運算中，請耐心稍候..."
 
 #: .\templates\sh_recognition\index.html:66
 msgid "最新辨識結果"
-msgstr ""
+msgstr "最新辨識結果"
 
 #: .\templates\sh_recognition\index.html:70
 msgid "版本"
-msgstr ""
-
-#: .\templates\sh_recognition\index.html:71 .\transfer_system\models.py:40
-msgid "狀態"
-msgstr ""
+msgstr "版本"
 
 #: .\templates\sh_recognition\index.html:73
 msgid "偵測到物體"
-msgstr ""
+msgstr "偵測到物體"
 
 #: .\templates\sh_recognition\index.html:75
 msgid "未偵測到物體"
-msgstr ""
+msgstr "未偵測到物體"
 
 #: .\templates\sh_recognition\index.html:81
 msgid "註記"
-msgstr ""
+msgstr "註記"
 
 #: .\templates\sh_recognition\index.html:85
 msgid "尚未有辨識紀錄"
-msgstr ""
+msgstr "尚未有辨識紀錄"
 
 #: .\templates\sh_recognition\record_detail.html:7
 msgid "辨識結果詳情"
-msgstr ""
+msgstr "辨識結果詳情"
 
 #: .\templates\sh_recognition\record_detail.html:13
 msgid "辨識紀錄詳情"
-msgstr ""
+msgstr "辨識紀錄詳情"
 
 #: .\templates\sh_recognition\record_detail.html:14
 msgid "返回列表"
-msgstr ""
+msgstr "返回列表"
 
 #: .\templates\sh_recognition\record_detail.html:25
 msgid "使用模型版本"
-msgstr ""
+msgstr "使用模型版本"
 
 #: .\templates\sh_recognition\record_detail.html:26
 msgid "辨識日期時間"
-msgstr ""
+msgstr "辨識日期時間"
 
 #: .\templates\sh_recognition\record_detail.html:27
 msgid "設定信心閥值"
-msgstr ""
+msgstr "設定信心閥值"
 
 #: .\templates\sh_recognition\record_detail.html:28
 msgid "是否有偵測到物體"
-msgstr ""
+msgstr "是否有偵測到物體"
 
 #: .\templates\sh_recognition\record_detail.html:28
 msgid "是,否"
-msgstr ""
+msgstr "是,否"
 
 #: .\templates\sh_recognition\record_detail.html:33
 msgid "使用新模型重新辨識"
-msgstr ""
+msgstr "使用新模型重新辨識"
 
 #: .\templates\sh_recognition\record_detail.html:41
 msgid "選擇未使用的模型..."
-msgstr ""
+msgstr "選擇未使用的模型..."
 
 #: .\templates\sh_recognition\record_detail.html:46
 msgid "信心閥值"
-msgstr ""
+msgstr "信心閥值"
 
 #: .\templates\sh_recognition\record_detail.html:48
 msgid "進行重新辨識"
-msgstr ""
+msgstr "進行重新辨識"
 
 #: .\templates\sh_recognition\record_detail.html:51
 msgid "重新運算中..."
-msgstr ""
+msgstr "重新運算中..."
 
 #: .\templates\sh_recognition\record_detail.html:56
 msgid "此原圖已使用過所有現有模型進行辨識。"
-msgstr ""
+msgstr "此原圖已使用過所有現有模型進行辨識。"
 
 #: .\templates\sh_recognition\record_detail.html:64
 msgid "原始上傳圖片"
-msgstr ""
+msgstr "原始上傳圖片"
 
 #: .\templates\sh_recognition\record_detail.html:68
 msgid "模型辨識繪製圖片"
-msgstr ""
+msgstr "模型辨識繪製圖片"
 
 #: .\templates\sh_recognition\record_detail.html:72
 msgid "無結果圖"
-msgstr ""
+msgstr "無結果圖"
 
 #: .\templates\sh_recognition\record_detail.html:77
 msgid "細節座標紀錄 (類別 座標)"
-msgstr ""
+msgstr "細節座標紀錄 (類別 座標)"
 
 #: .\templates\sh_recognition\record_list.html:7
 #: .\templates\sh_recognition\record_list.html:13
 msgid "辨識紀錄清單"
-msgstr ""
+msgstr "辨識紀錄清單"
 
 #: .\templates\sh_recognition\record_list.html:14
 msgid "返回辨識首頁"
-msgstr ""
+msgstr "返回辨識首頁"
 
 #: .\templates\sh_recognition\record_list.html:25
 msgid "所有模型"
-msgstr ""
+msgstr "所有模型"
 
 #: .\templates\sh_recognition\record_list.html:33
 msgid "搜尋註記..."
-msgstr ""
+msgstr "搜尋註記..."
 
 #: .\templates\sh_recognition\record_list.html:34
 msgid "查詢"
-msgstr ""
+msgstr "查詢"
 
 #: .\templates\sh_recognition\record_list.html:44
 msgid "刪除已勾選資料"
-msgstr ""
+msgstr "刪除已勾選資料"
 
 #: .\templates\sh_recognition\record_list.html:54
 msgid "模型版本"
-msgstr ""
+msgstr "模型版本"
 
 #: .\templates\sh_recognition\record_list.html:55
 msgid "辨識時間"
-msgstr ""
+msgstr "辨識時間"
 
 #: .\templates\sh_recognition\record_list.html:56
 msgid "偵測物體"
-msgstr ""
+msgstr "偵測物體"
 
 #: .\templates\sh_recognition\record_list.html:57
 msgid "資訊"
-msgstr ""
+msgstr "資訊"
 
 #: .\templates\sh_recognition\record_list.html:70
 msgid "有"
-msgstr ""
+msgstr "有"
 
 #: .\templates\sh_recognition\record_list.html:72
 msgid "無"
-msgstr ""
+msgstr "無"
 
 #: .\templates\sh_recognition\record_list.html:75
 msgid "詳情"
-msgstr ""
+msgstr "詳情"
 
 #: .\templates\sh_recognition\record_list.html:79
 msgid "查無紀錄，可嘗試清空日期查詢全部"
-msgstr ""
+msgstr "查無紀錄，可嘗試清空日期查詢全部"
 
 #: .\templates\socialaccount\connections.html:5
 msgid "Account Connections"
-msgstr ""
+msgstr "Account Connections"
 
 #: .\templates\socialaccount\connections.html:18
 msgid "Social Accounts"
-msgstr ""
+msgstr "Social Accounts"
 
 #: .\templates\socialaccount\connections.html:21
 msgid "您目前已連結以下第三方帳戶，可用於登入系統："
-msgstr ""
+msgstr "您目前已連結以下第三方帳戶，可用於登入系統："
 
 #: .\templates\socialaccount\connections.html:40
 msgid "Remove"
-msgstr ""
+msgstr "Remove"
 
 #: .\templates\socialaccount\connections.html:45
 msgid "目前沒有連結任何第三方帳號。"
-msgstr ""
+msgstr "目前沒有連結任何第三方帳號。"
 
 #: .\templates\socialaccount\connections.html:50
 msgid "連結其他帳號"
-msgstr ""
+msgstr "連結其他帳號"
 
 #: .\templates\socialaccount\login.html:21
 msgid ""
@@ -3095,7 +3412,7 @@ msgstr "點擊或將檔案拖曳至此"
 
 #: .\templates\study_brain\dashboard.html:67
 msgid "這是歷屆考題"
-msgstr ""
+msgstr "這是歷屆考題"
 
 #: .\templates\study_brain\dashboard.html:70
 msgid ""
@@ -3164,7 +3481,7 @@ msgstr "訓練中..."
 
 #: .\templates\study_brain\mistake_book.html:4
 msgid "我的專屬錯題本"
-msgstr ""
+msgstr "我的專屬錯題本"
 
 #: .\templates\study_brain\quiz_history.html:15
 msgid "Review your past quiz records and mistakes to improve your learning."
@@ -3259,11 +3576,11 @@ msgstr "提交答案"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:4
 msgid "ICS Sheet 結構淨化工具"
-msgstr ""
+msgstr "ICS Sheet 結構淨化工具"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:13
 msgid "ICS 工作表結構淨化工具"
-msgstr ""
+msgstr "ICS 工作表結構淨化工具"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:14
 msgid ""
@@ -3275,135 +3592,135 @@ msgstr ""
 #: .\templates\tigf\ics_merger_dashboard.html:17
 #: .\templates\tigf\ics_validator_dashboard.html:17
 msgid "返回數據比對儀表板"
-msgstr ""
+msgstr "返回數據比對儀表板"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:27
 msgid "上傳待整理之 ICS 原始檔案"
-msgstr ""
+msgstr "上傳待整理之 ICS 原始檔案"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:32
 msgid "系統將在記憶體中解析白名單工作表"
-msgstr ""
+msgstr "系統將在記憶體中解析白名單工作表"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:41
 #: .\templates\tigf\ics_cleaner_dashboard.html:74
 msgid "執行冗餘工作表全面清除"
-msgstr ""
+msgstr "執行冗餘工作表全面清除"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:49
 msgid "執行狀態監控日誌"
-msgstr ""
+msgstr "執行狀態監控日誌"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:52
 #: .\templates\tigf\ics_cleaner_dashboard.html:75
 msgid "等待使用者上傳單據..."
-msgstr ""
+msgstr "等待使用者上傳單據..."
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:56
 msgid "結構過濾完成！"
-msgstr ""
+msgstr "結構過濾完成！"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:57
 msgid "已成功移除非白名單中的工作表共"
-msgstr ""
+msgstr "已成功移除非白名單中的工作表共"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:57
 msgid "個。"
-msgstr ""
+msgstr "個。"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:59
 msgid "下載淨化後的 Excel 報表"
-msgstr ""
+msgstr "下載淨化後的 Excel 報表"
 
 #: .\templates\tigf\ics_cleaner_dashboard.html:73
 msgid "正在動態提取白名單標籤並過濾結構..."
-msgstr ""
+msgstr "正在動態提取白名單標籤並過濾結構..."
 
 #: .\templates\tigf\ics_merger_dashboard.html:4
 msgid "ICS Excel Report Merger"
-msgstr ""
+msgstr "ICS Excel Report Merger"
 
 #: .\templates\tigf\ics_merger_dashboard.html:13
 msgid "ICS Excel 報表合併系統"
-msgstr ""
+msgstr "ICS Excel 報表合併系統"
 
 #: .\templates\tigf\ics_merger_dashboard.html:14
 msgid "將副檔內的所有工作表及其原始格式樣式，往後串合至主檔中"
-msgstr ""
+msgstr "將副檔內的所有工作表及其原始格式樣式，往後串合至主檔中"
 
 #: .\templates\tigf\ics_merger_dashboard.html:27
 msgid "上傳主 Excel 檔案"
-msgstr ""
+msgstr "上傳主 Excel 檔案"
 
 #: .\templates\tigf\ics_merger_dashboard.html:32
 msgid "此檔案將作為合併後的基底表"
-msgstr ""
+msgstr "此檔案將作為合併後的基底表"
 
 #: .\templates\tigf\ics_merger_dashboard.html:38
 msgid "上傳副 Excel 檔案"
-msgstr ""
+msgstr "上傳副 Excel 檔案"
 
 #: .\templates\tigf\ics_merger_dashboard.html:43
 msgid "此檔內的所有工作表將會被完整抽出來併入主檔"
-msgstr ""
+msgstr "此檔內的所有工作表將會被完整抽出來併入主檔"
 
 #: .\templates\tigf\ics_merger_dashboard.html:52
 #: .\templates\tigf\ics_merger_dashboard.html:93
 msgid "執行 ICS 報表樣式無損合併"
-msgstr ""
+msgstr "執行 ICS 報表樣式無損合併"
 
 #: .\templates\tigf\ics_merger_dashboard.html:60
 msgid "合併技術與規範說明"
-msgstr ""
+msgstr "合併技術與規範說明"
 
 #: .\templates\tigf\ics_merger_dashboard.html:76
 msgid "合併作業已順利完成！"
-msgstr ""
+msgstr "合併作業已順利完成！"
 
 #: .\templates\tigf\ics_merger_dashboard.html:78
 msgid "下載已合併的 Excel 報表"
-msgstr ""
+msgstr "下載已合併的 Excel 報表"
 
 #: .\templates\tigf\ics_merger_dashboard.html:92
 msgid "正在讀取並轉移樣式格式中..."
-msgstr ""
+msgstr "正在讀取並轉移樣式格式中..."
 
 #: .\templates\tigf\ics_validator_dashboard.html:4
 msgid "ICS 指標雙向交叉驗證系統"
-msgstr ""
+msgstr "ICS 指標雙向交叉驗證系統"
 
 #: .\templates\tigf\ics_validator_dashboard.html:13
 msgid "ICS 報表指標交叉驗證系統"
-msgstr ""
+msgstr "ICS 報表指標交叉驗證系統"
 
 #: .\templates\tigf\ics_validator_dashboard.html:14
 msgid "檢核 config 內各表行寬、Row Type 與 rowNumber 的資料關聯性與完整性"
-msgstr ""
+msgstr "檢核 config 內各表行寬、Row Type 與 rowNumber 的資料關聯性與完整性"
 
 #: .\templates\tigf\ics_validator_dashboard.html:27
 msgid "上傳待驗證之已合併報表"
-msgstr ""
+msgstr "上傳待驗證之已合併報表"
 
 #: .\templates\tigf\ics_validator_dashboard.html:32
 msgid "系統將自動解析 config、rowNumber 與所有子表"
-msgstr ""
+msgstr "系統將自動解析 config、rowNumber 與所有子表"
 
 #: .\templates\tigf\ics_validator_dashboard.html:41
 #: .\templates\tigf\ics_validator_dashboard.html:66
 msgid "開始執行跨表關聯安全性驗證"
-msgstr ""
+msgstr "開始執行跨表關聯安全性驗證"
 
 #: .\templates\tigf\ics_validator_dashboard.html:49
 msgid "驗證回報與錯誤日誌清單"
-msgstr ""
+msgstr "驗證回報與錯誤日誌清單"
 
 #: .\templates\tigf\ics_validator_dashboard.html:52
 msgid "等待活頁簿上傳以進行指標矩陣掃描..."
-msgstr ""
+msgstr "等待活頁簿上傳以進行指標矩陣掃描..."
 
 #: .\templates\tigf\ics_validator_dashboard.html:65
 msgid "正在執行關聯比對、區塊空值檢索中..."
-msgstr ""
+msgstr "正在執行關聯比對、區塊空值檢索中..."
 
 #: .\templates\tigf\tigf_dashboard.html:4
 msgid "Data Verification Dashboard"
@@ -3436,7 +3753,7 @@ msgstr "未偵測到檔案"
 
 #: .\templates\tigf\tigf_dashboard.html:89
 msgid "比對規則說明與設定"
-msgstr ""
+msgstr "比對規則說明與設定"
 
 #: .\templates\tigf\tigf_dashboard.html:92
 #: .\templates\tigf\tigf_dashboard.html:207
@@ -3463,7 +3780,7 @@ msgstr "資料庫"
 #: .\templates\tigf\tigf_dashboard.html:116
 #, python-format
 msgid "編號 %(fid)s 的差異數：%(count)s"
-msgstr ""
+msgstr "編號 %(fid)s 的差異數：%(count)s"
 
 #: .\templates\tigf\tigf_dashboard.html:117
 msgid "Download CSV"
@@ -3476,11 +3793,11 @@ msgstr "還未比對"
 
 #: .\templates\tigf\tigf_dashboard.html:136
 msgid "資料比對規則說明與設定"
-msgstr ""
+msgstr "資料比對規則說明與設定"
 
 #: .\templates\tigf\tigf_dashboard.html:188
 msgid "關閉並儲存設定"
-msgstr ""
+msgstr "關閉並儲存設定"
 
 #: .\templates\tigf\tigf_dashboard.html:201
 msgid "Upload Error"
@@ -3525,493 +3842,491 @@ msgstr "完全匹配"
 
 #: .\templates\transfer_system\transfer_create.html:10
 msgid "發起轉移"
-msgstr ""
+msgstr "發起轉移"
 
 #: .\templates\transfer_system\transfer_create.html:13
 msgid "歷史清單"
-msgstr ""
+msgstr "歷史清單"
 
 #: .\templates\transfer_system\transfer_create.html:21
 msgid "選擇物品"
-msgstr ""
+msgstr "選擇物品"
 
 #: .\templates\transfer_system\transfer_create.html:23
 msgid "請輸入或選擇物品..."
-msgstr ""
+msgstr "請輸入或選擇物品..."
 
 #: .\templates\transfer_system\transfer_create.html:32
 msgid "選擇接收者"
-msgstr ""
+msgstr "選擇接收者"
 
 #: .\templates\transfer_system\transfer_create.html:34
 msgid "請輸入或選擇使用者..."
-msgstr ""
+msgstr "請輸入或選擇使用者..."
 
 #: .\templates\transfer_system\transfer_create.html:43
 msgid "送出轉移"
-msgstr ""
+msgstr "送出轉移"
 
 #: .\templates\transfer_system\transfer_history.html:9
 msgid "物品轉移歷史紀錄總覽 (Admin)"
-msgstr ""
+msgstr "物品轉移歷史紀錄總覽 (Admin)"
 
 #: .\templates\transfer_system\transfer_history.html:12
 msgid "發起新轉移"
-msgstr ""
+msgstr "發起新轉移"
 
 #: .\templates\transfer_system\transfer_history.html:20
 #: .\transfer_system\models.py:42
 msgid "發起時間"
-msgstr ""
+msgstr "發起時間"
 
 #: .\templates\transfer_system\transfer_history.html:21
 #: .\transfer_system\models.py:12
 msgid "物品名稱"
-msgstr ""
+msgstr "物品名稱"
 
 #: .\templates\transfer_system\transfer_history.html:22
 #: .\transfer_system\models.py:32
 msgid "轉出者"
-msgstr ""
+msgstr "轉出者"
 
 #: .\templates\transfer_system\transfer_history.html:23
 #: .\transfer_system\models.py:35
 msgid "接收者"
-msgstr ""
+msgstr "接收者"
 
 #: .\templates\transfer_system\transfer_history.html:24
 msgid "當前狀態"
-msgstr ""
+msgstr "當前狀態"
 
 #: .\templates\transfer_system\transfer_history.html:25
 msgid "管理操作"
-msgstr ""
+msgstr "管理操作"
 
 #: .\templates\transfer_system\transfer_history.html:41
 #: .\transfer_system\admin.py:29
 msgid "待處理"
-msgstr ""
+msgstr "待處理"
 
 #: .\templates\transfer_system\transfer_history.html:43
 #: .\transfer_system\admin.py:30
 msgid "已接受"
-msgstr ""
+msgstr "已接受"
 
 #: .\templates\transfer_system\transfer_history.html:45
 #: .\transfer_system\admin.py:31
 msgid "已拒絕"
-msgstr ""
+msgstr "已拒絕"
 
 #: .\templates\transfer_system\transfer_history.html:47
 #: .\transfer_system\admin.py:32
 msgid "已取消"
-msgstr ""
+msgstr "已取消"
 
 #: .\templates\transfer_system\transfer_history.html:53
 msgid "確定要取消此筆物品轉移請求嗎？"
-msgstr ""
+msgstr "確定要取消此筆物品轉移請求嗎？"
 
 #: .\templates\transfer_system\transfer_history.html:56
 msgid "取消轉移"
-msgstr ""
+msgstr "取消轉移"
 
 #: .\templates\transfer_system\transfer_history.html:68
 msgid "目前全系統尚無任何轉移紀錄。"
-msgstr ""
+msgstr "目前全系統尚無任何轉移紀錄。"
 
 #: .\templates\transfer_system\transfer_reply.html:10
 msgid "物品轉移確認"
-msgstr ""
+msgstr "物品轉移確認"
 
 #: .\templates\transfer_system\transfer_reply.html:17
 msgid "發送者："
-msgstr ""
+msgstr "發送者："
 
 #: .\templates\transfer_system\transfer_reply.html:22
 msgid "物品名稱："
-msgstr ""
+msgstr "物品名稱："
 
 #: .\templates\transfer_system\transfer_reply.html:32
 msgid "接受"
-msgstr ""
+msgstr "接受"
 
 #: .\templates\transfer_system\transfer_reply.html:35
 msgid "拒絕"
-msgstr ""
+msgstr "拒絕"
 
 #: .\templates\tube_hub\player.html:28
 msgid "返回清單"
-msgstr ""
+msgstr "返回清單"
 
 #: .\templates\tube_hub\player.html:49
 msgid "播放控制"
-msgstr ""
+msgstr "播放控制"
 
 #: .\templates\tube_hub\player.html:55
 msgid "全曲循環"
-msgstr ""
+msgstr "全曲循環"
 
 #: .\templates\tube_hub\player.html:61
 msgid "切換影片模式"
-msgstr ""
+msgstr "切換影片模式"
 
 #: .\templates\tube_hub\player.html:71
 msgid "語速"
-msgstr ""
+msgstr "語速"
 
 #: .\templates\tube_hub\player.html:80
 msgid "升降 Key"
-msgstr ""
+msgstr "升降 Key"
 
 #: .\templates\tube_hub\player.html:100
 msgid "下一首"
-msgstr ""
+msgstr "下一首"
 
 #: .\templates\tube_hub\player.html:107
 msgid "A-B 段落重複播放"
-msgstr ""
+msgstr "A-B 段落重複播放"
 
 #: .\templates\tube_hub\player.html:109
 msgid "設定 A 點"
-msgstr ""
+msgstr "設定 A 點"
 
 #: .\templates\tube_hub\player.html:110
 msgid "設定 B 點"
-msgstr ""
+msgstr "設定 B 點"
 
 #: .\templates\tube_hub\player.html:111
 msgid "清除"
-msgstr ""
+msgstr "清除"
 
 #: .\templates\tube_hub\player.html:114
 msgid "開啟重複播放"
-msgstr ""
+msgstr "開啟重複播放"
 
 #: .\templates\tube_hub\player.html:127 .\templates\tube_hub\search.html:75
 msgid "歌單"
-msgstr ""
+msgstr "歌單"
 
 #: .\templates\tube_hub\player.html:129
 msgid "全部循環"
-msgstr ""
+msgstr "全部循環"
 
 #: .\templates\tube_hub\player.html:129
 msgid "全部"
-msgstr ""
+msgstr "全部"
 
 #: .\templates\tube_hub\player.html:130
 msgid "單曲循環"
-msgstr ""
+msgstr "單曲循環"
 
 #: .\templates\tube_hub\player.html:130
 msgid "單曲"
-msgstr ""
+msgstr "單曲"
 
 #: .\templates\tube_hub\player.html:131
 msgid "隨機播放"
-msgstr ""
+msgstr "隨機播放"
 
 #: .\templates\tube_hub\player.html:131
 msgid "隨機"
-msgstr ""
+msgstr "隨機"
 
 #: .\templates\tube_hub\player.html:162
 msgid "原生字幕 / 歌詞"
-msgstr ""
+msgstr "原生字幕 / 歌詞"
 
 #: .\templates\tube_hub\player.html:165
 msgid "個人筆記資料"
-msgstr ""
+msgstr "個人筆記資料"
 
 #: .\templates\tube_hub\player.html:179
 msgid "在這裡輸入您的學習筆記、歌詞段落或是重點摘要..."
-msgstr ""
+msgstr "在這裡輸入您的學習筆記、歌詞段落或是重點摘要..."
 
 #: .\templates\tube_hub\player.html:183
 msgid "已儲存"
-msgstr ""
+msgstr "已儲存"
 
 #: .\templates\tube_hub\player.html:185
 msgid "儲存筆記"
-msgstr ""
+msgstr "儲存筆記"
 
 #: .\templates\tube_hub\search.html:8
 msgid "影音資源庫 - 搜尋與下載"
-msgstr ""
+msgstr "影音資源庫 - 搜尋與下載"
 
 #: .\templates\tube_hub\search.html:15
 msgid "Tube Hub 影音中心"
-msgstr ""
+msgstr "Tube Hub 影音中心"
 
 #: .\templates\tube_hub\search.html:20
 msgid "我的收藏"
-msgstr ""
+msgstr "我的收藏"
 
 #: .\templates\tube_hub\search.html:36 .\templates\tube_hub\search.html:92
 msgid "公開分享"
-msgstr ""
+msgstr "公開分享"
 
 #: .\templates\tube_hub\search.html:39 .\templates\tube_hub\search.html:95
 msgid "移除"
-msgstr ""
+msgstr "移除"
 
 #: .\templates\tube_hub\search.html:44 .\templates\tube_hub\search.html:99
 msgid "移動至..."
-msgstr ""
+msgstr "移動至..."
 
 #: .\templates\tube_hub\search.html:49 .\templates\tube_hub\search.html:104
 msgid "移出資料夾 (最外層)"
-msgstr ""
+msgstr "移出資料夾 (最外層)"
 
 #: .\templates\tube_hub\search.html:129
 msgid "尚無個人收藏"
-msgstr ""
+msgstr "尚無個人收藏"
 
 #: .\templates\tube_hub\search.html:135
 msgid "社群公開分享"
-msgstr ""
+msgstr "社群公開分享"
 
 #: .\templates\tube_hub\search.html:143
 msgid "提供者:"
-msgstr ""
+msgstr "提供者:"
 
 #: .\templates\tube_hub\search.html:146
 msgid "收藏"
-msgstr ""
+msgstr "收藏"
 
 #: .\templates\tube_hub\search.html:150
 msgid "目前沒有其他人公開的資源"
-msgstr ""
+msgstr "目前沒有其他人公開的資源"
 
 #: .\templates\tube_hub\search.html:158
 msgid "輸入關鍵字搜尋 YouTube..."
-msgstr ""
+msgstr "輸入關鍵字搜尋 YouTube..."
 
 #: .\templates\tube_hub\search.html:159
 msgid "搜尋"
-msgstr ""
+msgstr "搜尋"
 
 #: .\templates\tube_hub\search.html:165
 msgid "下載設定"
-msgstr ""
+msgstr "下載設定"
 
 #: .\templates\tube_hub\search.html:171 .\tube_hub\models.py:49
 msgid "資源分類"
-msgstr ""
+msgstr "資源分類"
 
 #: .\templates\tube_hub\search.html:173
 msgid "音樂類型"
-msgstr ""
+msgstr "音樂類型"
 
 #: .\templates\tube_hub\search.html:174
 msgid "影片類型"
-msgstr ""
+msgstr "影片類型"
 
 #: .\templates\tube_hub\search.html:178
 msgid "分類資料夾 (選填)"
-msgstr ""
+msgstr "分類資料夾 (選填)"
 
 #: .\templates\tube_hub\search.html:179
 msgid "選擇現有或輸入新名稱..."
-msgstr ""
+msgstr "選擇現有或輸入新名稱..."
 
 #: .\templates\tube_hub\search.html:189
 msgid "個人學習筆記"
-msgstr ""
+msgstr "個人學習筆記"
 
 #: .\templates\tube_hub\search.html:195
 msgid "公開給社群其他使用者收藏"
-msgstr ""
+msgstr "公開給社群其他使用者收藏"
 
 #: .\templates\tube_hub\search.html:197
 msgid "確認下載並自動分析字幕"
-msgstr ""
+msgstr "確認下載並自動分析字幕"
 
 #: .\tigf\apps.py:7
 msgid "安定基金"
-msgstr ""
+msgstr "安定基金"
 
 #: .\transfer_system\admin.py:46
 msgid "工作流狀態"
-msgstr ""
+msgstr "工作流狀態"
 
 #: .\transfer_system\admin.py:61
 msgid "核准轉移"
-msgstr ""
+msgstr "核准轉移"
 
 #: .\transfer_system\admin.py:62
 msgid "駁回請求"
-msgstr ""
+msgstr "駁回請求"
 
 #: .\transfer_system\admin.py:63
 msgid "強制取消"
-msgstr ""
+msgstr "強制取消"
 
 #: .\transfer_system\admin.py:80
 msgid "流程已結束"
-msgstr ""
+msgstr "流程已結束"
 
 #: .\transfer_system\admin.py:82
 msgid "FSM 自動化操作"
-msgstr ""
+msgstr "FSM 自動化操作"
 
 #: .\transfer_system\admin.py:104
 msgid "工作流狀態轉換成功。"
-msgstr ""
+msgstr "工作流狀態轉換成功。"
 
 #: .\transfer_system\admin.py:106
 msgid "轉換失敗：當前狀態不允許此操作。"
-msgstr ""
+msgstr "轉換失敗：當前狀態不允許此操作。"
 
 #: .\transfer_system\apps.py:9
 msgid "物品轉移系統"
-msgstr ""
-
-#: .\transfer_system\models.py:14 .\tube_hub\models.py:14
-#: .\tube_hub\models.py:39
-msgid "擁有者"
-msgstr ""
+msgstr "物品轉移系統"
 
 #: .\transfer_system\models.py:16
 msgid "物品描述"
-msgstr ""
+msgstr "物品描述"
 
 #: .\transfer_system\models.py:20 .\transfer_system\models.py:21
 msgid "物品"
-msgstr ""
+msgstr "物品"
 
 #: .\transfer_system\models.py:30
 msgid "轉移物品"
-msgstr ""
+msgstr "轉移物品"
 
 #: .\transfer_system\models.py:45 .\transfer_system\models.py:46
 msgid "轉移紀錄"
-msgstr ""
+msgstr "轉移紀錄"
 
 #: .\transfer_system\views.py:17 .\transfer_system\views.py:54
 #: .\transfer_system\views.py:72
 msgid "僅限管理員操作"
-msgstr ""
+msgstr "僅限管理員操作"
 
 #: .\transfer_system\views.py:31
 msgid "該物品目前已有進行中的轉移請求，無法同時發起第二筆轉移。"
-msgstr ""
+msgstr "該物品目前已有進行中的轉移請求，無法同時發起第二筆轉移。"
 
 #: .\transfer_system\views.py:35
 msgid "轉移請求已建立"
-msgstr ""
+msgstr "轉移請求已建立"
 
 #: .\transfer_system\views.py:79
 msgid "已成功取消該筆轉移請求"
-msgstr ""
+msgstr "已成功取消該筆轉移請求"
 
 #: .\transfer_system\views.py:99
 msgid "已接受物品轉移"
-msgstr ""
+msgstr "已接受物品轉移"
 
 #: .\transfer_system\views.py:103
 msgid "已拒絕物品轉移"
-msgstr ""
+msgstr "已拒絕物品轉移"
 
 #: .\tube_hub\apps.py:7
 msgid "影音資源中心"
-msgstr ""
+msgstr "影音資源中心"
 
 #: .\tube_hub\models.py:9
 msgid "影片資料夾"
-msgstr ""
+msgstr "影片資料夾"
 
 #: .\tube_hub\models.py:10
 msgid "音樂歌單"
-msgstr ""
+msgstr "音樂歌單"
 
 #: .\tube_hub\models.py:16
 msgid "資料夾名稱"
-msgstr ""
+msgstr "資料夾名稱"
 
 #: .\tube_hub\models.py:18
 msgid "類型"
-msgstr ""
+msgstr "類型"
 
 #: .\tube_hub\models.py:23 .\tube_hub\models.py:24
 msgid "收藏資料夾"
-msgstr ""
+msgstr "收藏資料夾"
 
 #: .\tube_hub\models.py:34
 msgid "影片"
-msgstr ""
+msgstr "影片"
 
 #: .\tube_hub\models.py:35
 msgid "音樂"
-msgstr ""
+msgstr "音樂"
 
 #: .\tube_hub\models.py:42
 msgid "所屬資料夾"
-msgstr ""
+msgstr "所屬資料夾"
 
 #: .\tube_hub\models.py:44
 msgid "公開分享給他人"
-msgstr ""
+msgstr "公開分享給他人"
 
 #: .\tube_hub\models.py:46
 msgid "來源網址"
-msgstr ""
+msgstr "來源網址"
 
 #: .\tube_hub\models.py:47
 msgid "資源標題"
-msgstr ""
+msgstr "資源標題"
 
 #: .\tube_hub\models.py:52
 msgid "影片檔"
-msgstr ""
+msgstr "影片檔"
 
 #: .\tube_hub\models.py:55
 msgid "音檔"
-msgstr ""
+msgstr "音檔"
 
 #: .\tube_hub\models.py:57
 msgid "主內容"
-msgstr ""
+msgstr "主內容"
 
 #: .\tube_hub\models.py:58
 msgid "副內容"
-msgstr ""
+msgstr "副內容"
 
 #: .\tube_hub\models.py:59
 msgid "個人筆記"
-msgstr ""
+msgstr "個人筆記"
 
 #: .\tube_hub\models.py:63 .\tube_hub\models.py:64
 msgid "影音資源"
-msgstr ""
+msgstr "影音資源"
 
 #: .\users\apps.py:7
 msgid "使用者管理"
-msgstr ""
+msgstr "使用者管理"
 
 #: .\users\models.py:17
 msgid "自定義大頭貼"
-msgstr ""
+msgstr "自定義大頭貼"
 
 #: .\users\models.py:18
 msgid "是否為公司人員"
-msgstr ""
+msgstr "是否為公司人員"
 
 #: .\users\models.py:19
 msgid "工號"
-msgstr ""
+msgstr "工號"
 
 #: .\users\models.py:23
 msgid "的個人檔案"
-msgstr ""
+msgstr "的個人檔案"
 
 #: .\users\models.py:26 .\users\models.py:27
 msgid "個人檔案"
-msgstr ""
+msgstr "個人檔案"
 
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr "您沒有權限，已導向首頁。"
+
+#~ msgid "The shop is currently under preparation, please stay tuned!"
+#~ msgstr "商城正在籌備中，敬請期待！"
 
 #~ msgid "Image Studio"
 #~ msgstr "圖像壓縮工具"

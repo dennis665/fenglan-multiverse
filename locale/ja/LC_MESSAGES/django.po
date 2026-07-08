@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CSI Server 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 16:22+0800\n"
+"POT-Creation-Date: 2026-07-08 15:57+0800\n"
 "PO-Revision-Date: 2026-04-13 10:15+0800\n"
 "Last-Translator: Gemini AI\n"
 "Language-Team: Japanese\n"
@@ -38,9 +38,9 @@ msgid "仿生人回覆"
 msgstr "バイオニック応答"
 
 #: .\bionic_chat\models.py:17 .\core\models.py:9 .\finance\models.py:38
-#: .\finance\models.py:76 .\finance\models.py:149 .\invest\models.py:58
+#: .\finance\models.py:76 .\finance\models.py:159 .\invest\models.py:58
 #: .\invest\models.py:93 .\line_manager\models.py:17
-#: .\line_manager\models.py:61 .\sh_recognition\models.py:41
+#: .\line_manager\models.py:62 .\sh_recognition\models.py:41
 #: .\study_brain\models.py:11 .\transfer_system\models.py:17
 #: .\tube_hub\models.py:20 .\tube_hub\models.py:60
 msgid "建立時間"
@@ -54,15 +54,15 @@ msgstr "対話履歴"
 msgid "伺服器已收到"
 msgstr "サーバーが受信しました"
 
-#: .\config\settings.py:321
+#: .\config\settings.py:328
 msgid "繁體中文"
 msgstr "繁体中国語"
 
-#: .\config\settings.py:322
+#: .\config\settings.py:329
 msgid "英文"
 msgstr "英語"
 
-#: .\config\settings.py:323
+#: .\config\settings.py:330
 msgid "日文"
 msgstr "日本語"
 
@@ -199,7 +199,7 @@ msgid "任務執行期間發生異常的追蹤紀錄 (若有的話)。"
 msgstr "タスク実行中に発生した例外のトレースログ (ある場合)。"
 
 #: .\core\models.py:10 .\finance\models.py:12 .\invest\models.py:37
-#: .\line_manager\models.py:62 .\notices\models.py:57
+#: .\line_manager\models.py:63 .\notices\models.py:57
 msgid "更新時間"
 msgstr "更新日時"
 
@@ -288,8 +288,11 @@ msgid "財務與商城"
 msgstr "財務・ショップ"
 
 #: .\finance\models.py:9 .\finance\models.py:31 .\finance\models.py:60
-#: .\finance\models.py:133 .\line_manager\models.py:11
-#: .\line_manager\models.py:78 .\study_brain\models.py:67
+#: .\finance\models.py:143 .\line_manager\models.py:11
+#: .\line_manager\models.py:79 .\pet_system\models.py:70
+#: .\pet_system\models.py:84 .\pet_system\models.py:120
+#: .\pet_system\models.py:132 .\pet_system\models.py:146
+#: .\pet_system\models.py:159 .\study_brain\models.py:67
 #: .\study_brain\models.py:83 .\users\models.py:16
 msgid "使用者"
 msgstr "ユーザー"
@@ -306,7 +309,7 @@ msgstr "ボーナスポイント"
 msgid "錢包餘額"
 msgstr "ウォレット残高"
 
-#: .\finance\models.py:27 .\finance\models.py:128
+#: .\finance\models.py:27 .\finance\models.py:138
 msgid "待付款"
 msgstr "支払い待ち"
 
@@ -314,7 +317,7 @@ msgstr "支払い待ち"
 msgid "付款成功"
 msgstr "支払い成功"
 
-#: .\finance\models.py:29 .\finance\models.py:130
+#: .\finance\models.py:29 .\finance\models.py:140
 msgid "付款失敗"
 msgstr "支払い失敗"
 
@@ -326,7 +329,7 @@ msgstr "加盟店取引番号"
 msgid "儲值金額"
 msgstr "チャージ金額"
 
-#: .\finance\models.py:36 .\finance\models.py:143
+#: .\finance\models.py:36 .\finance\models.py:153
 msgid "訂單狀態"
 msgstr "注文ステータス"
 
@@ -386,7 +389,7 @@ msgstr "ポイント取引履歴"
 msgid "方案名稱"
 msgstr "プラン名"
 
-#: .\finance\models.py:88 .\finance\models.py:108
+#: .\finance\models.py:88 .\finance\models.py:118
 msgid "台幣售價"
 msgstr "台湾ドル価格"
 
@@ -398,7 +401,7 @@ msgstr "獲得チャージポイント"
 msgid "加贈紅利點數"
 msgstr "付与ボーナスポイント"
 
-#: .\finance\models.py:91 .\finance\models.py:110
+#: .\finance\models.py:91 .\finance\models.py:120
 msgid "是否上架"
 msgstr "公開中"
 
@@ -410,67 +413,84 @@ msgstr "チャージプラン"
 msgid "商品名稱"
 msgstr "商品名"
 
-#: .\finance\models.py:105
+#: .\finance\models.py:108 .\templates\finance\shop.html:62
+msgid "一般商品"
+msgstr ""
+
+#: .\finance\models.py:109 .\pet_system\models.py:9
+#: .\templates\pet_system\dashboard.html:84
+msgid "寵物蛋"
+msgstr ""
+
+#: .\finance\models.py:110
+msgid "寵物成長道具"
+msgstr ""
+
+#: .\finance\models.py:113
+msgid "商品分類"
+msgstr ""
+
+#: .\finance\models.py:115
 msgid "商品描述"
 msgstr "商品説明"
 
-#: .\finance\models.py:106
+#: .\finance\models.py:116
 msgid "商品圖片"
 msgstr "商品画像"
 
-#: .\finance\models.py:107
+#: .\finance\models.py:117
 msgid "點數售價"
 msgstr "ポイント価格"
 
-#: .\finance\models.py:109
+#: .\finance\models.py:119
 msgid "庫存數量"
 msgstr "在庫数"
 
-#: .\finance\models.py:113 .\finance\models.py:114
+#: .\finance\models.py:123 .\finance\models.py:124
 msgid "商城商品"
 msgstr "ショップ商品"
 
-#: .\finance\models.py:124
+#: .\finance\models.py:134
 msgid "點數全額扣抵"
 msgstr "ポイント全額支払い"
 
-#: .\finance\models.py:125
+#: .\finance\models.py:135
 msgid "綠界金流付款"
 msgstr "ECPay 決済支払い"
 
-#: .\finance\models.py:129
+#: .\finance\models.py:139
 msgid "已付款"
 msgstr "支払い済み"
 
-#: .\finance\models.py:136
+#: .\finance\models.py:146
 msgid "購買商品"
 msgstr "購入商品"
 
-#: .\finance\models.py:137
+#: .\finance\models.py:147
 msgid "購買數量"
 msgstr "購入数量"
 
-#: .\finance\models.py:141
+#: .\finance\models.py:151
 msgid "付款方式"
 msgstr "支払い方法"
 
-#: .\finance\models.py:145
+#: .\finance\models.py:155
 msgid "總點數花費"
 msgstr "総消費ポイント"
 
-#: .\finance\models.py:146
+#: .\finance\models.py:156
 msgid "使用儲值點數"
 msgstr "使用チャージポイント"
 
-#: .\finance\models.py:147
+#: .\finance\models.py:157
 msgid "使用紅利點數"
 msgstr "使用ボーナスポイント"
 
-#: .\finance\models.py:148
+#: .\finance\models.py:158
 msgid "台幣實付金額"
 msgstr "台湾ドル実支払額"
 
-#: .\finance\models.py:152 .\finance\models.py:153
+#: .\finance\models.py:162 .\finance\models.py:163
 msgid "點數購物訂單"
 msgstr "ポイント購入注文"
 
@@ -945,58 +965,62 @@ msgid "旅遊踏青"
 msgstr "旅行・お出かけ"
 
 #: .\line_manager\models.py:35
+msgid "看電影"
+msgstr ""
+
+#: .\line_manager\models.py:36
 msgid "其他活動"
 msgstr "その他の活動"
 
-#: .\line_manager\models.py:39
+#: .\line_manager\models.py:40
 msgid "發起人"
 msgstr "主催者"
 
-#: .\line_manager\models.py:44
+#: .\line_manager\models.py:45
 msgid "LINE 群組識別碼"
 msgstr "LINE グループID"
 
-#: .\line_manager\models.py:48
+#: .\line_manager\models.py:49
 msgid "行程標題"
 msgstr "予定タイトル"
 
-#: .\line_manager\models.py:49
+#: .\line_manager\models.py:50
 msgid "活動地點"
 msgstr "活動場所"
 
-#: .\line_manager\models.py:50
+#: .\line_manager\models.py:51
 msgid "備註說明"
 msgstr "備考・説明"
 
-#: .\line_manager\models.py:54
+#: .\line_manager\models.py:55
 msgid "活動類型"
 msgstr "活動タイプ"
 
-#: .\line_manager\models.py:56
+#: .\line_manager\models.py:57
 msgid "行程時間"
 msgstr "予定日時"
 
-#: .\line_manager\models.py:58
+#: .\line_manager\models.py:59
 msgid "提前通知時間(分鐘)"
 msgstr "事前通知時間（分）"
 
-#: .\line_manager\models.py:59
+#: .\line_manager\models.py:60
 msgid "是否已發送通知"
 msgstr "通知送信済みか"
 
-#: .\line_manager\models.py:65 .\line_manager\models.py:66
+#: .\line_manager\models.py:66 .\line_manager\models.py:67
 msgid "行程管理"
 msgstr "スケジュール管理"
 
-#: .\line_manager\models.py:80
+#: .\line_manager\models.py:81
 msgid "LINE 群組 ID"
 msgstr "LINE グループ ID"
 
-#: .\line_manager\models.py:81
+#: .\line_manager\models.py:82
 msgid "加入時間"
 msgstr "加入日時"
 
-#: .\line_manager\models.py:84 .\line_manager\models.py:85
+#: .\line_manager\models.py:85 .\line_manager\models.py:86
 msgid "群組成員關係"
 msgstr "グループメンバー関係"
 
@@ -1229,6 +1253,214 @@ msgstr "採番者"
 #: .\notices\models.py:102 .\notices\models.py:103
 msgid "發文簿紀錄"
 msgstr "文書採番記録"
+
+#: .\pet_system\models.py:10
+msgid "幼年體"
+msgstr "幼年体"
+
+#: .\pet_system\models.py:11
+msgid "成長體"
+msgstr "成長体"
+
+#: .\pet_system\models.py:12
+msgid "完全體"
+msgstr "完全体"
+
+#: .\pet_system\models.py:13
+msgid "進化體"
+msgstr "進化体"
+
+#: .\pet_system\models.py:17
+msgid "幻獸綠龍"
+msgstr "幻獣緑竜"
+
+#: .\pet_system\models.py:18
+msgid "烈火幼犬"
+msgstr "ファイアパピー"
+
+#: .\pet_system\models.py:22
+msgid "普通"
+msgstr "普通"
+
+#: .\pet_system\models.py:23
+msgid "勇敢"
+msgstr "勇敢"
+
+#: .\pet_system\models.py:24
+msgid "懶散"
+msgstr "怠惰"
+
+#: .\pet_system\models.py:25
+#, fuzzy
+#| msgid "說明"
+msgid "聰明"
+msgstr "説明"
+
+#: .\pet_system\models.py:26
+msgid "肥嘟嘟"
+msgstr "ぽっちゃり"
+
+#: .\pet_system\models.py:29 .\transfer_system\models.py:14
+#: .\tube_hub\models.py:14 .\tube_hub\models.py:39
+msgid "擁有者"
+msgstr "所有者"
+
+#: .\pet_system\models.py:30
+msgid "未命名寵物"
+msgstr "未命名ペット"
+
+#: .\pet_system\models.py:30
+msgid "寵物名字"
+msgstr "ペットの名前"
+
+#: .\pet_system\models.py:31 .\pet_system\models.py:133
+msgid "寵物種類"
+msgstr "ペットの種類"
+
+#: .\pet_system\models.py:32
+msgid "成長階段"
+msgstr "成長段階"
+
+#: .\pet_system\models.py:35
+msgid "是否出戰"
+msgstr "出撃中か"
+
+#: .\pet_system\models.py:38
+msgid "成長進度"
+msgstr "成長進捗"
+
+#: .\pet_system\models.py:39
+msgid "已消耗登入天數"
+msgstr "消費されたログイン日数"
+
+#: .\pet_system\models.py:41
+msgid "普通乾糧消耗數"
+msgstr "消費された通常フード数"
+
+#: .\pet_system\models.py:42
+msgid "奇蹟藥水消耗數"
+msgstr "消費された奇跡の薬数"
+
+#: .\pet_system\models.py:44
+msgid "寵物性格"
+msgstr "ペットの性格"
+
+#: .\pet_system\models.py:47
+msgid "頭部裝飾"
+msgstr "頭の装飾"
+
+#: .\pet_system\models.py:48
+msgid "臉部裝飾"
+msgstr "顔の装飾"
+
+#: .\pet_system\models.py:49
+msgid "背部裝飾"
+msgstr "背中の装飾"
+
+#: .\pet_system\models.py:51
+msgid "領養時間"
+msgstr "引き取り時間"
+
+#: .\pet_system\models.py:52
+msgid "最後互動時間"
+msgstr "最終インタラクション時間"
+
+#: .\pet_system\models.py:55 .\pet_system\models.py:56
+msgid "寵物"
+msgstr "ペット"
+
+#: .\pet_system\models.py:71
+msgid "寵物金幣"
+msgstr "ペットの金貨"
+
+#: .\pet_system\models.py:72
+msgid "最後每日金幣領取日期"
+msgstr "最終デイリー金貨受け取り日"
+
+#: .\pet_system\models.py:75 .\pet_system\models.py:76
+msgid "玩家寵物存摺"
+msgstr "プレイヤーペット通帳"
+
+#: .\pet_system\models.py:85
+msgid "配件ID"
+msgstr "アクセサリID"
+
+#: .\pet_system\models.py:86 .\pet_system\models.py:161
+msgid "擁有數量"
+msgstr "所有数量"
+
+#: .\pet_system\models.py:90 .\pet_system\models.py:91
+msgid "玩家解鎖配件"
+msgstr "プレイヤー解放済アクセサリ"
+
+#: .\pet_system\models.py:100
+msgid "探索中"
+msgstr "探索中"
+
+#: .\pet_system\models.py:101
+msgid "探索完成"
+msgstr "探索完了"
+
+#: .\pet_system\models.py:102
+msgid "已領取獎勵"
+msgstr "報酬受取済"
+
+#: .\pet_system\models.py:104
+msgid "派遣寵物"
+msgstr "派遣ペット"
+
+#: .\pet_system\models.py:105
+msgid "探索時長(小時)"
+msgstr "探索時間(時間)"
+
+#: .\pet_system\models.py:106
+msgid "出發時間"
+msgstr "出発時間"
+
+#: .\pet_system\models.py:107
+msgid "預計結束時間"
+msgstr "予想終了時間"
+
+#: .\pet_system\models.py:108 .\templates\sh_recognition\index.html:71
+#: .\transfer_system\models.py:40
+msgid "狀態"
+msgstr "ステータス"
+
+#: .\pet_system\models.py:111 .\pet_system\models.py:112
+msgid "探索派遣任務"
+msgstr "探索派遣任務"
+
+#: .\pet_system\models.py:121
+msgid "當前爬塔層數"
+msgstr "現在の塔の階層"
+
+#: .\pet_system\models.py:124 .\pet_system\models.py:125
+msgid "爬塔進度"
+msgstr "塔の進行状況"
+
+#: .\pet_system\models.py:134
+msgid "已解鎖最高成長階段"
+msgstr "解放済最大成長段階"
+
+#: .\pet_system\models.py:138 .\pet_system\models.py:139
+msgid "劇情解鎖紀錄"
+msgstr "ストーリー解放記録"
+
+#: .\pet_system\models.py:147
+msgid "登入日期"
+msgstr "ログイン日"
+
+#: .\pet_system\models.py:151 .\pet_system\models.py:152
+msgid "每日登入日誌"
+msgstr "デイリーログインログ"
+
+#: .\pet_system\models.py:160
+msgid "道具商品"
+msgstr "道具商品"
+
+#: .\pet_system\models.py:165 .\pet_system\models.py:166
+msgid "使用者背包道具"
+msgstr "ユーザーインベントリの道具"
 
 #: .\sh_recognition\apps.py:7
 msgid "世祥辨識"
@@ -1537,7 +1769,7 @@ msgstr ""
 "fs-6 mt-2 border border-primary-subtle\">%(email)s</span>\n"
 "                            "
 
-#: .\templates\account\email_confirm.html:33 .\templates\finance\shop.html:139
+#: .\templates\account\email_confirm.html:33 .\templates\finance\shop.html:229
 msgid "Confirm"
 msgstr "確認"
 
@@ -1977,11 +2209,11 @@ msgstr "最終ログイン"
 msgid "My Wallet"
 msgstr "マイウォレット"
 
-#: .\templates\core\profile.html:62 .\templates\finance\shop.html:28
+#: .\templates\core\profile.html:62 .\templates\finance\shop.html:36
 msgid "Deposit Points"
 msgstr "チャージポイント"
 
-#: .\templates\core\profile.html:68 .\templates\finance\shop.html:33
+#: .\templates\core\profile.html:68 .\templates\finance\shop.html:41
 msgid "Bonus Points"
 msgstr "ボーナスポイント"
 
@@ -2176,38 +2408,46 @@ msgstr "CSI ポイントショップ"
 msgid "Redeem your points for rich products and exclusive rights"
 msgstr "ポイントを豊富な商品や限定特典と交換しましょう"
 
-#: .\templates\finance\shop.html:25
+#: .\templates\finance\shop.html:33
 msgid "Asset Overview"
 msgstr "資産概要"
 
-#: .\templates\finance\shop.html:29 .\templates\finance\shop.html:34
-#: .\templates\finance\shop.html:76
+#: .\templates\finance\shop.html:37 .\templates\finance\shop.html:42
+#: .\templates\finance\shop.html:101 .\templates\finance\shop.html:175
 msgid "Points"
 msgstr "ポイント"
 
-#: .\templates\finance\shop.html:40
+#: .\templates\finance\shop.html:48
+msgid "寵物培育室"
+msgstr ""
+
+#: .\templates\finance\shop.html:51
 msgid "Go to Recharge"
 msgstr "チャージへ"
 
-#: .\templates\finance\shop.html:56
+#: .\templates\finance\shop.html:67
+msgid "Q版寵物專區"
+msgstr ""
+
+#: .\templates\finance\shop.html:84 .\templates\finance\shop.html:151
 #, python-format
 msgid "Almost Sold Out (%(stock)s left)"
 msgstr "残りわずか (残り %(stock)s)"
 
-#: .\templates\finance\shop.html:59
+#: .\templates\finance\shop.html:87 .\templates\finance\shop.html:154
 msgid "Sold Out"
 msgstr "売り切れ"
 
-#: .\templates\finance\shop.html:87
+#: .\templates\finance\shop.html:109 .\templates\finance\shop.html:183
 msgid "Bonus Deduction"
 msgstr "ボーナス割引"
 
-#: .\templates\finance\shop.html:88
+#: .\templates\finance\shop.html:110 .\templates\finance\shop.html:184
 #, python-format
 msgid "Max %(price)s points"
 msgstr "最大 %(price)s ポイント"
 
-#: .\templates\finance\shop.html:97
+#: .\templates\finance\shop.html:118
 #, fuzzy, python-format
 #| msgid ""
 #| "\n"
@@ -2216,44 +2456,58 @@ msgstr "最大 %(price)s ポイント"
 #| "                                "
 msgid ""
 "\n"
-"                                    將扣除 <strong class=\"text-primary "
-"deposit-calc\">%(points)s</strong> 儲值點\n"
-"                                "
+"                                                    將扣除 <strong "
+"class=\"text-primary deposit-calc\">%(points)s</strong> 儲值點\n"
+"                                                "
 msgstr ""
 "\n"
 "                                    <strong class=\"text-primary deposit-"
 "calc\">%(points)s</strong> チャージポイントが差し引かれます\n"
 "                                "
 
-#: .\templates\finance\shop.html:107
+#: .\templates\finance\shop.html:127 .\templates\finance\shop.html:201
 msgid "Restocking"
 msgstr "入荷待ち"
 
-#: .\templates\finance\shop.html:109
+#: .\templates\finance\shop.html:129 .\templates\finance\shop.html:203
 msgid "Redeem Now"
 msgstr "今すぐ交換"
 
-#: .\templates\finance\shop.html:120
-msgid "The shop is currently under preparation, please stay tuned!"
-msgstr "ショップは現在準備中です。乞うご期待ください！"
+#: .\templates\finance\shop.html:192
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                    將扣除 <strong class=\"text-primary "
+#| "deposit-calc\">%(points)s</strong> 儲值點\n"
+#| "                                "
+msgid ""
+"\n"
+"                                                    將扣除 <strong "
+"class=\"text-success deposit-calc\">%(points)s</strong> 儲值點\n"
+"                                                "
+msgstr ""
+"\n"
+"                                    <strong class=\"text-primary deposit-"
+"calc\">%(points)s</strong> チャージポイントが差し引かれます\n"
+"                                "
 
-#: .\templates\finance\shop.html:135
+#: .\templates\finance\shop.html:225
 msgid "Confirm Redemption?"
 msgstr "交換を確認しますか？"
 
-#: .\templates\finance\shop.html:136
+#: .\templates\finance\shop.html:226
 msgid "You are about to redeem <span id=\"modal-prod-name\"></span>"
 msgstr "<span id=\"modal-prod-name\"></span> を交換しようとしています"
 
-#: .\templates\finance\shop.html:138
+#: .\templates\finance\shop.html:228
 msgid "Cancel"
 msgstr "キャンセル"
 
-#: .\templates\finance\shop.html:155
+#: .\templates\finance\shop.html:245
 msgid "Redeemed Successfully!"
 msgstr "交換が正常に完了しました！"
 
-#: .\templates\finance\shop.html:156
+#: .\templates\finance\shop.html:246
 msgid "Click anywhere to close"
 msgstr "どこかをクリックして閉じる"
 
@@ -2462,64 +2716,68 @@ msgstr "お知らせ"
 msgid "Member Zone"
 msgstr "メンバーゾーン"
 
-#: .\templates\includes\navbar.html:60
+#: .\templates\includes\navbar.html:56
+msgid "Q版寵物培育"
+msgstr ""
+
+#: .\templates\includes\navbar.html:65
 msgid "Investment"
 msgstr "投資"
 
-#: .\templates\includes\navbar.html:65
+#: .\templates\includes\navbar.html:70
 #: .\templates\study_brain\dashboard.html:14
 msgid "AI Study Brain"
 msgstr "AI 教材ブレイン"
 
-#: .\templates\includes\navbar.html:70
+#: .\templates\includes\navbar.html:75
 msgid "Vision Brain"
 msgstr "ビジョンブレイン"
 
-#: .\templates\includes\navbar.html:75
+#: .\templates\includes\navbar.html:80
 msgid "多媒體工具"
 msgstr "マルチメディアツール"
 
-#: .\templates\includes\navbar.html:88
+#: .\templates\includes\navbar.html:93
 msgid "CSI 專屬"
 msgstr "CSI 専用"
 
-#: .\templates\includes\navbar.html:91
+#: .\templates\includes\navbar.html:96
 msgid "企業資源"
 msgstr "企業リソース"
 
-#: .\templates\includes\navbar.html:94
+#: .\templates\includes\navbar.html:99
 msgid "企業內部資訊"
 msgstr "企業内情報"
 
-#: .\templates\includes\navbar.html:105
+#: .\templates\includes\navbar.html:110
 msgid "Tester Zone"
 msgstr "テスターゾーン"
 
-#: .\templates\includes\navbar.html:108
+#: .\templates\includes\navbar.html:113
 msgid "Test Management System"
 msgstr "テスト管理システム"
 
-#: .\templates\includes\navbar.html:116
+#: .\templates\includes\navbar.html:121
 msgid "No tools available"
 msgstr "利用可能なツールはありません"
 
-#: .\templates\includes\navbar.html:149
+#: .\templates\includes\navbar.html:154
 msgid "Admin"
 msgstr "管理"
 
-#: .\templates\includes\navbar.html:169
+#: .\templates\includes\navbar.html:174
 msgid "Profile"
 msgstr "プロフィール"
 
-#: .\templates\includes\navbar.html:174
+#: .\templates\includes\navbar.html:179
 msgid "Logout"
 msgstr "ログアウト"
 
-#: .\templates\includes\navbar.html:181
+#: .\templates\includes\navbar.html:186
 msgid "Login"
 msgstr "ログイン"
 
-#: .\templates\includes\navbar.html:184
+#: .\templates\includes\navbar.html:189
 msgid "Register"
 msgstr "登録"
 
@@ -2885,6 +3143,66 @@ msgstr "全般"
 msgid "No notices available."
 msgstr "お知らせはありません。"
 
+#: .\templates\pet_system\dashboard.html:11
+msgid "Q版像素寵物王國"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:13
+msgid "培育像素幻獸、穿戴裝飾配件、派往遺跡探索並挑戰冒險塔！"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:17
+msgid "點數商城"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:20
+msgid "返回大廳"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:46
+msgid "餵食/道具背包"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:52
+msgid "汲取登入能量"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:58
+msgid "寵物庫與更衣"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:64
+msgid "裝飾配件商城"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:74
+msgid "狀態與冒險看板"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:79
+msgid "加載中..."
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:95
+msgid "成長值進度"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:103
+msgid "進化覺醒"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:274
+msgid "跳過 (Skip)"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:622
+msgid "背包空空如也，快去商城採購點飼料或神秘蛋吧！"
+msgstr ""
+
+#: .\templates\pet_system\dashboard.html:807
+msgid "目前沒有任何寵物，快去孵化您的第一隻寵物蛋吧！"
+msgstr ""
+
 #: .\templates\sh_recognition\index.html:7
 msgid "世祥辨識系統 - 首頁"
 msgstr "世祥認識システム - ホーム"
@@ -2944,10 +3262,6 @@ msgstr "最新の認識結果"
 #: .\templates\sh_recognition\index.html:70
 msgid "版本"
 msgstr "バージョン"
-
-#: .\templates\sh_recognition\index.html:71 .\transfer_system\models.py:40
-msgid "狀態"
-msgstr "ステータス"
 
 #: .\templates\sh_recognition\index.html:73
 msgid "偵測到物體"
@@ -3993,11 +4307,6 @@ msgstr ""
 msgid "物品轉移系統"
 msgstr "アイテム譲渡システム"
 
-#: .\transfer_system\models.py:14 .\tube_hub\models.py:14
-#: .\tube_hub\models.py:39
-msgid "擁有者"
-msgstr "所有者"
-
 #: .\transfer_system\models.py:16
 msgid "物品描述"
 msgstr "アイテムの説明"
@@ -4140,6 +4449,9 @@ msgstr "プロフィール"
 #: .\utils\decorators.py:14
 msgid "You do not have permission, redirected to home page."
 msgstr "権限がありません。ホームへリダイレクトします。"
+
+#~ msgid "The shop is currently under preparation, please stay tuned!"
+#~ msgstr "ショップは現在準備中です。乞うご期待ください！"
 
 #~ msgid "請上傳正確的 CSV 檔案"
 #~ msgstr "正しいCSVファイルをアップロードしてください"
