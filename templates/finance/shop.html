@@ -36,6 +36,9 @@
                     </div>
                 </div>
                 <div class="d-none d-md-block text-end z-1">
+                    <a href="/pet/dashboard/" class="btn btn-light rounded-pill px-4 fw-bold text-success shadow-sm me-2">
+                        <i class="fas fa-dragon me-1"></i>{% trans "寵物培育室" %}
+                    </a>
                     <a href="{% url 'finance:recharge_store' %}" class="btn btn-light rounded-pill px-4 fw-bold text-primary shadow-sm">
                         <i class="fas fa-plus-circle me-1"></i>{% trans "Go to Recharge" %}
                     </a>
@@ -44,83 +47,162 @@
         </div>
     </div>
 
-    {# 商品列表網格 #}
-    <div class="row g-4">
-        {% for item in products %}
-        <div class="col-lg-4 col-md-6">
-            <div class="card product-card h-100 bg-white">
+    {# Tab 分類選擇器 #}
+    <ul class="nav nav-pills justify-content-center mb-5" id="shopTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active px-4 py-2 fw-bold" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-panel" type="button" role="tab" style="border-radius: 50px;">
+                <i class="fas fa-box-open me-2"></i>{% trans "一般商品" %}
+            </button>
+        </li>
+        <li class="nav-item ms-3" role="presentation">
+            <button class="nav-link px-4 py-2 fw-bold text-success" id="pet-tab" data-bs-toggle="tab" data-bs-target="#pet-panel" type="button" role="tab" style="border-radius: 50px;">
+                <i class="fas fa-egg me-2"></i>{% trans "Q版寵物專區" %}
+            </button>
+        </li>
+    </ul>
 
-                <div class="product-img-wrapper">
-                    {% if item.stock <= 5 and item.stock > 0 %}
-                        <span class="badge bg-danger stock-badge shadow-sm">
-                            {% blocktrans with stock=item.stock %}Almost Sold Out ({{ stock }} left){% endblocktrans %}
-                        </span>
-                    {% elif item.stock == 0 %}
-                        <span class="badge bg-secondary stock-badge shadow-sm">{% trans "Sold Out" %}</span>
-                    {% endif %}
-
-                    {% if item.image %}
-                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="product-img">
-                    {% else %}
-                        <i class="fas fa-box-open fa-4x text-muted opacity-25"></i>
-                    {% endif %}
-                </div>
-
-                <div class="card-body p-4 d-flex flex-column">
-                    <h5 class="card-title fw-bold text-dark mb-2">{{ item.name }}</h5>
-                    <p class="card-text text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                        {{ item.description }}
-                    </p>
-
-                    <div class="mt-auto mb-3">
-                        <span class="price-tag">{{ item.price_in_points }} <span class="fs-6 text-muted fw-normal">{% trans "Points" %}</span></span>
-                    </div>
-
-                    <hr class="opacity-10 my-3">
-
-                    <form method="POST" action="{% url 'finance:checkout_cart' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="product_id" value="{{ item.id }}">
-
-                        <div class="mb-3">
-                            <label class="form-label small text-secondary fw-bold d-flex justify-content-between">
-                                <span><i class="fas fa-coins text-warning me-1"></i>{% trans "Bonus Deduction" %}</span>
-                                <span class="text-muted">({% blocktrans with price=item.price_in_points %}Max {{ price }} points{% endblocktrans %})</span>
-                            </label>
-                            <input type="number" name="bonus_to_use" class="form-control form-control-sm bonus-input" 
-                                data-price="{{ item.price_in_points }}"
-                                data-max-bonus="{{ wallet.bonus_points }}"
-                                max="{{ wallet.bonus_points }}" min="0" value="0"
-                                {% if item.stock == 0 %}disabled{% endif %}>
-
-                            <div class="form-text small text-end mt-1 payment-summary">
-                                {% blocktrans with points=item.price_in_points %}
-                                    將扣除 <strong class="text-primary deposit-calc">{{ points }}</strong> 儲值點
-                                {% endblocktrans %}
+    {# Tab 內容區 #}
+    <div class="tab-content" id="shopTabContent">
+        {# 1. 一般商品分頁 #}
+        <div class="tab-pane fade show active" id="general-panel" role="tabpanel">
+            <div class="row g-4">
+                {% for item in products %}
+                    {% if item.category == 'GENERAL' %}
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card product-card h-100 bg-white shadow-sm border-0" style="border-radius: 16px; overflow: hidden; transition: transform 0.3s;">
+                                <div class="product-img-wrapper position-relative text-center bg-light py-4 d-flex align-items-center justify-content-center" style="height: 180px;">
+                                    {% if item.stock <= 5 and item.stock > 0 %}
+                                        <span class="badge bg-danger stock-badge shadow-sm position-absolute top-0 start-0 m-3">
+                                            {% blocktrans with stock=item.stock %}Almost Sold Out ({{ stock }} left){% endblocktrans %}
+                                        </span>
+                                    {% elif item.stock == 0 %}
+                                        <span class="badge bg-secondary stock-badge shadow-sm position-absolute top-0 start-0 m-3">{% trans "Sold Out" %}</span>
+                                    {% endif %}
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="product-img h-100" style="object-fit: contain;">
+                                    {% else %}
+                                        <i class="fas fa-box-open fa-4x text-muted opacity-25"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <h5 class="card-title fw-bold text-dark mb-2">{{ item.name }}</h5>
+                                    <p class="card-text text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        {{ item.description }}
+                                    </p>
+                                    <div class="mt-auto mb-3">
+                                        <span class="price-tag fs-4 fw-bold text-primary">{{ item.price_in_points }} <span class="fs-6 text-muted fw-normal">{% trans "Points" %}</span></span>
+                                    </div>
+                                    <hr class="opacity-10 my-3">
+                                    <form method="POST" action="{% url 'finance:checkout_cart' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="product_id" value="{{ item.id }}">
+                                        <div class="mb-3">
+                                            <label class="form-label small text-secondary fw-bold d-flex justify-content-between">
+                                                <span><i class="fas fa-coins text-warning me-1"></i>{% trans "Bonus Deduction" %}</span>
+                                                <span class="text-muted">({% blocktrans with price=item.price_in_points %}Max {{ price }} points{% endblocktrans %})</span>
+                                            </label>
+                                            <input type="number" name="bonus_to_use" class="form-control form-control-sm bonus-input" 
+                                                data-price="{{ item.price_in_points }}"
+                                                data-max-bonus="{{ wallet.bonus_points }}"
+                                                max="{{ wallet.bonus_points }}" min="0" value="0"
+                                                {% if item.stock == 0 %}disabled{% endif %}>
+                                            <div class="form-text small text-end mt-1 payment-summary">
+                                                {% blocktrans with points=item.price_in_points %}
+                                                    將扣除 <strong class="text-primary deposit-calc">{{ points }}</strong> 儲值點
+                                                {% endblocktrans %}
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold" 
+                                                {% if item.stock == 0 %}disabled{% endif %}
+                                                onclick="confirmRedeem('{{ item.id }}', '{{ item.name }}', '{{ item.price_in_points }}', this)">
+                                            {% if item.stock == 0 %}
+                                                {% trans "Restocking" %}
+                                            {% else %}
+                                                <i class="fas fa-shopping-bag me-1"></i>{% trans "Redeem Now" %}
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
 
-                        <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold" 
-                                {% if item.stock == 0 %}disabled{% endif %}
-                                onclick="confirmRedeem('{{ item.id }}', '{{ item.name }}', '{{ item.price_in_points }}', this)">
-                            {% if item.stock == 0 %}
-                                {% trans "Restocking" %}
-                            {% else %}
-                                <i class="fas fa-shopping-bag me-1"></i>{% trans "Redeem Now" %}
-                            {% endif %}
-                        </button>
-                    </form>
-                </div>
+        {# 2. Q版寵物專區分頁 #}
+        <div class="tab-pane fade" id="pet-panel" role="tabpanel">
+            <div class="row g-4">
+                {% for item in products %}
+                    {% if item.category == 'PET_EGG' or item.category == 'PET_FOOD' %}
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card product-card h-100 bg-white shadow-sm border-0" style="border-radius: 16px; overflow: hidden; transition: transform 0.3s; border: 2px solid #d4edda !important;">
+                                <div class="product-img-wrapper position-relative text-center bg-light py-4 d-flex align-items-center justify-content-center" style="height: 180px; background-color: #f8fcf9 !important;">
+                                    {% if item.stock <= 5 and item.stock > 0 %}
+                                        <span class="badge bg-danger stock-badge shadow-sm position-absolute top-0 start-0 m-3">
+                                            {% blocktrans with stock=item.stock %}Almost Sold Out ({{ stock }} left){% endblocktrans %}
+                                        </span>
+                                    {% elif item.stock == 0 %}
+                                        <span class="badge bg-secondary stock-badge shadow-sm position-absolute top-0 start-0 m-3">{% trans "Sold Out" %}</span>
+                                    {% endif %}
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="product-img h-100" style="object-fit: contain;">
+                                    {% else %}
+                                        <i class="fas fa-egg fa-4x text-success opacity-25"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <h5 class="card-title fw-bold text-success mb-2">
+                                        {% if item.category == 'PET_EGG' %}
+                                            <i class="fas fa-egg me-1"></i>
+                                        {% else %}
+                                            <i class="fas fa-cookie-bite me-1"></i>
+                                        {% endif %}
+                                        {{ item.name }}
+                                    </h5>
+                                    <p class="card-text text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        {{ item.description }}
+                                    </p>
+                                    <div class="mt-auto mb-3">
+                                        <span class="price-tag fs-4 fw-bold text-success">{{ item.price_in_points }} <span class="fs-6 text-muted fw-normal">{% trans "Points" %}</span></span>
+                                    </div>
+                                    <hr class="opacity-10 my-3">
+                                    <form method="POST" action="{% url 'finance:checkout_cart' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="product_id" value="{{ item.id }}">
+                                        <div class="mb-3">
+                                            <label class="form-label small text-secondary fw-bold d-flex justify-content-between">
+                                                <span><i class="fas fa-coins text-warning me-1"></i>{% trans "Bonus Deduction" %}</span>
+                                                <span class="text-muted">({% blocktrans with price=item.price_in_points %}Max {{ price }} points{% endblocktrans %})</span>
+                                            </label>
+                                            <input type="number" name="bonus_to_use" class="form-control form-control-sm bonus-input" 
+                                                data-price="{{ item.price_in_points }}"
+                                                data-max-bonus="{{ wallet.bonus_points }}"
+                                                max="{{ wallet.bonus_points }}" min="0" value="0"
+                                                {% if item.stock == 0 %}disabled{% endif %}>
+                                            <div class="form-text small text-end mt-1 payment-summary">
+                                                {% blocktrans with points=item.price_in_points %}
+                                                    將扣除 <strong class="text-success deposit-calc">{{ points }}</strong> 儲值點
+                                                {% endblocktrans %}
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-success w-100 rounded-pill fw-bold" 
+                                                {% if item.stock == 0 %}disabled{% endif %}
+                                                onclick="confirmRedeem('{{ item.id }}', '{{ item.name }}', '{{ item.price_in_points }}', this)">
+                                            {% if item.stock == 0 %}
+                                                {% trans "Restocking" %}
+                                            {% else %}
+                                                <i class="fas fa-shopping-bag me-1"></i>{% trans "Redeem Now" %}
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
             </div>
         </div>
-        {% empty %}
-        <div class="col-12 text-center py-5">
-            <div class="text-muted">
-                <i class="fas fa-store-slash fa-4x mb-3 opacity-25"></i>
-                <h5>{% trans "The shop is currently under preparation, please stay tuned!" %}</h5>
-            </div>
-        </div>
-        {% endfor %}
     </div>
 </div>
 

@@ -97,6 +97,11 @@
     {% endwith %}
 {% endif %}
 
+{% if user.is_authenticated %}
+    <script src="{% static 'pet_system/js/pet_sound.js' %}"></script>
+    <script src="{% static 'pet_system/js/pet_shimeji.js' %}"></script>
+{% endif %}
+
 {% block extra_js %}{% endblock %}
 
 </body>

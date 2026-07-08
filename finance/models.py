@@ -102,6 +102,16 @@ class Product(models.Model):
     """商城販售商品"""
 
     name = models.CharField(max_length=200, verbose_name=_("商品名稱"))
+    category = models.CharField(
+        max_length=20,
+        choices=[
+            ("GENERAL", _("一般商品")),
+            ("PET_EGG", _("寵物蛋")),
+            ("PET_FOOD", _("寵物成長道具")),
+        ],
+        default="GENERAL",
+        verbose_name=_("商品分類"),
+    )
     description = models.TextField(blank=True, verbose_name=_("商品描述"))
     image = models.ImageField(upload_to="products/", blank=True, null=True, verbose_name=_("商品圖片"))
     price_in_points = models.PositiveIntegerField(verbose_name=_("點數售價"))

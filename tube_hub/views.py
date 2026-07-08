@@ -11,10 +11,18 @@ with time_tracker("tube_hub"):
     from django.http import JsonResponse
     from django.shortcuts import get_object_or_404, render
     from django.views.decorators.csrf import csrf_exempt
-    from youtube_transcript_api import YouTubeTranscriptApi
-    from yt_dlp import YoutubeDL
 
     from .models import TubeFolder, TubeResource
+
+
+def YouTubeTranscriptApi(*args, **kwargs):
+    from youtube_transcript_api import YouTubeTranscriptApi as _YouTubeTranscriptApi
+    return _YouTubeTranscriptApi(*args, **kwargs)
+
+
+def YoutubeDL(*args, **kwargs):
+    from yt_dlp import YoutubeDL as _YoutubeDL
+    return _YoutubeDL(*args, **kwargs)
 
 
 @login_required

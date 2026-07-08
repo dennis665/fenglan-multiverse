@@ -35,7 +35,7 @@ def recharge_store(request):
 @login_required
 def point_shop(request):
     """商城首頁"""
-    products = Product.objects.filter(is_active=True, stock__gt=0)
+    products = Product.objects.filter(is_active=True).order_by("id")
     wallet, _ = UserPoints.objects.get_or_create(user=request.user)
     return render(request, "finance/shop.html", {"products": products, "wallet": wallet})
 
@@ -126,8 +126,20 @@ def checkout_cart(request):
 
             #! 建立訂單
             shop_order = ShopOrder.objects.create(
-                user=request.user, total_price=total_price, deposit_used=deposit_to_use, bonus_used=bonus_to_use
+                user=request.user,
+                product=product,
+                total_price=total_price,
+                deposit_used=deposit_to_use,
+                bonus_used=bonus_to_use,
+                status="PAID",
             )
+
+            # 如果商品是寵物相關商品，自動歸入玩家背包 (UserInventory)
+            if product.category in ["PET_EGG", "PET_FOOD"]:
+                from pet_system.models import UserInventory
+                inv, _ = UserInventory.objects.get_or_create(user=request.user, product=product)
+                inv.quantity += 1
+                inv.save()
 
             #! 寫入流水帳 (分開紀錄，方便查帳)
             if deposit_to_use > 0:
@@ -264,6 +276,14 @@ def ecpay_return(request):
                     order.status = "PAID"
                     order.product.stock -= order.quantity
                     order.product.save()
+                    
+                    # 如果商品是寵物相關商品，自動歸入玩家背包 (UserInventory)
+                    if order.product.category in ["PET_EGG", "PET_FOOD"]:
+                        from pet_system.models import UserInventory
+                        inv, _ = UserInventory.objects.get_or_create(user=order.user, product=order.product)
+                        inv.quantity += order.quantity
+                        inv.save()
+                        
                     order.save()
 
             #! 必須回傳 1|OK 給綠界，否則綠界會以為沒收到，一直重複發送！

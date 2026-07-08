@@ -1,0 +1,1457 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4" style="min-height: 90vh;">
+    {# 頁面標題列 #}
+    <div class="row align-items-center mb-4">
+        <div class="col-md-7">
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="fas fa-dragon text-success me-2 animate__animated animate__pulse animate__infinite"></i>{% trans "Q版像素寵物王國" %}
+            </h2>
+            <p class="text-muted mb-0">{% trans "培育像素幻獸、穿戴裝飾配件、派往遺跡探索並挑戰冒險塔！" %}</p>
+        </div>
+        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+            <a href="{% url 'finance:shop' %}" class="btn btn-success rounded-pill fw-bold shadow-sm me-2">
+                <i class="fas fa-store me-1"></i>{% trans "點數商城" %}
+            </a>
+            <a href="/" class="btn btn-outline-secondary rounded-pill fw-bold bg-white shadow-sm">
+                <i class="fas fa-arrow-left me-1"></i>{% trans "返回大廳" %}
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {# 左側：主畫布與培育選單 #}
+        <div class="col-lg-8">
+            <div class="card glass-card p-4 h-100 shadow-lg border-0 rounded-4" style="background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(10px);">
+                {# Canvas 培育區 #}
+                <div id="petCanvasContainer" class="position-relative overflow-hidden rounded-4 shadow-inner" style="height: 250px; background: linear-gradient(135deg, #11998e, #38ef7d); border: 3px solid #fff;">
+                    {# 泡泡動畫粒子背景 #}
+                    <div class="bg-bubble" style="left: 10%; width: 20px; height: 20px; animation-delay: 0s; animation-duration: 8s;"></div>
+                    <div class="bg-bubble" style="left: 30%; width: 40px; height: 40px; animation-delay: 2s; animation-duration: 12s;"></div>
+                    <div class="bg-bubble" style="left: 55%; width: 15px; height: 15px; animation-delay: 4s; animation-duration: 9s;"></div>
+                    <div class="bg-bubble" style="left: 80%; width: 30px; height: 30px; animation-delay: 1s; animation-duration: 11s;"></div>
+                    <div class="bg-bubble" style="left: 90%; width: 25px; height: 25px; animation-delay: 5s; animation-duration: 10s;"></div>
+
+                    <canvas id="petCanvas" style="width: 100%; display: block;"></canvas>
+                </div>
+
+                {# 底部互動主選單 #}
+                <div class="row g-3 mt-4 text-center">
+                    <div class="col-6 col-sm-3">
+                        <button class="btn glass-btn w-100 py-3 d-flex flex-column align-items-center rounded-4 shadow-sm border border-white" onclick="openInventoryModal()">
+                            <i class="fas fa-cookie-bite fa-2x mb-2 text-warning"></i>
+                            <span class="fw-bold">{% trans "餵食/道具背包" %}</span>
+                        </button>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <button class="btn glass-btn w-100 py-3 d-flex flex-column align-items-center rounded-4 shadow-sm border border-white" id="btnClaimEnergy" onclick="claimLoginEnergy()">
+                            <i class="fas fa-battery-three-quarters fa-2x mb-2 text-success"></i>
+                            <span class="fw-bold">{% trans "汲取登入能量" %}</span>
+                        </button>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <button class="btn glass-btn w-100 py-3 d-flex flex-column align-items-center rounded-4 shadow-sm border border-white" onclick="openPetLibraryModal()">
+                            <i class="fas fa-folder-open fa-2x mb-2 text-primary"></i>
+                            <span class="fw-bold">{% trans "寵物庫與更衣" %}</span>
+                        </button>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <button class="btn glass-btn w-100 py-3 d-flex flex-column align-items-center rounded-4 shadow-sm border border-white" onclick="openAccessoryShopModal()">
+                            <i class="fas fa-tshirt fa-2x mb-2 text-info"></i>
+                            <span class="fw-bold">{% trans "裝飾配件商城" %}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# 右側：狀態看板與探索/爬塔 #}
+        <div class="col-lg-4">
+            <div class="card glass-card p-4 h-100 d-flex flex-column shadow-lg border-0 rounded-4" style="background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(10px);">
+                <h4 class="fw-bold mb-3"><i class="fas fa-award text-success me-2"></i>{% trans "狀態與冒險看板" %}</h4>
+
+                {# 寵物基本狀態 #}
+                <div class="text-center py-3 mb-3 bg-white bg-opacity-50 rounded-4 border border-white shadow-sm position-relative">
+                    <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+                        <h3 class="fw-bold text-dark mb-0" id="infoPetName">{% trans "加載中..." %}</h3>
+                        <button class="btn btn-sm btn-outline-secondary rounded-circle border-0 p-1" onclick="triggerRename()">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <span class="badge bg-success px-3 py-2 fs-6 rounded-pill" id="infoPetStage">{% trans "寵物蛋" %}</span>
+                    <div class="mt-2 text-muted small fw-bold">性格: <span id="infoPetPersonality" class="text-success">普通</span></div>
+                    <div class="mt-1 text-muted" style="font-size: 0.8rem; font-weight: bold;">
+                        累積登入: <span id="infoTotalDays" class="text-primary">0</span> | 
+                        可汲取: <span id="infoUnclaimedDays" class="text-danger">0</span>
+                    </div>
+                </div>
+
+                {# 成長值進度條 #}
+                <div class="mb-3">
+                    <label class="form-label fw-bold d-flex justify-content-between text-dark">
+                        <span><i class="fas fa-star-half-alt text-warning me-1"></i>{% trans "成長值進度" %}</span>
+                        <span id="infoGrowthPercent">0%</span>
+                    </label>
+                    <div class="progress" style="height: 18px; border-radius: 50px; background-color: rgba(0,0,0,0.08);">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" id="infoGrowthBar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="text-end mt-2">
+                        <button class="btn btn-sm btn-danger rounded-pill fw-bold shadow-sm px-3" id="btnEvolve" onclick="evolvePet()" disabled>
+                            <i class="fas fa-magic me-1"></i>{% trans "進化覺醒" %}
+                        </button>
+                    </div>
+                </div>
+
+                {# 存摺與爬塔進度 #}
+                <div class="row g-2 mb-3 py-2 bg-white bg-opacity-30 rounded-3 border border-white">
+                    <div class="col-6 text-center border-end border-white">
+                        <div class="small text-muted fw-bold">寵物金幣</div>
+                        <div class="fs-5 fw-bold text-warning"><i class="fas fa-coins me-1"></i><span id="infoPetCoins">0</span></div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <div class="small text-muted fw-bold">冒險塔層數</div>
+                        <div class="fs-5 fw-bold text-danger"><i class="fas fa-dungeon me-1"></i><span id="infoTowerFloor">1</span>F</div>
+                    </div>
+                </div>
+
+                {# 冒險爬塔按鈕 #}
+                <button class="btn btn-danger w-100 rounded-pill fw-bold mb-3 shadow" id="btnChallengeTower" onclick="openTowerBattleModal()">
+                    <i class="fas fa-sword me-1"></i>挑戰冒險塔打怪
+                </button>
+
+                {# 探索派遣面板 #}
+                <div class="card p-3 border-0 rounded-4 bg-white bg-opacity-60 shadow-sm mt-auto">
+                    <h6 class="fw-bold text-dark mb-2"><i class="fas fa-compass text-primary me-2"></i>探索派遣中心</h6>
+                    
+                    {# 未派遣狀態 #}
+                    <div id="expeditionIdleSection" style="display: none;">
+                        <p class="small text-muted mb-2">派遣出戰寵物探索遺跡，帶回金幣、隨機配件與進化石！</p>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button class="btn btn-sm btn-outline-primary w-100 rounded-pill py-2" onclick="startExpedition(1)">1小時</button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-sm btn-outline-primary w-100 rounded-pill py-2" onclick="startExpedition(2)">2小時</button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-sm btn-outline-primary w-100 rounded-pill py-2" onclick="startExpedition(4)">4小時</button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-sm btn-outline-primary w-100 rounded-pill py-2" onclick="startExpedition(20)">20小時</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# 進行中狀態 #}
+                    <div id="expeditionActiveSection" style="display: none;" class="text-center py-2">
+                        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                        <div class="small fw-bold text-dark mb-1">正在探索派遣中...</div>
+                        <div class="h5 fw-bold text-primary mb-2" id="expeditionTimer">00:00:00</div>
+                        <div class="progress" style="height: 6px;">
+                            <div id="expeditionProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    {# 完成可領獎狀態 #}
+                    <div id="expeditionClaimSection" style="display: none;" class="text-center py-2">
+                        <i class="fas fa-gift fa-3x text-warning animate__animated animate__bounce animate__infinite mb-2"></i>
+                        <div class="small fw-bold text-success mb-2">探索派遣已完成！</div>
+                        <button class="btn btn-warning w-100 rounded-pill fw-bold shadow-sm" onclick="claimExpeditionRewards()">
+                            領取探索寶箱獎勵
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Modals 專區 #}
+
+{# 1. 寵物背包 Modal #}
+<div class="modal fade" id="inventoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-light border-0 py-3">
+                <h5 class="modal-title fw-bold"><i class="fas fa-box-open text-warning me-2"></i>道具背包</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3" id="inventoryGrid">
+                    {# 道具清單將動態載入 #}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# 2. 個人寵物庫 Modal (含配件更衣室) #}
+<div class="modal fade" id="petLibraryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-light border-0 py-3">
+                <h5 class="modal-title fw-bold"><i class="fas fa-folder-open text-success me-2"></i>個人寵物庫與裝備更衣</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3" id="petLibraryGrid">
+                    {# 寵物列表將動態載入 #}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# 3. 裝飾配件商城 Modal #}
+<div class="modal fade" id="accessoryShopModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-light border-0 py-3">
+                <h5 class="modal-title fw-bold"><i class="fas fa-tshirt text-info me-2"></i>裝飾配件商城</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted fw-bold">使用寵物金幣購買精美裝飾！</span>
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2"><i class="fas fa-coins me-1"></i>餘額: <span id="shopCoins">0</span></span>
+                </div>
+                <div class="row g-3" id="accessoryShopGrid">
+                    {# 飾品清單將動態載入 #}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# 4. 爬塔戰鬥 Modal #}
+<div class="modal fade" id="towerBattleModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 bg-dark text-white">
+            <div class="modal-header border-0 py-3">
+                <h5 class="modal-title fw-bold"><i class="fas fa-swords text-danger me-2"></i>冒險塔自動挑戰 - 第 <span id="battleTitleFloor">1</span> 層</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="btnCloseBattle" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                {# 血量指示器 #}
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="small fw-bold mb-1 text-success text-start" id="battlePetName">我的寵物</div>
+                        <div class="progress bg-secondary" style="height: 12px; border-radius: 5px;">
+                            <div id="battlePetHpBar" class="progress-bar bg-success" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="small fw-bold mb-1 text-danger text-end">冒險怪獸 (Slime)</div>
+                        <div class="progress bg-secondary" style="height: 12px; border-radius: 5px;">
+                            <div id="battleMonsterHpBar" class="progress-bar bg-danger" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {# 戰鬥渲染畫布 #}
+                <div class="position-relative border border-secondary rounded-4 overflow-hidden" style="height: 150px; background: #222;">
+                    <canvas id="battleCanvas" width="400" height="150" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+
+                {# 戰鬥文字滾動記錄 #}
+                <div id="battleLog" class="bg-black text-light p-2 mt-3 rounded-3 small" style="height: 70px; overflow-y: auto; font-family: monospace; opacity: 0.85; border: 1px solid #444;">
+                    準備戰鬥...
+                </div>
+
+                <button id="btnStartBattle" class="btn btn-danger w-100 mt-3 rounded-pill fw-bold shadow" onclick="startTowerBattle()">
+                    開始自動戰鬥
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# 5. 劇情插畫播放器 Overlay #}
+<div class="story-overlay" id="storyOverlay">
+    <button class="skip-btn" onclick="skipStory()"><i class="fas fa-forward me-1"></i>{% trans "跳過 (Skip)" %}</button>
+    <div class="story-container">
+        <div class="story-illustration-frame">
+            <img src="" class="story-illustration" id="storyImg" alt="Story Illustration">
+        </div>
+        <h4 class="fw-bold mb-3 text-success text-center" id="storyTitle"></h4>
+        <div class="story-textbox" id="storyText">
+            {# 劇情打字機特效輸出區 #}
+        </div>
+        <div class="text-end mt-3 text-white-50 small animate__animated animate__fadeIn animate__infinite">
+            點擊畫面任意處繼續...
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 泡泡粒子背景樣式 */
+    .bg-bubble {
+        position: absolute;
+        bottom: -50px;
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        animation: floatUp 10s infinite linear;
+        pointer-events: none;
+    }
+    @keyframes floatUp {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+        100% { transform: translateY(-350px) rotate(360deg); opacity: 0; }
+    }
+    .shadow-inner {
+        box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.45);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+    .glass-btn {
+        background: rgba(255, 255, 255, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        color: #2c3e50;
+        transition: all 0.25s ease;
+    }
+    .glass-btn:hover {
+        background: rgba(40, 167, 69, 0.85);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+    }
+    /* 劇情 Overlay 樣式 */
+    .story-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: radial-gradient(circle, rgba(16, 20, 16, 0.95) 0%, rgba(5, 8, 5, 0.98) 100%);
+        z-index: 100000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .story-container {
+        width: 90%;
+        max-width: 550px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+    .story-illustration-frame {
+        width: 180px; height: 180px;
+        margin: 0 auto 20px auto;
+        border-radius: 50%;
+        border: 4px solid #28a745;
+        overflow: hidden;
+        box-shadow: 0 0 25px rgba(40,167,69,0.4);
+        background: #fff;
+    }
+    .story-illustration {
+        width: 100%; height: 100%; object-fit: cover;
+    }
+    .story-textbox {
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(40, 167, 69, 0.3);
+        border-radius: 12px;
+        padding: 15px 20px;
+        color: #e2e8f0;
+        font-size: 14px;
+        line-height: 1.6;
+        min-height: 80px;
+    }
+    .skip-btn {
+        position: absolute;
+        top: 30px; right: 30px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-weight: bold;
+        transition: all 0.2s;
+    }
+    .skip-btn:hover {
+        background: #dc3545;
+        border-color: #dc3545;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{% static 'pet_system/js/pet_sound.js' %}"></script>
+<script src="{% static 'pet_system/js/pet_renderer.js' %}"></script>
+<script>
+    let renderer = null;
+    let activePet = null;
+    let dashboardData = {};
+    
+    // 故事播放控制
+    let isTyping = false;
+    let typingInterval = null;
+    let currentStoryData = null;
+    let onStoryFinishedCallback = null;
+
+    // 探索派遣計時器
+    let expeditionTimerInterval = null;
+
+    // 爬塔自動戰鬥狀態
+    let battleAnimationId = null;
+    let battleCanvas = null;
+    let battleCtx = null;
+    let isBattleRunning = false;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        renderer = new PetRenderer("petCanvas");
+        loadDashboardData();
+        
+        // 點擊 Overlay 繼續播放
+        document.getElementById("storyOverlay").addEventListener("click", function(e) {
+            if (e.target.classList.contains("skip-btn")) return;
+            handleStoryClick();
+        });
+
+        // 綁定爬塔 Canvas
+        battleCanvas = document.getElementById("battleCanvas");
+        battleCtx = battleCanvas.getContext("2d");
+    });
+
+    function loadDashboardData() {
+        fetch("{% url 'pet_system:api_get_dashboard_data' %}")
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    dashboardData = data;
+                    activePet = data.active_pet;
+                    updateUIElements(data);
+                    
+                    // 同步刷新全站漫遊桌寵 (Shimeji)
+                    if (window.petShimeji && typeof window.petShimeji.reload === "function") {
+                        window.petShimeji.reload();
+                    }
+
+                    // 如果有肥嘟嘟每日金幣發送，跳出喜慶彈窗
+                    if (data.chubby_bonus_claimed) {
+                        petSound.playWin();
+                        Swal.fire({
+                            title: "💰 肥嘟嘟守護利息！",
+                            text: "肥嘟嘟守護龍今天送給你 50 個寵物金幣！",
+                            icon: "success",
+                            confirmButtonColor: "#28a745"
+                        });
+                    }
+                }
+            });
+    }
+
+    function updateUIElements(data) {
+        document.getElementById("infoTotalDays").innerText = `${data.total_login_days} 天`;
+        document.getElementById("infoUnclaimedDays").innerText = `${data.unclaimed_login_days} 天`;
+        document.getElementById("infoPetCoins").innerText = data.pet_gold_coins;
+        document.getElementById("shopCoins").innerText = data.pet_gold_coins;
+        document.getElementById("infoTowerFloor").innerText = data.tower_floor;
+        
+        // 更新提取能量按鈕
+        document.getElementById("btnClaimEnergy").disabled = (data.unclaimed_login_days <= 0);
+
+        if (activePet) {
+            document.getElementById("infoPetName").innerText = activePet.name;
+            document.getElementById("infoPetStage").innerText = activePet.stage_display;
+            document.getElementById("infoPetPersonality").innerText = activePet.personality_display;
+            document.getElementById("infoGrowthPercent").innerText = `${activePet.growth_progress}%`;
+            
+            const bar = document.getElementById("infoGrowthBar");
+            bar.style.width = `${activePet.growth_progress}%`;
+            bar.setAttribute("aria-valuenow", activePet.growth_progress);
+
+            // 當成長度為 100% 且非最大等級，啟動進化按鈕
+            const btnEvolve = document.getElementById("btnEvolve");
+            if (activePet.growth_progress >= 100 && activePet.stage < 4) {
+                btnEvolve.disabled = false;
+                btnEvolve.classList.add("animate__animated", "animate__tada", "animate__infinite");
+            } else {
+                btnEvolve.disabled = true;
+                btnEvolve.classList.remove("animate__animated", "animate__tada", "animate__infinite");
+            }
+
+            // 更新畫布渲染圖片 (採用像素 WebP 動態渲染)
+            let imageUrl = "/static/pet_system/images/pet_egg.webp";
+            if (activePet.stage === 1) imageUrl = "/static/pet_system/images/baby_dragon.webp";
+            else if (activePet.stage === 2) imageUrl = "/static/pet_system/images/growth_dragon.webp";
+            else if (activePet.stage === 3) imageUrl = "/static/pet_system/images/complete_dragon.webp";
+            else if (activePet.stage === 4) {
+                if (activePet.personality === "CHUBBY") {
+                    imageUrl = "/static/pet_system/images/pixel_chubby_dragon.webp";
+                } else if (activePet.personality === "BRAVE") {
+                    imageUrl = "/static/pet_system/images/pixel_star_dragon.webp";
+                } else {
+                    imageUrl = "/static/pet_system/images/pixel_emerald_dragon.webp";
+                }
+            }
+
+            // 過濾出所有未出戰的寵物送入培育室畫布
+            const inactivePets = data.pets.filter(p => !p.is_active);
+            renderer.setPets(inactivePets);
+            
+            // 啟用爬塔與探索派遣按鈕
+            document.getElementById("btnChallengeTower").disabled = false;
+            updateExpeditionUI(data.active_pet_expedition);
+        } else {
+            document.getElementById("infoPetName").innerText = "尚未召喚寵物";
+            document.getElementById("infoPetStage").innerText = "無";
+            document.getElementById("infoPetPersonality").innerText = "無";
+            document.getElementById("infoGrowthPercent").innerText = "0%";
+            document.getElementById("infoGrowthBar").style.width = "0%";
+            document.getElementById("btnEvolve").disabled = true;
+            document.getElementById("btnChallengeTower").disabled = true;
+
+            // 仍要將所有未出戰的寵物送入培育室畫布
+            const inactivePets = data.pets ? data.pets.filter(p => !p.is_active) : [];
+            renderer.setPets(inactivePets);
+            
+            // 隱藏探索區域
+            document.getElementById("expeditionIdleSection").style.display = "none";
+            document.getElementById("expeditionActiveSection").style.display = "none";
+            document.getElementById("expeditionClaimSection").style.display = "none";
+        }
+    }
+
+    // Canvas 物理循環
+    function renderLoop() {
+        renderer.update();
+        renderer.draw();
+        requestAnimationFrame(renderLoop);
+    }
+    requestAnimationFrame(renderLoop);
+
+    // ==========================================
+    // 1. 汲取登入能量
+    // ==========================================
+    function claimLoginEnergy() {
+        fetch("{% url 'pet_system:api_claim_login_energy' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                petSound.playFeed();
+                Swal.fire("成功", data.message, "success");
+                loadDashboardData();
+            } else {
+                Swal.fire("錯誤", data.message, "error");
+            }
+        });
+    }
+
+    // ==========================================
+    // 2. 寵物命名
+    // ==========================================
+    function triggerRename() {
+        if (!activePet) return;
+        Swal.fire({
+            title: "幫寵物取個好聽的名字吧",
+            input: "text",
+            inputValue: activePet.name,
+            showCancelButton: true,
+            confirmButtonColor: "#28a745",
+            confirmButtonText: "決定了",
+            cancelButtonText: "取消",
+            inputValidator: (value) => {
+                if (!value.trim()) {
+                    return "名字不能是空的！";
+                }
+            }
+        }).then(res => {
+            if (res.isConfirmed) {
+                const formData = new FormData();
+                formData.append("pet_id", activePet.id);
+                formData.append("name", res.value);
+
+                fetch("{% url 'pet_system:api_rename_pet' %}", {
+                    method: "POST",
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                    body: formData
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        Swal.fire("命名成功！", data.message, "success");
+                        loadDashboardData();
+                    }
+                });
+            }
+        });
+    }
+
+    // ==========================================
+    // 3. 道具背包與餵食
+    // ==========================================
+    function openInventoryModal() {
+        const grid = document.getElementById("inventoryGrid");
+        grid.innerHTML = "";
+        
+        const items = dashboardData.inventory || [];
+        items.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "col-6";
+            
+            let actionBtn = "";
+            if (item.category === "PET_EGG") {
+                actionBtn = `<button class="btn btn-success w-100 rounded-pill fw-bold" onclick="hatchEgg()">孵化神秘蛋</button>`;
+            } else {
+                actionBtn = `<button class="btn btn-primary w-100 rounded-pill fw-bold" onclick="feedPet('${item.id}', '${item.name}')" ${!activePet ? 'disabled' : ''}>餵食</button>`;
+            }
+
+            card.innerHTML = `
+                <div class="card h-100 border p-3 rounded-4 shadow-sm text-center bg-light">
+                    <img src="${item.image_url}" class="mx-auto mb-2 rounded" style="width: 60px; height: 60px; object-fit: contain;">
+                    <h6 class="fw-bold mb-1">${item.name}</h6>
+                    <p class="small text-muted mb-2">${item.description}</p>
+                    <div class="badge bg-secondary mb-3">擁有數量: ${item.quantity}</div>
+                    ${actionBtn}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        if (items.length === 0) {
+            grid.innerHTML = `
+                <div class="col-12 text-center py-4">
+                    <i class="fas fa-box-open fa-3x text-muted opacity-25 mb-2"></i>
+                    <p class="text-muted">{% trans "背包空空如也，快去商城採購點飼料或神秘蛋吧！" %}</p>
+                    <a href="{% url 'finance:shop' %}" class="btn btn-sm btn-success rounded-pill fw-bold px-4">前往商城</a>
+                </div>
+            `;
+        }
+
+        new bootstrap.Modal(document.getElementById("inventoryModal")).show();
+    }
+
+    function hatchEgg() {
+        bootstrap.Modal.getInstance(document.getElementById("inventoryModal")).hide();
+        fetch("{% url 'pet_system:api_hatch_egg' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                petSound.playHatch();
+                playStory(data.story, () => {
+                    Swal.fire("恭喜", data.message, "success");
+                    loadDashboardData();
+                });
+            } else {
+                Swal.fire("錯誤", data.message, "error");
+            }
+        });
+    }
+
+    function feedPet(invId, name) {
+        if (!activePet) return;
+        const formData = new FormData();
+        formData.append("inventory_id", invId);
+        formData.append("pet_id", activePet.id);
+
+        fetch("{% url 'pet_system:api_feed_pet' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                petSound.playFeed();
+                // 彈出成功小提示
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+                Toast.fire({
+                    icon: 'success',
+                    title: data.message
+                });
+                
+                // 關閉 Modal 並重新讀取
+                bootstrap.Modal.getInstance(document.getElementById("inventoryModal")).hide();
+                loadDashboardData();
+            }
+        });
+    }
+
+    // ==========================================
+    // 4. 個人寵物庫管理與配件更衣室
+    // ==========================================
+    function openPetLibraryModal() {
+        const grid = document.getElementById("petLibraryGrid");
+        grid.innerHTML = "";
+        
+        const pets = dashboardData.pets || [];
+        const ownedAccessories = dashboardData.unlocked_accessories || [];
+        
+        pets.forEach(pet => {
+            const card = document.createElement("div");
+            card.className = "col-md-6";
+            
+            // 是否正在出戰
+            let statusBtn = "";
+            if (pet.is_active) {
+                statusBtn = `<button class="btn btn-success w-100 rounded-pill fw-bold" disabled><i class="fas fa-check me-1"></i>召喚中</button>`;
+            } else {
+                statusBtn = `<button class="btn btn-outline-success w-100 rounded-pill fw-bold" onclick="switchActivePet('${pet.id}')">召喚出戰</button>`;
+            }
+
+            // 歷史解鎖章節按鈕
+            const maxStage = dashboardData.story_unlocks[pet.pet_type] !== undefined ? dashboardData.story_unlocks[pet.pet_type] : -1;
+            let storyButtonsHtml = "";
+            for (let s = 0; s <= 4; s++) {
+                const disabledStr = s <= maxStage ? "" : "disabled";
+                const btnClass = s <= maxStage ? "btn-outline-success" : "btn-outline-secondary";
+                storyButtonsHtml += `<button class="btn btn-sm ${btnClass} px-2 py-1 small" ${disabledStr} onclick="reviewStory('${pet.pet_type}', ${s})" title="第 ${s} 章劇情">章 ${s}</button>`;
+            }
+
+            // 配件選裝 (僅出戰中可以即時預覽更衣)
+            let dressingHtml = "";
+            if (pet.is_active) {
+                // 過濾可用的 head, face, back 配件
+                const headOptions = ownedAccessories.filter(a => dashboardData.accessory_shop[a]?.slot === 'head');
+                const faceOptions = ownedAccessories.filter(a => dashboardData.accessory_shop[a]?.slot === 'face');
+                const backOptions = ownedAccessories.filter(a => dashboardData.accessory_shop[a]?.slot === 'back');
+
+                dressingHtml = `
+                    <div class="mt-3 p-2 bg-white rounded-3 border border-opacity-50 text-start">
+                        <div class="small fw-bold text-dark mb-2"><i class="fas fa-tshirt text-info me-1"></i>配件更衣室:</div>
+                        <div class="row g-1 mb-2">
+                            <div class="col-4">
+                                <label class="small text-muted">頭飾</label>
+                                <select class="form-select form-select-sm" onchange="equipAccessory('${pet.id}', 'head', this.value)">
+                                    <option value="">無</option>
+                                    ${headOptions.map(a => `<option value="${a}" ${pet.equipped_head === a ? 'selected' : ''}>${dashboardData.accessory_shop[a].name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <label class="small text-muted">面部</label>
+                                <select class="form-select form-select-sm" onchange="equipAccessory('${pet.id}', 'face', this.value)">
+                                    <option value="">無</option>
+                                    ${faceOptions.map(a => `<option value="${a}" ${pet.equipped_face === a ? 'selected' : ''}>${dashboardData.accessory_shop[a].name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <label class="small text-muted">背部</label>
+                                <select class="form-select form-select-sm" onchange="equipAccessory('${pet.id}', 'back', this.value)">
+                                    <option value="">無</option>
+                                    ${backOptions.map(a => `<option value="${a}" ${pet.equipped_back === a ? 'selected' : ''}>${dashboardData.accessory_shop[a].name}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                dressingHtml = `<div class="small text-muted py-2">僅限當前出戰寵物才可進行裝備搭配更衣。</div>`;
+            }
+
+            // 大頭照
+            let petAvatar = "/static/pet_system/images/pet_egg.webp";
+            if (pet.stage === 1) petAvatar = "/static/pet_system/images/baby_dragon.webp";
+            else if (pet.stage === 2) petAvatar = "/static/pet_system/images/growth_dragon.webp";
+            else if (pet.stage === 3) petAvatar = "/static/pet_system/images/complete_dragon.webp";
+            else if (pet.stage === 4) {
+                if (pet.personality === "CHUBBY") petAvatar = "/static/pet_system/images/pixel_chubby_dragon.webp";
+                else if (pet.personality === "BRAVE") petAvatar = "/static/pet_system/images/pixel_star_dragon.webp";
+                else petAvatar = "/static/pet_system/images/pixel_emerald_dragon.webp";
+            }
+
+            const avatarBorder = pet.is_active 
+                ? "border: 3px solid #28a745; box-shadow: 0 0 10px rgba(40, 167, 69, 0.4);" 
+                : "border: 2px solid #ccc;";
+
+            card.innerHTML = `
+                <div class="card h-100 border p-3 rounded-4 shadow-sm text-center bg-light">
+                    <img src="${petAvatar}" class="mx-auto mb-2 rounded-circle" style="width: 70px; height: 70px; object-fit: contain; ${avatarBorder}">
+                    <h6 class="fw-bold mb-1">${pet.name}</h5>
+                    <div class="badge bg-success mb-2">${pet.stage_display} (性格: ${pet.personality_display})</div>
+                    <div class="small text-muted mb-2">成長值: ${pet.growth_progress}%</div>
+                    
+                    <div class="mb-2">
+                        <div class="small fw-bold text-dark text-start mb-1"><i class="fas fa-history me-1 text-primary"></i>回憶錄(劇情):</div>
+                        <div class="d-flex justify-content-between gap-1">
+                            ${storyButtonsHtml}
+                        </div>
+                    </div>
+                    ${dressingHtml}
+                    ${statusBtn}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        if (pets.length === 0) {
+            grid.innerHTML = `
+                <div class="col-12 text-center py-4">
+                    <i class="fas fa-dragon fa-3x text-muted opacity-25 mb-2"></i>
+                    <p class="text-muted">{% trans "目前沒有任何寵物，快去孵化您的第一隻寵物蛋吧！" %}</p>
+                </div>
+            `;
+        }
+
+        new bootstrap.Modal(document.getElementById("petLibraryModal")).show();
+    }
+
+    function switchActivePet(petId) {
+        const formData = new FormData();
+        formData.append("pet_id", petId);
+
+        fetch("{% url 'pet_system:api_switch_active_pet' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                petSound.playClick();
+                Swal.fire("成功", data.message, "success");
+                bootstrap.Modal.getInstance(document.getElementById("petLibraryModal")).hide();
+                loadDashboardData();
+            }
+        });
+    }
+
+    // ==========================================
+    // 5. 更衣室裝備配件
+    // ==========================================
+    function equipAccessory(petId, slot, accessoryId) {
+        const formData = new FormData();
+        formData.append("pet_id", petId);
+        formData.append("slot", slot);
+        formData.append("accessory_id", accessoryId);
+
+        fetch("{% url 'pet_system:api_equip_accessory' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                // 播放叫聲預覽
+                petSound.playClick();
+                loadDashboardData();
+            } else {
+                Swal.fire("失敗", data.message, "error");
+            }
+        });
+    }
+
+    // ==========================================
+    // 6. 進化覺醒
+    // ==========================================
+    function evolvePet() {
+        if (!activePet) return;
+        const formData = new FormData();
+        formData.append("pet_id", activePet.id);
+
+        fetch("{% url 'pet_system:api_evolve_pet' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                petSound.playEvolve();
+                playStory(data.story, () => {
+                    Swal.fire("進化成功！", data.message, "success");
+                    loadDashboardData();
+                });
+            } else {
+                Swal.fire("失敗", data.message, "error");
+            }
+        });
+    }
+
+    // ==========================================
+    // 7. 裝飾配件商城
+    // ==========================================
+    function openAccessoryShopModal() {
+        const grid = document.getElementById("accessoryShopGrid");
+        grid.innerHTML = "";
+        
+        const shop = dashboardData.accessory_shop || {};
+        const owned = dashboardData.unlocked_accessories || [];
+
+        Object.keys(shop).forEach(key => {
+            const item = shop[key];
+            const isOwned = owned.includes(key);
+            const card = document.createElement("div");
+            card.className = "col-6 col-md-4";
+            
+            let btn = "";
+            if (isOwned) {
+                btn = `<button class="btn btn-secondary w-100 rounded-pill fw-bold" disabled>已解鎖擁有</button>`;
+            } else {
+                btn = `<button class="btn btn-info w-100 rounded-pill fw-bold text-white shadow-sm" onclick="buyAccessory('${key}')">金幣 x${item.price} 購買</button>`;
+            }
+
+            card.innerHTML = `
+                <div class="card h-100 border p-3 rounded-4 shadow-sm text-center bg-light">
+                    <img src="/static/pet_system/images/${key}.webp" class="mx-auto mb-2 rounded" style="width: 50px; height: 50px; object-fit: contain;">
+                    <h6 class="fw-bold mb-1">${item.name}</h6>
+                    <p class="small text-muted mb-2">部位: ${item.slot === 'head' ? '頭部' : item.slot === 'face' ? '臉部' : '背部'}</p>
+                    ${btn}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        new bootstrap.Modal(document.getElementById("accessoryShopModal")).show();
+    }
+
+    function buyAccessory(accId) {
+        const formData = new FormData();
+        formData.append("accessory_id", accId);
+
+        fetch("{% url 'pet_system:api_buy_accessory' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                petSound.playWin();
+                Swal.fire("成功解鎖裝飾", data.message, "success");
+                bootstrap.Modal.getInstance(document.getElementById("accessoryShopModal")).hide();
+                loadDashboardData();
+            } else {
+                Swal.fire("失敗", data.message, "error");
+            }
+        });
+    }
+
+    // ==========================================
+    // 8. 探索派遣
+    // ==========================================
+    function startExpedition(hours) {
+        if (!activePet) return;
+        const formData = new FormData();
+        formData.append("pet_id", activePet.id);
+        formData.append("hours", hours);
+
+        fetch("{% url 'pet_system:api_start_expedition' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                petSound.playClick();
+                Swal.fire("出發派遣", data.message, "success");
+                loadDashboardData();
+            } else {
+                Swal.fire("失敗", data.message, "error");
+            }
+        });
+    }
+
+    function updateExpeditionUI(exp) {
+        const idleSec = document.getElementById("expeditionIdleSection");
+        const activeSec = document.getElementById("expeditionActiveSection");
+        const claimSec = document.getElementById("expeditionClaimSection");
+
+        if (expeditionTimerInterval) clearInterval(expeditionTimerInterval);
+
+        if (!exp) {
+            idleSec.style.display = "block";
+            activeSec.style.display = "none";
+            claimSec.style.display = "none";
+            return;
+        }
+
+        if (exp.status === "ACTIVE") {
+            idleSec.style.display = "none";
+            activeSec.style.display = "block";
+            claimSec.style.display = "none";
+
+            let secondsLeft = exp.seconds_left;
+            const totalSeconds = exp.duration_hours * 3600;
+
+            const updateTimer = () => {
+                if (secondsLeft <= 0) {
+                    clearInterval(expeditionTimerInterval);
+                    loadDashboardData(); // 重新整理載入 completed 狀態
+                    return;
+                }
+                secondsLeft--;
+                
+                // 格式化為 hh:mm:ss
+                const h = Math.floor(secondsLeft / 3600).toString().padStart(2, '0');
+                const m = Math.floor((secondsLeft % 3600) / 60).toString().padStart(2, '0');
+                const s = (secondsLeft % 60).toString().padStart(2, '0');
+                document.getElementById("expeditionTimer").innerText = `${h}:${m}:${s}`;
+
+                // 更新進度條
+                const percent = ((totalSeconds - secondsLeft) / totalSeconds) * 100;
+                document.getElementById("expeditionProgressBar").style.width = `${percent}%`;
+            };
+
+            updateTimer();
+            expeditionTimerInterval = setInterval(updateTimer, 1000);
+
+        } else if (exp.status === "COMPLETED") {
+            idleSec.style.display = "none";
+            activeSec.style.display = "none";
+            claimSec.style.display = "block";
+        }
+    }
+
+    function claimExpeditionRewards() {
+        if (!dashboardData.active_pet_expedition) return;
+        const formData = new FormData();
+        formData.append("expedition_id", dashboardData.active_pet_expedition.id);
+
+        fetch("{% url 'pet_system:api_claim_expedition_rewards' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                petSound.playWin();
+                
+                // 組合獲獎清單
+                let rewardText = `獲得金幣 x${data.coins_earned}`;
+                if (data.accessory_won) rewardText += `\n獲得裝飾配件: ${data.accessory_won_display}`;
+                if (data.potion_won) rewardText += `\n獲得極罕見: 奇蹟進化藥水 x1！`;
+
+                Swal.fire({
+                    title: "🎁 探索寶箱開啟！",
+                    text: rewardText,
+                    icon: "success",
+                    confirmButtonColor: "#28a745"
+                });
+                
+                loadDashboardData();
+            } else {
+                Swal.fire("失敗", data.message, "error");
+            }
+        });
+    }
+
+    // ==========================================
+    // 9. 爬塔戰鬥模擬引擎
+    // ==========================================
+    function openTowerBattleModal() {
+        if (!activePet) return;
+        
+        // 設定塔層數標題與血量
+        document.getElementById("battleTitleFloor").innerText = dashboardData.tower_floor;
+        document.getElementById("battlePetName").innerText = activePet.name;
+        document.getElementById("battlePetHpBar").style.width = "100%";
+        document.getElementById("battleMonsterHpBar").style.width = "100%";
+        document.getElementById("battleLog").innerText = "等待戰鬥開始...\n點擊按鈕派出寵物進行回合制自動打怪！";
+
+        document.getElementById("btnStartBattle").disabled = false;
+        document.getElementById("btnCloseBattle").style.display = "block";
+
+        // 清理前次 Canvas 繪圖
+        battleCtx.clearRect(0, 0, battleCanvas.width, battleCanvas.height);
+        
+        // 繪製初始狀態
+        drawBattleStatic();
+
+        new bootstrap.Modal(document.getElementById("towerBattleModal")).show();
+    }
+
+    function drawBattleStatic() {
+        battleCtx.fillStyle = "#111";
+        battleCtx.fillRect(0, 0, battleCanvas.width, battleCanvas.height);
+        
+        // 地面
+        battleCtx.strokeStyle = "#444";
+        battleCtx.lineWidth = 2;
+        battleCtx.beginPath();
+        battleCtx.moveTo(0, 120);
+        battleCtx.lineTo(400, 120);
+        battleCtx.stroke();
+
+        // 畫小寵物跟怪獸 (灰色陰影提示)
+        battleCtx.fillStyle = "rgba(40,167,69,0.3)";
+        battleCtx.beginPath();
+        battleCtx.arc(80, 100, 20, 0, Math.PI*2);
+        battleCtx.fill();
+        
+        battleCtx.fillStyle = "rgba(220,53,69,0.3)";
+        battleCtx.beginPath();
+        battleCtx.arc(320, 100, 20, 0, Math.PI*2);
+        battleCtx.fill();
+    }
+
+    function startTowerBattle() {
+        if (isBattleRunning || !activePet) return;
+        isBattleRunning = true;
+        
+        document.getElementById("btnStartBattle").disabled = true;
+        document.getElementById("btnCloseBattle").style.display = "none"; // 戰鬥進行中不准關閉
+
+        const battleLog = document.getElementById("battleLog");
+        battleLog.innerText = "⚔️ 戰鬥開始！\n";
+
+        // 初始化屬性 (基於性格與進化階段決定數值)
+        let petMaxHp = 100 + (activePet.stage * 30);
+        if (activePet.personality === "CHUBBY") petMaxHp += 50;
+        else if (activePet.personality === "LAZY") petMaxHp += 30;
+
+        let petAtk = 10 + (activePet.stage * 5);
+        if (activePet.personality === "BRAVE") petAtk += 8;
+
+        let petHp = petMaxHp;
+
+        // 怪物數值 (隨層數增強)
+        const floor = dashboardData.tower_floor;
+        let monsterMaxHp = 50 + (floor * 15);
+        let monsterAtk = 6 + (floor * 3);
+        let monsterHp = monsterMaxHp;
+
+        // 戰鬥實體繪圖座標
+        let petX = 60, petY = 100;
+        let monsterX = 340, monsterY = 100;
+        
+        let chargeTimer = 0;
+        let turn = 0; // 0 = pet attack, 1 = monster attack
+        let combatState = "walk_in"; // walk_in, fight, hit_effect, retreat, finished
+        let hitFlash = 0;
+        let hitText = "";
+        let hitTextX = 0, hitTextY = 0;
+
+        battleLog.innerText += `寵物 HP: ${petHp}/${petMaxHp} | 怪獸 HP: ${monsterHp}/${monsterMaxHp}\n`;
+
+        // 載入主體 WebP 與裝飾
+        const petImg = new Image();
+        let imageUrl = "/static/pet_system/images/pet_egg.webp";
+        if (activePet.stage === 1) imageUrl = "/static/pet_system/images/baby_dragon.webp";
+        else if (activePet.stage === 2) imageUrl = "/static/pet_system/images/growth_dragon.webp";
+        else if (activePet.stage === 3) imageUrl = "/static/pet_system/images/complete_dragon.webp";
+        else if (activePet.stage === 4) {
+            if (activePet.personality === "CHUBBY") imageUrl = "/static/pet_system/images/pixel_chubby_dragon.webp";
+            else if (activePet.personality === "BRAVE") imageUrl = "/static/pet_system/images/pixel_star_dragon.webp";
+            else imageUrl = "/static/pet_system/images/pixel_emerald_dragon.webp";
+        }
+        petImg.src = imageUrl;
+
+        // 載入裝配更衣配件
+        const petAccessoryImgs = { head: new Image(), face: new Image(), back: new Image() };
+        const petAccessoryLoaded = { head: false, face: false, back: false };
+        if (activePet.equipped_head) {
+            petAccessoryImgs.head.onload = () => { petAccessoryLoaded.head = true; };
+            petAccessoryImgs.head.src = `/static/pet_system/images/${activePet.equipped_head}.webp`;
+        }
+        if (activePet.equipped_face) {
+            petAccessoryImgs.face.onload = () => { petAccessoryLoaded.face = true; };
+            petAccessoryImgs.face.src = `/static/pet_system/images/${activePet.equipped_face}.webp`;
+        }
+        if (activePet.equipped_back) {
+            petAccessoryImgs.back.onload = () => { petAccessoryLoaded.back = true; };
+            petAccessoryImgs.back.src = `/static/pet_system/images/${activePet.equipped_back}.webp`;
+        }
+        
+        const runSimulation = () => {
+            if (!isBattleRunning) return;
+            
+            // 物理與行為更新
+            chargeTimer++;
+
+            if (combatState === "walk_in") {
+                // 走進戰場中央
+                if (petX < 140) petX += 2;
+                if (monsterX > 260) monsterX -= 2;
+                
+                if (petX >= 140 && monsterX <= 260) {
+                    combatState = "fight";
+                    chargeTimer = 0;
+                }
+            } else if (combatState === "fight") {
+                // 每隔 60 幀進行一次交戰衝撞
+                if (chargeTimer > 40) {
+                    chargeTimer = 0;
+                    if (turn === 0) {
+                        // 寵物攻擊
+                        petX += 30; // 衝撞
+                        const dmg = Math.floor(petAtk * (0.9 + Math.random() * 0.2));
+                        monsterHp = Math.max(0, monsterHp - dmg);
+                        
+                        petSound.playHit();
+                        battleLog.innerText += `💥 ${activePet.name} 發動撞擊，對怪獸造成 ${dmg} 點傷害！\n`;
+                        battleLog.scrollTop = battleLog.scrollHeight;
+                        
+                        hitText = `-${dmg}`;
+                        hitTextX = monsterX;
+                        hitTextY = monsterY - 20;
+                        hitFlash = 15;
+                        combatState = "hit_effect";
+                        
+                        // 更新血量條
+                        document.getElementById("battleMonsterHpBar").style.width = `${(monsterHp/monsterMaxHp)*100}%`;
+                    } else {
+                        // 怪物反擊
+                        monsterX -= 30; // 衝撞
+                        const dmg = Math.floor(monsterAtk * (0.9 + Math.random() * 0.2));
+                        petHp = Math.max(0, petHp - dmg);
+                        
+                        petSound.playHit();
+                        battleLog.innerText += `👹 冒險怪獸咆哮反擊，造成 ${activePet.name} ${dmg} 點傷害！\n`;
+                        battleLog.scrollTop = battleLog.scrollHeight;
+                        
+                        hitText = `-${dmg}`;
+                        hitTextX = petX;
+                        hitTextY = petY - 20;
+                        hitFlash = 15;
+                        combatState = "hit_effect";
+
+                        // 更新血量條
+                        document.getElementById("battlePetHpBar").style.width = `${(petHp/petMaxHp)*100}%`;
+                    }
+                }
+            } else if (combatState === "hit_effect") {
+                hitFlash--;
+                if (hitFlash <= 0) {
+                    // 退回原位並輪替下一回合
+                    petX = 140;
+                    monsterX = 260;
+                    
+                    if (petHp <= 0 || monsterHp <= 0) {
+                        combatState = "finished";
+                    } else {
+                        turn = 1 - turn; // 輪流
+                        combatState = "fight";
+                    }
+                }
+            }
+
+            // 渲染戰鬥畫面
+            battleCtx.fillStyle = "#111";
+            battleCtx.fillRect(0, 0, battleCanvas.width, battleCanvas.height);
+
+            // 地面
+            battleCtx.strokeStyle = "#444";
+            battleCtx.beginPath();
+            battleCtx.moveTo(0, 120);
+            battleCtx.lineTo(400, 120);
+            battleCtx.stroke();
+
+            // 繪製陰影
+            battleCtx.fillStyle = "rgba(0,0,0,0.4)";
+            battleCtx.beginPath();
+            battleCtx.ellipse(petX, 118, 20, 5, 0, 0, Math.PI*2);
+            battleCtx.ellipse(monsterX, 118, 20, 5, 0, 0, Math.PI*2);
+            battleCtx.fill();
+
+            // 繪製我的寵物像素精靈 (翻轉朝右)
+            battleCtx.save();
+            battleCtx.translate(petX, petY);
+            if (activePet.equipped_back && petAccessoryLoaded.back) {
+                battleCtx.drawImage(petAccessoryImgs.back, -24, -24, 48, 48);
+            }
+            battleCtx.drawImage(petImg, -24, -24, 48, 48);
+            if (activePet.equipped_face && petAccessoryLoaded.face) {
+                battleCtx.drawImage(petAccessoryImgs.face, -24, -24, 48, 48);
+            }
+            if (activePet.equipped_head && petAccessoryLoaded.head) {
+                battleCtx.drawImage(petAccessoryImgs.head, -24, -24, 48, 48);
+            }
+            battleCtx.restore();
+
+            // 繪製冒險怪獸 (程序化畫出一隻帶斑點的紫紅史萊姆)
+            battleCtx.save();
+            battleCtx.translate(monsterX, monsterY);
+            battleCtx.fillStyle = "#a569bd";
+            battleCtx.beginPath();
+            battleCtx.arc(0, 5, 18, 0, Math.PI*2);
+            battleCtx.fill();
+            // 史萊姆小斑點與亮點
+            battleCtx.fillStyle = "#e8daef";
+            battleCtx.beginPath();
+            battleCtx.arc(-8, -2, 4, 0, Math.PI*2);
+            battleCtx.fill();
+            battleCtx.fillStyle = "#512e5f";
+            // 憤怒小眼睛
+            battleCtx.fillRect(-5, 2, 3, 3);
+            battleCtx.fillRect(5, 2, 3, 3);
+            battleCtx.restore();
+
+            // 繪製受傷與閃爍效果
+            if (combatState === "hit_effect" && hitFlash % 4 < 2) {
+                battleCtx.fillStyle = "rgba(255,0,0,0.5)";
+                if (turn === 0) {
+                    // 怪獸被打
+                    battleCtx.beginPath();
+                    battleCtx.arc(monsterX, monsterY, 20, 0, Math.PI*2);
+                    battleCtx.fill();
+                } else {
+                    // 寵物被打
+                    battleCtx.beginPath();
+                    battleCtx.arc(petX, petY, 20, 0, Math.PI*2);
+                    battleCtx.fill();
+                }
+            }
+
+            // 繪製飄字扣血數字
+            if (combatState === "hit_effect") {
+                battleCtx.fillStyle = "#e74c3c";
+                battleCtx.font = "bold 16px Courier New";
+                battleCtx.textAlign = "center";
+                battleCtx.fillText(hitText, hitTextX, hitTextY);
+            }
+
+            // 戰鬥終局判定
+            if (combatState === "finished") {
+                isBattleRunning = false;
+                const isVictory = monsterHp <= 0;
+                
+                battleCtx.fillStyle = "rgba(0,0,0,0.7)";
+                battleCtx.fillRect(0, 0, battleCanvas.width, battleCanvas.height);
+
+                battleCtx.textAlign = "center";
+                battleCtx.font = "bold 32px Arial";
+                
+                if (isVictory) {
+                    petSound.playWin();
+                    battleCtx.fillStyle = "#2ecc71";
+                    battleCtx.fillText("戰鬥勝利！", 200, 75);
+                    battleLog.innerText += "\n🏆 戰鬥結束！順利擊敗怪獸！\n";
+                } else {
+                    battleCtx.fillStyle = "#e74c3c";
+                    battleCtx.fillText("戰鬥失敗！", 200, 75);
+                    battleLog.innerText += "\n💀 戰鬥結束！寵物體力不支敗下陣來...\n";
+                }
+                battleLog.scrollTop = battleLog.scrollHeight;
+                
+                // 回報後端 API 進行金幣發送與爬塔結算
+                sendBattleResult(isVictory);
+                return;
+            }
+
+            battleAnimationId = requestAnimationFrame(runSimulation);
+        };
+
+        battleAnimationId = requestAnimationFrame(runSimulation);
+    }
+
+    function sendBattleResult(victory) {
+        const formData = new FormData();
+        formData.append("pet_id", activePet.id);
+        formData.append("victory", victory ? "true" : "false");
+
+        fetch("{% url 'pet_system:api_tower_battle_result' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            // 啟用關閉與再次戰鬥按鈕
+            document.getElementById("btnCloseBattle").style.display = "block";
+            
+            Swal.fire({
+                title: victory ? "🎉 挑戰成功！" : "💔 挑戰失敗",
+                text: data.message,
+                icon: victory ? "success" : "info",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                bootstrap.Modal.getInstance(document.getElementById("towerBattleModal")).hide();
+                loadDashboardData();
+            });
+        });
+    }
+
+    // ==========================================
+    // 10. 劇情重溫回顧播放器
+    // ==========================================
+    function reviewStory(petType, stage) {
+        // 關閉寵物庫 Modal
+        bootstrap.Modal.getInstance(document.getElementById("petLibraryModal")).hide();
+        
+        fetch(`{% url "pet_system:api_get_story" %}?pet_type=${petType}&stage=${stage}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    playStory(data.story, () => {
+                        // 播放完畢，重新打開寵物庫
+                        openPetLibraryModal();
+                    });
+                }
+            });
+    }
+
+    function playStory(storyData, onFinished) {
+        currentStoryData = storyData;
+        onStoryFinishedCallback = onFinished;
+
+        const overlay = document.getElementById("storyOverlay");
+        overlay.style.display = "flex";
+
+        document.getElementById("storyImg").src = storyData.illustration;
+        document.getElementById("storyTitle").innerText = storyData.title;
+
+        // 開始打字機特效
+        startTyping(storyData.text);
+    }
+
+    function startTyping(text) {
+        isTyping = true;
+        const box = document.getElementById("storyText");
+        box.innerText = "";
+        
+        let idx = 0;
+        if (typingInterval) clearInterval(typingInterval);
+        
+        typingInterval = setInterval(() => {
+            if (idx < text.length) {
+                box.innerText += text[idx];
+                idx++;
+            } else {
+                clearInterval(typingInterval);
+                isTyping = false;
+            }
+        }, 40); // 40 毫秒打一個字
+    }
+
+    function skipStory() {
+        if (isTyping) {
+            // 停止打字機，直接顯示全部字
+            clearInterval(typingInterval);
+            document.getElementById("storyText").innerText = currentStoryData.text;
+            isTyping = false;
+        } else {
+            // 再次點擊跳過，關閉 Overlay
+            closeStory();
+        }
+    }
+
+    function handleStoryClick() {
+        if (isTyping) {
+            // 點選畫面任意處快速完成打字
+            clearInterval(typingInterval);
+            document.getElementById("storyText").innerText = currentStoryData.text;
+            isTyping = false;
+        } else {
+            // 已打字完畢，點選畫面任意處關閉
+            closeStory();
+        }
+    }
+
+    function closeStory() {
+        if (typingInterval) clearInterval(typingInterval);
+        document.getElementById("storyOverlay").style.display = "none";
+        if (onStoryFinishedCallback) {
+            onStoryFinishedCallback();
+        }
+    }
+</script>
+{% endblock %}

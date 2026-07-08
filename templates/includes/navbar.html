@@ -51,6 +51,11 @@
                                 <i class="fas fa-store fa-fw me-2 {% if 'finance/shop' not in request.path %}text-success{% endif %}"></i>{% trans "Point Shop" %}
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item {% if 'pet/dashboard' in request.path %}active bg-primary text-white{% endif %}" href="{% url 'pet_system:dashboard' %}">
+                                <i class="fas fa-dragon fa-fw me-2 {% if 'pet/dashboard' not in request.path %}text-success{% endif %}"></i>{% trans "Q版寵物培育" %}
+                            </a>
+                        </li>
 
                         <li><hr class="dropdown-divider"></li>
 

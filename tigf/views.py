@@ -11,14 +11,29 @@ with time_tracker("tigf"):
     from decimal import Decimal, InvalidOperation
     from urllib.parse import quote
 
-    import pandas as pd
     from django.core.cache import cache
     from django.http import HttpResponse, JsonResponse
     from django.shortcuts import render
-    from openpyxl import load_workbook
-    from openpyxl.utils import get_column_letter
 
     from utils.decorators import staff_required
+
+
+class LazyPandas:
+    def __getattr__(self, name):
+        import pandas as _pd
+        return getattr(_pd, name)
+
+pd = LazyPandas()
+
+
+def load_workbook(*args, **kwargs):
+    from openpyxl import load_workbook as _load_workbook
+    return _load_workbook(*args, **kwargs)
+
+
+def get_column_letter(*args, **kwargs):
+    from openpyxl.utils import get_column_letter as _get_column_letter
+    return _get_column_letter(*args, **kwargs)
 
 
 def get_all_files(uploaded_files):
@@ -430,6 +445,9 @@ def tigf_dashboard(request):
 
                             #! 特殊表不做比對
                             if tag in (
+                                "T026",
+                                "T027",
+                                "T030",
                                 "T038",
                                 "T039",
                                 "T040",

@@ -7,8 +7,6 @@ with time_tracker("bionic_chat"):
     import re
     import time
 
-    import edge_tts
-    from deep_translator import GoogleTranslator
     from django.conf import settings
     from django.http import JsonResponse, StreamingHttpResponse
     from django.shortcuts import render
@@ -66,6 +64,7 @@ def chat_interface(request):
 
 def stream_llm_response(request):
     """處理語言模型推論、動態翻譯與音檔生成串流"""
+    from deep_translator import GoogleTranslator
     user_text = request.GET.get("message", "")
 
     #! 接收前端傳來的語言設定，預設為繁體中文
@@ -76,6 +75,7 @@ def stream_llm_response(request):
     cleanup_temp_audio()
 
     async def generate_audio(text, filename, voice):
+        import edge_tts
         communicate = edge_tts.Communicate(text, voice)
         await communicate.save(filename)
 
@@ -229,6 +229,7 @@ def translate_text_api(request):
         return JsonResponse({"translated_text": text})
 
     try:
+        from deep_translator import GoogleTranslator
         translated_text = GoogleTranslator(source="zh-TW", target=target_lang).translate(text)
         return JsonResponse({"translated_text": translated_text})
     except Exception as e:
@@ -255,6 +256,7 @@ def generate_audio_api(request):
 
     # 修正 1：將要發音的文字作為參數傳入，而不是依賴外部變數
     async def generate_audio(clean_text_for_tts):
+        import edge_tts
         communicate = edge_tts.Communicate(clean_text_for_tts, target_voice)
         await communicate.save(filename)
 

@@ -112,6 +112,7 @@ LOCAL_APPS = [
     "sh_recognition",
     "transfer_system",
     "line_manager",  # * LINE 行程管理 app
+    "pet_system",
 ]
 
 INSTALLED_APPS = WEBSOCKET_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

@@ -125,6 +125,8 @@ urlpatterns = [
     path("transfer/", include("transfer_system.urls")),
     #! LINE 行程管理
     path("line/", include("line_manager.urls")),
+    #! Q版寵物系統
+    path("pet/", include("pet_system.urls")),
     # ? ======================================================================
 ]
 
