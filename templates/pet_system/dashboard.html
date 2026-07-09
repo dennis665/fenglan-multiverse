@@ -516,10 +516,12 @@
         }
     }
 
-    // Canvas 物理循環
+    // Canvas 物理循環 (加入 renderer 存在性防護，防止 DOMContentLoaded 前執行崩潰)
     function renderLoop() {
-        renderer.update();
-        renderer.draw();
+        if (renderer) {
+            renderer.update();
+            renderer.draw();
+        }
         requestAnimationFrame(renderLoop);
     }
     requestAnimationFrame(renderLoop);
@@ -1183,100 +1185,263 @@
             petAccessoryImgs.back.src = `/static/pet_system/images/${activePet.equipped_back}.webp`;
         }
         
+        let particles = [];
+        let projectiles = [];
+        
+        // 動作與縮放變形 (用於蓄力與受傷震動效果)
+        let petScaleX = 1, petScaleY = 1;
+        let monsterScaleX = 1, monsterScaleY = 1;
+        let petShakeX = 0, monsterShakeX = 0;
+
         const runSimulation = () => {
             if (!isBattleRunning) return;
             
-            // 物理與行為更新
             chargeTimer++;
 
             if (combatState === "walk_in") {
                 // 走進戰場中央
-                if (petX < 140) petX += 2;
-                if (monsterX > 260) monsterX -= 2;
+                if (petX < 140) petX += 2.5;
+                if (monsterX > 260) monsterX -= 2.5;
                 
                 if (petX >= 140 && monsterX <= 260) {
                     combatState = "fight";
                     chargeTimer = 0;
                 }
             } else if (combatState === "fight") {
-                // 每隔 60 幀進行一次交戰衝撞
+                // 兩秒一次進行招式對決
                 if (chargeTimer > 40) {
                     chargeTimer = 0;
+                    combatState = "prepare_atk";
+                    
+                    // 蓄力前置變形
                     if (turn === 0) {
-                        // 寵物攻擊
-                        petX += 30; // 衝撞
-                        const dmg = Math.floor(petAtk * (0.9 + Math.random() * 0.2));
-                        monsterHp = Math.max(0, monsterHp - dmg);
-                        
-                        petSound.playHit();
-                        battleLog.innerText += `💥 ${activePet.name} 發動撞擊，對怪獸造成 ${dmg} 點傷害！\n`;
-                        battleLog.scrollTop = battleLog.scrollHeight;
-                        
-                        hitText = `-${dmg}`;
-                        hitTextX = monsterX;
-                        hitTextY = monsterY - 20;
-                        hitFlash = 15;
-                        combatState = "hit_effect";
-                        
-                        // 更新血量條
-                        document.getElementById("battleMonsterHpBar").style.width = `${(monsterHp/monsterMaxHp)*100}%`;
+                        if (activePet.pet_type === "DRAGON") {
+                            petScaleX = 0.8; petScaleY = 1.2; // 龍拔高蓄力
+                        } else {
+                            petScaleX = 1.25; petScaleY = 0.75; // 狗蹲下蓄力
+                        }
                     } else {
-                        // 怪物反擊
-                        monsterX -= 30; // 衝撞
-                        const dmg = Math.floor(monsterAtk * (0.9 + Math.random() * 0.2));
-                        petHp = Math.max(0, petHp - dmg);
-                        
-                        petSound.playHit();
-                        battleLog.innerText += `👹 冒險怪獸咆哮反擊，造成 ${activePet.name} ${dmg} 點傷害！\n`;
-                        battleLog.scrollTop = battleLog.scrollHeight;
-                        
-                        hitText = `-${dmg}`;
-                        hitTextX = petX;
-                        hitTextY = petY - 20;
-                        hitFlash = 15;
-                        combatState = "hit_effect";
-
-                        // 更新血量條
-                        document.getElementById("battlePetHpBar").style.width = `${(petHp/petMaxHp)*100}%`;
+                        monsterScaleX = 1.3; monsterScaleY = 0.7; // 史萊姆壓扁蓄力
                     }
                 }
+            } else if (combatState === "prepare_atk") {
+                // 蓄力 15 幀後發射專屬招式！
+                if (chargeTimer > 15) {
+                    chargeTimer = 0;
+                    combatState = "projectile_fly";
+                    
+                    // 恢復正常比例並發射子彈
+                    petScaleX = 1; petScaleY = 1;
+                    monsterScaleX = 1; monsterScaleY = 1;
+                    
+                    if (turn === 0) {
+                        if (activePet.pet_type === "DRAGON") {
+                            // 龍拳 / 熾熱火球
+                            projectiles.push({
+                                x: petX + 20,
+                                y: petY,
+                                targetX: monsterX,
+                                targetY: monsterY,
+                                type: "dragon_punch",
+                                size: 14,
+                                speed: 7
+                            });
+                            battleLog.innerText += `🔥 ${activePet.name} 揮出鐵拳，發動了【火龍神拳】！\n`;
+                        } else {
+                            // 狗狗烈焰吐息
+                            projectiles.push({
+                                x: petX + 15,
+                                y: petY,
+                                targetX: monsterX,
+                                targetY: monsterY,
+                                type: "fire_breath",
+                                size: 10,
+                                speed: 9
+                            });
+                            battleLog.innerText += `🔥 ${activePet.name} 大張犬嘴，發動了【烈焰吐息】！\n`;
+                        }
+                    } else {
+                        // 史萊姆綠色黏液噴吐
+                        projectiles.push({
+                            x: monsterX - 20,
+                            y: monsterY + 8,
+                            targetX: petX,
+                            targetY: petY,
+                            type: "slime_spit",
+                            size: 10,
+                            speed: 5.5
+                        });
+                        battleLog.innerText += `🤢 冒險怪獸蠕動身軀，使出了【黏液噴吐】！\n`;
+                    }
+                    battleLog.scrollTop = battleLog.scrollHeight;
+                }
+            } else if (combatState === "projectile_fly") {
+                if (projectiles.length === 0) {
+                    combatState = "fight";
+                    chargeTimer = 0;
+                }
+                
+                projectiles.forEach((proj, idx) => {
+                    let dx = proj.targetX - proj.x;
+                    let dy = proj.targetY - proj.y;
+                    let dist = Math.hypot(dx, dy);
+                    
+                    if (dist < proj.speed) {
+                        // 擊中！觸發受擊效果
+                        projectiles.splice(idx, 1);
+                        combatState = "hit_effect";
+                        chargeTimer = 0;
+                        hitFlash = 15;
+                        petSound.playHit();
+                        
+                        let dmg = 0;
+                        if (turn === 0) {
+                            dmg = Math.floor(petAtk * (0.85 + Math.random() * 0.3));
+                            monsterHp = Math.max(0, monsterHp - dmg);
+                            hitText = `-${dmg}`;
+                            hitTextX = monsterX;
+                            hitTextY = monsterY - 25;
+                            monsterShakeX = 14; // 強烈受擊晃動
+                            document.getElementById("battleMonsterHpBar").style.width = `${(monsterHp/monsterMaxHp)*100}%`;
+                            
+                            // 擊中噴發火花粒子
+                            let pColor = activePet.pet_type === "DRAGON" ? "#f39c12" : "#e74c3c";
+                            for (let p=0; p<25; p++) {
+                                let angle = Math.random() * Math.PI * 2;
+                                let speed = 2 + Math.random() * 5;
+                                particles.push({
+                                    x: monsterX,
+                                    y: monsterY + 8,
+                                    vx: Math.cos(angle) * speed,
+                                    vy: Math.sin(angle) * speed - 1.5,
+                                    color: pColor,
+                                    size: 3 + Math.random() * 4,
+                                    alpha: 1.0,
+                                    decay: 0.03 + Math.random() * 0.02
+                                });
+                            }
+                        } else {
+                            dmg = Math.floor(monsterAtk * (0.85 + Math.random() * 0.3));
+                            petHp = Math.max(0, petHp - dmg);
+                            hitText = `-${dmg}`;
+                            hitTextX = petX;
+                            hitTextY = petY - 25;
+                            petShakeX = -14; // 強烈受擊晃動
+                            document.getElementById("battlePetHpBar").style.width = `${(petHp/petMaxHp)*100}%`;
+                            
+                            // 擊中噴發黏液綠色滴落粒子
+                            for (let p=0; p<20; p++) {
+                                let angle = Math.random() * Math.PI * 2;
+                                let speed = 1.5 + Math.random() * 4;
+                                particles.push({
+                                    x: petX,
+                                    y: petY,
+                                    vx: Math.cos(angle) * speed,
+                                    vy: Math.sin(angle) * speed - 1,
+                                    color: "#2ecc71",
+                                    size: 4 + Math.random() * 4,
+                                    alpha: 1.0,
+                                    decay: 0.025 + Math.random() * 0.015
+                                });
+                            }
+                        }
+                    } else {
+                        // 推進子彈坐標
+                        let angle = Math.atan2(dy, dx);
+                        proj.x += Math.cos(angle) * proj.speed;
+                        proj.y += Math.sin(angle) * proj.speed;
+                        
+                        // 飛行釋放特技粒子
+                        if (proj.type === "dragon_punch") {
+                            for (let k=0; k<3; k++) {
+                                particles.push({
+                                    x: proj.x - Math.cos(angle) * 8 + (Math.random() - 0.5) * 6,
+                                    y: proj.y - Math.sin(angle) * 8 + (Math.random() - 0.5) * 6,
+                                    vx: -Math.cos(angle) * 1.5 + (Math.random() - 0.5) * 1,
+                                    vy: -Math.sin(angle) * 0.5 + (Math.random() - 0.5) * 1,
+                                    color: Math.random() > 0.4 ? "#f1c40f" : "#e67e22",
+                                    size: 4 + Math.random() * 4,
+                                    alpha: 0.8,
+                                    decay: 0.05
+                                });
+                            }
+                        } else if (proj.type === "fire_breath") {
+                            for (let k=0; k<4; k++) {
+                                particles.push({
+                                    x: proj.x + (Math.random() - 0.5) * 10,
+                                    y: proj.y + (Math.random() - 0.5) * 10,
+                                    vx: Math.cos(angle) * 3 + (Math.random() - 0.5) * 2,
+                                    vy: Math.sin(angle) * 3 + (Math.random() - 0.5) * 2,
+                                    color: Math.random() > 0.5 ? "#e74c3c" : "#f39c12",
+                                    size: 5 + Math.random() * 6,
+                                    alpha: 0.9,
+                                    decay: 0.04
+                                });
+                            }
+                        } else if (proj.type === "slime_spit") {
+                            for (let k=0; k<2; k++) {
+                                particles.push({
+                                    x: proj.x - Math.cos(angle) * 6,
+                                    y: proj.y - Math.sin(angle) * 6,
+                                    vx: -Math.cos(angle) * 0.8 + (Math.random() - 0.5) * 0.5,
+                                    vy: (Math.random() - 0.5) * 0.8,
+                                    color: "#2ecc71",
+                                    size: 3 + Math.random() * 3,
+                                    alpha: 0.8,
+                                    decay: 0.06
+                                });
+                            }
+                        }
+                    }
+                });
             } else if (combatState === "hit_effect") {
                 hitFlash--;
+                // 受擊震動阻尼衰減
+                petShakeX *= -0.75;
+                monsterShakeX *= -0.75;
+                
                 if (hitFlash <= 0) {
-                    // 退回原位並輪替下一回合
-                    petX = 140;
-                    monsterX = 260;
-                    
+                    petShakeX = 0;
+                    monsterShakeX = 0;
                     if (petHp <= 0 || monsterHp <= 0) {
                         combatState = "finished";
                     } else {
-                        turn = 1 - turn; // 輪流
+                        turn = 1 - turn;
                         combatState = "fight";
                     }
                 }
             }
 
-            // 渲染戰鬥畫面
+            // ================== 渲染區面 ==================
             battleCtx.fillStyle = "#111";
             battleCtx.fillRect(0, 0, battleCanvas.width, battleCanvas.height);
 
-            // 地面
+            // 繪製背景網格與地平線
+            battleCtx.strokeStyle = "#222";
+            battleCtx.lineWidth = 1;
+            for (let x=20; x<battleCanvas.width; x+=20) {
+                battleCtx.beginPath();
+                battleCtx.moveTo(x, 0);
+                battleCtx.lineTo(x, 120);
+                battleCtx.stroke();
+            }
             battleCtx.strokeStyle = "#444";
             battleCtx.beginPath();
             battleCtx.moveTo(0, 120);
             battleCtx.lineTo(400, 120);
             battleCtx.stroke();
 
-            // 繪製陰影
-            battleCtx.fillStyle = "rgba(0,0,0,0.4)";
+            // 繪製地底微光陰影
+            battleCtx.fillStyle = "rgba(0,0,0,0.45)";
             battleCtx.beginPath();
             battleCtx.ellipse(petX, 118, 20, 5, 0, 0, Math.PI*2);
             battleCtx.ellipse(monsterX, 118, 20, 5, 0, 0, Math.PI*2);
             battleCtx.fill();
 
-            // 繪製我的寵物像素精靈 (翻轉朝右)
+            // 1. 繪製我的寵物
             battleCtx.save();
-            battleCtx.translate(petX, petY);
+            battleCtx.translate(petX + petShakeX, petY);
+            battleCtx.scale(petScaleX, petScaleY);
             if (activePet.equipped_back && petAccessoryLoaded.back) {
                 battleCtx.drawImage(petAccessoryImgs.back, -24, -24, 48, 48);
             }
@@ -1289,41 +1454,149 @@
             }
             battleCtx.restore();
 
-            // 繪製冒險怪獸 (程序化畫出一隻帶斑點的紫紅史萊姆)
+            // 2. 繪製冒險怪獸 (紫紅史萊姆 + 果凍感渲染 + 動態表情變化)
             battleCtx.save();
-            battleCtx.translate(monsterX, monsterY);
-            battleCtx.fillStyle = "#a569bd";
+            battleCtx.translate(monsterX + monsterShakeX, monsterY);
+            battleCtx.scale(monsterScaleX, monsterScaleY);
+            
+            // 暗紫色外緣
+            battleCtx.fillStyle = "#8e44ad";
             battleCtx.beginPath();
-            battleCtx.arc(0, 5, 18, 0, Math.PI*2);
+            battleCtx.ellipse(0, 8, 22, 14, 0, 0, Math.PI * 2);
             battleCtx.fill();
-            // 史萊姆小斑點與亮點
-            battleCtx.fillStyle = "#e8daef";
+            
+            // 亮紫色核心
+            battleCtx.fillStyle = "#9b59b6";
             battleCtx.beginPath();
-            battleCtx.arc(-8, -2, 4, 0, Math.PI*2);
+            battleCtx.ellipse(0, 9, 18, 11, 0, 0, Math.PI * 2);
             battleCtx.fill();
-            battleCtx.fillStyle = "#512e5f";
-            // 憤怒小眼睛
-            battleCtx.fillRect(-5, 2, 3, 3);
-            battleCtx.fillRect(5, 2, 3, 3);
+            
+            // 亮點反光
+            battleCtx.fillStyle = "rgba(255,255,255,0.7)";
+            battleCtx.beginPath();
+            battleCtx.ellipse(-8, 4, 5, 2.5, -Math.PI/6, 0, Math.PI*2);
+            battleCtx.fill();
+
+            // 動態五官表情變化
+            battleCtx.fillStyle = "#2c3e50";
+            if (combatState === "prepare_atk" && turn === 1) {
+                // 蓄力大招時：生氣的瞇眼表情 >_<
+                battleCtx.strokeStyle = "#2c3e50";
+                battleCtx.lineWidth = 2;
+                battleCtx.beginPath();
+                battleCtx.moveTo(-10, 6); battleCtx.lineTo(-6, 9);
+                battleCtx.moveTo(-10, 9); battleCtx.lineTo(-6, 6);
+                battleCtx.stroke();
+                
+                battleCtx.beginPath();
+                battleCtx.moveTo(6, 6); battleCtx.lineTo(10, 9);
+                battleCtx.moveTo(6, 9); battleCtx.lineTo(10, 6);
+                battleCtx.stroke();
+                
+                // 大口嘴巴
+                battleCtx.fillStyle = "#c0392b";
+                battleCtx.beginPath();
+                battleCtx.arc(0, 14, 5, 0, Math.PI*2);
+                battleCtx.fill();
+            } else if (combatState === "hit_effect" && turn === 0) {
+                // 被擊中時：X_X 暈倒哭泣表情
+                battleCtx.strokeStyle = "#ffffff";
+                battleCtx.lineWidth = 2;
+                battleCtx.beginPath();
+                battleCtx.moveTo(-10, 5); battleCtx.lineTo(-6, 9);
+                battleCtx.moveTo(-10, 9); battleCtx.lineTo(-6, 5);
+                battleCtx.stroke();
+                
+                battleCtx.beginPath();
+                battleCtx.moveTo(6, 5); battleCtx.lineTo(10, 9);
+                battleCtx.moveTo(6, 9); battleCtx.lineTo(10, 5);
+                battleCtx.stroke();
+                
+                // 扭曲的哭泣波浪嘴
+                battleCtx.beginPath();
+                battleCtx.moveTo(-4, 14);
+                battleCtx.quadraticCurveTo(0, 17, 4, 13);
+                battleCtx.stroke();
+            } else {
+                // 正常警戒狀態：凶悍的小眼睛與嚴肅一字嘴
+                battleCtx.beginPath();
+                battleCtx.arc(-8, 7, 3, 0, Math.PI*2);
+                battleCtx.arc(8, 7, 3, 0, Math.PI*2);
+                battleCtx.fill();
+                
+                battleCtx.strokeStyle = "#2c3e50";
+                battleCtx.lineWidth = 2;
+                battleCtx.beginPath();
+                battleCtx.moveTo(-12, 3); battleCtx.lineTo(-4, 6);
+                battleCtx.moveTo(12, 3); battleCtx.lineTo(4, 6);
+                battleCtx.stroke();
+                
+                battleCtx.beginPath();
+                battleCtx.moveTo(-3, 14); battleCtx.lineTo(3, 14);
+                battleCtx.stroke();
+            }
             battleCtx.restore();
 
-            // 繪製受傷與閃爍效果
-            if (combatState === "hit_effect" && hitFlash % 4 < 2) {
-                battleCtx.fillStyle = "rgba(255,0,0,0.5)";
-                if (turn === 0) {
-                    // 怪獸被打
+            // 3. 繪製特技子彈 (招式特效繪製)
+            projectiles.forEach(proj => {
+                battleCtx.save();
+                if (proj.type === "dragon_punch") {
+                    // 熾烈火球：白核 + 亮黃 + 橙紅漸層
+                    let grad = battleCtx.createRadialGradient(proj.x, proj.y, 2, proj.x, proj.y, proj.size);
+                    grad.addColorStop(0, "#ffffff");
+                    grad.addColorStop(0.3, "#f1c40f");
+                    grad.addColorStop(0.7, "#e67e22");
+                    grad.addColorStop(1, "rgba(230,126,34,0)");
+                    battleCtx.fillStyle = grad;
                     battleCtx.beginPath();
-                    battleCtx.arc(monsterX, monsterY, 20, 0, Math.PI*2);
+                    battleCtx.arc(proj.x, proj.y, proj.size, 0, Math.PI*2);
                     battleCtx.fill();
+                } else if (proj.type === "slime_spit") {
+                    // 螢光綠色黏液彈
+                    let grad = battleCtx.createRadialGradient(proj.x, proj.y, 2, proj.x, proj.y, proj.size);
+                    grad.addColorStop(0, "#ffffff");
+                    grad.addColorStop(0.4, "#2ecc71");
+                    grad.addColorStop(1, "rgba(46,204,113,0)");
+                    battleCtx.fillStyle = grad;
+                    battleCtx.beginPath();
+                    battleCtx.arc(proj.x, proj.y, proj.size, 0, Math.PI*2);
+                    battleCtx.fill();
+                }
+                battleCtx.restore();
+            });
+
+            // 4. 繪製粒子效果
+            for (let idx = particles.length - 1; idx >= 0; idx--) {
+                let p = particles[idx];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+                if (p.alpha <= 0) {
+                    particles.splice(idx, 1);
                 } else {
-                    // 寵物被打
+                    battleCtx.save();
+                    battleCtx.globalAlpha = p.alpha;
+                    battleCtx.fillStyle = p.color;
                     battleCtx.beginPath();
-                    battleCtx.arc(petX, petY, 20, 0, Math.PI*2);
+                    battleCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                     battleCtx.fill();
+                    battleCtx.restore();
                 }
             }
 
-            // 繪製飄字扣血數字
+            // 5. 繪製受傷受擊閃光圈
+            if (combatState === "hit_effect" && hitFlash % 4 < 2) {
+                battleCtx.fillStyle = "rgba(231,76,60,0.45)"; // 紅色受傷爆光
+                battleCtx.beginPath();
+                if (turn === 0) {
+                    battleCtx.arc(monsterX, monsterY + 8, 24, 0, Math.PI*2);
+                } else {
+                    battleCtx.arc(petX, petY, 24, 0, Math.PI*2);
+                }
+                battleCtx.fill();
+            }
+
+            // 6. 飄字扣血數字
             if (combatState === "hit_effect") {
                 battleCtx.fillStyle = "#e74c3c";
                 battleCtx.font = "bold 16px Courier New";
@@ -1331,12 +1604,12 @@
                 battleCtx.fillText(hitText, hitTextX, hitTextY);
             }
 
-            // 戰鬥終局判定
+            // 7. 戰鬥局終判定
             if (combatState === "finished") {
                 isBattleRunning = false;
                 const isVictory = monsterHp <= 0;
                 
-                battleCtx.fillStyle = "rgba(0,0,0,0.7)";
+                battleCtx.fillStyle = "rgba(0,0,0,0.75)";
                 battleCtx.fillRect(0, 0, battleCanvas.width, battleCanvas.height);
 
                 battleCtx.textAlign = "center";
@@ -1354,7 +1627,6 @@
                 }
                 battleLog.scrollTop = battleLog.scrollHeight;
                 
-                // 回報後端 API 進行金幣發送與爬塔結算
                 sendBattleResult(isVictory);
                 return;
             }

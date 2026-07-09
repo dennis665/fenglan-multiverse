@@ -1,0 +1,963 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4" style="min-height: 90vh; font-family: 'Outfit', 'Inter', sans-serif;">
+    <!-- 頂部標題列 -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 pb-3 border-bottom border-secondary">
+        <div>
+            <h2 class="fw-bold text-dark mb-1" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                🛡️ CSI 遊戲美術資源多媒體圖鑑庫
+            </h2>
+            <p class="text-muted mb-0 small">收錄 CSI 專案中全部角色、怪獸、技能粒子特效、道具、裝扮配件與地形場景背景</p>
+        </div>
+        <div class="mt-2 mt-md-0">
+            <a href="{% url 'pet_system:dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 me-2">
+                <i class="fas fa-arrow-left me-1"></i> 返回寵物主頁
+            </a>
+            <a href="/admin/" target="_blank" class="btn btn-warning btn-sm rounded-pill px-3">
+                <i class="fas fa-cog me-1"></i> Django 後台
+            </a>
+        </div>
+    </div>
+
+    <!-- 數據統計看板 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                <div class="bg-primary text-white rounded-3 p-3 me-3">
+                    <i class="fas fa-dragon fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">12 款</h5>
+                    <span class="text-muted small">寵物形態角色</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                <div class="bg-success text-white rounded-3 p-3 me-3">
+                    <i class="fas fa-magic fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">4 組招式</h5>
+                    <span class="text-muted small">粒子物理特技動畫</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                <div class="bg-warning text-white rounded-3 p-3 me-3">
+                    <i class="fas fa-hat-wizard fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">5 款</h5>
+                    <span class="text-muted small">精美商城服飾配件</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                <div class="bg-info text-white rounded-3 p-3 me-3">
+                    <i class="fas fa-gamepad fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">2 大地形</h5>
+                    <span class="text-muted small">遊戲關卡天色背景</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 試穿疊加面板 (適用於寵物預覽卡) -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.05);">
+        <h6 class="fw-bold mb-3 d-flex align-items-center text-primary">
+            <span class="badge bg-primary me-2">LIVE 2D Overlay</span> 配件試穿疊加（勾選後將疊加於下方寵物角色身上進行位置校對）
+        </h6>
+        <div class="d-flex flex-wrap gap-4">
+            <div class="form-check form-switch">
+                <input class="form-check-input accessory-toggle" type="checkbox" id="toggleHeadHat" data-slot="head" data-img="pixel_straw_hat.webp">
+                <label class="form-check-label fw-bold text-secondary" for="toggleHeadHat">👒 草帽 (pixel_straw_hat.webp)</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input accessory-toggle" type="checkbox" id="toggleHeadCrown" data-slot="head" data-img="pixel_crown.webp">
+                <label class="form-check-label fw-bold text-secondary" for="toggleHeadCrown">👑 皇冠 (pixel_crown.webp)</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input accessory-toggle" type="checkbox" id="toggleFaceGlasses" data-slot="face" data-img="pixel_sunglasses.webp">
+                <label class="form-check-label fw-bold text-secondary" for="toggleFaceGlasses">🕶️ 墨鏡 (pixel_sunglasses.webp)</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input accessory-toggle" type="checkbox" id="toggleHeadDevilHorns" data-slot="head" data-img="pixel_devil_horns.webp">
+                <label class="form-check-label fw-bold text-secondary" for="toggleHeadDevilHorns">😈 惡魔角 (pixel_devil_horns.webp)</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input accessory-toggle" type="checkbox" id="toggleBackAngel" data-slot="back" data-img="pixel_angel_wings.webp">
+                <label class="form-check-label fw-bold text-secondary" for="toggleBackAngel">👼 天使翅膀 (pixel_angel_wings.webp)</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- 頁籤選單 -->
+    <ul class="nav nav-pills nav-fill gap-2 p-2 bg-light rounded-4 mb-4 shadow-sm" id="galleryTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill fw-bold" id="dragon-tab" data-bs-toggle="tab" data-bs-target="#dragon" type="button" role="tab">
+                🐉 綠龍與火犬系列 (Pets)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-bold" id="monsters-tab" data-bs-toggle="tab" data-bs-target="#monsters" type="button" role="tab" onclick="initMonsterCanvas()">
+                👾 人物與怪獸 (Monsters)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-bold" id="vfx-tab" data-bs-toggle="tab" data-bs-target="#vfx" type="button" role="tab" onclick="initVfxCanvas()">
+                💫 招式粒子特效 (VFX)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-bold" id="items-tab" data-bs-toggle="tab" data-bs-target="#items" type="button" role="tab">
+                👑 道具與服飾配件 (Items)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-bold" id="terrains-tab" data-bs-toggle="tab" data-bs-target="#terrains" type="button" role="tab">
+                🖼️ 關卡地形背景 (Terrains)
+            </button>
+        </li>
+    </ul>
+
+    <!-- 頁籤內容 -->
+    <div class="tab-content" id="galleryTabContent">
+        <!-- 1. 寵物角色頁籤 -->
+        <div class="tab-pane fade show active" id="dragon" role="tabpanel">
+            <h4 class="fw-bold mb-3 text-primary border-start border-4 border-primary ps-3">寵物多媒體動作圖鑑 (無撕裂 Q彈動圖)</h4>
+            <div class="row g-4" id="petContainer">
+                <!-- 預先透過 JS 渲染 12 款寵物 (包括綠龍與火犬) -->
+            </div>
+        </div>
+
+        <!-- 2. 人物與怪獸頁籤 -->
+        <div class="tab-pane fade" id="monsters" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                        <h5 class="fw-bold text-secondary mb-3"><i class="fas fa-ghost me-2 text-danger"></i>關卡怪獸：紫紅史萊姆 (Slime Monster)</h5>
+                        <p class="text-muted small">史萊姆在冒險塔中具備果凍感形變與表情狀態切換。請點選下方按鈕預覽其五官與表情的動態變化：</p>
+                        
+                        <div class="d-flex align-items-center justify-content-center bg-dark rounded-4 p-3 mb-3" style="height: 180px;">
+                            <canvas id="slimePreviewCanvas" width="200" height="150" style="background: #111; border-radius: 12px;"></canvas>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-info btn-sm flex-fill fw-bold" onclick="setSlimeState('idle')">🟢 呼吸閒置 (Idle)</button>
+                            <button class="btn btn-outline-warning btn-sm flex-fill fw-bold" onclick="setSlimeState('prepare')">🟡 蓄力生氣 (Prepare)</button>
+                            <button class="btn btn-outline-danger btn-sm flex-fill fw-bold" onclick="setSlimeState('hit')">🔴 受擊眩暈 (X_X)</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                        <h5 class="fw-bold text-secondary mb-3"><i class="fas fa-user-circle me-2 text-primary"></i>遊戲人物頭像與使用者 (Users)</h5>
+                        <p class="text-muted small">收錄 CSI 成員頭貼與遊戲預設頭像素材，以及後台權限指標：</p>
+                        <div class="d-flex flex-wrap gap-4 align-items-center p-3 bg-light rounded-4">
+                            <div class="text-center">
+                                <div class="bg-white rounded-circle p-2 shadow-sm border d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                    {% if user.profile.avatar %}
+                                        <img src="{{ user.profile.avatar.url }}" class="rounded-circle w-100 h-100" style="object-fit: cover;">
+                                    {% else %}
+                                        <i class="fas fa-user-shield text-warning" style="font-size: 2.5rem;"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="d-block text-secondary small fw-bold mt-2">當前管理員</span>
+                            </div>
+                            <div class="flex-fill">
+                                <h6 class="fw-bold mb-1">系統認證狀態</h6>
+                                <span class="badge bg-success">Staff Member</span>
+                                <span class="badge bg-danger">Superuser</span>
+                                <code class="d-block mt-2 small text-muted">User ID: {{ user.id }} | Username: {{ user.username }}</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 技能特技與粒子特效頁籤 -->
+        <div class="tab-pane fade" id="vfx" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-secondary mb-3"><i class="fas fa-bolt me-2 text-warning"></i>專屬大招與粒子物理特技模擬器</h5>
+                <p class="text-muted small">在下方畫布中點選對應招式按鈕，可以直接在圖鑑庫中預覽戰鬥時華麗的粒子噴發與招式軌跡物理演算：</p>
+                
+                <div class="d-flex align-items-center justify-content-center bg-dark rounded-4 p-3 mb-4" style="height: 250px;">
+                    <canvas id="vfxPreviewCanvas" width="500" height="220" style="background: #111; border-radius: 16px; border: 2px solid #333; max-width: 100%;"></canvas>
+                </div>
+                
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <button class="btn btn-danger w-100 fw-bold" onclick="triggerVfx('dragon_punch')">🔥 【火龍神拳】 (Dragon Flame)</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-warning w-100 fw-bold" onclick="triggerVfx('fire_breath')">🔥 【烈焰吐息】 (Fire Breath)</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success w-100 fw-bold text-white" onclick="triggerVfx('slime_spit')">🤢 【黏液噴吐】 (Slime Spit)</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-danger w-100 fw-bold" onclick="triggerVfx('hit_flash')">💥 【受擊光圈】 (Damage Shockwave)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 裝扮服飾與配件頁籤 -->
+        <div class="tab-pane fade" id="items" role="tabpanel">
+            <!-- 直接展示道具與配件 -->
+            <div class="row g-4">
+                <div class="col-12">
+                    <h5 class="fw-bold mb-3 text-secondary border-start border-4 border-info ps-3">👑 寵物商城裝配飾品</h5>
+                </div>
+                <!-- 飾品列表 -->
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 text-center">
+                        <div class="bg-light rounded-3 p-3 mb-2 d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <img src="/static/pet_system/images/pixel_straw_hat.webp" style="max-height: 80px; max-width: 80px;">
+                        </div>
+                        <h6 class="fw-bold mb-1">草帽 (Head)</h6>
+                        <span class="text-muted small">pixel_straw_hat.webp</span>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill mt-2 w-100" onclick="copyText('pixel_straw_hat.webp')">複製檔案名</button>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 text-center">
+                        <div class="bg-light rounded-3 p-3 mb-2 d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <img src="/static/pet_system/images/pixel_crown.webp" style="max-height: 80px; max-width: 80px;">
+                        </div>
+                        <h6 class="fw-bold mb-1">皇冠 (Head)</h6>
+                        <span class="text-muted small">pixel_crown.webp</span>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill mt-2 w-100" onclick="copyText('pixel_crown.webp')">複製檔案名</button>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 text-center">
+                        <div class="bg-light rounded-3 p-3 mb-2 d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <img src="/static/pet_system/images/pixel_sunglasses.webp" style="max-height: 80px; max-width: 80px;">
+                        </div>
+                        <h6 class="fw-bold mb-1">太陽眼鏡 (Face)</h6>
+                        <span class="text-muted small">pixel_sunglasses.webp</span>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill mt-2 w-100" onclick="copyText('pixel_sunglasses.webp')">複製檔案名</button>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 text-center">
+                        <div class="bg-light rounded-3 p-3 mb-2 d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <img src="/static/pet_system/images/pixel_demon_wings.webp" style="max-height: 80px; max-width: 80px;">
+                        </div>
+                        <h6 class="fw-bold mb-1">惡魔翅膀 (Back)</h6>
+                        <span class="text-muted small">pixel_demon_wings.webp</span>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill mt-2 w-100" onclick="copyText('pixel_demon_wings.webp')">複製檔案名</button>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 text-center">
+                        <div class="bg-light rounded-3 p-3 mb-2 d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <img src="/static/pet_system/images/pixel_angel_wings.webp" style="max-height: 80px; max-width: 80px;">
+                        </div>
+                        <h6 class="fw-bold mb-1">天使翅膀 (Back)</h6>
+                        <span class="text-muted small">pixel_angel_wings.webp</span>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill mt-2 w-100" onclick="copyText('pixel_angel_wings.webp')">複製檔案名</button>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <h5 class="fw-bold mb-3 text-secondary border-start border-4 border-success ps-3">🍖 寵物蛋與消耗性食物道具</h5>
+                </div>
+                <!-- 道具列表 -->
+                <div class="col-6 col-md-4">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 text-center">
+                        <div class="bg-light rounded-3 p-3 mb-2 d-flex align-items-center justify-content-center" style="height: 120px;">
+                            <img src="/static/pet_system/images/pet_egg.webp" class="breathing-egg" style="max-height: 90px; max-width: 90px;">
+                        </div>
+                        <h6 class="fw-bold mb-1">神秘寵物蛋 (PET_EGG)</h6>
+                        <span class="text-muted small">pet_egg.webp</span>
+                        <button class="btn btn-outline-success btn-sm rounded-pill mt-2 w-100" onclick="copyText('/static/pet_system/images/pet_egg.webp')">複製路徑</button>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 text-center">
+                        <div class="bg-light rounded-3 p-3 mb-2 d-flex align-items-center justify-content-center" style="height: 120px;">
+                            <img src="/static/pet_system/images/pet_feed.webp" style="max-height: 90px; max-width: 90px;">
+                        </div>
+                        <h6 class="fw-bold mb-1">美味寵物乾糧 (PET_FOOD)</h6>
+                        <span class="text-muted small">pet_feed.webp</span>
+                        <button class="btn btn-outline-success btn-sm rounded-pill mt-2 w-100" onclick="copyText('/static/pet_system/images/pet_feed.webp')">複製路徑</button>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 text-center">
+                        <div class="bg-light rounded-3 p-3 mb-2 d-flex align-items-center justify-content-center" style="height: 120px;">
+                            <img src="/static/pet_system/images/pixel_potion.webp" class="glowing-potion" style="max-height: 90px; max-width: 90px;">
+                        </div>
+                        <h6 class="fw-bold mb-1">奇蹟進化藥水 (PET_FOOD push)</h6>
+                        <span class="text-muted small">pixel_potion.webp</span>
+                        <button class="btn btn-outline-success btn-sm rounded-pill mt-2 w-100" onclick="copyText('/static/pet_system/images/pixel_potion.webp')">複製路徑</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 遊戲地形與背景頁籤 -->
+        <div class="tab-pane fade" id="terrains" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="p-3 bg-dark text-white fw-bold">🏡 培育室天色草地地形 (Nurturing Background)</div>
+                        <div class="p-4 d-flex align-items-center justify-content-center" style="height: 200px; background: linear-gradient(135deg, #11998e, #38ef7d);">
+                            <div class="w-75 h-50 border border-white border-2 rounded shadow d-flex align-items-center justify-content-center text-white fw-bold">
+                                linear-gradient(135deg, #11998e, #38ef7d)
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-1">培育室背景樣式</h6>
+                            <p class="text-muted small">採用清新漸變色彩與圓角陰影框，供非出戰寵物漫遊。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="p-3 bg-dark text-white fw-bold">⚔️ 冒險塔網格戰場地形 (Tower Arena Grid)</div>
+                        <div class="p-4 d-flex flex-column align-items-center justify-content-center bg-dark" style="height: 200px; background-size: 20px 20px; background-image: linear-gradient(to right, #222 1px, transparent 1px), linear-gradient(to bottom, #222 1px, transparent 1px);">
+                            <div class="w-100 border-bottom border-secondary mb-2" style="border-width: 2px;"></div>
+                            <div class="text-secondary fw-bold small">地平線 (y = 120px) 與 20px 網格背景</div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-1">戰場背景樣式</h6>
+                            <p class="text-muted small">利用 Canvas 動態繪製格線與陰影地平線，營造黑暗賽博龐克冒險氛圍。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 道具特殊呼吸 CSS */
+    .breathing-egg {
+        animation: eggBreath 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes eggBreath {
+        0% { transform: scale(0.93) translateY(3px); }
+        100% { transform: scale(1.03) translateY(-3px); }
+    }
+    .glowing-potion {
+        filter: drop-shadow(0 0 6px rgba(138, 43, 226, 0.6));
+        animation: floatPotion 2s ease-in-out infinite alternate;
+    }
+    @keyframes floatPotion {
+        0% { transform: translateY(4px) rotate(-3deg); }
+        100% { transform: translateY(-4px) rotate(3deg); }
+    }
+
+    /* 疊圖對齊定位 CSS */
+    .pet-preview-box {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(240,240,240,1) 100%);
+        border-radius: 16px;
+        border: 2px solid #e9ecef;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .pet-layer {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        object-fit: contain;
+        pointer-events: none;
+    }
+    .accessory-layer {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        object-fit: contain;
+        pointer-events: none;
+        display: none;
+        z-index: 10;
+    }
+    .accessory-layer[data-slot="back"] {
+        z-index: 1;
+    }
+    .pet-body-layer {
+        z-index: 5;
+    }
+</style>
+
+<script>
+    // 寵物數據定義
+    const petUnits = [
+        // DRAGON
+        { stage: 1, type: "DRAGON", name: "幼年體 - 綠龍寶寶", base: "baby_dragon", tech: "手繪 4 幀連續動畫" },
+        { stage: 2, type: "DRAGON", name: "成長體 - 雙足綠龍", base: "growth_dragon", tech: "手繪 4 幀連續動畫" },
+        { stage: 3, type: "DRAGON", name: "完全體 - 飛天綠龍", base: "complete_dragon", tech: "手繪 4 幀連續動畫" },
+        { stage: 4, type: "DRAGON", name: "究極進化 - 肥嘟嘟綠龍 (Chubby)", base: "pixel_chubby_dragon", tech: "手繪 4 幀連續動畫" },
+        { stage: 4, type: "DRAGON", name: "究極進化 - 星空烈焰龍 (Brave)", base: "pixel_star_dragon", tech: "一體化 Q彈變形" },
+        { stage: 4, type: "DRAGON", name: "究極進化 - 翡翠守護龍 (Emerald)", base: "pixel_emerald_dragon", tech: "一體化 Q彈變形" },
+        // PUPPY
+        { stage: 1, type: "PUPPY", name: "幼年體 - 烈火幼犬", base: "baby_puppy", tech: "手繪 4 幀連續動畫" },
+        { stage: 2, type: "PUPPY", name: "成長體 - 奔跑火狗", base: "growth_puppy", tech: "一體化 Q彈變形" },
+        { stage: 3, type: "PUPPY", name: "完全體 - 烈焰守護犬", base: "complete_puppy", tech: "一體化 Q彈變形" },
+        { stage: 4, type: "PUPPY", name: "究極進化 - 肥嘟嘟火犬 (Chubby)", base: "pixel_chubby_puppy", tech: "一體化 Q彈變形" },
+        { stage: 4, type: "PUPPY", name: "究極進化 - 深淵地獄犬 (Brave)", base: "pixel_star_puppy", tech: "一體化 Q彈變形" },
+        { stage: 4, type: "PUPPY", name: "究極進化 - 祥瑞麒麟犬 (Emerald)", base: "pixel_emerald_puppy", tech: "一體化 Q彈變形" }
+    ];
+
+    function renderPets() {
+        const petContainer = document.getElementById("petContainer");
+        petContainer.innerHTML = petUnits.map(unit => {
+            const actions = [
+                { key: "base", title: "靜態主圖", suffix: "" },
+                { key: "walk_left", title: "向左走路", suffix: "_walk_left" },
+                { key: "walk_right", title: "向右走路", suffix: "_walk_right" },
+                { key: "sleep", title: "熟睡發呆", suffix: "_sleep" },
+                { key: "jump", title: "Q彈跳躍", suffix: "_jump" }
+            ];
+
+            let cardHtml = `
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
+                    <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
+                        <span class="fw-bold text-warning">${unit.type === 'DRAGON' ? '🐉' : '🐕'} ${unit.name}</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success rounded-pill">${unit.tech}</span>
+                            <span class="badge bg-secondary rounded-pill">Stage ${unit.stage}</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+            `;
+
+            actions.forEach(action => {
+                let filename = `${unit.base}${action.suffix}.webp`;
+                let relativePath = `/static/pet_system/images/${filename}`;
+
+                cardHtml += `
+                    <div class="col-6 col-md">
+                        <div class="d-flex flex-column align-items-center bg-light p-3 rounded-4 border">
+                            <span class="fw-bold text-secondary small mb-2">${action.title}</span>
+                            
+                            <div class="pet-preview-box mb-3" data-action="${action.key}" data-pet-type="${unit.type}" data-stage="${unit.stage}" data-personality="${unit.base.includes('chubby') ? 'CHUBBY' : (unit.base.includes('star') ? 'BRAVE' : 'EMERALD')}">
+                                <img src="" class="accessory-layer" data-slot="back">
+                                <img src="${relativePath}" class="pet-layer pet-body-layer">
+                                <img src="" class="accessory-layer" data-slot="face">
+                                <img src="" class="accessory-layer" data-slot="head">
+                            </div>
+                            
+                            <div class="w-100">
+                                <code class="d-block text-center text-truncate small bg-white border rounded py-1 px-2 mb-2 text-danger" title="${filename}">${filename}</code>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-outline-dark btn-sm flex-fill" style="font-size: 11px;" onclick="copyText('${filename}')">檔名</button>
+                                    <button class="btn btn-primary btn-sm flex-fill" style="font-size: 11px;" onclick="copyText('${relativePath}')">路徑</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cardHtml += `
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+            return cardHtml;
+        }).join('');
+
+        setupAccessoryListeners();
+        adjustAllPreviewSizes();
+    }
+
+    // ==========================================
+    // 史萊姆怪獸預覽 Canvas 渲染
+    // ==========================================
+    let slimeCanvas, slimeCtx;
+    let slimeState = "idle";
+    let slimeTimer = 0;
+    let slimeAnimId = null;
+
+    function initMonsterCanvas() {
+        if (slimeAnimId) return;
+        slimeCanvas = document.getElementById("slimePreviewCanvas");
+        slimeCtx = slimeCanvas.getContext("2d");
+        
+        function slimeLoop() {
+            slimeTimer++;
+            slimeCtx.clearRect(0, 0, slimeCanvas.width, slimeCanvas.height);
+            
+            // 繪製格線背景
+            slimeCtx.strokeStyle = "#222";
+            for (let x=10; x<slimeCanvas.width; x+=10) {
+                slimeCtx.beginPath(); slimeCtx.moveTo(x, 0); slimeCtx.lineTo(x, slimeCanvas.height); slimeCtx.stroke();
+            }
+            slimeCtx.strokeStyle = "#444";
+            slimeCtx.beginPath(); slimeCtx.moveTo(0, 100); slimeCtx.lineTo(slimeCanvas.width, 100); slimeCtx.stroke();
+            
+            slimeCtx.save();
+            slimeCtx.translate(100, 92);
+            
+            let sx = 1, sy = 1;
+            let shakeX = 0;
+            
+            if (slimeState === "idle") {
+                // 呼吸 Q 彈收縮
+                sx = 1 + 0.05 * Math.sin(slimeTimer * 0.05);
+                sy = 1 - 0.05 * Math.sin(slimeTimer * 0.05);
+            } else if (slimeState === "prepare") {
+                // 蓄力大招壓扁
+                sx = 1.35; sy = 0.65;
+            } else if (slimeState === "hit") {
+                // 被擊中震動
+                shakeX = Math.sin(slimeTimer * 0.5) * 6;
+                sx = 0.95; sy = 1.05;
+            }
+            
+            slimeCtx.translate(shakeX, 0);
+            slimeCtx.scale(sx, sy);
+            
+            // 繪製史萊姆主體
+            slimeCtx.fillStyle = "#8e44ad";
+            slimeCtx.beginPath();
+            slimeCtx.ellipse(0, 0, 32, 20, 0, 0, Math.PI * 2);
+            slimeCtx.fill();
+            
+            slimeCtx.fillStyle = "#9b59b6";
+            slimeCtx.beginPath();
+            slimeCtx.ellipse(0, 2, 26, 16, 0, 0, Math.PI * 2);
+            slimeCtx.fill();
+            
+            slimeCtx.fillStyle = "rgba(255,255,255,0.7)";
+            slimeCtx.beginPath();
+            slimeCtx.ellipse(-12, -4, 8, 4, -Math.PI/6, 0, Math.PI * 2);
+            slimeCtx.fill();
+            
+            // 繪製表情五官
+            slimeCtx.fillStyle = "#2c3e50";
+            if (slimeState === "prepare") {
+                // 瞇眼
+                slimeCtx.strokeStyle = "#2c3e50";
+                slimeCtx.lineWidth = 2.5;
+                // 左眼 >
+                slimeCtx.beginPath(); slimeCtx.moveTo(-15, -2); slimeCtx.lineTo(-9, 2); slimeCtx.moveTo(-15, 2); slimeCtx.lineTo(-9, -2); slimeCtx.stroke();
+                // 右眼 <
+                slimeCtx.beginPath(); slimeCtx.moveTo(9, -2); slimeCtx.lineTo(15, 2); slimeCtx.moveTo(9, 2); slimeCtx.lineTo(15, -2); slimeCtx.stroke();
+                // 大口
+                slimeCtx.fillStyle = "#c0392b";
+                slimeCtx.beginPath(); slimeCtx.arc(0, 9, 7, 0, Math.PI*2); slimeCtx.fill();
+            } else if (slimeState === "hit") {
+                // X_X
+                slimeCtx.strokeStyle = "#ffffff";
+                slimeCtx.lineWidth = 2.5;
+                slimeCtx.beginPath(); slimeCtx.moveTo(-14, -3); slimeCtx.lineTo(-8, 3); slimeCtx.moveTo(-14, 3); slimeCtx.lineTo(-8, -3); slimeCtx.stroke();
+                slimeCtx.beginPath(); slimeCtx.moveTo(8, -3); slimeCtx.lineTo(14, 3); slimeCtx.moveTo(8, 3); slimeCtx.lineTo(14, -3); slimeCtx.stroke();
+                // 波浪嘴
+                slimeCtx.beginPath(); slimeCtx.moveTo(-6, 9); slimeCtx.quadraticCurveTo(0, 13, 6, 8); slimeCtx.stroke();
+            } else {
+                // 警戒小眼睛與一字嘴
+                slimeCtx.beginPath(); slimeCtx.arc(-10, 0, 4, 0, Math.PI*2); slimeCtx.arc(10, 0, 4, 0, Math.PI*2); slimeCtx.fill();
+                slimeCtx.strokeStyle = "#2c3e50"; slimeCtx.lineWidth = 2;
+                slimeCtx.beginPath(); slimeCtx.moveTo(-15, -5); slimeCtx.lineTo(-5, -2); slimeCtx.moveTo(15, -5); slimeCtx.lineTo(5, -2); slimeCtx.stroke();
+                slimeCtx.beginPath(); slimeCtx.moveTo(-4, 9); slimeCtx.lineTo(4, 9); slimeCtx.stroke();
+            }
+            
+            slimeCtx.restore();
+            
+            // 標示狀態文字
+            slimeCtx.fillStyle = "#fff";
+            slimeCtx.font = "bold 13px Arial";
+            slimeCtx.textAlign = "center";
+            slimeCtx.fillText(`當前狀態: ${slimeState.toUpperCase()}`, 100, 135);
+            
+            slimeAnimId = requestAnimationFrame(slimeLoop);
+        }
+        slimeLoop();
+    }
+
+    function setSlimeState(state) {
+        slimeState = state;
+    }
+
+    // ==========================================
+    // 招式與粒子特效 Canvas 模擬器
+    // ==========================================
+    let vfxCanvas, vfxCtx;
+    let vfxAnimId = null;
+    let vfxParticles = [];
+    let vfxProjectiles = [];
+    let vfxFlash = 0;
+    let vfxTimer = 0;
+
+    function initVfxCanvas() {
+        if (vfxAnimId) return;
+        vfxCanvas = document.getElementById("vfxPreviewCanvas");
+        vfxCtx = vfxCanvas.getContext("2d");
+        
+        function vfxLoop() {
+            vfxTimer++;
+            vfxCtx.fillStyle = "#111";
+            vfxCtx.fillRect(0, 0, vfxCanvas.width, vfxCanvas.height);
+            
+            // 繪製地平線與底網格
+            vfxCtx.strokeStyle = "#222";
+            for (let x=25; x<vfxCanvas.width; x+=25) {
+                vfxCtx.beginPath(); vfxCtx.moveTo(x, 0); vfxCtx.lineTo(x, 150); vfxCtx.stroke();
+            }
+            vfxCtx.strokeStyle = "#444";
+            vfxCtx.beginPath(); vfxCtx.moveTo(0, 150); vfxCtx.lineTo(vfxCanvas.width, 150); vfxCtx.stroke();
+            
+            // 繪製發射源與靶標標誌
+            vfxCtx.fillStyle = "#333";
+            vfxCtx.beginPath(); vfxCtx.arc(80, 140, 16, 0, Math.PI*2); vfxCtx.fill();
+            vfxCtx.beginPath(); vfxCtx.arc(420, 140, 16, 0, Math.PI*2); vfxCtx.fill();
+            vfxCtx.fillStyle = "#fff";
+            vfxCtx.font = "10px Arial";
+            vfxCtx.textAlign = "center";
+            vfxCtx.fillText("發射", 80, 144);
+            vfxCtx.fillText("目標", 420, 144);
+
+            // 更新與繪製子彈
+            for (let idx = vfxProjectiles.length - 1; idx >= 0; idx--) {
+                let proj = vfxProjectiles[idx];
+                let dx = proj.targetX - proj.x;
+                let dy = proj.targetY - proj.y;
+                let dist = Math.hypot(dx, dy);
+                
+                if (dist < proj.speed) {
+                    vfxProjectiles.splice(idx, 1);
+                    vfxFlash = 15;
+                    // 觸發擊中粒子爆裂
+                    let particleColor = proj.type === "dragon_punch" ? "#f39c12" : "#2ecc71";
+                    for (let p=0; p<20; p++) {
+                        let angle = Math.random() * Math.PI * 2;
+                        let speed = 1.5 + Math.random() * 4;
+                        vfxParticles.push({
+                            x: proj.targetX,
+                            y: proj.targetY,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed - 1.5,
+                            color: particleColor,
+                            size: 3 + Math.random() * 4,
+                            alpha: 1.0,
+                            decay: 0.03 + Math.random() * 0.02
+                        });
+                    }
+                } else {
+                    let angle = Math.atan2(dy, dx);
+                    proj.x += Math.cos(angle) * proj.speed;
+                    proj.y += Math.sin(angle) * proj.speed;
+                    
+                    // 釋放尾跡粒子
+                    if (proj.type === "dragon_punch") {
+                        for (let k=0; k<2; k++) {
+                            vfxParticles.push({
+                                x: proj.x - Math.cos(angle) * 8 + (Math.random() - 0.5) * 5,
+                                y: proj.y - Math.sin(angle) * 8 + (Math.random() - 0.5) * 5,
+                                vx: -Math.cos(angle) * 1 + (Math.random() - 0.5) * 0.5,
+                                vy: (Math.random() - 0.5) * 0.5,
+                                color: Math.random() > 0.4 ? "#f1c40f" : "#e67e22",
+                                size: 3 + Math.random() * 3,
+                                alpha: 0.8,
+                                decay: 0.06
+                            });
+                        }
+                    } else if (proj.type === "slime_spit") {
+                        for (let k=0; k<1; k++) {
+                            vfxParticles.push({
+                                x: proj.x - Math.cos(angle) * 6,
+                                y: proj.y - Math.sin(angle) * 6,
+                                vx: -Math.cos(angle) * 0.5,
+                                vy: (Math.random() - 0.5) * 0.5,
+                                color: "#2ecc71",
+                                size: 3 + Math.random() * 2,
+                                alpha: 0.8,
+                                decay: 0.07
+                            });
+                        }
+                    }
+                }
+            }
+
+            // 繪製子彈主體
+            vfxProjectiles.forEach(proj => {
+                vfxCtx.save();
+                if (proj.type === "dragon_punch") {
+                    let grad = vfxCtx.createRadialGradient(proj.x, proj.y, 2, proj.x, proj.y, proj.size);
+                    grad.addColorStop(0, "#ffffff");
+                    grad.addColorStop(0.3, "#f1c40f");
+                    grad.addColorStop(0.7, "#e67e22");
+                    grad.addColorStop(1, "rgba(230,126,34,0)");
+                    vfxCtx.fillStyle = grad;
+                    vfxCtx.beginPath(); vfxCtx.arc(proj.x, proj.y, proj.size, 0, Math.PI*2); vfxCtx.fill();
+                } else if (proj.type === "slime_spit") {
+                    let grad = vfxCtx.createRadialGradient(proj.x, proj.y, 1, proj.x, proj.y, proj.size);
+                    grad.addColorStop(0, "#ffffff");
+                    grad.addColorStop(0.5, "#2ecc71");
+                    grad.addColorStop(1, "rgba(46,204,113,0)");
+                    vfxCtx.fillStyle = grad;
+                    vfxCtx.beginPath(); vfxCtx.arc(proj.x, proj.y, proj.size, 0, Math.PI*2); vfxCtx.fill();
+                }
+                vfxCtx.restore();
+            });
+
+            // 更新並繪製所有粒子
+            for (let idx = vfxParticles.length - 1; idx >= 0; idx--) {
+                let p = vfxParticles[idx];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+                if (p.alpha <= 0) {
+                    vfxParticles.splice(idx, 1);
+                } else {
+                    vfxCtx.save();
+                    vfxCtx.globalAlpha = p.alpha;
+                    vfxCtx.fillStyle = p.color;
+                    vfxCtx.beginPath();
+                    vfxCtx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                    vfxCtx.fill();
+                    vfxCtx.restore();
+                }
+            }
+
+            // 繪製擊中爆光圈
+            if (vfxFlash > 0) {
+                vfxFlash--;
+                if (vfxFlash % 4 < 2) {
+                    vfxCtx.fillStyle = "rgba(231,76,60,0.45)";
+                    vfxCtx.beginPath();
+                    vfxCtx.arc(420, 140, 24, 0, Math.PI*2);
+                    vfxCtx.fill();
+                }
+            }
+
+            vfxAnimId = requestAnimationFrame(vfxLoop);
+        }
+        vfxLoop();
+    }
+
+    function triggerVfx(type) {
+        if (type === "dragon_punch") {
+            vfxProjectiles.push({
+                x: 80, y: 140, targetX: 420, targetY: 140, type: "dragon_punch", size: 14, speed: 6
+            });
+        } else if (type === "slime_spit") {
+            vfxProjectiles.push({
+                x: 80, y: 140, targetX: 420, targetY: 140, type: "slime_spit", size: 10, speed: 5
+            });
+        } else if (type === "fire_breath") {
+            // 烈焰吐息直接對目標噴射擴散粒子
+            for (let i=0; i<35; i++) {
+                setTimeout(() => {
+                    let angle = (Math.random() - 0.5) * 0.25;
+                    vfxParticles.push({
+                        x: 80,
+                        y: 140,
+                        vx: Math.cos(angle) * (4 + Math.random()*5),
+                        vy: Math.sin(angle) * (4 + Math.random()*5) - 1,
+                        color: Math.random() > 0.5 ? "#e74c3c" : "#f39c12",
+                        size: 4 + Math.random()*6,
+                        alpha: 0.9,
+                        decay: 0.03 + Math.random()*0.02
+                    });
+                }, i * 20);
+            }
+        } else if (type === "hit_flash") {
+            vfxFlash = 25;
+        }
+    }
+
+    // ==========================================
+    // 飾品配件試穿疊圖邏輯
+    // ==========================================
+    function setupAccessoryListeners_OLD() {
+        const switches = document.querySelectorAll(".accessory-toggle");
+        
+        switches.forEach(sw => {
+            sw.addEventListener("change", function() {
+                const slot = this.dataset.slot;
+                const imgName = this.dataset.img;
+                const isChecked = this.checked;
+
+                if (isChecked) {
+                    switches.forEach(otherSw => {
+                        if (otherSw !== this && otherSw.dataset.slot === slot) {
+                            otherSw.checked = false;
+                        }
+                    });
+                }
+
+                const previewBoxes = document.querySelectorAll(".pet-preview-box");
+                previewBoxes.forEach(box => {
+                    const accLayer = box.querySelector(`.accessory-layer[data-slot="${slot}"]`);
+                    if (accLayer) {
+                        const petType = box.dataset.petType;
+                        const stage = parseInt(box.dataset.stage);
+                        const personality = box.dataset.personality;
+                        const actionKey = box.dataset.action;
+                        
+                        // 判定是否為右向走路，套用翻轉
+                        const scaleX = (actionKey === "walk_right") ? -1 : 1;
+                        const baseTrans = getAccessoryTransform(petType, stage, personality, slot);
+                        
+                        if (isChecked) {
+                            accLayer.src = `/static/pet_system/images/${imgName}`;
+                            accLayer.style.display = "block";
+                            accLayer.style.transform = `scaleX(${scaleX}) ${baseTrans}`;
+                        } else {
+                            let anyActive = false;
+                            switches.forEach(activeSw => {
+                                if (activeSw.checked && activeSw.dataset.slot === slot) {
+                                    accLayer.src = `/static/pet_system/images/${activeSw.dataset.img}`;
+                                    accLayer.style.display = "block";
+                                    accLayer.style.transform = `scaleX(${scaleX}) ${baseTrans}`;
+                                    anyActive = true;
+                                }
+                            });
+                            if (!anyActive) {
+                                accLayer.src = "";
+                                accLayer.style.display = "none";
+                                accLayer.style.transform = "";
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    // 統一的配件骨骼插槽定位對齊函數
+    function getAccessoryTransform(petType, stage, personality, slot) {
+        let dx = 0, dy = 0, scale = 1.0;
+        
+        if (petType === "DRAGON") {
+            if (stage === 1) {
+                if (slot === "head") { dx = -2; dy = 14; scale = 0.65; }
+                else if (slot === "face") { dx = 4; dy = 14; scale = 0.65; }
+                else if (slot === "back") { dx = 12; dy = 12; scale = 0.65; }
+            } else if (stage === 2) {
+                if (slot === "head") { dx = -4; dy = 2; scale = 0.8; }
+                else if (slot === "face") { dx = 6; dy = 4; scale = 0.8; }
+                else if (slot === "back") { dx = 12; dy = 4; scale = 0.8; }
+            } else if (stage === 3) {
+                if (slot === "head") { dx = -16; dy = -8; scale = 1.15; }
+                else if (slot === "face") { dx = -4; dy = -6; scale = 1.15; }
+                else if (slot === "back") { dx = 16; dy = -2; scale = 1.15; }
+            } else if (stage === 4) {
+                if (personality === "CHUBBY") {
+                    if (slot === "head") { dx = -4; dy = 8; scale = 1.05; }
+                    else if (slot === "face") { dx = 6; dy = 10; scale = 1.05; }
+                    else if (slot === "back") { dx = 14; dy = 8; scale = 1.05; }
+                } else if (personality === "BRAVE") {
+                    if (slot === "head") { dx = -2; dy = -12; scale = 1.1; }
+                    else if (slot === "face") { dx = 8; dy = -8; scale = 1.1; }
+                    else if (slot === "back") { dx = 12; dy = -4; scale = 1.1; }
+                } else { // EMERALD
+                    if (slot === "head") { dx = -4; dy = -6; scale = 1.1; }
+                    else if (slot === "face") { dx = 8; dy = -2; scale = 1.1; }
+                    else if (slot === "back") { dx = 14; dy = -2; scale = 1.1; }
+                }
+            }
+        } else { // PUPPY
+            if (stage === 1) {
+                if (slot === "head") { dx = -2; dy = 16; scale = 0.6; }
+                else if (slot === "face") { dx = 4; dy = 18; scale = 0.6; }
+                else if (slot === "back") { dx = 10; dy = 16; scale = 0.6; }
+            } else if (stage === 2) {
+                if (slot === "head") { dx = -4; dy = 8; scale = 0.8; }
+                else if (slot === "face") { dx = 6; dy = 10; scale = 0.8; }
+                else if (slot === "back") { dx = 12; dy = 8; scale = 0.8; }
+            } else if (stage === 3) {
+                if (slot === "head") { dx = -10; dy = -2; scale = 1.1; }
+                else if (slot === "face") { dx = -2; dy = 2; scale = 1.1; }
+                else if (slot === "back") { dx = 16; dy = 0; scale = 1.1; }
+            } else if (stage === 4) {
+                if (personality === "CHUBBY") {
+                    if (slot === "head") { dx = -4; dy = 12; scale = 1.0; }
+                    else if (slot === "face") { dx = 6; dy = 14; scale = 1.0; }
+                    else if (slot === "back") { dx = 14; dy = 12; scale = 1.0; }
+                } else if (personality === "BRAVE") {
+                    if (slot === "head") { dx = -6; dy = -8; scale = 1.1; }
+                    else if (slot === "face") { dx = 2; dy = -4; scale = 1.1; }
+                    else if (slot === "back") { dx = 14; dy = -4; scale = 1.1; }
+                } else { // EMERALD
+                    if (slot === "head") { dx = -6; dy = -10; scale = 1.1; }
+                    else if (slot === "face") { dx = 2; dy = -6; scale = 1.1; }
+                    else if (slot === "back") { dx = 14; dy = -6; scale = 1.1; }
+                }
+            }
+        }
+        
+        return `translate(${dx}px, ${dy}px) scale(${scale})`;
+    }
+
+    function adjustAllPreviewSizes() {
+        const bodyLayers = document.querySelectorAll(".pet-body-layer");
+        bodyLayers.forEach(img => {
+            if (img.complete) {
+                applySizeAdjustment(img);
+            } else {
+                img.onload = function() {
+                    applySizeAdjustment(this);
+                };
+            }
+        });
+    }
+    
+    function applySizeAdjustment(img) {
+        const box = img.closest(".pet-preview-box");
+        if (!box) return;
+        
+        let naturalW = img.naturalWidth;
+        let naturalH = img.naturalHeight;
+        
+        const layers = box.querySelectorAll(".pet-layer, .accessory-layer");
+        
+        if (naturalW && naturalH && naturalH > naturalW) {
+            let ratio = naturalH / naturalW;
+            let heightPercent = `${ratio * 100}%`;
+            
+            layers.forEach(layer => {
+                layer.style.height = heightPercent;
+                layer.style.top = "auto";
+                layer.style.bottom = "0px";
+            });
+        } else {
+            layers.forEach(layer => {
+                layer.style.height = "100%";
+                layer.style.top = "0px";
+                layer.style.bottom = "auto";
+            });
+        }
+    }
+
+    function copyText(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert(`📋 已複製：${text}`);
+        }).catch(err => {
+            console.error("複製失敗：", err);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        renderPets();
+    });
+</script>
+{% endblock %}

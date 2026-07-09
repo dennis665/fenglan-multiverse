@@ -1,15 +1,14 @@
 class PetShimeji {
     constructor() {
         this.container = null;
-        this.canvas = null;
-        this.ctx = null;
+        this.petEl = null;
+        this.headEl = null;
+        this.faceEl = null;
+        this.backEl = null;
         
         // 寵物屬性
         this.hasPet = false;
         this.petData = null;
-        this.petImg = new Image();
-        this.accessoryImgs = { head: new Image(), face: new Image(), back: new Image() };
-        this.imgsLoaded = { body: false, head: false, face: false, back: false };
         
         // 狀態與座標 (相對於 viewport)
         this.x = window.innerWidth - 150;
@@ -94,12 +93,29 @@ class PetShimeji {
             userSelect: "none"
         });
 
-        // 建立繪圖畫布
-        this.canvas = document.createElement("canvas");
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
-        this.ctx = this.canvas.getContext("2d");
-        this.container.appendChild(this.canvas);
+        // 建立身體與配件圖片元素堆疊以播放 WebP 動圖動作檔
+        this.petEl = document.createElement("img");
+        this.headEl = document.createElement("img");
+        this.faceEl = document.createElement("img");
+        this.backEl = document.createElement("img");
+
+        const commonStyle = {
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            left: "0px",
+            top: "0px",
+            objectFit: "contain"
+        };
+        Object.assign(this.petEl.style, commonStyle);
+        Object.assign(this.headEl.style, commonStyle);
+        Object.assign(this.faceEl.style, commonStyle);
+        Object.assign(this.backEl.style, commonStyle);
+
+        this.container.appendChild(this.backEl);
+        this.container.appendChild(this.petEl);
+        this.container.appendChild(this.faceEl);
+        this.container.appendChild(this.headEl);
         
         document.body.appendChild(this.container);
 
@@ -190,25 +206,7 @@ class PetShimeji {
     }
 
     loadImages() {
-        // 載入主體
-        this.petImg.onload = () => { this.imgsLoaded.body = true; };
-        this.petImg.src = this.petData.pixel_image_url;
-
-        // 載入頭飾
-        if (this.petData.equipped_head) {
-            this.accessoryImgs.head.onload = () => { this.imgsLoaded.head = true; };
-            this.accessoryImgs.head.src = `/static/pet_system/images/${this.petData.equipped_head}.webp`;
-        }
-        // 載入臉飾
-        if (this.petData.equipped_face) {
-            this.accessoryImgs.face.onload = () => { this.imgsLoaded.face = true; };
-            this.accessoryImgs.face.src = `/static/pet_system/images/${this.petData.equipped_face}.webp`;
-        }
-        // 載入背飾
-        if (this.petData.equipped_back) {
-            this.accessoryImgs.back.onload = () => { this.imgsLoaded.back = true; };
-            this.accessoryImgs.back.src = `/static/pet_system/images/${this.petData.equipped_back}.webp`;
-        }
+        this.draw();
     }
 
     reload() {
@@ -219,40 +217,13 @@ class PetShimeji {
                     this.hasPet = true;
                     this.petData = data;
                     
-                    // 重新重設加載狀態
-                    this.imgsLoaded = { body: false, head: false, face: false, back: false };
-                    
-                    this.petImg.onload = () => { this.imgsLoaded.body = true; };
-                    this.petImg.src = this.petData.pixel_image_url;
-
-                    if (this.petData.equipped_head) {
-                        this.accessoryImgs.head.onload = () => { this.imgsLoaded.head = true; };
-                        this.accessoryImgs.head.src = `/static/pet_system/images/${this.petData.equipped_head}.webp`;
+                    if (this.container) {
+                        this.draw();
                     } else {
-                        this.accessoryImgs.head.src = "";
-                    }
-
-                    if (this.petData.equipped_face) {
-                        this.accessoryImgs.face.onload = () => { this.imgsLoaded.face = true; };
-                        this.accessoryImgs.face.src = `/static/pet_system/images/${this.petData.equipped_face}.webp`;
-                    } else {
-                        this.accessoryImgs.face.src = "";
-                    }
-
-                    if (this.petData.equipped_back) {
-                        this.accessoryImgs.back.onload = () => { this.imgsLoaded.back = true; };
-                        this.accessoryImgs.back.src = `/static/pet_system/images/${this.petData.equipped_back}.webp`;
-                    } else {
-                        this.accessoryImgs.back.src = "";
-                    }
-
-                    // 若容器不存在，重啟建立與渲染循環
-                    if (!this.container) {
                         this.setupDOM();
                         this.startLoop();
                     }
                 } else {
-                    // 若沒有出戰寵物，移除容器
                     this.hasPet = false;
                     this.petData = null;
                     if (this.container) {
@@ -425,48 +396,118 @@ class PetShimeji {
     }
 
     draw() {
-        this.ctx.clearRect(0, 0, this.width, this.height);
+        if (!this.container || !this.petData) return;
+
+        // 根據狀態選擇對應的 WebP 動畫動作檔
+        let action = "sleep";
+        if (this.state === 'walk' || this.state === 'climb') {
+            action = "walk";
+        } else if (this.y > this.stableFloor) {
+            action = "jump";
+        } else if (this.state === 'sleep') {
+            action = "sleep";
+        } else {
+            action = "sleep";
+        }
+
+        // 解析對應的動畫 WebP 檔
+        let baseUrl = this.petData.pixel_image_url;
+        let animUrl = baseUrl;
+        if (baseUrl.endsWith(".webp") && this.petData.stage > 0) {
+            let baseWithoutExt = baseUrl.substring(0, baseUrl.length - 5);
+            if (action === "walk") {
+                let dirSuffix = this.facingRight ? "right" : "left";
+                animUrl = `${baseWithoutExt}_walk_${dirSuffix}.webp`;
+            } else {
+                animUrl = `${baseWithoutExt}_${action}.webp`;
+            }
+        }
+
+        if (this.petEl.src !== window.location.origin + animUrl && !this.petEl.src.endsWith(animUrl)) {
+            this.petEl.src = animUrl;
+        }
+
+        // 配件
+        if (this.petData.equipped_head) {
+            this.headEl.src = `/static/pet_system/images/${this.petData.equipped_head}.webp`;
+            this.headEl.style.display = "block";
+        } else {
+            this.headEl.style.display = "none";
+        }
+
+        if (this.petData.equipped_face) {
+            this.faceEl.src = `/static/pet_system/images/${this.petData.equipped_face}.webp`;
+            this.faceEl.style.display = "block";
+        } else {
+            this.faceEl.style.display = "none";
+        }
+
+        if (this.petData.equipped_back) {
+            this.backEl.src = `/static/pet_system/images/${this.petData.equipped_back}.webp`;
+            this.backEl.style.display = "block";
+        } else {
+            this.backEl.style.display = "none";
+        }
+
+        // 處理非正方形 (如 128x233 縱向加高) 的圖片播放縮小問題
+        let naturalW = this.petEl.naturalWidth;
+        let naturalH = this.petEl.naturalHeight;
+        if (naturalW && naturalH && naturalH > naturalW) {
+            let ratio = naturalH / naturalW;
+            let heightPercent = `${ratio * 100}%`;
+            
+            this.petEl.style.height = heightPercent;
+            this.petEl.style.top = "auto";
+            this.petEl.style.bottom = "0px";
+            
+            this.headEl.style.height = heightPercent;
+            this.headEl.style.top = "auto";
+            this.headEl.style.bottom = "0px";
+            
+            this.faceEl.style.height = heightPercent;
+            this.faceEl.style.top = "auto";
+            this.faceEl.style.bottom = "0px";
+            
+            this.backEl.style.height = heightPercent;
+            this.backEl.style.top = "auto";
+            this.backEl.style.bottom = "0px";
+        } else {
+            this.petEl.style.height = "100%";
+            this.petEl.style.top = "0px";
+            this.petEl.style.bottom = "auto";
+            
+            this.headEl.style.height = "100%";
+            this.headEl.style.top = "0px";
+            this.headEl.style.bottom = "auto";
+            
+            this.faceEl.style.height = "100%";
+            this.faceEl.style.top = "0px";
+            this.faceEl.style.bottom = "auto";
+            
+            this.backEl.style.height = "100%";
+            this.backEl.style.top = "0px";
+            this.backEl.style.bottom = "auto";
+        }
+
+        // 套用翻轉、上下顛簸與旋轉，並融合動態骨骼插槽偏移量
+        let scaleX = this.facingRight ? -1 : 1;
+        if (action === "walk") {
+            this.petEl.style.transform = "scaleX(1)";
+        } else {
+            this.petEl.style.transform = `scaleX(${scaleX})`;
+        }
         
-        if (!this.imgsLoaded.body) return;
-
-        this.ctx.save();
+        // 取得插槽偏移值
+        const headTrans = getAccessoryTransform(this.petData.pet_type, this.petData.stage, this.petData.personality, "head");
+        const faceTrans = getAccessoryTransform(this.petData.pet_type, this.petData.stage, this.petData.personality, "face");
+        const backTrans = getAccessoryTransform(this.petData.pet_type, this.petData.stage, this.petData.personality, "back");
         
-        // 繪製中心對齊並套用行走上下顛簸
-        this.ctx.translate(this.width / 2, this.height / 2 + this.bobOffset);
+        this.headEl.style.transform = `scaleX(${scaleX}) ${headTrans}`;
+        this.faceEl.style.transform = `scaleX(${scaleX}) ${faceTrans}`;
+        this.backEl.style.transform = `scaleX(${scaleX}) ${backTrans}`;
         
-        // 翻轉方向
-        if (this.facingRight) {
-            this.ctx.scale(-1, 1);
-        }
-
-        // 1. 繪製背部配件 (羽翼)
-        if (this.petData.equipped_back && this.imgsLoaded.back) {
-            this.ctx.drawImage(this.accessoryImgs.back, -this.width / 2, -this.height / 2, this.width, this.height);
-        }
-
-        // 2. 繪製身體
-        this.ctx.drawImage(this.petImg, -this.width / 2, -this.height / 2, this.width, this.height);
-
-        // 3. 繪製臉部配件 (墨鏡)
-        if (this.petData.equipped_face && this.imgsLoaded.face) {
-            this.ctx.drawImage(this.accessoryImgs.face, -this.width / 2, -this.height / 2, this.width, this.height);
-        }
-
-        // 4. 繪製頭部配件 (草帽、皇冠)
-        if (this.petData.equipped_head && this.imgsLoaded.head) {
-            this.ctx.drawImage(this.accessoryImgs.head, -this.width / 2, -this.height / 2, this.width, this.height);
-        }
-
-        // 5. 如果在睡覺，繪製可愛的 Zzz 氣泡
-        if (this.state === 'sleep') {
-            this.ctx.fillStyle = "rgba(52, 152, 219, 0.85)";
-            this.ctx.font = "bold 9px Arial";
-            const zCount = Math.floor((this.bobPhase % (Math.PI * 2)) / (Math.PI * 0.6)) + 1;
-            const zStr = "Z".repeat(zCount);
-            this.ctx.fillText(zStr, 15, -15);
-        }
-
-        this.ctx.restore();
+        // 對容器套用 bobOffset (上下顛簸)
+        this.container.style.transform = `translateY(${this.bobOffset}px)`;
     }
 
     startLoop() {
@@ -477,6 +518,71 @@ class PetShimeji {
         };
         requestAnimationFrame(loop);
     }
+}
+
+// 統一的配件骨骼插槽定位對齊函數
+function getAccessoryTransform(petType, stage, personality, slot) {
+    let dx = 0, dy = 0, scale = 1.0;
+    
+    if (petType === "DRAGON") {
+        if (stage === 1) {
+            if (slot === "head") { dx = -2; dy = 14; scale = 0.65; }
+            else if (slot === "face") { dx = 4; dy = 14; scale = 0.65; }
+            else if (slot === "back") { dx = 12; dy = 12; scale = 0.65; }
+        } else if (stage === 2) {
+            if (slot === "head") { dx = -4; dy = 2; scale = 0.8; }
+            else if (slot === "face") { dx = 6; dy = 4; scale = 0.8; }
+            else if (slot === "back") { dx = 12; dy = 4; scale = 0.8; }
+        } else if (stage === 3) {
+            if (slot === "head") { dx = -16; dy = -8; scale = 1.15; }
+            else if (slot === "face") { dx = -4; dy = -6; scale = 1.15; }
+            else if (slot === "back") { dx = 16; dy = -2; scale = 1.15; }
+        } else if (stage === 4) {
+            if (personality === "CHUBBY") {
+                if (slot === "head") { dx = -4; dy = 8; scale = 1.05; }
+                else if (slot === "face") { dx = 6; dy = 10; scale = 1.05; }
+                else if (slot === "back") { dx = 14; dy = 8; scale = 1.05; }
+            } else if (personality === "BRAVE") {
+                if (slot === "head") { dx = -2; dy = -12; scale = 1.1; }
+                else if (slot === "face") { dx = 8; dy = -8; scale = 1.1; }
+                else if (slot === "back") { dx = 12; dy = -4; scale = 1.1; }
+            } else { // EMERALD
+                if (slot === "head") { dx = -4; dy = -6; scale = 1.1; }
+                else if (slot === "face") { dx = 8; dy = -2; scale = 1.1; }
+                else if (slot === "back") { dx = 14; dy = -2; scale = 1.1; }
+            }
+        }
+    } else { // PUPPY
+        if (stage === 1) {
+            if (slot === "head") { dx = -2; dy = 16; scale = 0.6; }
+            else if (slot === "face") { dx = 4; dy = 18; scale = 0.6; }
+            else if (slot === "back") { dx = 10; dy = 16; scale = 0.6; }
+        } else if (stage === 2) {
+            if (slot === "head") { dx = -4; dy = 8; scale = 0.8; }
+            else if (slot === "face") { dx = 6; dy = 10; scale = 0.8; }
+            else if (slot === "back") { dx = 12; dy = 8; scale = 0.8; }
+        } else if (stage === 3) {
+            if (slot === "head") { dx = -10; dy = -2; scale = 1.1; }
+            else if (slot === "face") { dx = -2; dy = 2; scale = 1.1; }
+            else if (slot === "back") { dx = 16; dy = 0; scale = 1.1; }
+        } else if (stage === 4) {
+            if (personality === "CHUBBY") {
+                if (slot === "head") { dx = -4; dy = 12; scale = 1.0; }
+                else if (slot === "face") { dx = 6; dy = 14; scale = 1.0; }
+                else if (slot === "back") { dx = 14; dy = 12; scale = 1.0; }
+            } else if (personality === "BRAVE") {
+                if (slot === "head") { dx = -6; dy = -8; scale = 1.1; }
+                else if (slot === "face") { dx = 2; dy = -4; scale = 1.1; }
+                else if (slot === "back") { dx = 14; dy = -4; scale = 1.1; }
+            } else { // EMERALD
+                if (slot === "head") { dx = -6; dy = -10; scale = 1.1; }
+                else if (slot === "face") { dx = 2; dy = -6; scale = 1.1; }
+                else if (slot === "back") { dx = 14; dy = -6; scale = 1.1; }
+            }
+        }
+    }
+    
+    return `translate(${dx}px, ${dy}px) scale(${scale})`;
 }
 
 // 當文件加載完成後自動載入全站桌寵

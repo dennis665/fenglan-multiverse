@@ -170,7 +170,10 @@
                             <span class="d-none d-lg-inline">{{ user.first_name|default:user.username }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/accounts/profile/">{% trans "Profile" %}</a></li>
+                            <li><a class="dropdown-item" href="/accounts/profile/"><i class="fas fa-id-card me-2"></i>{% trans "Profile" %}</a></li>
+                            {% if user.is_staff %}
+                            <li><a class="dropdown-item text-primary fw-bold" href="{% url 'pet_system:admin_gallery' %}"><i class="fas fa-images me-2"></i>{% trans "遊戲美術資源庫" %}</a></li>
+                            {% endif %}
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="post" action="{% url 'account_logout' %}">

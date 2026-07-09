@@ -84,6 +84,15 @@ def pet_dashboard(request):
 
 
 @login_required
+def admin_gallery(request):
+    """管理員專屬：預覽所有寵物與配件的靜態、動態 WebP 圖鑑"""
+    if not request.user.is_staff:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("🛑 存取被拒：此頁面僅限系統管理員訪問！")
+    return render(request, "pet_system/admin_gallery.html")
+
+
+@login_required
 @require_GET
 def api_get_dashboard_data(request):
     """取得寵物主畫面所有 JSON 格式數據 (包含 v2.0 金幣、探索與爬塔)"""
