@@ -1,14 +1,15 @@
 class PetRenderer {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
         this.container = this.canvas.parentElement; // petCanvasContainer
         
         // 將 canvas 作為背景繪圖（可放著或不畫），寵物實體則採用 DOM 元件，以播放 WebP 動畫
         this.canvas.style.pointerEvents = "none"; 
         this.container.style.position = "relative";
         
-        // 點擊事件改由容器代理
-        this.container.addEventListener('click', (e) => this.handleCanvasClick(e));
+        // 點擊事件已取消
+        // this.container.addEventListener('click', (e) => this.handleCanvasClick(e));
 
         this.pets = []; // 存放所有未召喚出戰的寵物實例
         this.gravity = 0.4;
@@ -53,10 +54,15 @@ class PetRenderer {
                 position: "absolute",
                 width: "80px",
                 height: "80px",
-                pointerEvents: "auto",
-                cursor: "pointer",
+                pointerEvents: "none", // 設為 none 以取消所有點擊框與選取框
+                cursor: "default",
                 transformOrigin: "center bottom",
-                transition: "transform 0.05s ease"
+                transition: "transform 0.05s ease",
+                outline: "none",
+                border: "none",
+                userSelect: "none",
+                webkitUserSelect: "none",
+                webkitTapHighlightColor: "transparent"
             });
 
             // 身體與配件的 <img> 標籤層疊
@@ -71,12 +77,19 @@ class PetRenderer {
                 height: "100%",
                 left: "0px",
                 top: "0px",
-                objectFit: "contain"
+                objectFit: "contain",
+                border: "none",
+                outline: "none"
             };
             Object.assign(bodyImg.style, imgStyle);
             Object.assign(headImg.style, imgStyle);
             Object.assign(faceImg.style, imgStyle);
             Object.assign(backImg.style, imgStyle);
+
+            // 預設將非身體的配件圖片隱藏，避免瀏覽器在空 src 時顯示框線與破圖圖示
+            headImg.style.display = "none";
+            faceImg.style.display = "none";
+            backImg.style.display = "none";
 
             // Z-Order 層級：背飾 -> 身體 -> 臉飾 -> 頭飾
             petEl.appendChild(backImg);
@@ -160,14 +173,17 @@ class PetRenderer {
             if (petData.equipped_head) {
                 headImg.src = `/static/pet_system/images/${petData.equipped_head}.webp`;
                 headImg.style.transform = getAccessoryTransform(petData.pet_type, petData.stage, petData.personality, "head");
+                headImg.style.display = "block";
             }
             if (petData.equipped_face) {
                 faceImg.src = `/static/pet_system/images/${petData.equipped_face}.webp`;
                 faceImg.style.transform = getAccessoryTransform(petData.pet_type, petData.stage, petData.personality, "face");
+                faceImg.style.display = "block";
             }
             if (petData.equipped_back) {
                 backImg.src = `/static/pet_system/images/${petData.equipped_back}.webp`;
                 backImg.style.transform = getAccessoryTransform(petData.pet_type, petData.stage, petData.personality, "back");
+                backImg.style.display = "block";
             }
 
             this.pets.push(petObj);

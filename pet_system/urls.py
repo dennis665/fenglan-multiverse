@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/get_story/", views.api_get_story, name="api_get_story"),
     path("api/start_expedition/", views.api_start_expedition, name="api_start_expedition"),
     path("api/claim_expedition_rewards/", views.api_claim_expedition_rewards, name="api_claim_expedition_rewards"),
+    path("api/cancel_expedition/", views.api_cancel_expedition, name="api_cancel_expedition"),
     path("api/buy_accessory/", views.api_buy_accessory, name="api_buy_accessory"),
     path("api/equip_accessory/", views.api_equip_accessory, name="api_equip_accessory"),
     path("api/tower_battle_result/", views.api_tower_battle_result, name="api_tower_battle_result"),

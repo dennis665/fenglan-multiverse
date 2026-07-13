@@ -1,14 +1,25 @@
 import random
 from datetime import timedelta
-from django.shortcuts import render, get_object_or_404
+
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_GET
 from django.db import transaction
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.utils.timezone import now
-from .models import Pet, PetStoryUnlock, DailyLoginLog, UserInventory, UserPetProfile, UserAccessory, PetExpedition, TowerProgress
+from django.views.decorators.http import require_GET, require_POST
+
 from finance.models import Product
 
+from .models import (
+    DailyLoginLog,
+    Pet,
+    PetExpedition,
+    PetStoryUnlock,
+    TowerProgress,
+    UserAccessory,
+    UserInventory,
+    UserPetProfile,
+)
 
 # 劇情文字與插畫對照表 (保持原有精美插圖作回憶)
 DRAGON_STORIES = {
@@ -67,13 +78,13 @@ PUPPY_STORIES = {
     }
 }
 
-# 配件清單與價格
+# 配件清單與價格（含能力加成值）
 ACCESSORY_SHOP = {
-    "pixel_straw_hat": {"name": "草帽", "price": 100, "slot": "head"},
-    "pixel_crown": {"name": "皇冠", "price": 500, "slot": "head"},
-    "pixel_sunglasses": {"name": "墨鏡", "price": 150, "slot": "face"},
-    "pixel_devil_horns": {"name": "惡魔角", "price": 200, "slot": "head"},
-    "pixel_angel_wings": {"name": "天使翅膀", "price": 400, "slot": "back"},
+    "pixel_straw_hat": {"name": "草帽", "price": 100, "slot": "head", "hp": 10, "atk": 0, "desc": "農夫精神！額外生命值 +10"},
+    "pixel_crown": {"name": "皇冠", "price": 500, "slot": "head", "hp": 50, "atk": 15, "desc": "王者霸氣！額外生命值 +50，攻擊力 +15"},
+    "pixel_sunglasses": {"name": "墨鏡", "price": 150, "slot": "face", "hp": 0, "atk": 8, "desc": "酷炫拉風！額外攻擊力 +8"},
+    "pixel_devil_horns": {"name": "惡魔角", "price": 200, "slot": "head", "hp": -5, "atk": 20, "desc": "惡魔附體！攻擊力大增 +20，生命限制 -5"},
+    "pixel_angel_wings": {"name": "天使翅膀", "price": 400, "slot": "back", "hp": 40, "atk": 10, "desc": "天使祝福！生命值 +40，攻擊力 +10"},
 }
 
 
@@ -583,6 +594,24 @@ def api_start_expedition(request):
 
 @login_required
 @require_POST
+def api_cancel_expedition(request):
+    """取消進行中的探索派遣"""
+    user = request.user
+    exp_id = request.POST.get("expedition_id")
+    exp = get_object_or_404(PetExpedition, id=exp_id, pet__user=user)
+    
+    if exp.status != "ACTIVE":
+        return JsonResponse({"status": "error", "message": "只能取消進行中的探索！"})
+        
+    exp.delete()
+    return JsonResponse({
+        "status": "success",
+        "message": "已成功取消探索派遣，寵物已歸隊。"
+    })
+
+
+@login_required
+@require_POST
 def api_claim_expedition_rewards(request):
     """領取探索派遣獎勵"""
     user = request.user
@@ -811,9 +840,9 @@ def api_setup_shop_products(request):
             "name": "奇蹟進化藥水",
             "category": "PET_FOOD",
             "description": "極其珍貴的魔力藥水，服用能瞬間暴增 50 點成長度，是快速進化不可或缺的秘寶！",
-            "price_in_points": 80,
+            "price_in_points": 30,
             "stock": 999,
-        }
+        },
     ]
     
     created_count = 0

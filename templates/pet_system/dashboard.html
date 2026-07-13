@@ -98,7 +98,10 @@
                     <div class="progress" style="height: 18px; border-radius: 50px; background-color: rgba(0,0,0,0.08);">
                         <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" id="infoGrowthBar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <div class="text-end mt-2">
+                    <div class="text-end mt-2 d-flex justify-content-between align-items-center">
+                        <button class="btn btn-sm btn-outline-dark rounded-pill fw-bold px-3" onclick="openEvolutionTreeModal()">
+                            <i class="fas fa-sitemap me-1"></i>進化分支圖鑑
+                        </button>
                         <button class="btn btn-sm btn-danger rounded-pill fw-bold shadow-sm px-3" id="btnEvolve" onclick="evolvePet()" disabled>
                             <i class="fas fa-magic me-1"></i>{% trans "進化覺醒" %}
                         </button>
@@ -117,10 +120,44 @@
                     </div>
                 </div>
 
-                {# 冒險爬塔按鈕 #}
-                <button class="btn btn-danger w-100 rounded-pill fw-bold mb-3 shadow" id="btnChallengeTower" onclick="openTowerBattleModal()">
-                    <i class="fas fa-sword me-1"></i>挑戰冒險塔打怪
-                </button>
+                {# 寵物能力面板 #}
+                <div class="card p-3 border-0 rounded-4 bg-white bg-opacity-60 shadow-sm mb-3" id="petStatusPanel" style="display: none;">
+                    <h6 class="fw-bold text-dark mb-2"><i class="fas fa-heartbeat text-danger me-2"></i>寵物能力面板</h6>
+                    <div class="row g-2 text-center">
+                        <div class="col-4">
+                            <div class="small text-muted fw-bold mb-1" style="font-size: 11px;">💖 生命值</div>
+                            <div class="fw-bold text-success" style="font-size: 13px;" id="statPetHp">100</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-muted fw-bold mb-1" style="font-size: 11px;">⚔️ 攻擊力</div>
+                            <div class="fw-bold text-danger" style="font-size: 13px;" id="statPetAtk">10</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-muted fw-bold mb-1" style="font-size: 11px;">⚡ 戰鬥力</div>
+                            <div class="fw-bold text-primary" style="font-size: 13px;" id="statPetPower">35</div>
+                        </div>
+                    </div>
+                    <hr class="my-2" style="opacity: 0.12; margin: 8px 0;">
+                    <div class="small text-muted d-flex justify-content-between text-center" style="font-size: 10.5px;">
+                        <span>頭飾: <span id="statEquipHead" class="text-dark fw-bold">無</span></span>
+                        <span>臉飾: <span id="statEquipFace" class="text-dark fw-bold">無</span></span>
+                        <span>背飾: <span id="statEquipBack" class="text-dark fw-bold">無</span></span>
+                    </div>
+                </div>
+
+                {# 冒險爬塔與圖鑑按鈕 #}
+                <div class="row g-2 mb-3">
+                    <div class="col-8">
+                        <button class="btn btn-danger w-100 rounded-pill fw-bold shadow py-2" id="btnChallengeTower" onclick="openTowerBattleModal()">
+                            <i class="fas fa-swords me-1"></i>挑戰冒險塔打怪
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-outline-dark w-100 rounded-pill fw-bold shadow py-2" onclick="openMonsterBookModal()">
+                            <i class="fas fa-book-dead me-1"></i>怪獸圖鑑
+                        </button>
+                    </div>
+                </div>
 
                 {# 探索派遣面板 #}
                 <div class="card p-3 border-0 rounded-4 bg-white bg-opacity-60 shadow-sm mt-auto">
@@ -150,9 +187,12 @@
                         <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
                         <div class="small fw-bold text-dark mb-1">正在探索派遣中...</div>
                         <div class="h5 fw-bold text-primary mb-2" id="expeditionTimer">00:00:00</div>
-                        <div class="progress" style="height: 6px;">
+                        <div class="progress mb-2" style="height: 6px;">
                             <div id="expeditionProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;"></div>
                         </div>
+                        <button class="btn btn-sm btn-outline-danger w-100 rounded-pill fw-bold mt-1" onclick="cancelExpedition()">
+                            <i class="fas fa-times me-1"></i>取消探索派遣
+                        </button>
                     </div>
 
                     {# 完成可領獎狀態 #}
@@ -162,6 +202,221 @@
                         <button class="btn btn-warning w-100 rounded-pill fw-bold shadow-sm" onclick="claimExpeditionRewards()">
                             領取探索寶箱獎勵
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# 5. 怪物圖鑑 Modal #}
+<div class="modal fade" id="monsterBookModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-dark text-white py-3 border-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-book-dead text-warning me-2"></i>冒險塔怪獸圖鑑</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <p class="small text-muted mb-3">怪獸屬性隨冒險塔層數 (Floor) 增強，以下為各區域史萊姆能力圖鑑：</p>
+                <div class="list-group border-0 gap-2" id="monsterBookList">
+                    <!-- 由 JS 動態生成怪物屬性 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# 6. 進化分支圖鑑 Modal #}
+<div class="modal fade" id="evolutionTreeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-success text-white py-3 border-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-sitemap me-2"></i>寵物進化分支與條件圖鑑</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="small text-muted mb-4">
+                    當寵物成長值達到 100% 時可點擊<strong>「進化覺醒」</strong>提升形態。前 3 階段為線性進化，而在第 4 階段（完熟期）進化至第 5 階段（終極覺醒）時，將根據您的<strong>餵食偏好與行為</strong>觸發不同的性格分支與屬性特權！
+                </p>
+
+                <!-- 導覽分頁標籤 -->
+                <ul class="nav nav-pills nav-fill mb-3 bg-light p-1 rounded-3" id="evoTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold py-2 rounded-3" id="evo-dragon-tab" data-bs-toggle="pill" data-bs-target="#evo-dragon" type="button" role="tab" aria-controls="evo-dragon" aria-selected="true">
+                            🟢 翡翠綠龍進化鏈
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold py-2 rounded-3" id="evo-puppy-tab" data-bs-toggle="pill" data-bs-target="#evo-puppy" type="button" role="tab" aria-controls="evo-puppy" aria-selected="false">
+                            🔴 烈火幼犬進化鏈
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content mt-3" id="evoTabContent">
+                    <!-- 1. 綠龍進化分頁 -->
+                    <div class="tab-pane fade show active" id="evo-dragon" role="tabpanel" aria-labelledby="evo-dragon-tab">
+                        <div class="d-flex flex-column gap-3">
+                            <div class="border rounded-3 p-3 bg-white shadow-sm d-flex align-items-center gap-3">
+                                <div class="badge bg-secondary p-2 fs-6">階段 0</div>
+                                <img src="/static/pet_system/images/pet_egg.webp" style="width: 50px; height: 50px; object-fit: contain;">
+                                <div>
+                                    <div class="fw-bold text-dark">神秘的龍蛋 (Egg)</div>
+                                    <div class="small text-muted">起點：點擊餵食或汲取能量即可孵化。</div>
+                                </div>
+                            </div>
+                            <div class="text-center text-muted py-0"><i class="fas fa-arrow-down"></i></div>
+                            <div class="border rounded-3 p-3 bg-white shadow-sm d-flex align-items-center gap-3">
+                                <div class="badge bg-info p-2 fs-6">階段 1</div>
+                                <img src="/static/pet_system/images/baby_dragon.webp" style="width: 50px; height: 50px; object-fit: contain;">
+                                <div>
+                                    <div class="fw-bold text-dark">綠色雛龍 (Baby)</div>
+                                    <div class="small text-muted">線性期：踏出冒險第一步。</div>
+                                </div>
+                            </div>
+                            <div class="text-center text-muted py-0"><i class="fas fa-arrow-down"></i></div>
+                            <div class="border rounded-3 p-3 bg-white shadow-sm d-flex align-items-center gap-3">
+                                <div class="badge bg-primary p-2 fs-6">階段 2</div>
+                                <img src="/static/pet_system/images/growth_dragon.webp" style="width: 50px; height: 50px; object-fit: contain;">
+                                <div>
+                                    <div class="fw-bold text-dark">翡翠成長龍 (Growth)</div>
+                                    <div class="small text-muted">線性期：體型變大，基礎屬性提升。</div>
+                                </div>
+                            </div>
+                            <div class="text-center text-muted py-0"><i class="fas fa-arrow-down"></i></div>
+                            <div class="border rounded-3 p-3 bg-white shadow-sm d-flex align-items-center gap-3">
+                                <div class="badge bg-warning p-2 fs-6">階段 3</div>
+                                <img src="/static/pet_system/images/complete_dragon.webp" style="width: 50px; height: 50px; object-fit: contain;">
+                                <div>
+                                    <div class="fw-bold text-dark">翡翠完熟龍 (Complete)</div>
+                                    <div class="small text-danger fw-bold">⚠️ 分支臨界點：此階段的餵食選擇將決定最終進化方向！</div>
+                                </div>
+                            </div>
+                            <div class="text-center text-muted py-0"><i class="fas fa-arrows-split-up-and-left"></i></div>
+                            
+                            <!-- 終極分支出圖 -->
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-success p-3 text-center bg-light">
+                                        <div class="badge bg-success mb-2 py-1">終極：肥嘟嘟分支</div>
+                                        <img src="/static/pet_system/images/pixel_chubby_dragon.webp" class="mx-auto mb-2" style="width: 60px; height: 60px; object-fit: contain;">
+                                        <h6 class="fw-bold text-success mb-1">肥嘟嘟守護龍</h6>
+                                        <div class="small fw-bold text-dark mb-2">💖 生命值 +50</div>
+                                        <p class="x-small text-muted mb-0" style="font-size: 11px; line-height: 1.3; text-align: left;">
+                                            <strong>條件：</strong>全程靠登入天數累積成長，<strong>完全不餵食</strong>任何道具食物。<br>
+                                            <strong>特權：</strong>每天早上會隨機在主畫面產出 <strong>+50 金幣</strong> 的守護利息！
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-danger p-3 text-center bg-light">
+                                        <div class="badge bg-danger mb-2 py-1">終極：勇敢分支</div>
+                                        <img src="/static/pet_system/images/pixel_star_dragon.webp" class="mx-auto mb-2" style="width: 60px; height: 60px; object-fit: contain;">
+                                        <h6 class="fw-bold text-danger mb-1">烈焰星光龍</h6>
+                                        <div class="small fw-bold text-dark mb-2">⚔️ 攻擊力 +8</div>
+                                        <p class="x-small text-muted mb-0" style="font-size: 11px; line-height: 1.3; text-align: left;">
+                                            <strong>條件：</strong>餵食<strong>「奇蹟進化藥水」</strong>的次數<strong>大於</strong>普通飼料。<br>
+                                            <strong>特權：</strong>戰鬥力極強，在冒險塔中擁有最強的輸出能力。
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-primary p-3 text-center bg-light">
+                                        <div class="badge bg-primary mb-2 py-1">終極：普通分支</div>
+                                        <img src="/static/pet_system/images/pixel_emerald_dragon.webp" class="mx-auto mb-2" style="width: 60px; height: 60px; object-fit: contain;">
+                                        <h6 class="fw-bold text-primary mb-1">自然翡翠龍</h6>
+                                        <div class="small fw-bold text-dark mb-2">⚖️ 屬性均衡</div>
+                                        <p class="x-small text-muted mb-0" style="font-size: 11px; line-height: 1.3; text-align: left;">
+                                            <strong>條件：</strong>正常餵食，且<strong>「普通乾糧」</strong>的餵食次數大於或等於藥水。<br>
+                                            <strong>特權：</strong>攻防一體的均衡神獸，無任何負面效果。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 烈火犬進化分頁 -->
+                    <div class="tab-pane fade" id="evo-puppy" role="tabpanel" aria-labelledby="evo-puppy-tab">
+                        <div class="d-flex flex-column gap-3">
+                            <div class="border rounded-3 p-3 bg-white shadow-sm d-flex align-items-center gap-3">
+                                <div class="badge bg-secondary p-2 fs-6">階段 0</div>
+                                <img src="/static/pet_system/images/pet_egg.webp" style="width: 50px; height: 50px; object-fit: contain;">
+                                <div>
+                                    <div class="fw-bold text-dark">神秘的火犬蛋 (Egg)</div>
+                                    <div class="small text-muted">起點：點擊餵食或汲取能量即可孵化。</div>
+                                </div>
+                            </div>
+                            <div class="text-center text-muted py-0"><i class="fas fa-arrow-down"></i></div>
+                            <div class="border rounded-3 p-3 bg-white shadow-sm d-flex align-items-center gap-3">
+                                <div class="badge bg-info p-2 fs-6">階段 1</div>
+                                <img src="/static/pet_system/images/baby_puppy.webp" style="width: 50px; height: 50px; object-fit: contain;">
+                                <div>
+                                    <div class="fw-bold text-dark">烈火幼犬 (Baby)</div>
+                                    <div class="small text-muted">線性期：活潑愛動的小火狗。</div>
+                                </div>
+                            </div>
+                            <div class="text-center text-muted py-0"><i class="fas fa-arrow-down"></i></div>
+                            <div class="border rounded-3 p-3 bg-white shadow-sm d-flex align-items-center gap-3">
+                                <div class="badge bg-primary p-2 fs-6">階段 2</div>
+                                <img src="/static/pet_system/images/growth_puppy.webp" style="width: 50px; height: 50px; object-fit: contain;">
+                                <div>
+                                    <div class="fw-bold text-dark">烈火成長犬 (Growth)</div>
+                                    <div class="small text-muted">線性期：奔跑速度大幅度提升。</div>
+                                </div>
+                            </div>
+                            <div class="text-center text-muted py-0"><i class="fas fa-arrow-down"></i></div>
+                            <div class="border rounded-3 p-3 bg-white shadow-sm d-flex align-items-center gap-3">
+                                <div class="badge bg-warning p-2 fs-6">階段 3</div>
+                                <img src="/static/pet_system/images/complete_puppy.webp" style="width: 50px; height: 50px; object-fit: contain;">
+                                <div>
+                                    <div class="fw-bold text-dark">烈火完熟犬 (Complete)</div>
+                                    <div class="small text-danger fw-bold">⚠️ 分支臨界點：此階段的餵食選擇將決定最終進化方向！</div>
+                                </div>
+                            </div>
+                            <div class="text-center text-muted py-0"><i class="fas fa-arrows-split-up-and-left"></i></div>
+                            
+                            <!-- 終極分支出圖 -->
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-success p-3 text-center bg-light">
+                                        <div class="badge bg-success mb-2 py-1">終極：肥嘟嘟分支</div>
+                                        <img src="/static/pet_system/images/pixel_chubby_puppy.webp" class="mx-auto mb-2" style="width: 60px; height: 60px; object-fit: contain;">
+                                        <h6 class="fw-bold text-success mb-1">肥嘟嘟烈火犬</h6>
+                                        <div class="small fw-bold text-dark mb-2">💖 生命值 +50</div>
+                                        <p class="x-small text-muted mb-0" style="font-size: 11px; line-height: 1.3; text-align: left;">
+                                            <strong>條件：</strong>全程靠登入天數累積成長，<strong>完全不餵食</strong>任何道具食物。<br>
+                                            <strong>特權：</strong>每天早上會隨機在主畫面產出 <strong>+50 金幣</strong> 的守護利息！
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-danger p-3 text-center bg-light">
+                                        <div class="badge bg-danger mb-2 py-1">終極：勇敢分支</div>
+                                        <img src="/static/pet_system/images/pixel_star_puppy.webp" class="mx-auto mb-2" style="width: 60px; height: 60px; object-fit: contain;">
+                                        <h6 class="fw-bold text-danger mb-1">地獄烈焰星犬</h6>
+                                        <div class="small fw-bold text-dark mb-2">⚔️ 攻擊力 +8</div>
+                                        <p class="x-small text-muted mb-0" style="font-size: 11px; line-height: 1.3; text-align: left;">
+                                            <strong>條件：</strong>餵食<strong>「奇蹟進化藥水」</strong>的次數<strong>大於</strong>普通飼料。<br>
+                                            <strong>特權：</strong>地獄熔岩戰神，在冒險塔中擁有最強的輸出能力。
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-primary p-3 text-center bg-light">
+                                        <div class="badge bg-primary mb-2 py-1">終極：普通分支</div>
+                                        <img src="/static/pet_system/images/pixel_emerald_puppy.webp" class="mx-auto mb-2" style="width: 60px; height: 60px; object-fit: contain;">
+                                        <h6 class="fw-bold text-primary mb-1">麒麟火犬</h6>
+                                        <div class="small fw-bold text-dark mb-2">⚖️ 屬性均衡</div>
+                                        <p class="x-small text-muted mb-0" style="font-size: 11px; line-height: 1.3; text-align: left;">
+                                            <strong>條件：</strong>正常餵食，且<strong>「普通乾糧」</strong>的餵食次數大於或等於藥水。<br>
+                                            <strong>特權：</strong>祥瑞神獸化身，攻防屬性十分穩健。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -474,6 +729,39 @@
                 btnEvolve.classList.remove("animate__animated", "animate__tada", "animate__infinite");
             }
 
+            // 更新能力值面板
+            let extraHp = 0;
+            let extraAtk = 0;
+            const shop = data.accessory_shop || {};
+            
+            [activePet.equipped_head, activePet.equipped_face, activePet.equipped_back].forEach(accId => {
+                if (accId && shop[accId]) {
+                    const item = shop[accId];
+                    if (item.hp) extraHp += item.hp;
+                    if (item.atk) extraAtk += item.atk;
+                }
+            });
+            
+            let baseHp = 100 + (activePet.stage * 30);
+            if (activePet.personality === "CHUBBY") baseHp += 50;
+            else if (activePet.personality === "LAZY") baseHp += 30;
+            
+            let baseAtk = 10 + (activePet.stage * 5);
+            if (activePet.personality === "BRAVE") baseAtk += 8;
+            
+            let totalHp = baseHp + extraHp;
+            let totalAtk = baseAtk + extraAtk;
+            let petPower = Math.round(totalHp * 0.2 + totalAtk * 1.5);
+            
+            document.getElementById("statPetHp").innerHTML = `${totalHp} <span class="text-muted" style="font-size: 9.5px; font-weight: normal;">(${baseHp} + ${extraHp})</span>`;
+            document.getElementById("statPetAtk").innerHTML = `${totalAtk} <span class="text-muted" style="font-size: 9.5px; font-weight: normal;">(${baseAtk} + ${extraAtk})</span>`;
+            document.getElementById("statPetPower").innerText = petPower;
+            
+            document.getElementById("statEquipHead").innerText = activePet.equipped_head && shop[activePet.equipped_head] ? shop[activePet.equipped_head].name : "無";
+            document.getElementById("statEquipFace").innerText = activePet.equipped_face && shop[activePet.equipped_face] ? shop[activePet.equipped_face].name : "無";
+            document.getElementById("statEquipBack").innerText = activePet.equipped_back && shop[activePet.equipped_back] ? shop[activePet.equipped_back].name : "無";
+            document.getElementById("petStatusPanel").style.display = "block";
+
             // 更新畫布渲染圖片 (採用像素 WebP 動態渲染)
             let imageUrl = "/static/pet_system/images/pet_egg.webp";
             if (activePet.stage === 1) imageUrl = "/static/pet_system/images/baby_dragon.webp";
@@ -504,6 +792,7 @@
             document.getElementById("infoGrowthBar").style.width = "0%";
             document.getElementById("btnEvolve").disabled = true;
             document.getElementById("btnChallengeTower").disabled = true;
+            document.getElementById("petStatusPanel").style.display = "none";
 
             // 仍要將所有未出戰的寵物送入培育室畫布
             const inactivePets = data.pets ? data.pets.filter(p => !p.is_active) : [];
@@ -901,20 +1190,33 @@
             const item = shop[key];
             const isOwned = owned.includes(key);
             const card = document.createElement("div");
-            card.className = "col-6 col-md-4";
+            card.className = "col-6 col-md-4 mb-3";
             
             let btn = "";
             if (isOwned) {
                 btn = `<button class="btn btn-secondary w-100 rounded-pill fw-bold" disabled>已解鎖擁有</button>`;
             } else {
-                btn = `<button class="btn btn-info w-100 rounded-pill fw-bold text-white shadow-sm" onclick="buyAccessory('${key}')">金幣 x${item.price} 購買</button>`;
+                btn = `<button class="btn btn-info w-100 rounded-pill fw-bold text-white shadow-sm" onclick="buyAccessory('${key}')">金幣 x${item.price}</button>`;
             }
+
+            const hpStat = item.hp ? (item.hp > 0 ? `+${item.hp}` : `${item.hp}`) : null;
+            const atkStat = item.atk ? `+${item.atk}` : null;
+            let statsHtml = "";
+            if (hpStat || atkStat) {
+                statsHtml = `<div class="small fw-bold text-success mb-1" style="font-size: 11px;">`;
+                if (hpStat) statsHtml += `💖生命 ${hpStat} `;
+                if (atkStat) statsHtml += `⚔️攻擊 ${atkStat}`;
+                statsHtml += `</div>`;
+            }
+            const descHtml = item.desc ? `<p class="text-muted mb-2" style="font-size: 10px; line-height: 1.2; min-height: 24px;">${item.desc}</p>` : "";
 
             card.innerHTML = `
                 <div class="card h-100 border p-3 rounded-4 shadow-sm text-center bg-light">
                     <img src="/static/pet_system/images/${key}.webp" class="mx-auto mb-2 rounded" style="width: 50px; height: 50px; object-fit: contain;">
-                    <h6 class="fw-bold mb-1">${item.name}</h6>
-                    <p class="small text-muted mb-2">部位: ${item.slot === 'head' ? '頭部' : item.slot === 'face' ? '臉部' : '背部'}</p>
+                    <h6 class="fw-bold mb-1" style="font-size: 14px;">${item.name}</h6>
+                    <p class="text-muted mb-1" style="font-size: 11px;">部位: ${item.slot === 'head' ? '頭部' : item.slot === 'face' ? '臉部' : '背部'}</p>
+                    ${statsHtml}
+                    ${descHtml}
                     ${btn}
                 </div>
             `;
@@ -1057,6 +1359,83 @@
         });
     }
 
+    function cancelExpedition() {
+        if (!dashboardData.active_pet_expedition) return;
+        
+        Swal.fire({
+            title: "確定取消探索派遣？",
+            text: "取消後將直接召回寵物，但先前累積的探索進度會直接消失且不發放任何獎勵喔！",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc3545",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "確定取消",
+            cancelButtonText: "繼續探索"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append("expedition_id", dashboardData.active_pet_expedition.id);
+
+                fetch("{% url 'pet_system:api_cancel_expedition' %}", {
+                    method: "POST",
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        petSound.playClick();
+                        Swal.fire("已取消", data.message, "success");
+                        loadDashboardData();
+                    } else {
+                        Swal.fire("失敗", data.message, "error");
+                    }
+                });
+            }
+        });
+    }
+
+    function openMonsterBookModal() {
+        const list = document.getElementById("monsterBookList");
+        list.innerHTML = "";
+        
+        // 定義塔中的 5 個怪獸區域等級
+        const monsters = [
+            { name: "🟢 軟萌綠史萊姆", floors: "1 - 5 層", baseHp: 65, baseAtk: 9, color: "#2ecc71", desc: "常年棲息在冒險塔低層的軟萌史萊姆，攻擊性弱，適合新晉小龍/小狗練手。" },
+            { name: "🟣 毒霧紫史萊姆", floors: "6 - 10 層", baseHp: 140, baseAtk: 24, color: "#9b59b6", desc: "身體充滿劇毒，黏液噴吐的威力顯著提升，請穿戴好護具再進行挑戰。" },
+            { name: "🔴 熔岩紅史萊姆", floors: "11 - 15 層", baseHp: 215, baseAtk: 39, color: "#e74c3c", desc: "常年在熔岩中浸泡，身體散發極高溫度，生命值與攻擊力有著爆發性增長。" },
+            { name: "👑 巨型果凍史萊姆王", floors: "16 - 20 層", baseHp: 290, baseAtk: 54, color: "#f1c40f", desc: "統領整片史萊姆部族的王者，身軀龐大，防禦力驚人，是極強的對手。" },
+            { name: "💀 深淵邪能史萊姆皇", floors: "21 層+", baseHp: 365, baseAtk: 69, color: "#1abc9c", desc: "吸收了冒險塔深處無盡深淵力量的皇帝，屬性無上限，隨層數無限自我膨脹進化！" }
+        ];
+        
+        monsters.forEach(m => {
+            const row = document.createElement("div");
+            row.className = "list-group-item border rounded-3 p-3 d-flex flex-column bg-light";
+            row.innerHTML = `
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fw-bold" style="color: ${m.color}; font-size: 1.05rem;">${m.name}</span>
+                    <span class="badge bg-secondary rounded-pill">${m.floors}</span>
+                </div>
+                <div class="row g-2 mb-2 text-center" style="font-size: 0.85rem;">
+                    <div class="col-6 bg-white py-1 rounded border">
+                        <span class="text-muted">💖 預估生命: </span><span class="fw-bold text-success">${m.baseHp}</span>
+                    </div>
+                    <div class="col-6 bg-white py-1 rounded border">
+                        <span class="text-muted">⚔️ 預估攻擊: </span><span class="fw-bold text-danger">${m.baseAtk}</span>
+                    </div>
+                </div>
+                <p class="small text-muted mb-0" style="font-size: 11.5px; line-height: 1.3;">${m.desc}</p>
+            `;
+            list.appendChild(row);
+        });
+        
+        new bootstrap.Modal(document.getElementById("monsterBookModal")).show();
+    }
+
+    function openEvolutionTreeModal() {
+        new bootstrap.Modal(document.getElementById("evolutionTreeModal")).show();
+    }
+
     // ==========================================
     // 9. 爬塔戰鬥模擬引擎
     // ==========================================
@@ -1116,12 +1495,24 @@
         const battleLog = document.getElementById("battleLog");
         battleLog.innerText = "⚔️ 戰鬥開始！\n";
 
-        // 初始化屬性 (基於性格與進化階段決定數值)
-        let petMaxHp = 100 + (activePet.stage * 30);
+        // 初始化屬性 (基於性格與進化階段決定數值，並加上裝飾配件屬性加成)
+        let extraHp = 0;
+        let extraAtk = 0;
+        const shop = dashboardData.accessory_shop || {};
+        
+        [activePet.equipped_head, activePet.equipped_face, activePet.equipped_back].forEach(accId => {
+            if (accId && shop[accId]) {
+                const item = shop[accId];
+                if (item.hp) extraHp += item.hp;
+                if (item.atk) extraAtk += item.atk;
+            }
+        });
+
+        let petMaxHp = 100 + (activePet.stage * 30) + extraHp;
         if (activePet.personality === "CHUBBY") petMaxHp += 50;
         else if (activePet.personality === "LAZY") petMaxHp += 30;
 
-        let petAtk = 10 + (activePet.stage * 5);
+        let petAtk = 10 + (activePet.stage * 5) + extraAtk;
         if (activePet.personality === "BRAVE") petAtk += 8;
 
         let petHp = petMaxHp;
