@@ -75,7 +75,13 @@
 
                 <!-- 時間 -->
                 <div class="mb-3">
-                    <label for="date_time" class="form-label fw-bold">行程時間 <span class="text-danger">*</span></label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="date_time" class="form-label fw-bold mb-0">行程時間 <span class="text-danger" id="time-required-star">*</span></label>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="is_unscheduled" onchange="toggleTimeUnscheduled()">
+                            <label class="form-check-label small fw-bold text-success" for="is_unscheduled">時間未定 (有興趣活動)</label>
+                        </div>
+                    </div>
                     <input type="datetime-local" class="form-control" id="date_time" required>
                 </div>
 
@@ -87,6 +93,19 @@
                         <button class="btn btn-outline-success" type="button" id="geo-btn" onclick="saveFormAndSelectLocation()">
                             <i class="fa-solid fa-location-crosshairs"></i> 定位
                         </button>
+                    </div>
+                </div>
+
+                <!-- 相關活動連結 -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold d-flex justify-content-between align-items-center">
+                        <span>相關活動連結</span>
+                        <button type="button" class="btn btn-xs btn-outline-success py-1 px-2 rounded-pill fw-bold" style="font-size: 0.75rem;" onclick="addRelatedLinkRow()">
+                            <i class="fa-solid fa-plus me-1"></i>新增連結
+                        </button>
+                    </label>
+                    <div id="links-container" class="d-flex flex-column gap-2">
+                        <!-- 動態連結行 -->
                     </div>
                 </div>
 
@@ -158,9 +177,21 @@
                         const temp = JSON.parse(tempStr);
                         document.getElementById("title").value = temp.title || "";
                         document.getElementById("activity_type").value = temp.activity_type || "OTHER";
-                        document.getElementById("date_time").value = temp.date_time || "";
+                        if (temp.is_unscheduled) {
+                            document.getElementById("is_unscheduled").checked = true;
+                            toggleTimeUnscheduled();
+                        } else {
+                            document.getElementById("is_unscheduled").checked = false;
+                            toggleTimeUnscheduled();
+                            document.getElementById("date_time").value = temp.date_time || "";
+                        }
                         document.getElementById("notify_minutes_before").value = temp.notify_minutes_before || "1440";
                         document.getElementById("notes").value = temp.notes || "";
+                        
+                        // 恢復連結
+                        if (temp.related_links) {
+                            temp.related_links.forEach(link => addRelatedLinkRow(link.title, link.url));
+                        }
                     } catch (e) {
                         console.error("Failed to parse temp itinerary", e);
                     } finally {
@@ -186,6 +217,63 @@
                 }
             }
         });
+
+        // 相關活動連結動態 rows 控制
+        function addRelatedLinkRow(title = "", url = "") {
+            const container = document.getElementById("links-container");
+            const row = document.createElement("div");
+            row.className = "input-group link-row";
+            row.innerHTML = `
+                <input type="text" class="form-control form-control-sm link-title" placeholder="標題 (如:官網)" value="${title}" style="max-width: 120px;">
+                <input type="url" class="form-control form-control-sm link-url" placeholder="網址 (https://...)" value="${url}">
+                <button class="btn btn-sm btn-outline-danger" type="button" onclick="this.closest('.link-row').remove()">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            `;
+            container.appendChild(row);
+        }
+
+        function getRelatedLinksData() {
+            const rows = document.querySelectorAll(".link-row");
+            const links = [];
+            rows.forEach(row => {
+                const title = row.querySelector(".link-title").value.trim();
+                const url = row.querySelector(".link-url").value.trim();
+                if (title && url) {
+                    links.push({ title, url });
+                }
+            });
+            return links;
+        }
+
+        // 時間未定切換控制器
+        function toggleTimeUnscheduled() {
+            const isUnscheduled = document.getElementById("is_unscheduled").checked;
+            const dtInput = document.getElementById("date_time");
+            const star = document.getElementById("time-required-star");
+            
+            if (isUnscheduled) {
+                dtInput.disabled = true;
+                dtInput.required = false;
+                dtInput.value = "";
+                if (star) star.style.display = "none";
+            } else {
+                dtInput.disabled = false;
+                dtInput.required = true;
+                if (star) star.style.display = "inline";
+                
+                // 預設為一小時後
+                const now = new Date();
+                now.setHours(now.getHours() + 1);
+                now.setMinutes(0);
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                dtInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+        }
 
         function initLiff() {
             liff.init({ liffId: liffId })
@@ -228,10 +316,24 @@
                     // 預填表單欄位
                     document.getElementById("title").value = data.title;
                     document.getElementById("activity_type").value = data.activity_type;
-                    document.getElementById("date_time").value = data.date_time;
+                    
+                    if (!data.date_time) {
+                        document.getElementById("is_unscheduled").checked = true;
+                        toggleTimeUnscheduled();
+                    } else {
+                        document.getElementById("date_time").value = data.date_time;
+                    }
+                    
                     document.getElementById("location").value = data.location;
                     document.getElementById("notify_minutes_before").value = data.notify_minutes_before;
                     document.getElementById("notes").value = data.notes;
+
+                    // 載入相關連結
+                    if (data.related_links && data.related_links.length > 0) {
+                        data.related_links.forEach(link => {
+                            addRelatedLinkRow(link.title, link.url);
+                        });
+                    }
 
                     if (data.is_expired) {
                         Swal.fire({
@@ -264,10 +366,12 @@
 
             const title = document.getElementById("title").value.trim();
             const activity_type = document.getElementById("activity_type").value;
+            const isUnscheduled = document.getElementById("is_unscheduled").checked;
             const date_time = document.getElementById("date_time").value;
             const location = document.getElementById("location").value.trim();
             const notify_minutes_before = document.getElementById("notify_minutes_before").value;
             const notes = document.getElementById("notes").value.trim();
+            const related_links = getRelatedLinksData();
 
             const groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
 
@@ -284,10 +388,11 @@
                     group_id: groupId,
                     title: title,
                     activity_type: activity_type,
-                    date_time: date_time,
+                    date_time: isUnscheduled ? "" : date_time,
                     location: location,
                     notify_minutes_before: notify_minutes_before,
-                    notes: notes
+                    notes: notes,
+                    related_links: related_links
                 })
             })
             .then(res => res.json())
@@ -317,8 +422,10 @@
                 title: document.getElementById("title").value.trim(),
                 activity_type: document.getElementById("activity_type").value,
                 date_time: document.getElementById("date_time").value,
+                is_unscheduled: document.getElementById("is_unscheduled").checked,
                 notify_minutes_before: document.getElementById("notify_minutes_before").value,
-                notes: document.getElementById("notes").value.trim()
+                notes: document.getElementById("notes").value.trim(),
+                related_links: getRelatedLinksData()
             };
             localStorage.setItem("temp_itinerary", JSON.stringify(formData));
             

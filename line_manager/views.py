@@ -578,8 +578,10 @@ def api_get_itineraries(request):
 
     if tab == "upcoming":
         itineraries_qs = base_qs.filter(date_time__gte=current_time).order_by("-date_time")
+    elif tab == "unscheduled":
+        itineraries_qs = base_qs.filter(date_time__isnull=True).order_by("-id")
     else:
-        itineraries_qs = base_qs.filter(date_time__lt=current_time).order_by("-date_time")
+        itineraries_qs = base_qs.filter(date_time__lt=current_time, date_time__isnull=False).order_by("-date_time")
 
     total_count = itineraries_qs.count()
     page_size = 5
@@ -626,15 +628,33 @@ def api_get_itineraries(request):
         else:
             notify_text = f"提前 {minutes} 分鐘"
 
+        # 解析相關活動連結與有興趣成員 (JSON 格式)
+        related_links_list = []
+        if item.related_links:
+            try:
+                related_links_list = json.loads(item.related_links)
+            except Exception:
+                pass
+
+        interested_users_list = []
+        if item.interested_users:
+            try:
+                interested_users_list = json.loads(item.interested_users)
+            except Exception:
+                pass
+
         schedule_data = {
             "id": item.pk,
             "title": title_dec,
             "location": location_dec,
             "notes": notes_dec,
             "activity_type": type_map.get(item.activity_type, "🌟 其他活動"),
-            "date_time": localtime(item.date_time).strftime("%Y-%m-%d %H:%M"),
+            "date_time": localtime(item.date_time).strftime("%Y-%m-%d %H:%M") if item.date_time else "時間待定",
+            "is_unscheduled": item.date_time is None,
+            "related_links": related_links_list,
+            "interested_users": interested_users_list,
             "notify_minutes_before": minutes,
-            "notify_text": notify_text,
+            "notify_text": notify_text if item.date_time else "無提醒",
             "is_notified": item.is_notified,
             "creator": creator_name,
         }
@@ -672,7 +692,7 @@ def api_create_itinerary(request):
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
-    if not access_token or not title or not date_time_str:
+    if not access_token or not title:
         return JsonResponse({"error": "Missing required fields"}, status=400)
 
     # 驗證 LINE Token
@@ -686,14 +706,20 @@ def api_create_itinerary(request):
     if not line_profile:
         return JsonResponse({"error": "Account not bound"}, status=403)
 
-    try:
-        dt = parse_datetime(date_time_str)
-        if not dt:
-            dt = datetime.fromisoformat(date_time_str)
-        if dt.tzinfo is None:
-            dt = make_aware(dt)
-    except Exception:
-        return JsonResponse({"error": "Invalid date_time format"}, status=400)
+    dt = None
+    if date_time_str:
+        try:
+            dt = parse_datetime(date_time_str)
+            if not dt:
+                dt = datetime.fromisoformat(date_time_str)
+            if dt.tzinfo is None:
+                dt = make_aware(dt)
+        except Exception:
+            return JsonResponse({"error": "Invalid date_time format"}, status=400)
+
+    # 取得活動連結
+    related_links_data = data.get("related_links", [])
+    related_links_str = json.dumps(related_links_data, ensure_ascii=False)
 
     itinerary = Itinerary.objects.create(
         user=line_profile.user,
@@ -703,6 +729,7 @@ def api_create_itinerary(request):
         notes=notes,
         activity_type=activity_type,
         date_time=dt,
+        related_links=related_links_str,
         notify_minutes_before=notify_minutes,
     )
 
@@ -901,6 +928,24 @@ def api_get_itinerary_detail(request, pk):
         return JsonResponse({"error": "Permission Denied"}, status=403)
 
     from django.utils.timezone import localtime
+    related_links_list = []
+    if itinerary.related_links:
+        try:
+            related_links_list = json.loads(itinerary.related_links)
+        except Exception:
+            pass
+
+    interested_users_list = []
+    if itinerary.interested_users:
+        try:
+            interested_users_list = json.loads(itinerary.interested_users)
+        except Exception:
+            pass
+
+    from django.utils.timezone import localtime
+    dt_str = localtime(itinerary.date_time).strftime("%Y-%m-%dT%H:%M") if itinerary.date_time else ""
+    is_expired = itinerary.date_time <= now() if itinerary.date_time else False
+
     return JsonResponse({
         "status": "success",
         "id": itinerary.pk,
@@ -908,9 +953,11 @@ def api_get_itinerary_detail(request, pk):
         "location": itinerary.location,
         "notes": itinerary.notes,
         "activity_type": itinerary.activity_type,
-        "date_time": localtime(itinerary.date_time).strftime("%Y-%m-%dT%H:%M"),
+        "date_time": dt_str,
+        "related_links": related_links_list,
+        "interested_users": interested_users_list,
         "notify_minutes_before": itinerary.notify_minutes_before,
-        "is_expired": itinerary.date_time <= now()
+        "is_expired": is_expired
     })
 
 
@@ -932,7 +979,7 @@ def api_update_itinerary(request, pk):
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
-    if not access_token or not title or not date_time_str:
+    if not access_token or not title:
         return JsonResponse({"error": "Missing required fields"}, status=400)
 
     # 驗證 LINE Token
@@ -962,17 +1009,23 @@ def api_update_itinerary(request, pk):
         return JsonResponse({"error": "Permission Denied"}, status=403)
 
     # 檢查是否過期
-    if itinerary.date_time <= now():
+    if itinerary.date_time and itinerary.date_time <= now():
         return JsonResponse({"error": "Cannot edit expired itineraries"}, status=400)
 
-    try:
-        dt = parse_datetime(date_time_str)
-        if not dt:
-            dt = datetime.fromisoformat(date_time_str)
-        if dt.tzinfo is None:
-            dt = make_aware(dt)
-    except Exception:
-        return JsonResponse({"error": "Invalid date_time format"}, status=400)
+    dt = None
+    if date_time_str:
+        try:
+            dt = parse_datetime(date_time_str)
+            if not dt:
+                dt = datetime.fromisoformat(date_time_str)
+            if dt.tzinfo is None:
+                dt = make_aware(dt)
+        except Exception:
+            return JsonResponse({"error": "Invalid date_time format"}, status=400)
+
+    # 取得活動連結
+    related_links_data = data.get("related_links", [])
+    related_links_str = json.dumps(related_links_data, ensure_ascii=False)
 
     # 更新欄位
     itinerary.title = title
@@ -980,6 +1033,7 @@ def api_update_itinerary(request, pk):
     itinerary.notes = notes
     itinerary.activity_type = activity_type
     itinerary.date_time = dt
+    itinerary.related_links = related_links_str
     itinerary.notify_minutes_before = notify_minutes
     itinerary.is_notified = False  # 重設通知標記以重新輪詢發送
     itinerary.save()
@@ -1037,3 +1091,223 @@ def api_send_guide_message(request):
     except Exception as e:
         print(f"❌ 發送定位引導訊息失敗: {e}")
         return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+def api_join_unscheduled_itinerary(request, pk):
+    """API 端點：對時間未定的行程表達興趣 (👍 我有興趣/加入)"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    # 驗證 LINE Token
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get("https://api.line.me/v2/profile", headers=headers)
+    if res.status_code != 200:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    profile_data = res.json()
+    line_user_id = profile_data["userId"]
+    line_display_name = profile_data.get("displayName", "LINE 用戶")
+
+    line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
+    if not line_profile:
+        return JsonResponse({"error": "Account not bound"}, status=403)
+
+    itinerary = Itinerary.objects.filter(pk=pk).first()
+    if not itinerary:
+        return JsonResponse({"error": "Itinerary not found"}, status=404)
+
+    # 解析並更新有興趣的成員列表
+    interested_users_list = []
+    if itinerary.interested_users:
+        try:
+            interested_users_list = json.loads(itinerary.interested_users)
+        except Exception:
+            pass
+
+    if line_display_name not in interested_users_list:
+        interested_users_list.append(line_display_name)
+        itinerary.interested_users = json.dumps(interested_users_list, ensure_ascii=False)
+        itinerary.save()
+
+    return JsonResponse({
+        "status": "success",
+        "interested_users": interested_users_list
+    })
+
+
+@csrf_exempt
+def api_set_unscheduled_time(request, pk):
+    """API 端點：決定時間未定行程的最終時間，並升級為正式共享行程，推送 LINE 群組通知"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        date_time_str = data.get("date_time")
+        group_id = data.get("group_id")  # 新傳入的群組 ID，方便在群組內定案時寫入
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not date_time_str:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    # 驗證 LINE Token
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get("https://api.line.me/v2/profile", headers=headers)
+    if res.status_code != 200:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    profile_data = res.json()
+    line_user_id = profile_data["userId"]
+    line_display_name = profile_data.get("displayName", "LINE 用戶")
+
+    line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
+    if not line_profile:
+        return JsonResponse({"error": "Account not bound"}, status=403)
+
+    itinerary = Itinerary.objects.filter(pk=pk).first()
+    if not itinerary:
+        return JsonResponse({"error": "Itinerary not found"}, status=404)
+
+    try:
+        dt = parse_datetime(date_time_str)
+        if not dt:
+            dt = datetime.fromisoformat(date_time_str)
+        if dt.tzinfo is None:
+            dt = make_aware(dt)
+    except Exception:
+        return JsonResponse({"error": "Invalid date_time format"}, status=400)
+
+    itinerary.date_time = dt
+    if group_id:
+        itinerary.group_id = group_id
+    itinerary.is_notified = False
+    itinerary.save()
+
+    # 主動發送 Flex Message 通知群組或個人
+    target_id = itinerary.group_id if itinerary.group_id else line_user_id
+    
+    # 組合有興趣名單字串
+    interested_users_list = []
+    if itinerary.interested_users:
+        try:
+            interested_users_list = json.loads(itinerary.interested_users)
+        except Exception:
+            pass
+            
+    interested_str = "、".join(interested_users_list) if interested_users_list else "尚無"
+
+    # 行程類型對照
+    type_map = {
+        "EAT": "🍴 吃飯聚餐",
+        "EXHIBIT": "🎨 逛街展覽",
+        "SPORT": "🏸 運動健身",
+        "TRAVEL": "🚗 旅遊踏青",
+        "MOVIE": "🎬 看電影",
+        "OTHER": "🌟 其他活動",
+    }
+    act_type = type_map.get(itinerary.activity_type, "🌟 其他活動")
+
+    # 組織推播 Flex Message 卡片
+    flex_contents = {
+        "type": "bubble",
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": "🎉 行程定案推播通知",
+                    "weight": "bold",
+                    "color": "#1DB446",
+                    "size": "sm"
+                },
+                {
+                    "type": "text",
+                    "text": itinerary.title,
+                    "weight": "bold",
+                    "size": "xl",
+                    "margin": "md"
+                },
+                {
+                    "type": "separator",
+                    "margin": "md"
+                },
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "margin": "md",
+                    "spacing": "sm",
+                    "contents": [
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "sm",
+                            "contents": [
+                                {"type": "text", "text": "類型", "color": "#aaaaaa", "size": "sm", "flex": 2},
+                                {"type": "text", "text": act_type, "wrap": True, "color": "#666666", "size": "sm", "flex": 5}
+                            ]
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "sm",
+                            "contents": [
+                                {"type": "text", "text": "定案時間", "color": "#aaaaaa", "size": "sm", "flex": 2},
+                                {"type": "text", "text": dt.strftime("%Y-%m-%d %H:%M"), "wrap": True, "color": "#ff4d4f", "weight": "bold", "size": "sm", "flex": 5}
+                            ]
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "sm",
+                            "contents": [
+                                {"type": "text", "text": "地點", "color": "#aaaaaa", "size": "sm", "flex": 2},
+                                {"type": "text", "text": itinerary.location, "wrap": True, "color": "#666666", "size": "sm", "flex": 5}
+                            ]
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "sm",
+                            "contents": [
+                                {"type": "text", "text": "參與成員", "color": "#aaaaaa", "size": "sm", "flex": 2},
+                                {"type": "text", "text": interested_str, "wrap": True, "color": "#666666", "size": "sm", "flex": 5}
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+
+    try:
+        from linebot.v3.messaging import PushMessageRequest, FlexMessage, FlexContainer
+        with ApiClient(configuration) as api_client:
+            api_instance = MessagingApi(api_client)
+            api_instance.push_message(
+                PushMessageRequest(
+                    to=target_id,
+                    messages=[
+                        FlexMessage(
+                            alt_text=f"📢 行程【{itinerary.title}】已定案！",
+                            contents=FlexContainer.from_dict(flex_contents)
+                        )
+                    ]
+                )
+            )
+    except Exception as e:
+        print(f"❌ 定案推播通知失敗: {e}")
+
+    return JsonResponse({"status": "success"})

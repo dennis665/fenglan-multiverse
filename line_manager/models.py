@@ -50,11 +50,15 @@ class Itinerary(models.Model):
     location = EncryptedCharField(max_length=255, verbose_name=_("活動地點"))
     notes = EncryptedTextField(blank=True, verbose_name=_("備註說明"))
 
+    # 新增：相關活動連結與有興趣加入的成員（皆以 JSON 格式之加密字串儲存）
+    related_links = EncryptedTextField(blank=True, default="[]", verbose_name=_("相關活動連結"))
+    interested_users = EncryptedTextField(blank=True, default="[]", verbose_name=_("有興趣成員"))
+
     #! 一般篩選欄位（保持明文以供後續篩選排序）
     activity_type = models.CharField(
         max_length=10, choices=ACTIVITY_CHOICES, default="OTHER", verbose_name=_("活動類型")
     )
-    date_time = models.DateTimeField(verbose_name=_("行程時間"))
+    date_time = models.DateTimeField(blank=True, null=True, verbose_name=_("行程時間"))
 
     notify_minutes_before = models.IntegerField(default=1440, verbose_name=_("提前通知時間(分鐘)"))
     is_notified = models.BooleanField(default=False, verbose_name=_("是否已發送通知"))
@@ -71,7 +75,8 @@ class Itinerary(models.Model):
         # * 字串表達式：用於 Admin 後台顯示。
         # * 由於 title 欄位是加密欄位，在後台讀取 __str__ 時如果會觸發資料解密，這會讓管理員看見標題。
         # * 為保證絕對隱私，當前如果是由 non-owner 存取時，我們只返回其類型與 ID。
-        return f"[{self.get_activity_type_display()}] {self.date_time.strftime('%Y-%m-%d %H:%M')}"  # pyright: ignore[reportAttributeAccessIssue]
+        dt_str = self.date_time.strftime('%Y-%m-%d %H:%M') if self.date_time else _("時間待定")
+        return f"[{self.get_activity_type_display()}] {dt_str}"
 
 
 class GroupMembership(models.Model):

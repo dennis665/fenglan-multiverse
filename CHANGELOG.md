@@ -8,6 +8,30 @@
 
 ---
 
+## [1.17.6] - 2026-07-14
+### Added (新增)
+* **時間未定有興趣行程功能 (Unscheduled/Interested Itinerary)**：
+    * 調整行程 `date_time` 欄位為可為空（`null=True, blank=True`），支援在時間未知或待討論時建立行程。
+    * 在新增/修改行程 UI (`liff_create.html`) 中新增「時間未定」切換開關，開啟時自動禁用並清空日期時間輸入框。
+    * 行程看板頁面 (`liff_list.html`) 新增「🌟 有興趣 / 未定」分頁，專門收錄並渲染時間待定行程卡片。
+* **多重活動連結支援 (Multiple Related Links)**：
+    * 新增加密 `related_links` 欄位，支援以 JSON 陣列格式儲存多個活動相關 URL。
+    * 實作動態的「活動連結編輯面板」，使用者可動態新增/刪除自訂標題與 URL（如地圖、官網等）的連結。
+    * 地理定位分享引導時，暫存機制可同步記錄並恢復當前已填寫的多重連結。
+    * 行程卡片下方自動將相關活動連結渲染為綠色小連結徽章，點擊直接另開網頁。
+* **群組分享、有興趣加入與定案推播系統 (LINE Group Sharing & finalization)**：
+    * **分享至群組**：時間待定行程卡片新增「分享至群組」按鈕，觸發 `liff.shareTargetPicker` 向好友或 LINE 群組發送設計精美的 Flex Message 邀約卡片。
+    * **我有興趣/加入表達**：新增 `api_join_unscheduled_itinerary` 接口。群組成員點選卡片連結進入 LIFF，系統會自動辨識並彈出加入確認，將 LINE 顯示名稱寫入「有興趣成員」列表。
+    * **決定時間定案推播**：新增 `api_set_unscheduled_time` 接口。成員在卡片點擊「決定時間」時，可直接指定定案日期，行程將轉為正式行程。同時，**LINE 機器人會主動向群組聊天室發送精美的「行程定案 Flex 通知卡片」**通報大家。
+* **一鍵加入 Google 日曆功能 (Add to Google Calendar)**：
+    * 看板即將到來行程卡片下方新增「加到日曆」按鈕，自動解析行程時間並包裝生成 Google 日曆新增範本 URL，實現一鍵同步行程。
+
+### Fixed & Optimized (修復與優化)
+* **修復行程刪除後的列表刷新 Bug**：
+    * 將原先在行程刪除成功時無參數調用 `fetchItineraries()` 導致 JavaScript 報錯的 Bug，修正為傳入各自分頁參數同步刷新 `upcoming`、`unscheduled` 與 `history` 列表，提升穩定性。
+
+---
+
 ## [1.17.5] - 2026-07-13
 ### Added (新增)
 * **探索派遣支援中途取消 (Dispatch Cancellation)**：

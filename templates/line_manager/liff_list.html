@@ -110,10 +110,13 @@
             <!-- 分頁 Tab -->
             <ul class="nav nav-tabs justify-content-center mb-3" id="scheduleTab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-panel" type="button" role="tab">即將到來</button>
+                    <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-panel" type="button" role="tab">🔔 即將到來</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-panel" type="button" role="tab">歷史紀錄</button>
+                    <button class="nav-link" id="unscheduled-tab" data-bs-toggle="tab" data-bs-target="#unscheduled-panel" type="button" role="tab">🌟 有興趣/未定</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-panel" type="button" role="tab">📅 歷史紀錄</button>
                 </li>
             </ul>
 
@@ -128,6 +131,18 @@
                         <button class="btn btn-sm btn-outline-success px-3" id="upcoming-prev-btn" onclick="changePage('upcoming', -1)" style="border-radius: 50px;">上一頁</button>
                         <span class="small text-muted fw-bold">第 <span id="upcoming-page-num" class="text-success">1</span> 頁</span>
                         <button class="btn btn-sm btn-outline-success px-3" id="upcoming-next-btn" onclick="changePage('upcoming', 1)" style="border-radius: 50px;">下一頁</button>
+                    </div>
+                </div>
+
+                <!-- 時間待定/有興趣行程 -->
+                <div class="tab-pane fade" id="unscheduled-panel" role="tabpanel">
+                    <div id="unscheduled-list" class="d-flex flex-column gap-3">
+                        <!-- 動態插入 -->
+                    </div>
+                    <div id="unscheduled-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
+                        <button class="btn btn-sm btn-outline-success px-3" id="unscheduled-prev-btn" onclick="changePage('unscheduled', -1)" style="border-radius: 50px;">上一頁</button>
+                        <span class="small text-muted fw-bold">第 <span id="unscheduled-page-num" class="text-success">1</span> 頁</span>
+                        <button class="btn btn-sm btn-outline-success px-3" id="unscheduled-next-btn" onclick="changePage('unscheduled', 1)" style="border-radius: 50px;">下一頁</button>
                     </div>
                 </div>
 
@@ -155,6 +170,7 @@
 
         // 分頁狀態變數
         let upcomingPage = 1;
+        let unscheduledPage = 1;
         let historyPage = 1;
 
         // 解析 URL 中的 groupId 參數 (防止 LINE 內外瀏覽器重導向造成 Context 遺失)
@@ -182,9 +198,13 @@
                             document.getElementById("group-title").innerHTML = `<i class="fa-solid fa-users me-1"></i>群組共享行程`;
                         }
 
-                        // 首次載入：各自分別請求第一頁，節省效能
+                        // 首次載入：各分頁分別請求第一頁
                         fetchItineraries("upcoming", 1);
+                        fetchItineraries("unscheduled", 1);
                         fetchItineraries("history", 1);
+                        
+                        // 行程分享快速加入動作檢測
+                        checkUrlActions();
                     }
                 })
                 .catch((err) => {
@@ -289,6 +309,10 @@
                 upcomingPage += offset;
                 if (upcomingPage < 1) upcomingPage = 1;
                 fetchItineraries("upcoming", upcomingPage);
+            } else if (tab === "unscheduled") {
+                unscheduledPage += offset;
+                if (unscheduledPage < 1) unscheduledPage = 1;
+                fetchItineraries("unscheduled", unscheduledPage);
             } else {
                 historyPage += offset;
                 if (historyPage < 1) historyPage = 1;
@@ -310,18 +334,20 @@
                 return;
             }
 
+            const currentTab = elementId.split("-")[0]; // "upcoming", "unscheduled", "history"
+
             list.forEach(item => {
                 // 決定 Badge 樣式
                 let badgeClass = "badge-other";
-                if (item.activity_type.includes("吃飯")) badgeClass = "badge-eat";
-                else if (item.activity_type.includes("逛街")) badgeClass = "badge-exhibit";
-                else if (item.activity_type.includes("運動")) badgeClass = "badge-sport";
-                else if (item.activity_type.includes("旅遊")) badgeClass = "badge-travel";
-                else if (item.activity_type.includes("電影")) badgeClass = "badge-movie";
+                if (item.activity_type.includes("吃飯") || item.activity_type.includes("EAT")) badgeClass = "badge-eat";
+                else if (item.activity_type.includes("逛街") || item.activity_type.includes("EXHIBIT")) badgeClass = "badge-exhibit";
+                else if (item.activity_type.includes("運動") || item.activity_type.includes("SPORT")) badgeClass = "badge-sport";
+                else if (item.activity_type.includes("旅遊") || item.activity_type.includes("TRAVEL")) badgeClass = "badge-travel";
+                else if (item.activity_type.includes("電影") || item.activity_type.includes("MOVIE")) badgeClass = "badge-movie";
 
                 let editBtn = "";
                 let deleteBtn = "";
-                if (isUpcoming) {
+                if (currentTab !== "history") {
                     editBtn = `
                         <button class="btn btn-sm btn-outline-primary border-0 me-1" onclick="editItinerary(${item.id})">
                             <i class="fa-regular fa-pen-to-square"></i>
@@ -334,20 +360,85 @@
                     `;
                 }
 
+                // 渲染相關活動連結
+                let linksHtml = "";
+                if (item.related_links && item.related_links.length > 0) {
+                    linksHtml = '<div class="d-flex flex-wrap gap-1 mt-2">';
+                    item.related_links.forEach(link => {
+                        linksHtml += `
+                            <a href="${link.url}" target="_blank" class="badge bg-white text-success border border-success text-decoration-none px-2 py-1 small" style="font-size: 0.7rem; border-radius: 5px;">
+                                <i class="fa-solid fa-link me-1"></i>${link.title}
+                            </a>
+                        `;
+                    });
+                    linksHtml += '</div>';
+                }
+
+                // 時間顯示或待定提示
+                let timeHtml = "";
+                if (item.is_unscheduled) {
+                    timeHtml = `<span class="badge bg-warning text-dark small"><i class="fa-regular fa-clock me-1"></i>時間待定</span>`;
+                } else {
+                    timeHtml = `<span class="text-muted" style="font-size: 0.75rem;"><i class="fa-regular fa-clock me-1"></i>${item.date_time}</span>`;
+                }
+
+                // 針對已定時行程，添加「加入 Google 日曆」按鈕
+                let googleCalendarBtn = "";
+                if (!item.is_unscheduled && currentTab === "upcoming") {
+                    const gcalUrl = makeGoogleCalendarUrl(item);
+                    googleCalendarBtn = `
+                        <a href="${gcalUrl}" target="_blank" class="btn btn-xs btn-outline-danger rounded-pill fw-bold py-1 px-2 mt-2 me-1 text-decoration-none" style="font-size: 0.7rem; display: inline-block;">
+                            <i class="fa-brands fa-google me-1"></i>加到日曆
+                        </a>
+                    `;
+                }
+
+                // 針對時間未定行程，添加「我有興趣」、「決定時間」、「分享至群組」按鈕及有興趣人員名單
+                let unscheduledActionsHtml = "";
+                if (item.is_unscheduled) {
+                    const interestedCount = item.interested_users ? item.interested_users.length : 0;
+                    const interestedNames = item.interested_users && interestedCount > 0 ? item.interested_users.join("、") : "尚無";
+                    
+                    unscheduledActionsHtml = `
+                        <div class="mt-2 border-top pt-2">
+                            <div class="small mb-2 text-muted">
+                                <i class="fa-solid fa-thumbs-up text-primary me-1"></i>有興趣成員 (${interestedCount}人)：<span class="fw-bold text-dark">${interestedNames}</span>
+                            </div>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <button class="btn btn-xs btn-primary rounded-pill fw-bold py-1 px-2" style="font-size: 0.7rem;" onclick="joinUnscheduled(${item.id})">
+                                    <i class="fa-regular fa-thumbs-up me-1"></i>我有興趣
+                                </button>
+                                <button class="btn btn-xs btn-success rounded-pill fw-bold py-1 px-2" style="font-size: 0.7rem;" onclick="setFinalTimeModal(${item.id})">
+                                    <i class="fa-regular fa-clock me-1"></i>決定時間
+                                </button>
+                                <button class="btn btn-xs btn-line rounded-pill fw-bold py-1 px-2" style="font-size: 0.7rem;" onclick="shareToGroup(${item.id}, '${item.title.replace(/'/g, "\\'")}', '${item.location.replace(/'/g, "\\'")}', ${interestedCount})">
+                                    <i class="fa-solid fa-share-nodes me-1"></i>分享至群組
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 const html = `
                     <div class="glass-card p-3 schedule-item d-flex justify-content-between align-items-center">
-                        <div class="flex-grow-1 me-2">
-                            <div class="d-flex align-items-center mb-1 gap-2">
+                        <div class="flex-grow-1 me-2" style="max-width: 85%;">
+                            <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
                                 <span class="badge ${badgeClass} small">${item.activity_type}</span>
-                                <span class="text-muted" style="font-size: 0.75rem;"><i class="fa-regular fa-clock me-1"></i>${item.date_time}</span>
+                                ${timeHtml}
                             </div>
-                            <h5 class="fw-bold mb-1" style="font-size: 1.05rem; color: #2c3e50;">${item.title}</h5>
+                            <h5 class="fw-bold mb-1" style="font-size: 1.05rem; color: #2c3e50; word-break: break-all;">${item.title}</h5>
                             <div class="text-muted small mb-1"><i class="fa-solid fa-location-dot me-1 text-danger"></i>${item.location}</div>
-                            ${item.notes ? `<div class="bg-light p-2 rounded text-secondary" style="font-size: 0.8rem; border-left: 2px solid #ccc;">${item.notes}</div>` : ""}
+                            ${item.notes ? `<div class="bg-light p-2 rounded text-secondary" style="font-size: 0.8rem; border-left: 2px solid #ccc; word-break: break-all;">${item.notes}</div>` : ""}
+                            
+                            ${linksHtml}
+                            
                             <div class="text-muted" style="font-size: 0.7rem; margin-top: 5px;">
                                 <i class="fa-regular fa-user me-1"></i>發起人: ${item.creator}
-                                ${item.notify_text ? ` | 🔔 ${item.notify_text}` : ""}
+                                ${(!item.is_unscheduled && item.notify_text) ? ` | 🔔 ${item.notify_text}` : ""}
                             </div>
+                            
+                            ${googleCalendarBtn}
+                            ${unscheduledActionsHtml}
                         </div>
                         <div class="d-flex align-items-center">
                             ${editBtn}
@@ -390,7 +481,9 @@
                                 timer: 1500,
                                 showConfirmButton: false
                             }).then(() => {
-                                fetchItineraries();
+                                fetchItineraries("upcoming", 1);
+                                fetchItineraries("unscheduled", 1);
+                                fetchItineraries("history", 1);
                             });
                         } else {
                             Swal.fire('錯誤', "刪除失敗: " + data.error, 'error');
@@ -411,6 +504,324 @@
                 editUrl += `&groupId=${groupId}`;
             }
             window.location.href = editUrl;
+        }
+
+        // Google 日曆連結生成器
+        function makeGoogleCalendarUrl(item) {
+            const base = "https://www.google.com/calendar/render?action=TEMPLATE";
+            const text = encodeURIComponent(item.title);
+            const location = encodeURIComponent(item.location || "待定");
+            const details = encodeURIComponent(item.notes || "");
+            
+            const dtStr = item.date_time.replace(/[^0-9]/g, ""); // 例如 202607141030
+            if (dtStr.length >= 12) {
+                const year = dtStr.substring(0, 4);
+                const month = dtStr.substring(4, 6);
+                const day = dtStr.substring(6, 8);
+                const hour = dtStr.substring(8, 10);
+                const min = dtStr.substring(10, 12);
+                
+                const startDate = `${year}${month}${day}T${hour}${min}00`;
+                
+                // 預設長度：一小時
+                const end = new Date(year, month - 1, day, hour, min);
+                end.setHours(end.getHours() + 1);
+                
+                const ey = end.getFullYear();
+                const em = String(end.getMonth() + 1).padStart(2, '0');
+                const ed = String(end.getDate()).padStart(2, '0');
+                const eh = String(end.getHours()).padStart(2, '0');
+                const emn = String(end.getMinutes()).padStart(2, '0');
+                const endDate = `${ey}${em}${ed}T${eh}${emn}00`;
+                
+                return `${base}&text=${text}&dates=${startDate}/${endDate}&location=${location}&details=${details}`;
+            }
+            return `${base}&text=${text}&location=${location}&details=${details}`;
+        }
+
+        // 👍 我有興趣/加入
+        function joinUnscheduled(id) {
+            fetch(`/line/api/itineraries/join/${id}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    access_token: userAccessToken
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({
+                        title: '成功加入',
+                        text: '您已成功表達對此行程有興趣！',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        fetchItineraries("unscheduled", unscheduledPage);
+                    });
+                } else {
+                    Swal.fire('錯誤', "操作失敗: " + data.error, 'error');
+                }
+            })
+            .catch(err => {
+                console.error("Join error:", err);
+                Swal.fire('錯誤', "伺服器連線失敗", 'error');
+            });
+        }
+
+        // ⏰ 決定時間並定案
+        function setFinalTimeModal(id) {
+            let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+            
+            const now = new Date();
+            now.setDate(now.getDate() + 1);
+            now.setHours(12);
+            now.setMinutes(0);
+            
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const defaultTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+            Swal.fire({
+                title: '⏰ 決定活動時間',
+                html: `
+                    <p class="small text-muted">決定此行程時間後，將會發送推播通知至聊天室！</p>
+                    <input type="datetime-local" id="swal-dt" class="form-control" value="${defaultTime}">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonColor: '#1DB446',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: '確定時間並定案',
+                cancelButtonText: '取消',
+                preConfirm: () => {
+                    const dt = document.getElementById('swal-dt').value;
+                    if (!dt) {
+                        Swal.showValidationMessage('請選擇活動日期與時間！');
+                    }
+                    return dt;
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    fetch(`/line/api/itineraries/set_time/${id}/`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            access_token: userAccessToken,
+                            date_time: result.value,
+                            group_id: groupId
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            Swal.fire({
+                                title: '行程已定案！',
+                                text: '已更新行程時間並成功推送 LINE 訊息！',
+                                icon: 'success',
+                                confirmButtonColor: '#1DB446'
+                            }).then(() => {
+                                fetchItineraries("upcoming", 1);
+                                fetchItineraries("unscheduled", 1);
+                            });
+                        } else {
+                            Swal.fire('錯誤', "定案失敗: " + data.error, 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Set time error:", err);
+                        Swal.fire('錯誤', "伺服器連線失敗", 'error');
+                    });
+                }
+            });
+        }
+
+        // 📢 分享至群組 (shareTargetPicker)
+        function shareToGroup(id, title, location, interestedCount) {
+            if (!liff.isApiAvailable('shareTargetPicker')) {
+                Swal.fire('提示', '目前環境不支援群組分享功能，請在 LINE App 內使用！', 'warning');
+                return;
+            }
+
+            const liffUrl = `https://liff.line.me/${liffId}/?action=join&itineraryId=${id}`;
+
+            const flexMessage = {
+                type: "flex",
+                altText: `🌟 有興趣行程邀約：【${title}】`,
+                contents: {
+                    type: "bubble",
+                    body: {
+                        type: "box",
+                        layout: "vertical",
+                        contents: [
+                            {
+                                type: "text",
+                                text: "🌟 時間待定行程邀約",
+                                weight: "bold",
+                                color: "#1DB446",
+                                size: "sm"
+                            },
+                            {
+                                type: "text",
+                                text: title,
+                                weight: "bold",
+                                size: "xl",
+                                margin: "md"
+                            },
+                            {
+                                type: "separator",
+                                margin: "md"
+                            },
+                            {
+                                type: "box",
+                                layout: "vertical",
+                                margin: "md",
+                                spacing: "sm",
+                                contents: [
+                                    {
+                                        type: "box",
+                                        layout: "baseline",
+                                        spacing: "sm",
+                                        contents: [
+                                            {
+                                                type: "text",
+                                                text: "地點",
+                                                color: "#aaaaaa",
+                                                size: "sm",
+                                                flex: 2
+                                            },
+                                            {
+                                                type: "text",
+                                                text: location || "待定",
+                                                wrap: true,
+                                                color: "#666666",
+                                                size: "sm",
+                                                flex: 5
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        type: "box",
+                                        layout: "baseline",
+                                        spacing: "sm",
+                                        contents: [
+                                            {
+                                                type: "text",
+                                                text: "成員",
+                                                color: "#aaaaaa",
+                                                size: "sm",
+                                                flex: 2
+                                            },
+                                            {
+                                                type: "text",
+                                                text: `${interestedCount} 人有興趣`,
+                                                wrap: true,
+                                                color: "#666666",
+                                                size: "sm",
+                                                flex: 5
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    footer: {
+                        type: "box",
+                        layout: "vertical",
+                        spacing: "sm",
+                        contents: [
+                            {
+                                type: "button",
+                                style: "primary",
+                                color: "#1DB446",
+                                action: {
+                                    type: "uri",
+                                    label: "👍 我有興趣 / 決定時間",
+                                    uri: liffUrl
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+
+            liff.shareTargetPicker([flexMessage])
+                .then(res => {
+                    if (res) {
+                        Swal.fire('分享成功', '行程邀請已成功發送至聊天室！', 'success');
+                    }
+                })
+                .catch(err => {
+                    console.error("Share target picker error:", err);
+                });
+        }
+
+        // 檢查網址參數之快速動作 (例如從 Flex 點進來)
+        function checkUrlActions() {
+            const action = urlParams.get("action");
+            const itineraryId = urlParams.get("itineraryId");
+            
+            if (action === "join" && itineraryId) {
+                // 清理 URL 參數以防重複彈出
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // 獲取該行程詳細資訊
+                fetch(`/line/api/itineraries/detail/${itineraryId}/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        access_token: userAccessToken
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        const interestedCount = data.interested_users ? data.interested_users.length : 0;
+                        const interestedNames = data.interested_users && interestedCount > 0 ? data.interested_users.join("、") : "尚無";
+
+                        Swal.fire({
+                            title: `🌟 行程邀約：${data.title}`,
+                            html: `
+                                <div class="text-start small p-2 bg-light rounded" style="font-size: 0.85rem; line-height: 1.5;">
+                                    <div><b>📍 地點：</b>${data.location}</div>
+                                    ${data.notes ? `<div><b>📝 備註：</b>${data.notes}</div>` : ""}
+                                    <div class="mt-2 border-top pt-2">
+                                        <b>👍 有興趣成員 (${interestedCount}人)：</b><br>
+                                        <span class="text-success fw-bold">${interestedNames}</span>
+                                    </div>
+                                </div>
+                            `,
+                            showCancelButton: true,
+                            showDenyButton: true,
+                            confirmButtonColor: '#1DB446',
+                            denyButtonColor: '#3085d6',
+                            cancelButtonColor: '#aaa',
+                            confirmButtonText: '👍 我有興趣',
+                            denyButtonText: '⏰ 決定時間',
+                            cancelButtonText: '關閉'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                joinUnscheduled(itineraryId);
+                            } else if (result.isDenied) {
+                                setFinalTimeModal(itineraryId);
+                            }
+                        });
+                    } else {
+                        Swal.fire('錯誤', '載入邀請行程失敗: ' + data.error, 'error');
+                    }
+                });
+            }
         }
     </script>
 </body>

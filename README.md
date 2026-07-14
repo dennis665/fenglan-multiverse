@@ -4,7 +4,7 @@
 
 這是一個基於 **Django 6.0.x** 與 **MySQL 8.x** 建立的多功能整合入口網站系統（CSI Portal），具備豐富的商業管理與 AI 應用模組。專案支援 **Google OAuth 2.0** 登入、**WebSocket (Daphne)** 即時通訊與 **Docker** 容器化部署，並結合了多種先進的機器學習與雲端 AI 引擎。
 
-*   **最新版本**：`v1.17.5`
+*   **最新版本**：`v1.17.6`
 *   **更新摘要**：[點此查看完整變更歷程 (CHANGELOG.md)](CHANGELOG.md)
 
 ---
@@ -73,7 +73,7 @@ graph TD
 *   **[bionic_chat](file:///d:/SI1403/dennis/csi_server/bionic_chat/)**：虛擬人物語音對話系統。以 `llama-cpp-python` 載入本地 LLM 模型，透過 SSE (Server-Sent Events) 串流輸出文字，並於斷句時自動將繁體中文回覆翻譯並生成 `edge-tts` 語音音檔串流播放。
 *   **[games](file:///d:/SI1403/dennis/csi_server/games/)**：綜合網頁遊戲中心與 Godot API 接口。提供「倖存者生存」（Vampire Survivor 網頁版/ Godot Token 驗證存檔）、「虛擬人生」（大富翁地圖事件）以及「魔塔 RPG」（五層地圖、存檔資料序列化與局外金幣升級）三款遊戲。
 *   **[pet_system](file:///d:/SI1403/dennis/csi_server/pet_system/)**：Q 版像素寵物養成遊戲化系統。支援神秘蛋隨機孵化（幻獸綠龍 / 烈火幼犬）、點數餵食、登入天數進化與多元性格分支。內建「進化分支圖鑑」展示性格進化條件與特權；新增「寵物能力面板」顯示含裝飾品能力加成之生命值 (HP)、攻擊力 (ATK) 與戰鬥力 (Power)；支援「怪獸圖鑑」查詢冒險塔各區域史萊姆屬性；配備中途可隨時召回之「探索派遣」及自動爬塔回合制 Canvas 戰鬥；出戰寵物支援全站 Shimeji 漫遊與任意拖曳定位；其餘倉庫寵物群聚於培育室畫布進行背景漫遊，畫面乾淨無框線。
-*   **[line_manager](file:///d:/SI1403/dennis/csi_server/line_manager/)**：LINE 官方帳號行程管理與隱私防護系統。支援 Google 帳戶合併綁定、歷史行程自動移轉、`GroupMembership` 成員關係動態追蹤（群組行程自動同步共享）、LINE LIFF 網頁端行程面板，且核心行程資料欄位在資料庫層進行對稱加密，以防後台窺探。
+*   **[line_manager](file:///d:/SI1403/dennis/csi_server/line_manager/)**：LINE 官方帳號行程管理與隱私防護系統。支援 Google 帳戶合併綁定與歷史行程移轉；配備「時間待定（有興趣）行程」之建立與分享機制，支援群組成員點擊加入與投票定案；支援設定「多重相關活動連結」；整合「一鍵加入 Google 日曆」提升日常便利性；實作 `GroupMembership` 成員關係動態追蹤與共享看板，且核心標題、地點與備註等隱私欄位在資料庫層進行對稱加密以防後台窺探。
 
 ---
 
