@@ -2,31 +2,42 @@ import json
 from datetime import datetime
 
 import requests
+
+# Force urllib3 to use IPv4 only to prevent IPv6 DNS timeout (common on Windows)
+try:
+    import socket
+
+    import urllib3.util.connection as urllib3_cn
+
+    urllib3_cn.allowed_gai_family = lambda: socket.AF_INET
+except Exception:
+    pass
+
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.dateparse import parse_datetime
-from django.utils.timezone import make_aware, now, localtime
+from django.utils.timezone import localtime, make_aware, now
 from django.views.decorators.csrf import csrf_exempt
 from linebot.v3 import WebhookHandler
 from linebot.v3.exceptions import InvalidSignatureError
 from linebot.v3.messaging import (
     ApiClient,
     Configuration,
-    MessagingApi,
-    ReplyMessageRequest,
-    TextMessage,
-    FlexMessage,
     FlexContainer,
+    FlexMessage,
+    LocationAction,
+    MessagingApi,
     QuickReply,
     QuickReplyItem,
-    LocationAction,
+    ReplyMessageRequest,
+    TextMessage,
 )
-from linebot.v3.webhooks import JoinEvent, MessageEvent, TextMessageContent, LocationMessageContent
+from linebot.v3.webhooks import JoinEvent, LocationMessageContent, MessageEvent, TextMessageContent
 
-from django.db.models import Q
-from .models import Itinerary, LineProfile, GroupMembership
+from .models import GroupMembership, Itinerary, LineProfile
 
 #! 初始化 LINE SDK 配置
 configuration = Configuration(access_token=settings.LINE_CHANNEL_ACCESS_TOKEN)
@@ -503,7 +514,11 @@ def liff_itinerary_list(request):
     context = {
         "liff_id": settings.LINE_LIFF_ID,
     }
-    return render(request, "line_manager/liff_list.html", context)
+    response = render(request, "line_manager/liff_list.html", context)
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    return response
 
 
 def liff_itinerary_create(request):
@@ -871,7 +886,7 @@ def api_create_itinerary(request):
         }
 
         try:
-            from linebot.v3.messaging import PushMessageRequest, FlexMessage, FlexContainer
+            from linebot.v3.messaging import FlexContainer, FlexMessage, PushMessageRequest
             with ApiClient(configuration) as api_client:
                 api_instance = MessagingApi(api_client)
                 api_instance.push_message(
@@ -1097,7 +1112,6 @@ def api_get_itinerary_detail(request, pk):
         except Exception:
             pass
 
-    from django.utils.timezone import localtime
     dt_str = localtime(itinerary.date_time).strftime("%Y-%m-%dT%H:%M") if itinerary.date_time else ""
     is_expired = itinerary.date_time <= now() if itinerary.date_time else False
 
@@ -1448,7 +1462,7 @@ def api_set_unscheduled_time(request, pk):
     }
 
     try:
-        from linebot.v3.messaging import PushMessageRequest, FlexMessage, FlexContainer
+        from linebot.v3.messaging import FlexContainer, FlexMessage, PushMessageRequest
         with ApiClient(configuration) as api_client:
             api_instance = MessagingApi(api_client)
             api_instance.push_message(
@@ -1513,3 +1527,864 @@ def api_hide_itinerary(request, pk):
     itinerary.save()
 
     return JsonResponse({"status": "success"})
+
+
+import time
+
+_token_cache = {}  # key: access_token, value: (line_user_id, display_name, expire_time)
+
+
+def _verify_token_with_cache(access_token):
+    """自帶 10 分鐘快取的 LINE Token 驗證，避免高頻重複請求 LINE API"""
+    if not access_token:
+        return None, None
+    now_ts = time.time()
+    if access_token in _token_cache:
+        line_user_id, display_name, expire = _token_cache[access_token]
+        if now_ts < expire:
+            return line_user_id, display_name
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+    try:
+        res = requests.get("https://api.line.me/v2/profile", headers=headers, timeout=5)
+        if res.status_code == 200:
+            profile_data = res.json()
+            line_user_id = profile_data["userId"]
+            display_name = profile_data.get("displayName", "LINE 用戶")
+            _token_cache[access_token] = (line_user_id, display_name, now_ts + 600)
+            return line_user_id, display_name
+    except Exception as e:
+        print(f"❌ LINE Token 驗證請求失敗: {e}")
+    return None, None
+
+
+def _get_or_create_profile(line_user_id, display_name="LINE 用戶"):
+    """當前 LINE 帳號如未曾建立過 Profile，在此進行靜默自動註冊"""
+    line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
+    if not line_profile:
+        new_username = f"line_{line_user_id[:15]}"
+        user = User.objects.filter(username=new_username).first()
+        if not user:
+            user = User.objects.create_user(username=new_username)
+        line_profile = LineProfile.objects.create(
+            user=user, line_user_id=line_user_id, line_display_name=display_name
+        )
+    return line_profile
+
+
+@csrf_exempt
+def api_get_friends(request):
+    """API 端點：取得目前的好友列表與其他可供新增的會員列表 (支援名稱搜尋且僅曝露 LINE 顯示名稱)"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        query = data.get("query", "").strip()
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    # 驗證 LINE Token
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import Friendship
+
+    # 目前的好友 (只顯示 LINE 名稱)
+    friendships = Friendship.objects.filter(user=user).select_related("friend__line_profile")
+    friends_list = []
+    friend_ids = []
+    for f in friendships:
+        friend_ids.append(f.friend.id)
+        try:
+            display_name = f.friend.line_profile.line_display_name or "未知 LINE 用戶"
+        except AttributeError:
+            display_name = "未知 LINE 用戶"
+        friends_list.append({"id": f.friend.id, "display_name": display_name})
+
+    # 其他已加入 LINE 的所有會員 (排除自己與現有好友，支援模糊搜尋)
+    others_qs = LineProfile.objects.exclude(user=user).exclude(user__id__in=friend_ids)
+    if query:
+        others_qs = others_qs.filter(line_display_name__icontains=query)
+
+    # 限制數量 (最多 30 個項目)
+    others_qs = others_qs[:30]
+
+    others_list = []
+    for o in others_qs:
+        others_list.append({"id": o.user.id, "display_name": o.line_display_name or "未設定名稱"})
+
+    return JsonResponse({"status": "success", "friends": friends_list, "others": others_list})
+
+
+@csrf_exempt
+def api_add_friend(request):
+    """API 端點：新增好友"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        friend_id = data.get("friend_id")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not friend_id:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    # 驗證 LINE Token
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    friend_user = User.objects.filter(id=friend_id).first()
+    if not friend_user:
+        return JsonResponse({"error": "Friend user not found"}, status=404)
+
+    if user == friend_user:
+        return JsonResponse({"error": "Cannot add yourself as a friend"}, status=400)
+
+    from .models import Friendship
+
+    # 雙向建立好友關係
+    Friendship.objects.get_or_create(user=user, friend=friend_user)
+    Friendship.objects.get_or_create(user=friend_user, friend=user)
+
+    return JsonResponse({"status": "success"})
+
+
+@csrf_exempt
+def api_get_dramas(request):
+    """API 端點：取得使用者的追劇進度清單或收到的推薦清單"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        tab = data.get("tab", "my_dramas")  # my_dramas, recommendations
+        page = int(data.get("page", 1))
+        if page < 1:
+            page = 1
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    # 驗證 LINE Token
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    page_size = 6
+    start = (page - 1) * page_size
+    end = start + page_size
+
+    from django.utils.timezone import localtime
+
+    from .models import DramaRecommendation, UserDramaProgress
+
+    list_data = []
+    if tab == "my_dramas":
+        progress_qs = (
+            UserDramaProgress.objects.filter(user=user)
+            .select_related("drama__creator__line_profile")
+            .order_by("-updated_at")
+        )
+        total_count = progress_qs.count()
+        sliced_qs = progress_qs[start:end]
+        has_more = total_count > end
+
+        for p in sliced_qs:
+            d = p.drama
+            try:
+                creator_name = d.creator.line_profile.line_display_name or "未知 LINE 用戶"
+            except AttributeError:
+                creator_name = "未知 LINE 用戶"
+
+            links = []
+            if d.info_links:
+                try:
+                    links = json.loads(d.info_links)
+                except Exception:
+                    pass
+
+            list_data.append(
+                {
+                    "progress_id": p.pk,
+                    "drama_id": d.pk,
+                    "title": d.title,
+                    "category": d.category,
+                    "total_seasons": d.total_seasons,
+                    "total_episodes": d.total_episodes,
+                    "info_links": links,
+                    "current_season": p.current_season,
+                    "current_episode": p.current_episode,
+                    "is_tracked": p.is_tracked,
+                    "creator": creator_name,
+                    "updated_at": localtime(d.updated_at).strftime("%Y-%m-%d %H:%M"),
+                }
+            )
+    elif tab == "all_dramas":
+        from .models import Drama
+        dramas_qs = Drama.objects.all().select_related("creator__line_profile").order_by("-updated_at")
+        
+        q = data.get("q", "").strip().lower()
+        cat = data.get("category", "").strip()
+
+        # 記憶體內過濾與解密比對
+        filtered_dramas = []
+        for d in dramas_qs:
+            if cat and d.category != cat:
+                continue
+            if q and q not in d.title.lower():
+                continue
+            filtered_dramas.append(d)
+
+        total_count = len(filtered_dramas)
+        sliced_dramas = filtered_dramas[start:end]
+        has_more = total_count > end
+
+        tracked_drama_ids = set(UserDramaProgress.objects.filter(user=user).values_list("drama_id", flat=True))
+
+        for d in sliced_dramas:
+            try:
+                creator_name = d.creator.line_profile.line_display_name or "未知 LINE 用戶"
+            except AttributeError:
+                creator_name = "未知 LINE 用戶"
+
+            links = []
+            if d.info_links:
+                try:
+                    links = json.loads(d.info_links)
+                except Exception:
+                    pass
+
+            list_data.append(
+                {
+                    "drama_id": d.pk,
+                    "title": d.title,
+                    "category": d.category,
+                    "total_seasons": d.total_seasons,
+                    "total_episodes": d.total_episodes,
+                    "info_links": links,
+                    "creator": creator_name,
+                    "is_added": d.pk in tracked_drama_ids,
+                    "updated_at": localtime(d.updated_at).strftime("%Y-%m-%d %H:%M"),
+                }
+            )
+    else:
+        rec_qs = (
+            DramaRecommendation.objects.filter(to_user=user, is_accepted=False)
+            .select_related("drama__creator__line_profile", "from_user__line_profile")
+            .order_by("-created_at")
+        )
+        total_count = rec_qs.count()
+        sliced_qs = rec_qs[start:end]
+        has_more = total_count > end
+
+        for r in sliced_qs:
+            d = r.drama
+            try:
+                from_name = r.from_user.line_profile.line_display_name or "未知 LINE 用戶"
+            except AttributeError:
+                from_name = "未知 LINE 用戶"
+
+            links = []
+            if d.info_links:
+                try:
+                    links = json.loads(d.info_links)
+                except Exception:
+                    pass
+
+            list_data.append(
+                {
+                    "recommendation_id": r.pk,
+                    "drama_id": d.pk,
+                    "title": d.title,
+                    "category": d.category,
+                    "total_seasons": d.total_seasons,
+                    "total_episodes": d.total_episodes,
+                    "info_links": links,
+                    "from_user": from_name,
+                    "recommend_notes": r.recommend_notes,
+                    "created_at": localtime(r.created_at).strftime("%Y-%m-%d %H:%M"),
+                }
+            )
+
+    return JsonResponse({"status": "success", "list": list_data, "has_more": has_more})
+
+
+@csrf_exempt
+def api_create_drama(request):
+    """API 端點：建立新的追劇主檔並自動加入使用者的進度清單"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        title = data.get("title")
+        category = data.get("category", "其他")
+        total_seasons = int(data.get("total_seasons", 1))
+        total_episodes = int(data.get("total_episodes", 0))
+        links = data.get("info_links", [])
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not title:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    # 驗證 LINE Token
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import Drama, UserDramaProgress
+
+    # 檢查同名劇集（解密比對）
+    existing_titles = {d.title.strip() for d in Drama.objects.all()}
+    if title.strip() in existing_titles:
+        return JsonResponse({"error": f"劇名『{title}』已存在，請勿重複建立！"}, status=400)
+
+    drama = Drama.objects.create(
+        title=title,
+        category=category,
+        total_seasons=total_seasons,
+        total_episodes=total_episodes,
+        info_links=json.dumps(links, ensure_ascii=False),
+        creator=user,
+    )
+
+    # 預設建立進度
+    UserDramaProgress.objects.create(
+        user=user, drama=drama, current_season=1, current_episode=1, is_tracked=False
+    )
+
+    return JsonResponse({"status": "success", "drama_id": drama.id})
+
+
+@csrf_exempt
+def api_update_drama_progress(request, pk):
+    """API 端點：更新使用者個人的追劇進度（季/集）或追蹤狀態"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        current_season = data.get("current_season")
+        current_episode = data.get("current_episode")
+        is_tracked = data.get("is_tracked")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    # 驗證 LINE Token
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import UserDramaProgress
+
+    progress = UserDramaProgress.objects.filter(user=user, drama_id=pk).first()
+    if not progress:
+        return JsonResponse({"error": "Progress not found"}, status=404)
+
+    if current_season is not None:
+        progress.current_season = int(current_season)
+    if current_episode is not None:
+        progress.current_episode = int(current_episode)
+    if is_tracked is not None:
+        progress.is_tracked = bool(is_tracked)
+
+    progress.save()
+    return JsonResponse({"status": "success"})
+
+
+@csrf_exempt
+def api_update_drama(request, pk):
+    """API 端點：修改劇集的共享資訊。如連結有更新，將會推播通知其他追蹤該劇的好友"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        title = data.get("title")
+        category = data.get("category")
+        total_seasons = data.get("total_seasons")
+        total_episodes = data.get("total_episodes")
+        links = data.get("info_links")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    # 驗證 LINE Token
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import Drama, UserDramaProgress
+
+    drama = Drama.objects.filter(pk=pk).first()
+    if not drama:
+        return JsonResponse({"error": "Drama not found"}, status=404)
+
+    # 偵測連結是否異動
+    links_changed = False
+    old_links_str = drama.info_links or "[]"
+    new_links_str = json.dumps(links, ensure_ascii=False) if links is not None else old_links_str
+
+    if links is not None:
+        try:
+            old_list = json.loads(old_links_str)
+            if old_list != links:
+                links_changed = True
+        except Exception:
+            links_changed = True
+
+    if title is not None:
+        drama.title = title
+    if category is not None:
+        drama.category = category
+    if total_seasons is not None:
+        drama.total_seasons = int(total_seasons)
+    if total_episodes is not None:
+        drama.total_episodes = int(total_episodes)
+    if links is not None:
+        drama.info_links = new_links_str
+
+    drama.save()
+
+    # 如果有連結更新，發送 LINE 推播給有勾選追蹤的其他會員
+    if links_changed:
+        trackers = (
+            UserDramaProgress.objects.filter(drama=drama, is_tracked=True)
+            .select_related("user__line_profile")
+        )
+        if trackers.exists():
+            editor_name = line_profile.line_display_name or user.username
+
+            # 發送 Flex 卡片推播
+            flex_contents = {
+                "type": "bubble",
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "🌟 追蹤劇集連結更新通知",
+                            "weight": "bold",
+                            "color": "#1DB446",
+                            "size": "sm",
+                        },
+                        {
+                            "type": "text",
+                            "text": f"【{drama.title}】的相關資訊連結已更新！",
+                            "weight": "bold",
+                            "size": "md",
+                            "margin": "md",
+                            "wrap": True,
+                        },
+                        {"type": "separator", "margin": "md"},
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "margin": "md",
+                            "spacing": "xs",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": f"更新者: {editor_name}",
+                                    "size": "xs",
+                                    "color": "#666666",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "請開啟追劇看板，於劇集卡片下方點擊新連結查看詳情！",
+                                    "size": "xs",
+                                    "color": "#888888",
+                                    "wrap": True,
+                                },
+                            ],
+                        },
+                    ],
+                },
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#1DB446",
+                            "height": "sm",
+                            "action": {
+                                "type": "uri",
+                                "label": "📺 開啟追劇看板",
+                                "uri": f"https://liff.line.me/{settings.LINE_LIFF_ID}/?page=drama",
+                            },
+                        }
+                    ],
+                },
+            }
+
+            try:
+                from linebot.v3.messaging import FlexContainer, FlexMessage, PushMessageRequest
+
+                for t in trackers:
+                    tracker_line_id = t.user.line_profile.line_user_id
+                    if tracker_line_id:
+                        with ApiClient(configuration) as api_client:
+                            api_instance = MessagingApi(api_client)
+                            api_instance.push_message(
+                                PushMessageRequest(
+                                    to=tracker_line_id,
+                                    messages=[
+                                        FlexMessage(
+                                            alt_text=f"🌟 劇集【{drama.title}】相關連結已更新！",
+                                            contents=FlexContainer.from_dict(flex_contents),
+                                        )
+                                    ],
+                                )
+                            )
+            except Exception as e:
+                print(f"❌ 追蹤者連結更新通知發送失敗: {e}")
+
+    return JsonResponse({"status": "success"})
+
+
+@csrf_exempt
+def api_recommend_drama(request):
+    """API 端點：向多個好友發送追劇推薦"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        drama_id = data.get("drama_id")
+        friend_ids = data.get("friend_ids", [])
+        recommend_notes = data.get("recommend_notes", "")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not drama_id or not friend_ids:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    # 驗證 LINE Token
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import Drama, DramaRecommendation
+
+    drama = Drama.objects.filter(pk=drama_id).first()
+    if not drama:
+        return JsonResponse({"error": "Drama not found"}, status=404)
+
+    from_name = line_profile.line_display_name or user.username
+
+    success_names = []
+    skipped_names = []
+
+    from .models import UserDramaProgress
+    for fid in friend_ids:
+        friend_user = User.objects.filter(id=fid).first()
+        if not friend_user:
+            continue
+
+        try:
+            friend_name = friend_user.line_profile.line_display_name or friend_user.username
+        except AttributeError:
+            friend_name = friend_user.username
+
+        # 1. 防呆：檢查對方是否已在追此劇
+        if UserDramaProgress.objects.filter(user=friend_user, drama=drama).exists():
+            skipped_names.append(f"{friend_name} (已在追此劇)")
+            continue
+
+        # 2. 防呆：檢查是否已推薦過且對方尚未接受
+        if DramaRecommendation.objects.filter(to_user=friend_user, drama=drama, is_accepted=False).exists():
+            skipped_names.append(f"{friend_name} (已推薦過，等待接受中)")
+            continue
+
+        # 3. 建立推薦紀錄
+        DramaRecommendation.objects.create(
+            from_user=user,
+            to_user=friend_user,
+            drama=drama,
+            recommend_notes=recommend_notes,
+        )
+        success_names.append(friend_name)
+
+        # 推送 LINE 訊息通知被推薦的好友
+        try:
+            friend_line_id = friend_user.line_profile.line_user_id
+            if friend_line_id:
+                flex_contents = {
+                    "type": "bubble",
+                    "body": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "📬 收到好友追劇推薦",
+                                "weight": "bold",
+                                "color": "#1DB446",
+                                "size": "sm",
+                            },
+                            {
+                                "type": "text",
+                                "text": f"【{drama.title}】",
+                                "weight": "bold",
+                                "size": "lg",
+                                "margin": "md",
+                            },
+                            {"type": "separator", "margin": "md"},
+                            {
+                                "type": "box",
+                                "layout": "vertical",
+                                "margin": "md",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": f"推薦人: {from_name}",
+                                        "size": "xs",
+                                        "color": "#666666",
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": f"推薦語: {recommend_notes}"
+                                        if recommend_notes
+                                        else "推薦這部劇給您！",
+                                        "size": "xs",
+                                        "color": "#888888",
+                                        "wrap": True,
+                                        "margin": "xs",
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    "footer": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "style": "primary",
+                                "color": "#1DB446",
+                                "height": "sm",
+                                "action": {
+                                    "type": "uri",
+                                    "label": "📺 查看推薦清單",
+                                    "uri": f"https://liff.line.me/{settings.LINE_LIFF_ID}/?page=drama",
+                                },
+                            }
+                        ],
+                    },
+                }
+
+                from linebot.v3.messaging import FlexContainer, FlexMessage, PushMessageRequest
+
+                with ApiClient(configuration) as api_client:
+                    api_instance = MessagingApi(api_client)
+                    api_instance.push_message(
+                        PushMessageRequest(
+                            to=friend_line_id,
+                            messages=[
+                                FlexMessage(
+                                    alt_text=f"📬 好友 {from_name} 推薦了劇集【{drama.title}】給您！",
+                                    contents=FlexContainer.from_dict(flex_contents),
+                                )
+                            ],
+                        )
+                    )
+        except Exception as e:
+            print(f"❌ 傳送好友推薦通知失敗 to {friend_user.username}: {e}")
+
+    if not success_names and skipped_names:
+        return JsonResponse({
+            "status": "error",
+            "error": "、".join(skipped_names)
+        })
+
+    return JsonResponse({
+        "status": "success",
+        "success_list": success_names,
+        "skipped_list": skipped_names
+    })
+
+
+@csrf_exempt
+def api_accept_recommendation(request, pk):
+    """API 端點：接受好友的推薦，將其加入自己的追劇進度表中"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    # 驗證 LINE Token
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import DramaRecommendation, UserDramaProgress
+
+    rec = DramaRecommendation.objects.filter(pk=pk, to_user=user).first()
+    if not rec:
+        return JsonResponse({"error": "Recommendation not found"}, status=404)
+
+    # 標記已接受
+    rec.is_accepted = True
+    rec.save()
+
+    # 建立個人的追劇進度
+    UserDramaProgress.objects.get_or_create(
+        user=user,
+        drama=rec.drama,
+        defaults={"current_season": 1, "current_episode": 1, "is_tracked": False},
+    )
+
+    return JsonResponse({"status": "success"})
+
+@csrf_exempt
+def api_search_existing_dramas(request):
+    """API 端點：搜尋資料庫中已存在的劇集，以供新增時自動填寫"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        query = data.get("q", "").strip().lower()
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    from .models import Drama
+    dramas = Drama.objects.all().order_by("-id")
+
+    results = []
+    for d in dramas:
+        if query and query not in d.title.lower():
+            continue
+
+        links = []
+        if d.info_links:
+            try:
+                links = json.loads(d.info_links)
+            except Exception:
+                pass
+        results.append({
+            "id": d.id,
+            "title": d.title,
+            "category": d.category,
+            "total_seasons": d.total_seasons,
+            "total_episodes": d.total_episodes,
+            "info_links": links
+        })
+        if len(results) >= 10:
+            break
+
+    return JsonResponse({"status": "success", "results": results})
+
+
+@csrf_exempt
+def api_join_drama(request, pk):
+    """API 端點：將資料庫已存在的劇集加入個人追劇清單"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from .models import Drama, UserDramaProgress
+    drama = Drama.objects.filter(pk=pk).first()
+    if not drama:
+        return JsonResponse({"error": "Drama not found"}, status=404)
+
+    progress, created = UserDramaProgress.objects.get_or_create(
+        user=user,
+        drama=drama,
+        defaults={"current_season": 1, "current_episode": 1, "is_tracked": False}
+    )
+
+    return JsonResponse({"status": "success", "already_exists": not created})
+
+
+@csrf_exempt
+def api_get_categories(request):
+    """API 端點：取得目前資料庫中所有唯一的劇集分類"""
+    from .models import Drama
+    categories_qs = Drama.objects.values_list("category", flat=True).distinct()
+    categories = [cat.strip() for cat in categories_qs if cat and cat.strip()]
+    for default_cat in ["2026年7月新番", "動畫", "美劇", "日劇", "韓劇", "其他"]:
+        if default_cat not in categories:
+            categories.append(default_cat)
+    response = JsonResponse({"status": "success", "categories": categories})
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    return response
+
+
+def liff_drama(request):
+    """追劇行程 LIFF 頁面渲染視圖"""
+    context = {
+        "liff_id": settings.LINE_LIFF_ID,
+    }
+    response = render(request, "line_manager/liff_drama.html", context)
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    return response

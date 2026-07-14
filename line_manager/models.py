@@ -94,3 +94,72 @@ class GroupMembership(models.Model):
 
     def __str__(self):
         return f"{self.user.username} in {self.group_id}"
+
+
+class Friendship(models.Model):
+    """好友關係模型 (僅限已綁定的 CSI 會員)"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="friendships", verbose_name=_("使用者"))
+    friend = models.ForeignKey(User, on_delete=models.CASCADE, related_name="friend_of", verbose_name=_("好友"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
+
+    class Meta:
+        verbose_name = _("追劇好友關係")
+        verbose_name_plural = _("追劇好友關係")
+        unique_together = ("user", "friend")
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.friend.username}"
+
+
+class Drama(models.Model):
+    """追劇主表（共享資訊部分）"""
+    title = EncryptedCharField(max_length=255, verbose_name=_("劇名"))
+    category = models.CharField(max_length=50, default="其他", verbose_name=_("分類"))
+    total_seasons = models.IntegerField(default=1, verbose_name=_("總季數"))
+    total_episodes = models.IntegerField(default=0, verbose_name=_("總集數"))
+    info_links = EncryptedTextField(blank=True, default="[]", verbose_name=_("相關資訊連結"))
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_dramas", verbose_name=_("建立者"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))
+
+    class Meta:
+        verbose_name = _("追劇主檔")
+        verbose_name_plural = _("追劇主檔")
+
+    def __str__(self):
+        return f"{self.title} ({self.category})"
+
+
+class UserDramaProgress(models.Model):
+    """個人追劇進度表（私有資訊部分）"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="drama_progresses", verbose_name=_("使用者"))
+    drama = models.ForeignKey(Drama, on_delete=models.CASCADE, related_name="progresses", verbose_name=_("追劇"))
+    current_season = models.IntegerField(default=1, verbose_name=_("目前看至第幾季"))
+    current_episode = models.IntegerField(default=1, verbose_name=_("目前看至第幾集"))
+    is_tracked = models.BooleanField(default=False, verbose_name=_("是否追蹤連結更新"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))
+
+    class Meta:
+        verbose_name = _("個人追劇進度")
+        verbose_name_plural = _("個人追劇進度")
+        unique_together = ("user", "drama")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.drama.title} (S{self.current_season}E{self.current_episode})"
+
+
+class DramaRecommendation(models.Model):
+    """追劇推薦清單"""
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_recommendations", verbose_name=_("推薦人"))
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_recommendations", verbose_name=_("被推薦人"))
+    drama = models.ForeignKey(Drama, on_delete=models.CASCADE, verbose_name=_("追劇項目"))
+    recommend_notes = EncryptedTextField(blank=True, verbose_name=_("推薦心得語錄"))
+    is_accepted = models.BooleanField(default=False, verbose_name=_("是否已接受"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
+
+    class Meta:
+        verbose_name = _("追劇推薦記錄")
+        verbose_name_plural = _("追劇推薦記錄")
+
+    def __str__(self):
+        return f"{self.from_user.username} recommend {self.drama.title} to {self.to_user.username}"

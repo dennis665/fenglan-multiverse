@@ -32,12 +32,28 @@
 * **分辨行程個人與群組共用來源 (Distinguish Itinerary Source)**：
     * 後端 API 自動判別 `group_id` 並調用 LINE 官方 API 獲取群組摘要名稱，並快取 24 小時以確保加載效能。
     * 行程看板卡片頂部新增「個人行程」或「群組: [群組名稱]」徽章，供使用者清晰分辨行程來源。
+* **全新「探索新番/劇庫」追劇大廳功能**：
+    * 追劇看板頁面 (`liff_drama.html`) 新增「🌐 探索新番/劇庫」大廳分頁，呈現資料庫共享之劇庫（支援分頁加載與即時模糊搜尋）。
+    * 提供一鍵「➕ 加入清單」功能，並於已加入時自動轉為「已在清單」狀態，簡化個人與共享劇集之同步。
+* **分類智慧下拉選單與自訂分類**：
+    * 新增/編輯劇集之分類由原本文字欄位改為動態下拉選單，並支援「➕ 自訂新分類...」動態切換為文字框輸入。
+    * 提供分類數據接口 `api_get_categories`（使用 POST 方法以防止 ngrok 免費版警告頁面干擾）。
+* **同名劇集防重防呆判定**：
+    * 在 `api_create_drama` 建立劇集時引入同名防重機制，於記憶體中將加密的劇名解密後進行重複判定，若發現同名劇集則拋出 `400` 錯誤及防重警示。
+* **大量新番與劇場版基礎 CSV 自動初始化部署**：
+    * 支援在 Django 啟動的 `ready()` 初始化中，透過非同步背景 Thread 讀取基礎 CSV 檔案（包含 2026年7月新番與 2026年日美韓劇、動畫劇場版共 172 部），自動比對資料庫（記憶體內解密比對）將缺漏之影劇建檔，免去生產部署手動匯入的麻煩。
 
 ### Fixed & Optimized (修復與優化)
 * **修復行程刪除後的列表刷新 Bug**：
     * 將原先在行程刪除成功時無參數調用 `fetchItineraries()` 導致 JavaScript 報錯的 Bug，修正為傳入各自分頁參數同步刷新 `upcoming`、`unscheduled` 與 `history` 列表，提升穩定性。
 * **修復排程任務計算提醒時間 Bug (Scheduler NoneType Error)**：
     * 修復在啟動排程 `start_scheduler` 指令掃描行程時，遇到 nullable 之時間待定行程 (`date_time = None`)，因進行 `date_time - timedelta` 運算引發 `unsupported operand type(s) for -` 崩潰的 Bug。修正為預先過濾 `date_time__isnull=False` 行程再行提醒計算。
+* **修復手機 LINE 內建瀏覽器（WebKit）請求與跳轉快取 Bug (WebView Cache-Busting)**：
+    * 修復 iOS LINE WebView 因相對路徑在 iframe 沙盒或 file:// 環境下 fetch 失敗拋出 `DOMException: The string did not match the expected pattern` 錯誤之 Bug，在前台 JS 引進絕對網域 `apiBaseUrl` 機制。
+    * 修復 ngrok 免費版 GET 瀏覽器警告攔截 HTML 導致 JSON 解析崩潰之 Bug，將分類請求全面轉換為 POST 協定以順利穿透。
+    * 在跳轉 URL 加入隨機時間戳 `_t`，並在 HTML 與 API 視圖中全面配置強制 Cache-Control 標頭，防止手機端加載舊頁面暫存。
+* **防重複 LINE 圖文選單自動化註冊**：
+    * 重構圖文選單註冊指令 `register_rich_menu`。Django 啟動時在背景執行緒中自動判定現存選單結構，防止圖文選單重複累積，實現全自動佈署。
 
 ---
 

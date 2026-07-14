@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的追劇小幫手</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        .btn-line {
+            background-color: #1DB446;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-line:hover {
+            background-color: #158b32;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .nav-tabs {
+            border-bottom: none;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            font-weight: bold;
+            border-radius: 50px;
+            margin: 0 5px;
+            padding: 8px 20px;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #1DB446;
+            color: white;
+        }
+        .drama-item {
+            border-left: 5px solid #00bcff;
+            transition: transform 0.2s ease;
+        }
+        .drama-item:hover {
+            transform: scale(1.02);
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #1DB446;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="py-4">
+    <div class="container" style="max-width: 500px;">
+        <!-- 載入中畫面 -->
+        <div id="loading-section" class="text-center py-5">
+            <div class="loader d-inline-block"></div>
+            <p class="mt-3 text-muted fw-bold">正在讀取 LINE 追劇檔案...</p>
+        </div>
+
+        <!-- 主要畫面 -->
+        <div id="main-section" class="d-none">
+            <!-- 頂部 Header -->
+            <div class="glass-card p-3 mb-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="fw-bold mb-0 text-success" id="group-title" style="font-size: 1.35rem;">
+                        <i class="fa-solid fa-clapperboard me-2"></i>追劇清單
+                    </h3>
+                    <span class="text-muted small">Hi, <span id="user-display-name" class="fw-bold text-success">LINE 用戶</span></span>
+                </div>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="openDisplaySettingsModal()">
+                        <i class="fa-solid fa-sliders me-1"></i>顯示設定
+                    </button>
+                    <button class="btn btn-sm btn-line px-3" onclick="openAddDramaModal()">
+                        <i class="fa-solid fa-plus me-1"></i>新增劇集
+                    </button>
+                </div>
+            </div>
+
+            <!-- 分頁 Tab -->
+            <ul class="nav nav-tabs justify-content-center mb-3" id="dramaTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="my-dramas-tab" data-bs-toggle="tab" data-bs-target="#my-dramas-panel" type="button" role="tab" onclick="switchTab('my_dramas')">📺 我的追劇</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="all-dramas-tab" data-bs-toggle="tab" data-bs-target="#all-dramas-panel" type="button" role="tab" onclick="switchTab('all_dramas')">🌐 探索新番/劇庫</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="recs-tab" data-bs-toggle="tab" data-bs-target="#recs-panel" type="button" role="tab" onclick="switchTab('recommendations')">📬 好友推薦</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="friends-tab" data-bs-toggle="tab" data-bs-target="#friends-panel" type="button" role="tab" onclick="switchTab('friends')">👥 好友管理</button>
+                </li>
+            </ul>
+
+            <!-- 分頁內容 -->
+            <div class="tab-content">
+                <!-- 我的追劇 -->
+                <div class="tab-pane fade show active" id="my-dramas-panel" role="tabpanel">
+                    <div id="my-dramas-list" class="d-flex flex-column gap-3"></div>
+                    <div id="my-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
+                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="my-prev-btn" onclick="changePage(-1)">上一頁</button>
+                        <span class="small text-muted fw-bold">第 <span id="my-page-num" class="text-success">1</span> 頁</span>
+                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="my-next-btn" onclick="changePage(1)">下一頁</button>
+                    </div>
+                </div>
+
+                <!-- 探索新番/劇庫 -->
+                <div class="tab-pane fade" id="all-dramas-panel" role="tabpanel">
+                    <!-- 搜尋與分類選單 -->
+                    <div class="glass-card p-3 mb-3 d-flex gap-2 align-items-center">
+                        <div class="flex-grow-1 position-relative">
+                            <i class="fa-solid fa-magnifying-glass text-secondary position-absolute" style="left: 12px; top: 10px;"></i>
+                            <input type="text" id="all-dramas-search" class="form-control form-control-sm rounded-pill ps-4" placeholder="搜尋劇名或新番..." oninput="triggerAllDramasSearch()">
+                        </div>
+                        <select id="all-dramas-cat-select" class="form-select form-select-sm rounded-pill w-auto" onchange="triggerAllDramasSearch()">
+                            <option value="">所有分類</option>
+                        </select>
+                    </div>
+                    <div id="all-dramas-list" class="d-flex flex-column gap-3"></div>
+                    <div id="all-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
+                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="all-prev-btn" onclick="changePage(-1)">上一頁</button>
+                        <span class="small text-muted fw-bold">第 <span id="all-page-num" class="text-success">1</span> 頁</span>
+                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="all-next-btn" onclick="changePage(1)">下一頁</button>
+                    </div>
+                </div>
+
+                <!-- 好友推薦 -->
+                <div class="tab-pane fade" id="recs-panel" role="tabpanel">
+                    <div id="recs-list" class="d-flex flex-column gap-3"></div>
+                    <div id="recs-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
+                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="recs-prev-btn" onclick="changePage(-1)">上一頁</button>
+                        <span class="small text-muted fw-bold">第 <span id="recs-page-num" class="text-success">1</span> 頁</span>
+                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="recs-next-btn" onclick="changePage(1)">下一頁</button>
+                    </div>
+                </div>
+
+                <!-- 好友管理 -->
+                <div class="tab-pane fade" id="friends-panel" role="tabpanel">
+                    <!-- 新增好友 -->
+                    <div class="glass-card p-3 mb-3">
+                        <h6 class="fw-bold mb-2"><i class="fa-solid fa-user-plus text-success me-1"></i>搜尋並新增 LINE 好友</h6>
+                        <div class="mb-2">
+                            <input type="text" id="friend-search-input" class="form-control form-control-sm" placeholder="輸入 LINE 暱稱關鍵字自動搜尋..." oninput="handleFriendSearch()">
+                        </div>
+                        <div id="search-results-list" class="d-flex flex-column gap-2 mt-2" style="max-height: 150px; overflow-y: auto;">
+                            <!-- 搜尋結果將動態插入在此 -->
+                        </div>
+                    </div>
+                    <!-- 好友清單 -->
+                    <div class="glass-card p-3">
+                        <h6 class="fw-bold mb-2"><i class="fa-solid fa-users text-primary me-1"></i>我的追劇好友</h6>
+                        <div id="friends-list" class="d-flex flex-column gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 顯示設定 Modal -->
+    <div class="modal fade" id="displaySettingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-success"><i class="fa-solid fa-sliders me-1"></i>自訂顯示項目</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">勾選決定是否在劇集卡片上顯示對應的項目：</p>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="pref-category-chk">
+                        <label class="form-check-label fw-bold small" for="pref-category-chk">顯示分類 (劇集種類)</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="pref-links-chk">
+                        <label class="form-check-label fw-bold small" for="pref-links-chk">顯示相關活動連結</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="pref-total-chk">
+                        <label class="form-check-label fw-bold small" for="pref-total-chk">顯示總季數與總集數</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="pref-creator-chk">
+                        <label class="form-check-label fw-bold small" for="pref-creator-chk">顯示發起人與更新時間</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-line w-100 py-2" onclick="saveDisplaySettings()">儲存設定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/編輯劇集 Modal -->
+    <div class="modal fade" id="dramaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-success" id="dramaModalTitle">新增劇集項目</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                    <input type="hidden" id="edit-drama-id">
+                    <div class="mb-2 position-relative">
+                        <label class="form-label fw-bold small">劇名</label>
+                        <input type="text" id="drama-title" class="form-control" placeholder="請輸入劇名" autocomplete="off">
+                        <div id="drama-suggestions" class="list-group position-absolute w-100 shadow d-none" style="z-index: 1050; max-height: 200px; overflow-y: auto; background: white; border-radius: 0 0 8px 8px; border: 1px solid #ddd;"></div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small">分類</label>
+                        <select id="drama-category-select" class="form-select form-select-sm" onchange="toggleCustomCategoryInput()">
+                            <option value="其他">其他</option>
+                            <option value="2026年7月新番">2026年7月新番</option>
+                            <option value="動畫">動畫</option>
+                            <option value="美劇">美劇</option>
+                            <option value="日劇">日劇</option>
+                            <option value="韓劇">韓劇</option>
+                            <option value="__custom__">➕ 自訂新分類...</option>
+                        </select>
+                        <input type="text" id="drama-category" class="form-control form-control-sm mt-2 d-none" placeholder="請輸入自訂分類名稱" value="其他">
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">總季數</label>
+                            <input type="number" id="drama-seasons" class="form-control" value="1" min="1">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small">總集數 (單季或全部總計)</label>
+                            <input type="number" id="drama-episodes" class="form-control" value="12" min="0">
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small d-flex justify-content-between align-items-center">
+                            相關資訊連結
+                            <button class="btn btn-xs btn-outline-success py-0 px-2" onclick="addLinkRow()"><i class="fa-solid fa-plus"></i></button>
+                        </label>
+                        <div id="link-rows-container" class="d-flex flex-column gap-2 mt-1"></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-line px-4" onclick="submitDramaForm()">送出儲存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 推薦劇集 Modal -->
+    <div class="modal fade" id="recommendModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-success"><i class="fa-solid fa-share-nodes me-1"></i>推薦劇集給好友</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="rec-drama-id">
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small">被推薦劇集</label>
+                        <input type="text" id="rec-drama-title" class="form-control" disabled>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small">選擇好友 (複選)</label>
+                        <div id="rec-friends-checkboxes" class="border p-2 rounded" style="max-height: 120px; overflow-y: auto;">
+                            <!-- 動態插入 -->
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small">推薦心得與短評</label>
+                        <textarea id="rec-notes" class="form-control" placeholder="例如：超好看神作！必追！" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-line px-4" onclick="submitRecommendForm()">發送推薦</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let liffId = "{{ liff_id }}";
+        let apiBaseUrl = "{{ request.scheme }}://{{ request.get_host }}";
+        let userAccessToken = null;
+        let lineContext = null;
+
+        // 分頁與狀態變數
+        let currentTab = "my_dramas";
+        let myDramasPage = 1;
+        let recsPage = 1;
+        let allDramasPage = 1;
+        let displayPrefs = {
+            category: true,
+            links: true,
+            total: true,
+            creator: true
+        };
+
+        // 好友快取
+        let myFriendsList = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadDisplaySettings();
+            initLiff();
+        });
+
+        function initLiff() {
+            liff.init({ liffId: liffId })
+                .then(() => {
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                    } else {
+                        userAccessToken = liff.getAccessToken();
+                        lineContext = liff.getContext();
+
+                        // 獲取使用者個人資料並設定問候語
+                        liff.getProfile().then(profile => {
+                            document.getElementById("user-display-name").innerText = profile.displayName;
+                        }).catch(err => {
+                            console.error("Failed to get profile", err);
+                        });
+
+                        // 抓取好友關係與追劇列表
+                        fetchFriends();
+                        fetchDramas("my_dramas", 1);
+                        fetchDramas("recommendations", 1);
+                        fetchDramas("all_dramas", 1);
+                        fetchCategories();
+                    }
+                })
+                .catch((err) => {
+                    console.error("LIFF initialization failed", err);
+                    alert("LIFF 啟動失敗，請於 LINE 內開啟！");
+                });
+        }
+
+        // 讀取/儲存顯示設定
+        function loadDisplaySettings() {
+            const saved = localStorage.getItem("drama_display_settings");
+            if (saved) {
+                try {
+                    displayPrefs = JSON.parse(saved);
+                } catch(e) {}
+            }
+            document.getElementById("pref-category-chk").checked = displayPrefs.category;
+            document.getElementById("pref-links-chk").checked = displayPrefs.links;
+            document.getElementById("pref-total-chk").checked = displayPrefs.total;
+            document.getElementById("pref-creator-chk").checked = displayPrefs.creator;
+        }
+
+        function openDisplaySettingsModal() {
+            const modal = new bootstrap.Modal(document.getElementById("displaySettingsModal"));
+            modal.show();
+        }
+
+        function saveDisplaySettings() {
+            displayPrefs.category = document.getElementById("pref-category-chk").checked;
+            displayPrefs.links = document.getElementById("pref-links-chk").checked;
+            displayPrefs.total = document.getElementById("pref-total-chk").checked;
+            displayPrefs.creator = document.getElementById("pref-creator-chk").checked;
+            localStorage.setItem("drama_display_settings", JSON.stringify(displayPrefs));
+            
+            // 關閉並重新渲染
+            bootstrap.Modal.getInstance(document.getElementById("displaySettingsModal")).hide();
+            fetchDramas("my_dramas", myDramasPage);
+        }
+
+        // 切換 Tab
+        function switchTab(tab) {
+            currentTab = tab;
+            if (tab === "my_dramas") {
+                fetchDramas("my_dramas", myDramasPage);
+            } else if (tab === "recommendations") {
+                fetchDramas("recommendations", recsPage);
+            } else if (tab === "all_dramas") {
+                fetchDramas("all_dramas", allDramasPage);
+                fetchCategories();
+            }
+        }
+
+        // 讀取追劇列表或推薦
+        function fetchDramas(tab, page) {
+            let listContainerId = "my-dramas-list";
+            if (tab === "recommendations") {
+                listContainerId = "recs-list";
+            } else if (tab === "all_dramas") {
+                listContainerId = "all-dramas-list";
+            }
+            const listContainer = document.getElementById(listContainerId);
+            listContainer.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
+
+            const reqBody = {
+                access_token: userAccessToken,
+                tab: tab,
+                page: page
+            };
+            if (tab === "all_dramas") {
+                reqBody.q = document.getElementById("all-dramas-search").value;
+                reqBody.category = document.getElementById("all-dramas-cat-select").value;
+            }
+
+            fetch(apiBaseUrl + "/line/api/dramas/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reqBody)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (tab === "my_dramas") {
+                    document.getElementById("loading-section").classList.add("d-none");
+                    document.getElementById("main-section").classList.remove("d-none");
+                }
+                if (data.status === "success") {
+                    renderDramaList(data.list, tab);
+                    updatePaginationControls(tab, page, data.has_more);
+                } else {
+                    listContainer.innerHTML = `<div class="alert alert-danger text-center small py-2">載入失敗：${data.error}</div>`;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                listContainer.innerHTML = `<div class="alert alert-danger text-center small py-2">伺服器連線失敗</div>`;
+            });
+        }
+
+        function renderDramaList(list, tab) {
+            let containerId = "my-dramas-list";
+            if (tab === "recommendations") {
+                containerId = "recs-list";
+            } else if (tab === "all_dramas") {
+                containerId = "all-dramas-list";
+            }
+            const container = document.getElementById(containerId);
+            container.innerHTML = "";
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card p-4 text-center text-muted">
+                        <i class="fa-solid fa-tv fa-2x mb-2 text-secondary"></i>
+                        <p class="mb-0 small">目前沒有任何劇集項目</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.forEach(item => {
+                if (tab === "my_dramas") {
+                    // 渲染相關連結
+                    let linksHtml = "";
+                    if (item.info_links && item.info_links.length > 0) {
+                        linksHtml = `<div class="d-flex flex-wrap gap-1 mt-2 pref-links ${displayPrefs.links ? '' : 'd-none'}">`;
+                        item.info_links.forEach(link => {
+                            linksHtml += `
+                                <a href="${link.url}" target="_blank" class="badge bg-white text-info border border-info text-decoration-none px-2 py-1 small" style="font-size: 0.7rem; border-radius: 5px;">
+                                    <i class="fa-solid fa-link me-1"></i>${link.title}
+                                </a>
+                            `;
+                        });
+                        linksHtml += '</div>';
+                    }
+
+                    const html = `
+                        <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1 me-2" style="max-width: 80%;">
+                                <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
+                                    <span class="badge bg-primary small pref-category ${displayPrefs.category ? '' : 'd-none'}">${item.category}</span>
+                                    <span class="badge ${item.is_tracked ? 'bg-success' : 'bg-secondary'} small" style="cursor: pointer;" onclick="toggleTrack(${item.drama_id}, ${!item.is_tracked})">
+                                        <i class="fa-solid fa-bell me-1"></i>${item.is_tracked ? '追蹤中' : '開啟追蹤'}
+                                    </span>
+                                </div>
+                                <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
+                                <div class="text-success small fw-bold mb-1">
+                                    目前看至：第 ${item.current_season} 季 第 ${item.current_episode} 集
+                                </div>
+                                <div class="text-muted small pref-total ${displayPrefs.total ? '' : 'd-none'}" style="font-size: 0.8rem;">
+                                    總集數：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
+                                </div>
+                                ${linksHtml}
+                                <div class="text-muted pref-creator ${displayPrefs.creator ? '' : 'd-none'}" style="font-size: 0.7rem; margin-top: 5px;">
+                                    發起人: ${item.creator} | 更新: ${item.updated_at}
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column gap-1">
+                                <button class="btn btn-sm btn-outline-success fw-bold py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="addOneEpisode(${item.drama_id}, ${item.current_season}, ${item.current_episode})">
+                                    <i class="fa-solid fa-plus me-1"></i>1 集
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaProgressModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', ${item.current_season}, ${item.current_episode})">
+                                    <i class="fa-regular fa-pen-to-square me-1"></i>進度
+                                </button>
+                                <button class="btn btn-sm btn-outline-info py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaDetailsModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', '${item.category.replace(/'/g, "\\'")}', ${item.total_seasons}, ${item.total_episodes}, ${JSON.stringify(item.info_links).replace(/"/g, '&quot;')})">
+                                    <i class="fa-solid fa-gear me-1"></i>編輯
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="openRecommendModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}')">
+                                    <i class="fa-solid fa-share-nodes me-1"></i>推薦
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                } else if (tab === "all_dramas") {
+                    // 探索新番/劇庫
+                    let linksHtml = "";
+                    if (item.info_links && item.info_links.length > 0) {
+                        linksHtml = '<div class="d-flex flex-wrap gap-1 mt-2">';
+                        item.info_links.forEach(link => {
+                            linksHtml += `
+                                <a href="${link.url}" target="_blank" class="badge bg-white text-info border border-info text-decoration-none px-2 py-1 small" style="font-size: 0.7rem; border-radius: 5px;">
+                                    <i class="fa-solid fa-link me-1"></i>${link.title}
+                                </a>
+                            `;
+                        });
+                        linksHtml += '</div>';
+                    }
+
+                    let joinBtnHtml = "";
+                    if (item.is_added) {
+                        joinBtnHtml = `
+                            <button class="btn btn-sm btn-secondary py-1 px-2 text-nowrap text-white" style="font-size: 0.75rem; cursor: default;" disabled>
+                                <i class="fa-solid fa-check me-1"></i>已在清單
+                            </button>
+                        `;
+                    } else {
+                        joinBtnHtml = `
+                            <button class="btn btn-sm btn-success py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="joinDrama(${item.drama_id})">
+                                <i class="fa-solid fa-plus me-1"></i>加入清單
+                            </button>
+                        `;
+                    }
+
+                    const html = `
+                        <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1 me-2" style="max-width: 80%;">
+                                <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
+                                    <span class="badge bg-primary small">${item.category}</span>
+                                </div>
+                                <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
+                                <div class="text-muted small" style="font-size: 0.8rem;">
+                                    總集數：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
+                                </div>
+                                ${linksHtml}
+                                <div class="text-muted" style="font-size: 0.7rem; margin-top: 5px;">
+                                    發起人: ${item.creator} | 更新: ${item.updated_at}
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column gap-1">
+                                ${joinBtnHtml}
+                                <button class="btn btn-sm btn-outline-info py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaDetailsModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', '${item.category.replace(/'/g, "\\'")}', ${item.total_seasons}, ${item.total_episodes}, ${JSON.stringify(item.info_links).replace(/"/g, '&quot;')})">
+                                    <i class="fa-solid fa-gear me-1"></i>編輯
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="openRecommendModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}')">
+                                    <i class="fa-solid fa-share-nodes me-1"></i>推薦
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                } else {
+                    // 推薦清單
+                    const html = `
+                        <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center" style="border-left-color: #ff9f43;">
+                            <div class="flex-grow-1 me-2" style="max-width: 80%;">
+                                <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
+                                    <span class="badge bg-warning text-dark small">${item.category}</span>
+                                    <span class="small text-muted"><i class="fa-regular fa-user me-1"></i>推薦人: ${item.from_user}</span>
+                                </div>
+                                <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem;">${item.title}</h5>
+                                ${item.recommend_notes ? `<div class="bg-light p-2 rounded text-secondary mb-2 small" style="border-left: 2px solid #ff9f43;">推薦短評: ${item.recommend_notes}</div>` : ""}
+                                <div class="text-muted small" style="font-size: 0.8rem;">
+                                    總集數規格：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
+                                </div>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-line py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="acceptRecommend(${item.recommendation_id})">
+                                    <i class="fa-solid fa-check me-1"></i>接受
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                }
+            });
+        }
+
+        // 分頁控制
+        function updatePaginationControls(tab, page, hasMore) {
+            let prefix = "my";
+            if (tab === "recommendations") {
+                prefix = "recs";
+            } else if (tab === "all_dramas") {
+                prefix = "all";
+            }
+            const paginationDiv = document.getElementById(`${prefix}-pagination`);
+            const pageNumSpan = document.getElementById(`${prefix}-page-num`);
+            const prevBtn = document.getElementById(`${prefix}-prev-btn`);
+            const nextBtn = document.getElementById(`${prefix}-next-btn`);
+
+            pageNumSpan.innerText = page;
+            prevBtn.disabled = (page <= 1);
+            nextBtn.disabled = !hasMore;
+            if (page > 1 || hasMore) {
+                paginationDiv.classList.remove("d-none");
+            } else {
+                paginationDiv.classList.add("d-none");
+            }
+        }
+
+        function changePage(offset) {
+            if (currentTab === "my_dramas") {
+                myDramasPage += offset;
+                if (myDramasPage < 1) myDramasPage = 1;
+                fetchDramas("my_dramas", myDramasPage);
+            } else if (currentTab === "recommendations") {
+                recsPage += offset;
+                if (recsPage < 1) recsPage = 1;
+                fetchDramas("recommendations", recsPage);
+            } else if (currentTab === "all_dramas") {
+                allDramasPage += offset;
+                if (allDramasPage < 1) allDramasPage = 1;
+                fetchDramas("all_dramas", allDramasPage);
+            }
+        }
+
+        // 快捷：追劇+1集
+        function addOneEpisode(id, curS, curE) {
+            fetch(`/line/api/dramas/update_progress/${id}/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    current_season: curS,
+                    current_episode: curE + 1
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    fetchDramas("my_dramas", myDramasPage);
+                } else {
+                    Swal.fire("錯誤", "更新進度失敗：" + data.error, "error");
+                }
+            });
+        }
+
+        // 彈出修改個人進度彈窗
+        function editDramaProgressModal(id, title, curS, curE) {
+            Swal.fire({
+                title: `修改《${title}》觀看進度`,
+                html: `
+                    <div class="row text-start p-1 small">
+                        <div class="col-6 mb-2">
+                            <label class="form-label fw-bold">第幾季</label>
+                            <input type="number" id="swal-season" class="form-control" value="${curS}" min="1">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label fw-bold">第幾集</label>
+                            <input type="number" id="swal-episode" class="form-control" value="${curE}" min="1">
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonColor: '#1DB446',
+                confirmButtonText: '更新進度',
+                cancelButtonText: '取消',
+                preConfirm: () => {
+                    const season = document.getElementById("swal-season").value;
+                    const episode = document.getElementById("swal-episode").value;
+                    if (!season || !episode) {
+                        Swal.showValidationMessage("欄位不可留空！");
+                    }
+                    return { season: parseInt(season), episode: parseInt(episode) };
+                }
+            }).then(res => {
+                if (res.isConfirmed && res.value) {
+                    fetch(`/line/api/dramas/update_progress/${id}/`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            access_token: userAccessToken,
+                            current_season: res.value.season,
+                            current_episode: res.value.episode
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            Swal.fire({ title: '更新成功！', icon: 'success', timer: 1000, showConfirmButton: false });
+                            fetchDramas("my_dramas", myDramasPage);
+                        } else {
+                            Swal.fire("錯誤", "更新進度失敗：" + data.error, "error");
+                        }
+                    });
+                }
+            });
+        }
+
+        // 點擊切換追蹤狀態
+        function toggleTrack(id, isTracked) {
+            fetch(`/line/api/dramas/update_progress/${id}/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    is_tracked: isTracked
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    fetchDramas("my_dramas", myDramasPage);
+                } else {
+                    Swal.fire("錯誤", "更改追蹤狀態失敗", "error");
+                }
+            });
+        }
+
+        // 相關活動連結多欄位控制
+        function addLinkRow(title = "", url = "") {
+            const container = document.getElementById("link-rows-container");
+            const rowDiv = document.createElement("div");
+            rowDiv.className = "d-flex gap-1 link-row-item";
+            rowDiv.innerHTML = `
+                <input type="text" class="form-control form-control-sm link-title" placeholder="連結名稱 (如: 巴哈)" value="${title}" style="flex: 2;">
+                <input type="url" class="form-control form-control-sm link-url" placeholder="URL 網址" value="${url}" style="flex: 4;">
+                <button class="btn btn-sm btn-outline-danger px-2" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(rowDiv);
+        }
+
+        // 新增劇集
+        function openAddDramaModal() {
+            document.getElementById("dramaModalTitle").innerText = "新增劇集項目";
+            document.getElementById("edit-drama-id").value = "";
+            document.getElementById("drama-title").value = "";
+            
+            const selectEl = document.getElementById("drama-category-select");
+            selectEl.value = "其他";
+            const inputEl = document.getElementById("drama-category");
+            inputEl.value = "其他";
+            inputEl.classList.add("d-none");
+
+            document.getElementById("drama-seasons").value = "1";
+            document.getElementById("drama-episodes").value = "12";
+            document.getElementById("link-rows-container").innerHTML = "";
+            
+            const modal = new bootstrap.Modal(document.getElementById("dramaModal"));
+            modal.show();
+        }
+
+        // 編輯劇集主檔資訊
+        function editDramaDetailsModal(id, title, category, seasons, episodes, links) {
+            document.getElementById("dramaModalTitle").innerText = "編輯劇集共享資訊";
+            document.getElementById("edit-drama-id").value = id;
+            document.getElementById("drama-title").value = title;
+            
+            const selectEl = document.getElementById("drama-category-select");
+            const inputEl = document.getElementById("drama-category");
+            inputEl.value = category;
+            
+            let matched = false;
+            for (let i = 0; i < selectEl.options.length; i++) {
+                if (selectEl.options[i].value === category) {
+                    selectEl.value = category;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                selectEl.value = "__custom__";
+                inputEl.classList.remove("d-none");
+            } else {
+                inputEl.classList.add("d-none");
+            }
+
+            document.getElementById("drama-seasons").value = seasons;
+            document.getElementById("drama-episodes").value = episodes;
+            
+            const container = document.getElementById("link-rows-container");
+            container.innerHTML = "";
+            if (links && links.length > 0) {
+                links.forEach(l => addLinkRow(l.title, l.url));
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById("dramaModal"));
+            modal.show();
+        }
+
+        function submitDramaForm() {
+            const id = document.getElementById("edit-drama-id").value;
+            const title = document.getElementById("drama-title").value;
+            
+            const selectEl = document.getElementById("drama-category-select");
+            const inputEl = document.getElementById("drama-category");
+            let finalCategory = inputEl.value.trim();
+            if (selectEl.value !== "__custom__") {
+                finalCategory = selectEl.value;
+            }
+            if (!finalCategory) {
+                finalCategory = "其他";
+            }
+
+            const totalSeasons = document.getElementById("drama-seasons").value;
+            const totalEpisodes = document.getElementById("drama-episodes").value;
+
+            if (!title) {
+                alert("劇名不可空白！");
+                return;
+            }
+
+            const linkRows = document.querySelectorAll(".link-row-item");
+            const links = [];
+            linkRows.forEach(row => {
+                const lt = row.querySelector(".link-title").value;
+                const lu = row.querySelector(".link-url").value;
+                if (lt && lu) {
+                    links.push({ title: lt, url: lu });
+                }
+            });
+
+            const url = id ? `/line/api/dramas/update/${id}/` : "/line/api/dramas/create/";
+            const payload = {
+                access_token: userAccessToken,
+                title: title,
+                category: finalCategory,
+                total_seasons: parseInt(totalSeasons),
+                total_episodes: parseInt(totalEpisodes),
+                info_links: links
+            };
+
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    bootstrap.Modal.getInstance(document.getElementById("dramaModal")).hide();
+                    Swal.fire({ title: '儲存成功！', text: id ? '如果連結有異動，系統將自動推播通知其他追蹤該劇的好友。' : '', icon: 'success' });
+                    fetchDramas("my_dramas", myDramasPage);
+                } else {
+                    Swal.fire("錯誤", "儲存失敗：" + data.error, "error");
+                }
+            });
+        }
+
+        // 好友管理與搜尋
+        function fetchFriends(query = "") {
+            fetch("/line/api/friends/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    access_token: userAccessToken,
+                    query: query
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    myFriendsList = data.friends;
+                    renderFriends(data.friends);
+                    renderSearchResults(data.others);
+                    renderRecommendFriendsSelector(data.friends);
+                }
+            });
+        }
+
+        function handleFriendSearch() {
+            const query = document.getElementById("friend-search-input").value;
+            fetchFriends(query);
+        }
+
+        function renderFriends(friends) {
+            const container = document.getElementById("friends-list");
+            container.innerHTML = "";
+            if (friends.length === 0) {
+                container.innerHTML = `<p class="small text-muted text-center py-2 mb-0">目前尚無加好友，快加其他 LINE 用戶吧！</p>`;
+                return;
+            }
+            friends.forEach(f => {
+                container.innerHTML += `
+                    <div class="d-flex align-items-center justify-content-between p-2 border rounded bg-white small mb-1">
+                        <div>
+                            <i class="fa-brands fa-line text-success me-2" style="font-size: 1.1rem;"></i>
+                            <span class="fw-bold text-dark">${f.display_name}</span>
+                        </div>
+                        <span class="badge bg-success">好友已連線</span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderSearchResults(others) {
+            const container = document.getElementById("search-results-list");
+            container.innerHTML = "";
+            if (others.length === 0) {
+                container.innerHTML = `<p class="small text-muted text-center py-2 mb-0">無符合的 LINE 用戶</p>`;
+                return;
+            }
+            others.forEach(o => {
+                container.innerHTML += `
+                    <div class="d-flex align-items-center justify-content-between p-2 border rounded bg-white small mb-1">
+                        <span class="fw-bold text-dark"><i class="fa-brands fa-line text-success me-1"></i>${o.display_name}</span>
+                        <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.75rem;" onclick="handleAddFriend(${o.id})">
+                            <i class="fa-solid fa-plus me-1"></i>加好友
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function handleAddFriend(friendId) {
+            if (!friendId) return;
+
+            fetch("/line/api/friends/add/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    friend_id: parseInt(friendId)
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({ title: '好友已建立！', text: '現在您可以互相推薦喜愛的神劇清單了。', icon: 'success' });
+                    document.getElementById("friend-search-input").value = "";
+                    fetchFriends();
+                } else {
+                    Swal.fire("錯誤", "加好友失敗：" + data.error, "error");
+                }
+            });
+        }
+
+        // 推薦劇集 Modal 好友選擇器 (僅顯示 LINE 顯示名稱)
+        function renderRecommendFriendsSelector(friends) {
+            const container = document.getElementById("rec-friends-checkboxes");
+            container.innerHTML = "";
+            if (friends.length === 0) {
+                container.innerHTML = `<p class="small text-muted py-1">請先至好友管理頁面加好友！</p>`;
+                return;
+            }
+            friends.forEach(f => {
+                container.innerHTML += `
+                    <div class="form-check">
+                        <input class="form-check-input rec-friend-chk" type="checkbox" value="${f.id}" id="rec-friend-${f.id}">
+                        <label class="form-check-label small" for="rec-friend-${f.id}">
+                            ${f.display_name}
+                        </label>
+                    </div>
+                `;
+            });
+        }
+
+        function openRecommendModal(dramaId, dramaTitle) {
+            document.getElementById("rec-drama-id").value = dramaId;
+            document.getElementById("rec-drama-title").value = dramaTitle;
+            document.getElementById("rec-notes").value = "";
+            
+            // 重新讀取好友
+            renderRecommendFriendsSelector(myFriendsList);
+
+            const modal = new bootstrap.Modal(document.getElementById("recommendModal"));
+            modal.show();
+        }
+
+        // 推薦劇集送出
+        function submitRecommendForm() {
+            const dramaId = document.getElementById("rec-drama-id").value;
+            const notes = document.getElementById("rec-notes").value;
+            const checkboxes = document.querySelectorAll(".rec-friend-chk:checked");
+            
+            if (checkboxes.length === 0) {
+                alert("請至少選擇一位好友推薦！");
+                return;
+            }
+
+            const friendIds = [];
+            checkboxes.forEach(chk => friendIds.push(parseInt(chk.value)));
+
+            fetch("/line/api/dramas/recommend/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    drama_id: parseInt(dramaId),
+                    friend_ids: friendIds,
+                    recommend_notes: notes
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    bootstrap.Modal.getInstance(document.getElementById("recommendModal")).hide();
+                    let text = '已向可接收的好友發送 LINE 推播推薦。';
+                    if (data.skipped_list && data.skipped_list.length > 0) {
+                        text += '\n\n以下因重複已被過濾：\n' + data.skipped_list.join('\n');
+                    }
+                    Swal.fire({ title: '推薦發送成功！', text: text, icon: 'success' });
+                } else {
+                    Swal.fire("發送失敗", "無法推薦：\n" + data.error, "warning");
+                }
+            });
+        }
+
+        // 接受推薦
+        function acceptRecommend(id) {
+            fetch(`/line/api/dramas/accept_recommend/${id}/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ access_token: userAccessToken })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({ title: '已加入您的追劇清單！', icon: 'success', timer: 1200, showConfirmButton: false });
+                    fetchDramas("my_dramas", 1);
+                    fetchDramas("recommendations", 1);
+                } else {
+                    Swal.fire("錯誤", "接受失敗：" + data.error, "error");
+                }
+            });
+        }
+
+        // 劇名自動搜尋/自動填寫功能
+        let searchTimeout = null;
+        const dramaTitleInput = document.getElementById("drama-title");
+        const suggestionsBox = document.getElementById("drama-suggestions");
+
+        dramaTitleInput.addEventListener("input", function() {
+            clearTimeout(searchTimeout);
+            const q = this.value.trim();
+            const editId = document.getElementById("edit-drama-id").value;
+            if (editId) {
+                suggestionsBox.classList.add("d-none");
+                return;
+            }
+
+            if (q.length < 1) {
+                suggestionsBox.classList.add("d-none");
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch("/line/api/dramas/search/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ q: q })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success" && data.results.length > 0) {
+                        suggestionsBox.innerHTML = "";
+                        data.results.forEach(d => {
+                            const btn = document.createElement("button");
+                            btn.type = "button";
+                            btn.className = "list-group-item list-group-item-action text-start small py-2";
+                            btn.style.fontSize = "0.85rem";
+                            btn.innerHTML = `<i class="fa-solid fa-film me-2 text-success"></i><strong>${d.title}</strong> <span class="badge bg-secondary ms-2">${d.category}</span>`;
+                            btn.addEventListener("click", () => {
+                                dramaTitleInput.value = d.title;
+                                document.getElementById("drama-category").value = d.category;
+                                document.getElementById("drama-seasons").value = d.total_seasons;
+                                document.getElementById("drama-episodes").value = d.total_episodes;
+
+                                const container = document.getElementById("link-rows-container");
+                                container.innerHTML = "";
+                                if (d.info_links && d.info_links.length > 0) {
+                                    d.info_links.forEach(l => addLinkRow(l.title, l.url));
+                                }
+
+                                suggestionsBox.classList.add("d-none");
+                            });
+                            suggestionsBox.appendChild(btn);
+                        });
+                        suggestionsBox.classList.remove("d-none");
+                    } else {
+                        suggestionsBox.classList.add("d-none");
+                    }
+                });
+            }, 300);
+        });
+
+        document.addEventListener("click", function(e) {
+            if (e.target !== dramaTitleInput && e.target !== suggestionsBox) {
+                suggestionsBox.classList.add("d-none");
+            }
+        });
+
+        // 探索劇庫：將特定劇集加入個人追劇清單
+        function joinDrama(id) {
+            fetch(`/line/api/dramas/join/${id}/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ access_token: userAccessToken })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({ title: '成功加入個人清單！', icon: 'success', timer: 1000, showConfirmButton: false });
+                    fetchDramas("all_dramas", allDramasPage);
+                    fetchDramas("my_dramas", 1);
+                } else {
+                    Swal.fire("錯誤", "加入失敗：" + data.error, "error");
+                }
+            });
+        }
+
+        // 抓取所有唯一的分類並填入下拉選單
+        function fetchCategories() {
+            const url = apiBaseUrl + "/line/api/dramas/categories/";
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ access_token: userAccessToken })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("HTTP status " + res.status);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.status === "success") {
+                    const searchSelect = document.getElementById("all-dramas-cat-select");
+                    if (searchSelect) {
+                        searchSelect.innerHTML = `<option value="">所有分類</option>`;
+                        data.categories.forEach(cat => {
+                            const opt = document.createElement("option");
+                            opt.value = cat;
+                            opt.innerText = cat;
+                            searchSelect.appendChild(opt);
+                        });
+                    }
+
+                    const modalSelect = document.getElementById("drama-category-select");
+                    if (modalSelect) {
+                        modalSelect.innerHTML = "";
+                        data.categories.forEach(cat => {
+                            const opt = document.createElement("option");
+                            opt.value = cat;
+                            opt.innerText = cat;
+                            modalSelect.appendChild(opt);
+                        });
+                        const customOpt = document.createElement("option");
+                        customOpt.value = "__custom__";
+                        customOpt.innerText = "➕ 自訂新分類...";
+                        modalSelect.appendChild(customOpt);
+                    }
+                } else {
+                    console.error("fetchCategories status error", data);
+                }
+            })
+            .catch(err => {
+                console.error("fetchCategories failed", err);
+                alert("分類讀取錯誤: " + err.message);
+            });
+        }
+
+        // 切換自訂分類輸入框顯示
+        function toggleCustomCategoryInput() {
+            const selectEl = document.getElementById("drama-category-select");
+            const inputEl = document.getElementById("drama-category");
+            if (selectEl.value === "__custom__") {
+                inputEl.classList.remove("d-none");
+                inputEl.value = "";
+                inputEl.focus();
+            } else {
+                inputEl.classList.add("d-none");
+                inputEl.value = selectEl.value;
+            }
+        }
+
+        // 探索新番即時搜尋與分類過濾
+        let allDramasSearchTimeout = null;
+        function triggerAllDramasSearch() {
+            clearTimeout(allDramasSearchTimeout);
+            allDramasSearchTimeout = setTimeout(() => {
+                allDramasPage = 1;
+                fetchDramas("all_dramas", 1);
+            }, 300);
+        }
+    </script>
+</body>
+</html>

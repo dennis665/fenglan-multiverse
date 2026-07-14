@@ -178,6 +178,12 @@
         const urlGroupId = urlParams.get("groupId");
 
         document.addEventListener("DOMContentLoaded", function() {
+            const pageParam = urlParams.get("page");
+            if (pageParam === "drama") {
+                urlParams.set("_t", new Date().getTime());
+                window.location.href = `/line/liff/drama/?${urlParams.toString()}`;
+                return;
+            }
             initLiff();
         });
 
