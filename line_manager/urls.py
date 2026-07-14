@@ -18,6 +18,7 @@ urlpatterns = [
     path("api/itineraries/delete/<int:pk>/", views.api_delete_itinerary, name="api_delete_itinerary"),
     path("api/itineraries/detail/<int:pk>/", views.api_get_itinerary_detail, name="api_get_itinerary_detail"),
     path("api/itineraries/update/<int:pk>/", views.api_update_itinerary, name="api_update_itinerary"),
+    path("api/itineraries/hide/<int:pk>/", views.api_hide_itinerary, name="api_hide_itinerary"),
     path("api/itineraries/join/<int:pk>/", views.api_join_unscheduled_itinerary, name="api_join_unscheduled_itinerary"),
     path("api/itineraries/set_time/<int:pk>/", views.api_set_unscheduled_time, name="api_set_unscheduled_time"),
     path("api/itineraries/send_guide/", views.api_send_guide_message, name="api_send_guide_message"),

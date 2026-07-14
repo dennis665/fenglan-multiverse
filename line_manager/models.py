@@ -62,6 +62,7 @@ class Itinerary(models.Model):
 
     notify_minutes_before = models.IntegerField(default=1440, verbose_name=_("提前通知時間(分鐘)"))
     is_notified = models.BooleanField(default=False, verbose_name=_("是否已發送通知"))
+    is_hidden = models.BooleanField(default=False, verbose_name=_("是否已隱藏"))
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))

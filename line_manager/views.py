@@ -573,7 +573,8 @@ def api_get_itineraries(request):
     # 撈取行程：清單一律顯示自己的（包含個人行程以及該用戶所屬群組的所有行程）
     # 依用戶要求：日期新至舊排序 (date_time 降序)
     base_qs = Itinerary.objects.filter(
-        Q(user=user) | Q(group_id__in=user_group_ids)
+        Q(user=user) | Q(group_id__in=user_group_ids),
+        is_hidden=False
     ).distinct()
 
     if tab == "upcoming":
@@ -732,6 +733,124 @@ def api_create_itinerary(request):
         related_links=related_links_str,
         notify_minutes_before=notify_minutes,
     )
+
+    if group_id:
+        type_map = {
+            "EAT": "🍴 吃飯聚餐",
+            "EXHIBIT": "🎨 逛街展覽",
+            "SPORT": "🏸 運動健身",
+            "TRAVEL": "🚗 旅遊踏青",
+            "MOVIE": "🎬 看電影",
+            "OTHER": "🌟 其他活動",
+        }
+        act_type = type_map.get(activity_type, "🌟 其他活動")
+        dt_display = dt.strftime("%Y-%m-%d %H:%M") if dt else "時間待定"
+
+        flex_contents = {
+            "type": "bubble",
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "📢 新群組行程通知",
+                        "weight": "bold",
+                        "color": "#1DB446",
+                        "size": "sm"
+                    },
+                    {
+                        "type": "text",
+                        "text": title,
+                        "weight": "bold",
+                        "size": "xl",
+                        "margin": "md"
+                    },
+                    {
+                        "type": "separator",
+                        "margin": "md"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "margin": "md",
+                        "spacing": "sm",
+                        "contents": [
+                            {
+                                "type": "box",
+                                "layout": "baseline",
+                                "spacing": "sm",
+                                "contents": [
+                                    {"type": "text", "text": "類型", "color": "#aaaaaa", "size": "sm", "flex": 2},
+                                    {"type": "text", "text": act_type, "wrap": True, "color": "#666666", "size": "sm", "flex": 5}
+                                ]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "baseline",
+                                "spacing": "sm",
+                                "contents": [
+                                    {"type": "text", "text": "時間", "color": "#aaaaaa", "size": "sm", "flex": 2},
+                                    {"type": "text", "text": dt_display, "wrap": True, "color": "#666666", "size": "sm", "flex": 5}
+                                ]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "baseline",
+                                "spacing": "sm",
+                                "contents": [
+                                    {"type": "text", "text": "地點", "color": "#aaaaaa", "size": "sm", "flex": 2},
+                                    {"type": "text", "text": location if location else "待定", "wrap": True, "color": "#666666", "size": "sm", "flex": 5}
+                                ]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "baseline",
+                                "spacing": "sm",
+                                "contents": [
+                                    {"type": "text", "text": "發起人", "color": "#aaaaaa", "size": "sm", "flex": 2},
+                                    {"type": "text", "text": line_profile.line_display_name or line_profile.user.username, "wrap": True, "color": "#666666", "size": "sm", "flex": 5}
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "footer": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "button",
+                        "style": "link",
+                        "height": "sm",
+                        "action": {
+                            "type": "uri",
+                            "label": "🔗 開啟行程看板",
+                            "uri": f"https://liff.line.me/{settings.LINE_LIFF_ID}/?groupId={group_id}"
+                        }
+                    }
+                ]
+            }
+        }
+
+        try:
+            from linebot.v3.messaging import PushMessageRequest, FlexMessage, FlexContainer
+            with ApiClient(configuration) as api_client:
+                api_instance = MessagingApi(api_client)
+                api_instance.push_message(
+                    PushMessageRequest(
+                        to=group_id,
+                        messages=[
+                            FlexMessage(
+                                alt_text=f"📢 新群組行程【{title}】已排定！",
+                                contents=FlexContainer.from_dict(flex_contents)
+                            )
+                        ]
+                    )
+                )
+        except Exception as e:
+            print(f"❌ 群組行程建立推播通知失敗: {e}")
 
     return JsonResponse({"status": "success", "id": itinerary.pk})
 
@@ -1309,5 +1428,52 @@ def api_set_unscheduled_time(request, pk):
             )
     except Exception as e:
         print(f"❌ 定案推播通知失敗: {e}")
+
+    return JsonResponse({"status": "success"})
+
+
+@csrf_exempt
+def api_hide_itinerary(request, pk):
+    """API 端點：將指定的行程標記為隱藏 (例如：隱藏歷史行程)"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    # 驗證 LINE Token
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get("https://api.line.me/v2/profile", headers=headers)
+    if res.status_code != 200:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_user_id = res.json()["userId"]
+    line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
+    if not line_profile:
+        return JsonResponse({"error": "Account not bound"}, status=403)
+
+    itinerary = Itinerary.objects.filter(pk=pk).first()
+    if not itinerary:
+        return JsonResponse({"error": "Itinerary not found"}, status=404)
+
+    # 檢查權限：群組共享行程凡綁定者皆有權隱藏，個人行程限本人
+    can_hide = False
+    if itinerary.user == line_profile.user:
+        can_hide = True
+    elif itinerary.group_id:
+        if GroupMembership.objects.filter(user=line_profile.user, group_id=itinerary.group_id).exists():
+            can_hide = True
+
+    if not can_hide:
+        return JsonResponse({"error": "Permission Denied"}, status=403)
+
+    itinerary.is_hidden = True
+    itinerary.save()
 
     return JsonResponse({"status": "success"})

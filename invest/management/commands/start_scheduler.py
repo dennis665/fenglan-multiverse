@@ -35,8 +35,8 @@ def check_itinerary_reminders_job():
         from line_manager.models import Itinerary
 
         current_time = now()
-        # 查詢未通知行程
-        itineraries = Itinerary.objects.filter(is_notified=False)
+        # 查詢未通知且已設定時間的行程，排除時間待定的項目
+        itineraries = Itinerary.objects.filter(is_notified=False, date_time__isnull=False)
 
         configuration = Configuration(access_token=settings.LINE_CHANNEL_ACCESS_TOKEN)
 

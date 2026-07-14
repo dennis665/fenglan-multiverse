@@ -20,15 +20,21 @@
     * 地理定位分享引導時，暫存機制可同步記錄並恢復當前已填寫的多重連結。
     * 行程卡片下方自動將相關活動連結渲染為綠色小連結徽章，點擊直接另開網頁。
 * **群組分享、有興趣加入與定案推播系統 (LINE Group Sharing & finalization)**：
+    * **新建行程推播**：在群組共享看板中**正常建立新行程**時，LINE 機器人會主動向群組聊天室推送 Flex 訊息通知，附帶標題、類型、時間、地點及發起人資訊。
     * **分享至群組**：時間待定行程卡片新增「分享至群組」按鈕，觸發 `liff.shareTargetPicker` 向好友或 LINE 群組發送設計精美的 Flex Message 邀約卡片。
     * **我有興趣/加入表達**：新增 `api_join_unscheduled_itinerary` 接口。群組成員點選卡片連結進入 LIFF，系統會自動辨識並彈出加入確認，將 LINE 顯示名稱寫入「有興趣成員」列表。
     * **決定時間定案推播**：新增 `api_set_unscheduled_time` 接口。成員在卡片點擊「決定時間」時，可直接指定定案日期，行程將轉為正式行程。同時，**LINE 機器人會主動向群組聊天室發送精美的「行程定案 Flex 通知卡片」**通報大家。
 * **一鍵加入 Google 日曆功能 (Add to Google Calendar)**：
     * 看板即將到來行程卡片下方新增「加到日曆」按鈕，自動解析行程時間並包裝生成 Google 日曆新增範本 URL，實現一鍵同步行程。
+* **歷史行程隱藏功能 (Hide Historical Itineraries)**：
+    * 資料庫模型新增 `is_hidden` 欄位，並實作 `api_hide_itinerary` 控制接口。
+    * 歷史紀錄 Tab 清單中的卡片右方新增「👁️‍🗨️ 隱藏（eye-slash）」快捷按鈕，點擊確認後即可將不需要的歷史行程標記為隱藏，使其不顯示於行程列表中。
 
 ### Fixed & Optimized (修復與優化)
 * **修復行程刪除後的列表刷新 Bug**：
     * 將原先在行程刪除成功時無參數調用 `fetchItineraries()` 導致 JavaScript 報錯的 Bug，修正為傳入各自分頁參數同步刷新 `upcoming`、`unscheduled` 與 `history` 列表，提升穩定性。
+* **修復排程任務計算提醒時間 Bug (Scheduler NoneType Error)**：
+    * 修復在啟動排程 `start_scheduler` 指令掃描行程時，遇到 nullable 之時間待定行程 (`date_time = None`)，因進行 `date_time - timedelta` 運算引發 `unsupported operand type(s) for -` 崩潰的 Bug。修正為預先過濾 `date_time__isnull=False` 行程再行提醒計算。
 
 ---
 

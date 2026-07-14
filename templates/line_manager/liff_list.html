@@ -347,6 +347,7 @@
 
                 let editBtn = "";
                 let deleteBtn = "";
+                let hideBtn = "";
                 if (currentTab !== "history") {
                     editBtn = `
                         <button class="btn btn-sm btn-outline-primary border-0 me-1" onclick="editItinerary(${item.id})">
@@ -356,6 +357,12 @@
                     deleteBtn = `
                         <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteItinerary(${item.id})">
                             <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    `;
+                } else {
+                    hideBtn = `
+                        <button class="btn btn-sm btn-outline-secondary border-0 me-1" onclick="hideItinerary(${item.id})" title="隱藏此歷史行程">
+                            <i class="fa-regular fa-eye-slash"></i>
                         </button>
                     `;
                 }
@@ -442,6 +449,7 @@
                         </div>
                         <div class="d-flex align-items-center">
                             ${editBtn}
+                            ${hideBtn}
                             ${deleteBtn}
                         </div>
                     </div>
@@ -491,6 +499,53 @@
                     })
                     .catch(err => {
                         console.error("Delete error:", err);
+                        Swal.fire('錯誤', "伺服器連線失敗", 'error');
+                    });
+                }
+            });
+        }
+
+        function hideItinerary(id) {
+            Swal.fire({
+                title: '確定要隱藏嗎？',
+                text: "隱藏後此歷史行程將不再顯示於看板中！",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: '確定隱藏',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/line/api/itineraries/hide/${id}/`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            access_token: userAccessToken
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            Swal.fire({
+                                title: '已隱藏',
+                                text: '該行程已成功隱藏！',
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                fetchItineraries("upcoming", 1);
+                                fetchItineraries("unscheduled", 1);
+                                fetchItineraries("history", 1);
+                            });
+                        } else {
+                            Swal.fire('錯誤', "隱藏失敗: " + data.error, 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Hide error:", err);
                         Swal.fire('錯誤', "伺服器連線失敗", 'error');
                     });
                 }
