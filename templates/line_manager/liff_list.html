@@ -381,6 +381,15 @@
                     linksHtml += '</div>';
                 }
 
+                // 辨識個人或群組來源 Badge
+                let sourceBadgeHtml = "";
+                if (item.is_group) {
+                    const membersStr = item.group_members && item.group_members.length > 0 ? item.group_members.join("、") : "無其他成員";
+                    sourceBadgeHtml = `<span class="badge bg-success text-white small" style="font-weight: 500;" title="已綁定成員：${membersStr}"><i class="fa-solid fa-users me-1"></i>${item.group_source}</span>`;
+                } else {
+                    sourceBadgeHtml = `<span class="badge bg-secondary text-white small" style="font-weight: 500;"><i class="fa-solid fa-user me-1"></i>個人行程</span>`;
+                }
+
                 // 時間顯示或待定提示
                 let timeHtml = "";
                 if (item.is_unscheduled) {
@@ -431,6 +440,7 @@
                         <div class="flex-grow-1 me-2" style="max-width: 85%;">
                             <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
                                 <span class="badge ${badgeClass} small">${item.activity_type}</span>
+                                ${sourceBadgeHtml}
                                 ${timeHtml}
                             </div>
                             <h5 class="fw-bold mb-1" style="font-size: 1.05rem; color: #2c3e50; word-break: break-all;">${item.title}</h5>

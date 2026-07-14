@@ -562,6 +562,17 @@ def api_get_itineraries(request):
     # 取得該用戶加入的所有群組 ID
     user_group_ids = list(GroupMembership.objects.filter(user=user).values_list("group_id", flat=True))
 
+    # 獲取群組成員名單對應表，避免 N+1 查詢
+    from collections import defaultdict
+    group_members_map = defaultdict(list)
+    memberships = GroupMembership.objects.filter(group_id__in=user_group_ids).select_related('user__line_profile')
+    for m in memberships:
+        try:
+            name = m.user.line_profile.line_display_name or m.user.username
+        except AttributeError:
+            name = m.user.username
+        group_members_map[m.group_id].append(name)
+
     tab = data.get("tab", "upcoming")
     try:
         page = int(data.get("page", 1))
@@ -609,6 +620,28 @@ def api_get_itineraries(request):
         title_dec = item.title
         location_dec = item.location
         notes_dec = item.notes
+
+        # 決定來源屬性（分辨個人與群組共用）
+        is_group = False
+        group_source = "個人行程"
+        group_members = []
+        if item.group_id:
+            is_group = True
+            group_members = group_members_map.get(item.group_id, [])
+            from django.core.cache import cache
+            cache_key = f"line_group_name_{item.group_id}"
+            group_name = cache.get(cache_key)
+            if not group_name:
+                try:
+                    with ApiClient(configuration) as api_client:
+                        api_instance = MessagingApi(api_client)
+                        summary = api_instance.get_group_summary(item.group_id)
+                        group_name = summary.group_name
+                        cache.set(cache_key, group_name, timeout=86400)  # 快取 24 小時
+                except Exception as e:
+                    print(f"Failed to fetch group summary for {item.group_id}: {e}")
+                    group_name = f"群組 ({item.group_id[-6:]})"
+            group_source = f"群組: {group_name}"
 
         # 讀取建立者的 LINE 暱稱，若無則顯示系統帳號名稱
         try:
@@ -658,6 +691,9 @@ def api_get_itineraries(request):
             "notify_text": notify_text if item.date_time else "無提醒",
             "is_notified": item.is_notified,
             "creator": creator_name,
+            "is_group": is_group,
+            "group_source": group_source,
+            "group_members": group_members,
         }
         list_data.append(schedule_data)
 

@@ -29,6 +29,9 @@
 * **歷史行程隱藏功能 (Hide Historical Itineraries)**：
     * 資料庫模型新增 `is_hidden` 欄位，並實作 `api_hide_itinerary` 控制接口。
     * 歷史紀錄 Tab 清單中的卡片右方新增「👁️‍🗨️ 隱藏（eye-slash）」快捷按鈕，點擊確認後即可將不需要的歷史行程標記為隱藏，使其不顯示於行程列表中。
+* **分辨行程個人與群組共用來源 (Distinguish Itinerary Source)**：
+    * 後端 API 自動判別 `group_id` 並調用 LINE 官方 API 獲取群組摘要名稱，並快取 24 小時以確保加載效能。
+    * 行程看板卡片頂部新增「個人行程」或「群組: [群組名稱]」徽章，供使用者清晰分辨行程來源。
 
 ### Fixed & Optimized (修復與優化)
 * **修復行程刪除後的列表刷新 Bug**：
