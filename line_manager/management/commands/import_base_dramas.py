@@ -108,4 +108,7 @@ class Command(BaseCommand):
                 existing_titles.add(title)
                 created_count += 1
 
-        self.stdout.write(self.style.SUCCESS(f"📊 基礎劇集比對完成！CSV 總筆數: {total_rows} | 新建立: {created_count} 筆。"))
+        try:
+            self.stdout.write(self.style.SUCCESS(f"📊 基礎劇集比對完成！CSV 總筆數: {total_rows} | 新建立: {created_count} 筆。"))
+        except UnicodeEncodeError:
+            self.stdout.write(self.style.SUCCESS(f"[Import] 基礎劇集比對完成！CSV 總筆數: {total_rows} | 新建立: {created_count} 筆。"))

@@ -52,30 +52,44 @@ class Colors:
         return str(error), filename, lineno
 
     @classmethod
+    def _safe_print(cls, text: str):
+        try:
+            print(text)
+        except UnicodeEncodeError:
+            import sys
+            encoding = sys.stdout.encoding or 'ascii'
+            try:
+                # 使用 terminal 的編碼進行編碼，不支援的字元（如 emoji）會被替換為問號，解碼後安全印出，避免崩潰
+                safe_text = text.encode(encoding, errors='replace').decode(encoding)
+                print(safe_text)
+            except Exception:
+                pass
+
+    @classmethod
     def error_print(cls, error: Exception | str = "", message: str = ""):
         if isinstance(error, Exception):
             err_msg, filename, lineno = cls._parse_error(error)
-            print(f"{cls.FAIL}{message}\n錯誤訊息：{err_msg}\n檔名：{filename}\n行數：{lineno}{cls.ENDC}")
+            cls._safe_print(f"{cls.FAIL}{message}\n錯誤訊息：{err_msg}\n檔名：{filename}\n行數：{lineno}{cls.ENDC}")
         elif message:
-            print(f"{cls.FAIL}{message}{cls.ENDC}")
+            cls._safe_print(f"{cls.FAIL}{message}{cls.ENDC}")
         elif isinstance(error, str):
-            print(f"{cls.FAIL}{error}{cls.ENDC}")
+            cls._safe_print(f"{cls.FAIL}{error}{cls.ENDC}")
 
     @classmethod
     def highlight_print(cls, message: str = ""):
-        print(f"{cls.OKCYAN}{message}{cls.ENDC}")
+        cls._safe_print(f"{cls.OKCYAN}{message}{cls.ENDC}")
 
     @classmethod
     def warning_print(cls, message: str = ""):
-        print(f"{cls.WARNING}{message}{cls.ENDC}")
+        cls._safe_print(f"{cls.WARNING}{message}{cls.ENDC}")
 
     @classmethod
     def processing_print(cls, message: str = ""):
-        print(f"{cls.PROCESSING}{message}{cls.ENDC}")
+        cls._safe_print(f"{cls.PROCESSING}{message}{cls.ENDC}")
 
     @classmethod
     def paragraph_print(cls, message: str = ""):
-        print(f"{cls.HEADER}{message}{cls.ENDC}")
+        cls._safe_print(f"{cls.HEADER}{message}{cls.ENDC}")
 
 
 def jinfo(message: str = ""):
