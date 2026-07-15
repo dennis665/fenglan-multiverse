@@ -15,6 +15,45 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f"⚠️ 找不到基礎劇集 CSV 檔: {csv_path}"))
             return
 
+        # 1. 自動檢查並清理資料庫中重複劇名的 Drama 記錄
+        self.stdout.write(self.style.WARNING("正在檢查並清理資料庫中重複的劇集..."))
+        all_dramas = list(Drama.objects.all())
+        dramas_by_title = {}
+        for d in all_dramas:
+            title_clean = d.title.strip().lower()
+            if title_clean not in dramas_by_title:
+                dramas_by_title[title_clean] = []
+            dramas_by_title[title_clean].append(d)
+
+        deleted_duplicates = 0
+        for title_clean, group in dramas_by_title.items():
+            if len(group) > 1:
+                group.sort(key=lambda x: x.id)
+                keep_drama = group[0]
+                duplicate_dramas = group[1:]
+
+                for dup_drama in duplicate_dramas:
+                    # 重新連結 UserDramaProgress
+                    for progress in list(dup_drama.progresses.all()):
+                        from line_manager.models import UserDramaProgress
+                        dup_exists = UserDramaProgress.objects.filter(user=progress.user, drama=keep_drama).exists()
+                        if dup_exists:
+                            progress.delete()
+                        else:
+                            progress.drama = keep_drama
+                            progress.save()
+
+                    # 重新連結 DramaRecommendation
+                    from line_manager.models import DramaRecommendation
+                    DramaRecommendation.objects.filter(drama=dup_drama).update(drama=keep_drama)
+
+                    # 刪除重複 Drama
+                    dup_drama.delete()
+                    deleted_duplicates += 1
+
+        if deleted_duplicates > 0:
+            self.stdout.write(self.style.SUCCESS(f"🧹 已成功清理並合併 {deleted_duplicates} 筆重複的劇集！"))
+
         self.stdout.write(self.style.WARNING("正在讀取基礎劇集清單並比對資料庫..."))
 
         # 取得或建立系統匯入者帳戶
