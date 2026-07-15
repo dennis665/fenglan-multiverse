@@ -6,4 +6,4 @@ class PetSystemConfig(AppConfig):
     name = 'pet_system'
 
     def ready(self):
-        import pet_system.signals
+        pass

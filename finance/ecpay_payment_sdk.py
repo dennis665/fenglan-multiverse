@@ -1,4 +1,3 @@
-# coding: utf-8
 import collections
 import copy
 import hashlib
@@ -216,7 +215,7 @@ UnionPay = {
     'Hidden': 2,  # 不可使用銀聯卡, 綠界會將交易頁面隱藏銀聯選項
 }
 
-class BasePayment(object):
+class BasePayment:
 
     def merge(self, x, y):
         """
@@ -289,7 +288,7 @@ class BasePayment(object):
         encoding_lst = []
         encoding_lst.append('HashKey=%s&' % self.HashKey)
         encoding_lst.append(''.join(
-            ['{}={}&'.format(key, value) for key, value in ordered_params.items()]))
+            [f'{key}={value}&' for key, value in ordered_params.items()]))
         encoding_lst.append('HashIV=%s' % self.HashIV)
 
         safe_characters = '-_.!*()'

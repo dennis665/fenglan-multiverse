@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from .models import AnalysisResult, Category, Material, QuestionDeepAnalysis, QuizMistake, QuizRecord, ReadingRecord
+from .models import (
+    AnalysisResult,
+    Category,
+    Material,
+    QuestionDeepAnalysis,
+    QuizMistake,
+    QuizRecord,
+    ReadingRecord,
+)
 
 
 @admin.register(Category)

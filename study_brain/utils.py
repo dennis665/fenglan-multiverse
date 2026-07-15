@@ -104,7 +104,6 @@ def generate_ai_content(file_path, text_content, existing_summary=None, existing
             "explanation": "請詳細說明正確答案為何正確，並解釋其他選項為何錯誤。"
         }
     ]
-    
     【極度重要】："answer" 欄位必須填寫「正確選項的完整文字內容」。
     請嚴格遵守以下輸出格式（請使用特定分隔符號以便程式解析）：
     """

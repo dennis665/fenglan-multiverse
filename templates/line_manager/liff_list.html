@@ -612,13 +612,15 @@
 
         // 👍 我有興趣/加入
         function joinUnscheduled(id) {
+            let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
             fetch(`/line/api/itineraries/join/${id}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    access_token: userAccessToken
+                    access_token: userAccessToken,
+                    group_id: groupId
                 })
             })
             .then(res => res.json())

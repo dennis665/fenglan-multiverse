@@ -21,9 +21,9 @@ class Command(BaseCommand):
         try:
             #! 加上 verify=False 略過憑證檢查
             response = requests.get(
-                url, 
-                timeout=15, 
-                verify=certifi.where() 
+                url,
+                timeout=15,
+                verify=certifi.where()
             )
             response.raise_for_status()
             data = response.json()

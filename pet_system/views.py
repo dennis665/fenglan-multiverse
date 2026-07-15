@@ -108,20 +108,20 @@ def admin_gallery(request):
 def api_get_dashboard_data(request):
     """取得寵物主畫面所有 JSON 格式數據 (包含 v2.0 金幣、探索與爬塔)"""
     user = request.user
-    
+
     # 確保今日登入日誌存在
     DailyLoginLog.objects.get_or_create(user=user, login_date=now().date())
     total_login_days = DailyLoginLog.objects.filter(user=user).count()
-    
+
     # 取得或建立玩家金幣存摺
     profile, _ = UserPetProfile.objects.get_or_create(user=user)
-    
+
     # 取得或建立爬塔進度
     tower, _ = TowerProgress.objects.get_or_create(user=user)
-    
+
     # 取得出戰中的寵物
     active_pet_obj = Pet.objects.filter(user=user, is_active=True).first()
-    
+
     # 肥嘟嘟守護龍 每日金幣贈送邏輯
     chubby_bonus_claimed = False
     if active_pet_obj and active_pet_obj.stage == 4 and active_pet_obj.personality == "CHUBBY":
@@ -134,11 +134,11 @@ def api_get_dashboard_data(request):
                     profile.last_daily_claim = today
                     profile.save()
                     chubby_bonus_claimed = True
-    
+
     active_pet = None
     unclaimed_login_days = 0
     active_pet_expedition = None
-    
+
     if active_pet_obj:
         active_pet = {
             "id": active_pet_obj.id,
@@ -156,7 +156,7 @@ def api_get_dashboard_data(request):
             "equipped_back": active_pet_obj.equipped_back,
         }
         unclaimed_login_days = max(0, total_login_days - active_pet_obj.login_days_consumed)
-        
+
         # 檢查該出戰寵物目前是否有正在進行的探索派遣
         exp = PetExpedition.objects.filter(pet=active_pet_obj).exclude(status="CLAIMED").first()
         if exp:
@@ -190,7 +190,7 @@ def api_get_dashboard_data(request):
             "equipped_face": p.equipped_face,
             "equipped_back": p.equipped_back,
         })
-        
+
     # 取得背包道具
     inventory = []
     for inv in UserInventory.objects.filter(user=user, quantity__gt=0).select_related("product"):
@@ -244,11 +244,11 @@ def api_get_active_shimeji(request):
     user = request.user
     if not user.is_authenticated:
         return JsonResponse({"status": "error", "message": "未登入"})
-        
+
     active_pet = Pet.objects.filter(user=user, is_active=True).first()
     if not active_pet:
         return JsonResponse({"status": "no_pet"})
-        
+
     # 定義像素化渲染路徑
     pixel_img = "/static/pet_system/images/pet_egg.webp"
     if active_pet.pet_type == "DRAGON":
@@ -299,7 +299,7 @@ def api_claim_login_energy(request):
 
     total_login_days = DailyLoginLog.objects.filter(user=user).count()
     unclaimed = total_login_days - active_pet.login_days_consumed
-    
+
     if unclaimed <= 0:
         return JsonResponse({"status": "error", "message": "沒有可領取的登入能量！"})
 
@@ -312,7 +312,7 @@ def api_claim_login_energy(request):
             active_pet.login_days_consumed = total_login_days
             # 累計登入成長能量 (用於性格判定)
             active_pet.save()
-            
+
     return JsonResponse({
         "status": "success",
         "message": f"成功吸收 {unclaimed} 天的能量，成長值增加 {unclaimed * 10}！",
@@ -328,15 +328,15 @@ def api_hatch_egg(request):
     egg_inv = UserInventory.objects.filter(user=user, product__category="PET_EGG", quantity__gt=0).first()
     if not egg_inv:
         return JsonResponse({"status": "error", "message": "背包中沒有寵物蛋，請先到商城購買！"})
-        
+
     with transaction.atomic():
         egg_inv.quantity -= 1
         egg_inv.save()
-        
+
         # 隨機決定孵化出幻獸綠龍或烈火幼犬
         import random
         pet_type = random.choice(["DRAGON", "PUPPY"])
-        
+
         if pet_type == "DRAGON":
             pet_name = "神秘的龍蛋"
             story_dict = DRAGON_STORIES
@@ -352,7 +352,7 @@ def api_hatch_egg(request):
             growth_progress=0,
             is_active=True
         )
-        
+
         unlock, _ = PetStoryUnlock.objects.get_or_create(user=user, pet_type=pet_type)
         if unlock.max_stage_reached < 0:
             unlock.max_stage_reached = 0
@@ -373,13 +373,13 @@ def api_feed_pet(request):
     user = request.user
     inv_id = request.POST.get("inventory_id")
     pet_id = request.POST.get("pet_id")
-    
+
     inv = get_object_or_404(UserInventory, id=inv_id, user=user, quantity__gt=0)
     pet = get_object_or_404(Pet, id=pet_id, user=user)
-    
+
     if pet.growth_progress >= 100:
         return JsonResponse({"status": "error", "message": "成長度已達 100%，請先點擊進化！"})
-        
+
     growth_add = 0
     is_potion = False
     if inv.product.name == "美味寵物乾糧":
@@ -393,15 +393,15 @@ def api_feed_pet(request):
     with transaction.atomic():
         inv.quantity -= 1
         inv.save()
-        
+
         pet.growth_progress = min(100, pet.growth_progress + growth_add)
-        
+
         # 累加餵食次數，用於分支性格進化判定
         if is_potion:
             pet.potions_consumed += 1
         else:
             pet.feed_items_consumed += 1
-            
+
         pet.save()
 
     return JsonResponse({
@@ -418,10 +418,10 @@ def api_evolve_pet(request):
     user = request.user
     pet_id = request.POST.get("pet_id")
     pet = get_object_or_404(Pet, id=pet_id, user=user)
-    
+
     if pet.growth_progress < 100:
         return JsonResponse({"status": "error", "message": "成長值尚未達到 100%，無法進化！"})
-        
+
     if pet.stage >= 4:
         return JsonResponse({"status": "error", "message": "寵物已達到最高進化形態！"})
 
@@ -431,13 +431,13 @@ def api_evolve_pet(request):
             pet.growth_progress = 0
         else:
             pet.growth_progress = 100
-        
+
         if pet.stage == 1:
             if pet.pet_type == "DRAGON" and pet.name == "神秘的龍蛋":
                 pet.name = "綠色雛龍"
             elif pet.pet_type == "PUPPY" and pet.name == "神秘的火犬蛋":
                 pet.name = "烈火幼犬"
-            
+
         # 終極形態 (Stage 4) 分支進化判定：
         if pet.stage == 4:
             # 1. 肥嘟嘟分支：如果完全沒有餵食任何道具 (全程靠登入天數)
@@ -461,9 +461,9 @@ def api_evolve_pet(request):
                     pet.name = "自然翡翠龍"
                 else:
                     pet.name = "麒麟火犬"
-        
+
         pet.save()
-        
+
         # 更新劇情解鎖紀錄
         unlock, _ = PetStoryUnlock.objects.get_or_create(user=user, pet_type=pet.pet_type)
         if pet.stage > unlock.max_stage_reached:
@@ -511,7 +511,7 @@ def api_rename_pet(request):
     user = request.user
     pet_id = request.POST.get("pet_id")
     new_name = request.POST.get("name", "").strip()
-    
+
     if not new_name:
         return JsonResponse({"status": "error", "message": "名字不能為空！"})
     if len(new_name) > 20:
@@ -520,7 +520,7 @@ def api_rename_pet(request):
     pet = get_object_or_404(Pet, id=pet_id, user=user)
     pet.name = new_name
     pet.save()
-    
+
     return JsonResponse({"status": "success", "message": "寵物命名成功！", "name": pet.name})
 
 
@@ -531,12 +531,12 @@ def api_switch_active_pet(request):
     user = request.user
     pet_id = request.POST.get("pet_id")
     pet = get_object_or_404(Pet, id=pet_id, user=user)
-    
+
     with transaction.atomic():
         Pet.objects.filter(user=user).update(is_active=False)
         pet.is_active = True
         pet.save()
-    
+
     return JsonResponse({"status": "success", "message": f"成功召喚 {pet.name} 出戰！", "pet_id": pet.id})
 
 
@@ -546,7 +546,7 @@ def api_get_story(request):
     """重溫回顧劇情"""
     pet_type = request.GET.get("pet_type", "DRAGON")
     stage = int(request.GET.get("stage", 0))
-    
+
     if pet_type == "DRAGON" and stage in DRAGON_STORIES:
         return JsonResponse({"status": "success", "story": DRAGON_STORIES[stage]})
     elif pet_type == "PUPPY" and stage in PUPPY_STORIES:
@@ -565,26 +565,26 @@ def api_start_expedition(request):
     user = request.user
     pet_id = request.POST.get("pet_id")
     hours = int(request.POST.get("hours", 1))
-    
+
     if hours not in [1, 2, 4, 20]:
         return JsonResponse({"status": "error", "message": "無效的探索時長！"})
-        
+
     pet = get_object_or_404(Pet, id=pet_id, user=user)
-    
+
     # 檢查是否有正在進行的探索
     exists = PetExpedition.objects.filter(pet=pet).exclude(status="CLAIMED").exists()
     if exists:
         return JsonResponse({"status": "error", "message": "該寵物已在探索中，或是等待領取獎勵中！"})
-        
+
     end_time = now() + timedelta(hours=hours)
-    
-    exp = PetExpedition.objects.create(
+
+    PetExpedition.objects.create(
         pet=pet,
         duration_hours=hours,
         end_time=end_time,
         status="ACTIVE"
     )
-    
+
     return JsonResponse({
         "status": "success",
         "message": f"召喚 {pet.name} 出發！探索派遣中，預計時長 {hours} 小時。",
@@ -599,10 +599,10 @@ def api_cancel_expedition(request):
     user = request.user
     exp_id = request.POST.get("expedition_id")
     exp = get_object_or_404(PetExpedition, id=exp_id, pet__user=user)
-    
+
     if exp.status != "ACTIVE":
         return JsonResponse({"status": "error", "message": "只能取消進行中的探索！"})
-        
+
     exp.delete()
     return JsonResponse({
         "status": "success",
@@ -617,10 +617,10 @@ def api_claim_expedition_rewards(request):
     user = request.user
     exp_id = request.POST.get("expedition_id")
     exp = get_object_or_404(PetExpedition, id=exp_id, pet__user=user)
-    
+
     if exp.status == "CLAIMED":
         return JsonResponse({"status": "error", "message": "獎勵已經領取過了！"})
-        
+
     if now() < exp.end_time:
         return JsonResponse({"status": "error", "message": "探索時間還沒到，請耐心等待！"})
 
@@ -628,31 +628,31 @@ def api_claim_expedition_rewards(request):
     coins_earned = 0
     won_accessory = None
     won_potion = False
-    
+
     # 隨機池
     accessories_pool = list(ACCESSORY_SHOP.keys())
-    
+
     if exp.duration_hours == 1:
         coins_earned = random.randint(10, 20)
         if random.random() < 0.10: # 10% 配件
             won_accessory = random.choice(accessories_pool)
         if random.random() < 0.001: # 0.1% 進化石(藥水)
             won_potion = True
-            
+
     elif exp.duration_hours == 2:
         coins_earned = random.randint(25, 45)
         if random.random() < 0.20: # 20% 配件
             won_accessory = random.choice(accessories_pool)
         if random.random() < 0.003: # 0.3% 進化石
             won_potion = True
-            
+
     elif exp.duration_hours == 4:
         coins_earned = random.randint(60, 100)
         if random.random() < 0.40: # 40% 配件
             won_accessory = random.choice(accessories_pool)
         if random.random() < 0.01: # 1% 進化石
             won_potion = True
-            
+
     elif exp.duration_hours == 20:
         coins_earned = random.randint(350, 500)
         won_accessory = random.choice(accessories_pool) # 100% 獲得配件
@@ -664,13 +664,13 @@ def api_claim_expedition_rewards(request):
         profile, _ = UserPetProfile.objects.get_or_create(user=user)
         profile.pet_gold_coins += coins_earned
         profile.save()
-        
+
         # 2. 發送配件 (去重保存，累積數量)
         if won_accessory:
             acc, _ = UserAccessory.objects.get_or_create(user=user, accessory_id=won_accessory)
             acc.quantity += 1
             acc.save()
-            
+
         # 3. 發送進化石 (奇蹟藥水背包數量 +1)
         if won_potion:
             potion_prod = Product.objects.filter(name="奇蹟進化藥水").first()
@@ -678,7 +678,7 @@ def api_claim_expedition_rewards(request):
                 inv, _ = UserInventory.objects.get_or_create(user=user, product=potion_prod)
                 inv.quantity += 1
                 inv.save()
-                
+
         # 4. 更新任務狀態
         exp.status = "CLAIMED"
         exp.save()
@@ -703,28 +703,28 @@ def api_buy_accessory(request):
     """使用寵物金幣購買裝飾品"""
     user = request.user
     acc_id = request.POST.get("accessory_id")
-    
+
     if acc_id not in ACCESSORY_SHOP:
         return JsonResponse({"status": "error", "message": "商品不存在！"})
-        
+
     item = ACCESSORY_SHOP[acc_id]
     price = item["price"]
-    
+
     with transaction.atomic():
         profile = UserPetProfile.objects.select_for_update().get(user=user)
-        
+
         # 檢查是否已擁有該飾品 (通常買一個即可，這裡防重複或允許重複購買)
         owned = UserAccessory.objects.filter(user=user, accessory_id=acc_id).exists()
         if owned:
             return JsonResponse({"status": "error", "message": "您已經擁有該裝飾品囉，不須重複購買！"})
-            
+
         if profile.pet_gold_coins < price:
             return JsonResponse({"status": "error", "message": "您的寵物金幣餘額不足，快去探索或爬塔賺取！"})
-            
+
         # 扣款
         profile.pet_gold_coins -= price
         profile.save()
-        
+
         # 發貨
         UserAccessory.objects.create(user=user, accessory_id=acc_id, quantity=1)
 
@@ -742,22 +742,22 @@ def api_equip_accessory(request):
     pet_id = request.POST.get("pet_id")
     slot = request.POST.get("slot") # head, face, back
     acc_id = request.POST.get("accessory_id") # 可以是空字串，代表脫下
-    
+
     pet = get_object_or_404(Pet, id=pet_id, user=user)
-    
+
     if slot not in ["head", "face", "back"]:
         return JsonResponse({"status": "error", "message": "無效的裝備槽位！"})
-        
+
     if acc_id:
         # 檢查玩家是否擁有此配件
         owned = UserAccessory.objects.filter(user=user, accessory_id=acc_id).exists()
         if not owned:
             return JsonResponse({"status": "error", "message": "您尚未擁有該配件，請先到商城購買！"})
-            
+
         # 檢查槽位是否匹配
         if ACCESSORY_SHOP.get(acc_id, {}).get("slot") != slot:
             return JsonResponse({"status": "error", "message": "裝備槽位與配件類型不相符！"})
-            
+
     # 進行裝備/脫下
     if slot == "head":
         pet.equipped_head = acc_id or None
@@ -765,9 +765,9 @@ def api_equip_accessory(request):
         pet.equipped_face = acc_id or None
     elif slot == "back":
         pet.equipped_back = acc_id or None
-        
+
     pet.save()
-    
+
     return JsonResponse({
         "status": "success",
         "message": "裝備更新完畢！"
@@ -785,21 +785,21 @@ def api_tower_battle_result(request):
     user = request.user
     pet_id = request.POST.get("pet_id")
     victory = request.POST.get("victory") == "true"
-    
-    pet = get_object_or_404(Pet, id=pet_id, user=user)
+
+    _pet = get_object_or_404(Pet, id=pet_id, user=user)
     tower, _ = TowerProgress.objects.get_or_create(user=user)
-    
+
     if not victory:
         return JsonResponse({"status": "success", "message": "戰鬥失敗，繼續努力！"})
-        
+
     # 計算勝利獎勵金幣 = 當前層數 * 10
     coins_reward = tower.current_floor * 10
-    
+
     with transaction.atomic():
         profile, _ = UserPetProfile.objects.get_or_create(user=user)
         profile.pet_gold_coins += coins_reward
         profile.save()
-        
+
         # 關卡層數 + 1
         tower.current_floor += 1
         tower.save()
@@ -818,9 +818,9 @@ def api_setup_shop_products(request):
     """一鍵建立商城預設寵物商品（限管理員）"""
     if not request.user.is_staff:
         return JsonResponse({"status": "error", "message": "權限不足，必須是管理員！"})
-        
+
     from finance.models import Product
-    
+
     defaults = [
         {
             "name": "神秘寵物蛋",
@@ -844,7 +844,7 @@ def api_setup_shop_products(request):
             "stock": 999,
         },
     ]
-    
+
     created_count = 0
     for item in defaults:
         prod, created = Product.objects.get_or_create(
@@ -859,7 +859,7 @@ def api_setup_shop_products(request):
         )
         if created:
             created_count += 1
-            
+
     return JsonResponse({
         "status": "success",
         "message": f"商城初始化成功！已新建 {created_count} 項商品（神秘寵物蛋、美味寵物乾糧、奇蹟進化藥水）。"

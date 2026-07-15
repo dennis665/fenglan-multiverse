@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import LineProfile, Itinerary, GroupMembership
+
+from .models import GroupMembership, Itinerary, LineProfile
 
 
 @admin.register(LineProfile)

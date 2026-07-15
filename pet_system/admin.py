@@ -1,5 +1,15 @@
 from django.contrib import admin
-from .models import Pet, PetStoryUnlock, DailyLoginLog, UserInventory, UserPetProfile, UserAccessory, PetExpedition, TowerProgress
+
+from .models import (
+    DailyLoginLog,
+    Pet,
+    PetExpedition,
+    PetStoryUnlock,
+    TowerProgress,
+    UserAccessory,
+    UserInventory,
+    UserPetProfile,
+)
 
 
 @admin.register(Pet)

@@ -35,7 +35,14 @@ from linebot.v3.messaging import (
     ReplyMessageRequest,
     TextMessage,
 )
-from linebot.v3.webhooks import JoinEvent, LocationMessageContent, MessageEvent, TextMessageContent
+from linebot.v3.webhooks import (
+    JoinEvent,
+    LocationMessageContent,
+    MessageEvent,
+    TextMessageContent,
+)
+
+from utils.logger_utils import jinfo, jinfo_error
 
 from .models import GroupMembership, Itinerary, LineProfile
 
@@ -75,7 +82,7 @@ def parse_itinerary_with_gemini(text):
 
     for model_name in fallback_models:
         try:
-            print(f"🤖 [LINE Bot] 嘗試使用 {model_name} 進行語意解析...")
+            jinfo(f"🤖 [LINE Bot] 嘗試使用 {model_name} 進行語意解析...")
             response = client.models.generate_content(
                 model=model_name,
                 config={"system_instruction": system_instruction},
@@ -92,7 +99,7 @@ def parse_itinerary_with_gemini(text):
             parsed_data = json.loads(raw_text.strip())
             return parsed_data
         except Exception as e:
-            print(f"❌ 使用 {model_name} 解析失敗: {e}")
+            jinfo_error(e, f"❌ 使用 {model_name} 解析失敗")
             continue
     return None
 
@@ -492,7 +499,7 @@ def handle_location(event):
                 )
             )
     except Exception as e:
-        print(f"❌ 傳送定位確認 Flex Message 失敗: {e}")
+        jinfo_error(e, "❌ 傳送定位確認 Flex Message 失敗")
         # 降級使用文字回覆
         with ApiClient(configuration) as api_client:
             api_instance = MessagingApi(api_client)
@@ -654,7 +661,7 @@ def api_get_itineraries(request):
                         group_name = summary.group_name
                         cache.set(cache_key, group_name, timeout=86400)  # 快取 24 小時
                 except Exception as e:
-                    print(f"Failed to fetch group summary for {item.group_id}: {e}")
+                    jinfo_error(e, f"Failed to fetch group summary for {item.group_id}")
                     group_name = f"群組 ({item.group_id[-6:]})"
             group_source = f"群組: {group_name}"
 
@@ -886,7 +893,11 @@ def api_create_itinerary(request):
         }
 
         try:
-            from linebot.v3.messaging import FlexContainer, FlexMessage, PushMessageRequest
+            from linebot.v3.messaging import (
+                FlexContainer,
+                FlexMessage,
+                PushMessageRequest,
+            )
             with ApiClient(configuration) as api_client:
                 api_instance = MessagingApi(api_client)
                 api_instance.push_message(
@@ -901,7 +912,7 @@ def api_create_itinerary(request):
                     )
                 )
         except Exception as e:
-            print(f"❌ 群組行程建立推播通知失敗: {e}")
+            jinfo_error(e, "❌ 群組行程建立推播通知失敗")
 
     return JsonResponse({"status": "success", "id": itinerary.pk})
 
@@ -1258,7 +1269,7 @@ def api_send_guide_message(request):
             )
         return JsonResponse({"status": "success"})
     except Exception as e:
-        print(f"❌ 發送定位引導訊息失敗: {e}")
+        jinfo_error(e, "❌ 發送定位引導訊息失敗")
         return JsonResponse({"error": str(e)}, status=500)
 
 
@@ -1271,6 +1282,7 @@ def api_join_unscheduled_itinerary(request, pk):
     try:
         data = json.loads(request.body)
         access_token = data.get("access_token")
+        group_id = data.get("group_id")
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
@@ -1306,7 +1318,12 @@ def api_join_unscheduled_itinerary(request, pk):
     if line_display_name not in interested_users_list:
         interested_users_list.append(line_display_name)
         itinerary.interested_users = json.dumps(interested_users_list, ensure_ascii=False)
-        itinerary.save()
+
+    # 用戶於群組點入表達興趣時，同步更新行程的群組 ID
+    if group_id and not itinerary.group_id:
+        itinerary.group_id = group_id
+
+    itinerary.save()
 
     return JsonResponse({
         "status": "success",
@@ -1339,7 +1356,7 @@ def api_set_unscheduled_time(request, pk):
 
     profile_data = res.json()
     line_user_id = profile_data["userId"]
-    line_display_name = profile_data.get("displayName", "LINE 用戶")
+    _line_display_name = profile_data.get("displayName", "LINE 用戶")
 
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     if not line_profile:
@@ -1366,7 +1383,7 @@ def api_set_unscheduled_time(request, pk):
 
     # 主動發送 Flex Message 通知群組或個人
     target_id = itinerary.group_id if itinerary.group_id else line_user_id
-    
+
     # 組合有興趣名單字串
     interested_users_list = []
     if itinerary.interested_users:
@@ -1374,7 +1391,7 @@ def api_set_unscheduled_time(request, pk):
             interested_users_list = json.loads(itinerary.interested_users)
         except Exception:
             pass
-            
+
     interested_str = "、".join(interested_users_list) if interested_users_list else "尚無"
 
     # 行程類型對照
@@ -1477,7 +1494,7 @@ def api_set_unscheduled_time(request, pk):
                 )
             )
     except Exception as e:
-        print(f"❌ 定案推播通知失敗: {e}")
+        jinfo_error(e, "❌ 定案推播通知失敗")
 
     return JsonResponse({"status": "success"})
 
@@ -1554,7 +1571,7 @@ def _verify_token_with_cache(access_token):
             _token_cache[access_token] = (line_user_id, display_name, now_ts + 600)
             return line_user_id, display_name
     except Exception as e:
-        print(f"❌ LINE Token 驗證請求失敗: {e}")
+        jinfo_error(e, "❌ LINE Token 驗證請求失敗")
     return None, None
 
 
@@ -1741,7 +1758,7 @@ def api_get_dramas(request):
     elif tab == "all_dramas":
         from .models import Drama
         dramas_qs = Drama.objects.all().select_related("creator__line_profile").order_by("-updated_at")
-        
+
         q = data.get("q", "").strip().lower()
         cat = data.get("category", "").strip()
 
@@ -2055,7 +2072,11 @@ def api_update_drama(request, pk):
             }
 
             try:
-                from linebot.v3.messaging import FlexContainer, FlexMessage, PushMessageRequest
+                from linebot.v3.messaging import (
+                    FlexContainer,
+                    FlexMessage,
+                    PushMessageRequest,
+                )
 
                 for t in trackers:
                     tracker_line_id = t.user.line_profile.line_user_id
@@ -2074,7 +2095,7 @@ def api_update_drama(request, pk):
                                 )
                             )
             except Exception as e:
-                print(f"❌ 追蹤者連結更新通知發送失敗: {e}")
+                jinfo_error(e, "❌ 追蹤者連結更新通知發送失敗")
 
     return JsonResponse({"status": "success"})
 
@@ -2214,7 +2235,11 @@ def api_recommend_drama(request):
                     },
                 }
 
-                from linebot.v3.messaging import FlexContainer, FlexMessage, PushMessageRequest
+                from linebot.v3.messaging import (
+                    FlexContainer,
+                    FlexMessage,
+                    PushMessageRequest,
+                )
 
                 with ApiClient(configuration) as api_client:
                     api_instance = MessagingApi(api_client)
@@ -2230,7 +2255,7 @@ def api_recommend_drama(request):
                         )
                     )
         except Exception as e:
-            print(f"❌ 傳送好友推薦通知失敗 to {friend_user.username}: {e}")
+            jinfo_error(e, f"❌ 傳送好友推薦通知失敗 to {friend_user.username}")
 
     if not success_names and skipped_names:
         return JsonResponse({

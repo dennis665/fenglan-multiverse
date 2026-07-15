@@ -20,7 +20,11 @@ with time_tracker("study_brain"):
         QuizRecord,
         ReadingRecord,
     )
-    from .utils import extract_text_from_file, generate_ai_content, generate_question_deep_analysis
+    from .utils import (
+        extract_text_from_file,
+        generate_ai_content,
+        generate_question_deep_analysis,
+    )
 
 
 @login_required

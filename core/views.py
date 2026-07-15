@@ -116,7 +116,7 @@ def portal_ai_bot(request):
 
         ## Latest Announcements:
         {notice_text if notice_text else "No announcements."}
-        
+
         {policy_context}
 
         ## Security & Constraints:

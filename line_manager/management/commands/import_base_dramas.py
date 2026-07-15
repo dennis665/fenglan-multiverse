@@ -1,10 +1,12 @@
-import os
 import csv
-import json
-from django.core.management.base import BaseCommand
+import os
+
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
+
 from line_manager.models import Drama, LineProfile
+
 
 class Command(BaseCommand):
     help = "讀取 base_dramas.csv 並將不存在的基礎劇集匯入資料庫"
@@ -68,11 +70,11 @@ class Command(BaseCommand):
 
         # 由於 title 為 EncryptedCharField，無法在資料庫層面直接過濾比對，故加載至記憶體中比對
         existing_titles = {d.title for d in Drama.objects.all()}
-        
+
         created_count = 0
         total_rows = 0
 
-        with open(csv_path, "r", encoding="utf-8-sig") as f:
+        with open(csv_path, encoding="utf-8-sig") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 title = row.get("title", "").strip()

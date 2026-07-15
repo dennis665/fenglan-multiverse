@@ -1,10 +1,10 @@
 import sys
 import threading
 import time
-import logging
+
 from django.apps import AppConfig
 
-logger = logging.getLogger(__name__)
+from utils.logger_utils import jinfo, jinfo_error
 
 
 class LineManagerConfig(AppConfig):
@@ -22,16 +22,16 @@ class LineManagerConfig(AppConfig):
             time.sleep(5)
             try:
                 from django.core.management import call_command
-                logger.info("🤖 正在自動註冊/更新 LINE 雙區圖文選單...")
+                jinfo("🤖 正在自動註冊/更新 LINE 雙區圖文選單...")
                 call_command('register_rich_menu')
             except Exception as e:
-                logger.warning(f"⚠️ 背景自動註冊圖文選單失敗: {e}")
+                jinfo_error(e, "⚠️ 背景自動註冊圖文選單失敗")
 
             try:
                 from django.core.management import call_command
-                logger.info("🤖 正在自動比對並匯入基礎新番清單...")
+                jinfo("🤖 正在自動比對並匯入基礎新番清單...")
                 call_command('import_base_dramas')
             except Exception as e:
-                logger.warning(f"⚠️ 自動匯入基礎劇集失敗: {e}")
+                jinfo_error(e, "⚠️ 自動匯入基礎劇集失敗")
 
         threading.Thread(target=auto_register, daemon=True).start()

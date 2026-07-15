@@ -42,6 +42,12 @@
     * 在 `api_create_drama` 建立劇集時引入同名防重機制，於記憶體中將加密的劇名解密後進行重複判定，若發現同名劇集則拋出 `400` 錯誤及防重警示。
 * **大量新番與劇場版基礎 CSV 自動初始化部署**：
     * 支援在 Django 啟動的 `ready()` 初始化中，透過非同步背景 Thread 讀取基礎 CSV 檔案（包含 2026年7月新番與 2026年日美韓劇、動畫劇場版共 172 部），自動比對資料庫（記憶體內解密比對）將缺漏之影劇建檔，免去生產部署手動匯入的麻煩。
+* **全自動背景服務維護與開機自啟動批次指令檔 (Background Services Maintenance & Auto-Startup Scripts)**：
+    * 建立一組 Windows 批次指令檔，用以實現本機生產與開發環境自動維護。
+    * [start_services.bat](file:///d:/SI1403/dennis/csi_server/start_services.bat)：呼叫 PowerShell 在背景無視窗執行 Django 伺服器、ngrok 伺服器及 start_scheduler 排程任務。
+    * [stop_services.bat](file:///d:/SI1403/dennis/csi_server/stop_services.bat)：精準過濾並強制終止關聯的專案 python.exe 與 ngrok 進程。
+    * [restart_services.bat](file:///d:/SI1403/dennis/csi_server/restart_services.bat)：快速重新啟動所有背景服務。
+    * [setup_startup.bat](file:///d:/SI1403/dennis/csi_server/setup_startup.bat)：自動在 Windows 開機啟動資料夾中建立快捷方式，實現主機開機自動在背景執行全部背景服務。
 
 ### Fixed & Optimized (修復與優化)
 * **修復行程刪除後的列表刷新 Bug**：

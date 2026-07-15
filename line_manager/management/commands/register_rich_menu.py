@@ -1,12 +1,9 @@
 import os
+
 import requests
-from django.core.management.base import BaseCommand
 from django.conf import settings
-from linebot.v3.messaging import (
-    ApiClient,
-    Configuration,
-    MessagingApi,
-)
+from django.core.management.base import BaseCommand
+
 
 class Command(BaseCommand):
     help = "註冊並綁定 LINE 官方帳號的雙區圖文選單 (Rich Menu)"
@@ -30,9 +27,8 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.WARNING("正在註冊 Rich Menu..."))
 
-        # LINE Token 與認證
-        configuration = Configuration(access_token=settings.LINE_CHANNEL_ACCESS_TOKEN)
-        
+
+
         # 1. 建立 Rich Menu JSON 定義
         # 左右對稱雙按鈕選單 (2500 x 843)
         liff_id = settings.LINE_LIFF_ID
@@ -86,7 +82,7 @@ class Command(BaseCommand):
                 for menu in existing_menus:
                     if menu.get("name") == "CSI Portal 雙區選單":
                         existing_areas = menu.get("areas", [])
-                        
+
                         # 比對各按鈕區域的連結，完全一致就直接重用並設為預設
                         match = True
                         if len(existing_areas) != len(rich_menu_data["areas"]):
@@ -96,7 +92,7 @@ class Command(BaseCommand):
                                 if area.get("action", {}).get("uri") != rich_menu_data["areas"][idx]["action"]["uri"]:
                                     match = False
                                     break
-                        
+
                         if match:
                             self.stdout.write(self.style.SUCCESS(f"ℹ️ 已存在完全一致的選單 (ID: {menu['richMenuId']})，無需重複註冊。"))
                             # 確保它是預設選單
@@ -122,7 +118,7 @@ class Command(BaseCommand):
             if res.status_code != 200:
                 self.stdout.write(self.style.ERROR(f"❌ LINE Rich Menu 建立失敗: {res.text}"))
                 return
-            
+
             rich_menu_id = res.json()["richMenuId"]
             self.stdout.write(self.style.SUCCESS(f"✅ Rich Menu 建立成功，ID: {rich_menu_id}"))
 
@@ -135,23 +131,23 @@ class Command(BaseCommand):
             }
             with open(image_path, "rb") as img_file:
                 upload_res = requests.post(upload_url, data=img_file, headers=upload_headers)
-                
+
             if upload_res.status_code != 200:
                 self.stdout.write(self.style.ERROR(f"❌ 圖片上傳失敗: {upload_res.text}"))
                 return
-            
+
             self.stdout.write(self.style.SUCCESS("✅ 背景圖片上傳成功！"))
 
             # 3. 設為該帳號的預設 Rich Menu
             self.stdout.write(self.style.WARNING("正在套用預設選單..."))
             default_url = f"https://api.line.me/v2/bot/user/all/richmenu/{rich_menu_id}"
             default_res = requests.post(default_url, headers={"Authorization": f"Bearer {settings.LINE_CHANNEL_ACCESS_TOKEN}"})
-            
+
             if default_res.status_code != 200:
                 self.stdout.write(self.style.ERROR(f"❌ 設定預設選單失敗: {default_res.text}"))
                 return
-            
-            self.stdout.write(self.style.SUCCESS(f"🎉 成功！雙區圖文選單已生效並套用為預設。"))
-            
+
+            self.stdout.write(self.style.SUCCESS("🎉 成功！雙區圖文選單已生效並套用為預設。"))
+
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"❌ 發生異常錯誤: {e}"))

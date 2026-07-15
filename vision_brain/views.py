@@ -177,7 +177,7 @@ def ocr_recognize(request):
                 messages.success(request, f"✅ 處理成功！引擎：{selected_engine}")
                 request.session["ocr_result_text"] = final_text
                 request.session["ocr_image_uri"] = image_data_uri
-                
+
             return redirect(request.path)
 
         except Exception as e:

@@ -1,5 +1,6 @@
-import logging
+import re
 import time
+from datetime import timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -8,22 +9,21 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django_apscheduler.jobstores import DjangoJobStore
 
-logger = logging.getLogger(__name__)
+from utils.logger_utils import jinfo, jinfo_error
 
 
 def update_prices_job():
-    print("⏳ [排程任務] 開始執行每日收盤後股價更新...")
+    jinfo("⏳ [排程任務] 開始執行每日收盤後股價更新...")
     try:
         call_command("update_prices")  # * 呼叫你的爬蟲指令
-        print("✅ [排程任務] 每日股價更新完成！")
+        jinfo("✅ [排程任務] 每日股價更新完成！")
     except Exception as e:
-        print(f"❌ [排程任務] 執行失敗: {e}")
+        jinfo_error(e, "❌ [排程任務] 執行失敗")
 
 
 def check_itinerary_reminders_job():
     try:
-        from django.conf import settings
-        from django.utils.timezone import now, localtime
+        from django.utils.timezone import localtime, now
         from linebot.v3.messaging import (
             ApiClient,
             Configuration,
@@ -44,7 +44,6 @@ def check_itinerary_reminders_job():
             api_instance = MessagingApi(api_client)
 
             for item in itineraries:
-                from datetime import timedelta
                 # 計算應該提醒的時間點
                 reminder_time = item.date_time - timedelta(minutes=item.notify_minutes_before)
 
@@ -57,16 +56,19 @@ def check_itinerary_reminders_job():
                         try:
                             target_id = item.user.line_profile.line_user_id
                         except AttributeError:
-                            print(f"⚠️ 行程 #{item.pk} 找不到綁定的 LINE 用戶，無法發送通知。")
+                            jinfo_error(
+                                f"⚠️ 行程 #{item.pk} 找不到綁定的 LINE 用戶，無法發送通知。"
+                            )
                             continue
 
                     if not target_id:
                         continue
 
                     # 驗證是否為符合 LINE 格式的有效 ID（避免開發或測試環境中的 UUID 等模擬 ID 導致 LINE API 報錯）
-                    import re
                     if not re.match(r"^[UCR][0-9a-fA-F]{32}$", target_id):
-                        print(f"⚠️ 行程 #{item.pk} 的目標 ID [{target_id}] 格式不符合 LINE 規範，自動忽略並標記為已處理。")
+                        jinfo_error(
+                            f"⚠️ 行程 #{item.pk} 的目標 ID [{target_id}] 格式不符合 LINE 規範，自動忽略並標記為已處理。"
+                        )
                         item.is_notified = True
                         item.save()
                         continue
@@ -113,16 +115,16 @@ def check_itinerary_reminders_job():
                                 target_info = f"群組 [{item.group_id}]"
 
                         push_time_str = localtime(now()).strftime("%Y-%m-%d %H:%M:%S")
-                        print(f"✅ 已成功推播行程 #{item.pk} 通知至 {target_info} (時間: {push_time_str})")
+                        jinfo(f"✅ 已成功推播行程 #{item.pk} 通知至 {target_info} (時間: {push_time_str})")
                     except Exception as e:
-                        print(f"❌ 推播行程 #{item.pk} 通知失敗: {e}")
+                        jinfo_error(e, f"❌ 推播行程 #{item.pk} 通知失敗")
 
     except Exception as e:
-        print(f"❌ [排程任務] 執行行程提醒檢查時發生錯誤: {e}")
+        jinfo_error(e, "❌ [排程任務] 執行行程提醒檢查時發生錯誤")
 
 
 # def test_job():
-#     print("🤖 測試排程執行中... 滴答！(每 5 秒觸發)")
+#     jinfo("🤖 測試排程執行中... 滴答！(每 5 秒觸發)")
 
 
 class Command(BaseCommand):
@@ -155,15 +157,6 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("啟動成功！排程器正在背景監聽中..."))
             self.stdout.write(self.style.SUCCESS("⏰ 已設定為：每週一至週五 14:30 自動更新股價。"))
             self.stdout.write(self.style.WARNING("按 Ctrl+C 可以安全關閉此排程器。"))
-
-            #! 測試用
-            # scheduler.add_job(
-            #     test_job,
-            #     trigger=IntervalTrigger(seconds=5),  # * 改用 IntervalTrigger
-            #     id="test_5_seconds_job",  # * 給它一個測試用的 ID
-            #     max_instances=1,
-            #     replace_existing=True,
-            # )
 
             #! 開始阻擋並持續運行
             scheduler.start()
