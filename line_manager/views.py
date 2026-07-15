@@ -1721,8 +1721,21 @@ def api_get_dramas(request):
             .select_related("drama__creator__line_profile")
             .order_by("-updated_at")
         )
-        total_count = progress_qs.count()
-        sliced_qs = progress_qs[start:end]
+        q = data.get("q", "").strip().lower()
+        cat = data.get("category", "").strip()
+
+        # 記憶體內過濾與解密比對
+        filtered_progress = []
+        for p in progress_qs:
+            d = p.drama
+            if cat and d.category != cat:
+                continue
+            if q and q not in d.title.lower():
+                continue
+            filtered_progress.append(p)
+
+        total_count = len(filtered_progress)
+        sliced_qs = filtered_progress[start:end]
         has_more = total_count > end
 
         for p in sliced_qs:
@@ -2389,14 +2402,59 @@ def api_join_drama(request, pk):
 
 @csrf_exempt
 def api_get_categories(request):
-    """API 端點：取得目前資料庫中所有唯一的劇集分類"""
-    from .models import Drama
-    categories_qs = Drama.objects.values_list("category", flat=True).distinct()
-    categories = [cat.strip() for cat in categories_qs if cat and cat.strip()]
+    """API 端點：取得目前資料庫中所有唯一的劇集分類與對應數量"""
+    from .models import Drama, UserDramaProgress
+
+    # 取得所有的劇集分類
+    categories_qs = Drama.objects.values_list("category", flat=True)
+
+    # 計算資料庫中全部劇集的分類數量
+    all_counts = {}
+    for cat in categories_qs:
+        if cat:
+            clean_cat = cat.strip()
+            if clean_cat:
+                all_counts[clean_cat] = all_counts.get(clean_cat, 0) + 1
+
+    # 確保預設分類存在於 all_counts 中
     for default_cat in ["2026年7月新番", "動畫", "美劇", "日劇", "韓劇", "其他"]:
-        if default_cat not in categories:
-            categories.append(default_cat)
-    response = JsonResponse({"status": "success", "categories": categories})
+        if default_cat not in all_counts:
+            all_counts[default_cat] = 0
+
+    categories = list(all_counts.keys())
+
+    # 檢查是否有傳入 access_token 以計算該使用者的追劇分類數量
+    my_counts = {cat: 0 for cat in categories}
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        if access_token:
+            line_user_id, display_name = _verify_token_with_cache(access_token)
+            if line_user_id:
+                line_profile = _get_or_create_profile(line_user_id, display_name)
+                user = line_profile.user
+
+                # 取得使用者追劇中的分類與數量 (包含所有在個人追劇列表中的劇集)
+                progress_qs = UserDramaProgress.objects.filter(user=user).values_list("drama__category", flat=True)
+                for cat in progress_qs:
+                    if cat:
+                        clean_cat = cat.strip()
+                        if clean_cat in my_counts:
+                            my_counts[clean_cat] += 1
+                        else:
+                            my_counts[clean_cat] = 1
+    except Exception:
+        pass
+
+    # 排序分類列表
+    categories.sort()
+
+    response = JsonResponse({
+        "status": "success",
+        "categories": categories,
+        "all_counts": all_counts,
+        "my_counts": my_counts
+    })
     response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     response["Pragma"] = "no-cache"
     response["Expires"] = "0"

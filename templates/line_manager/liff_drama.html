@@ -122,6 +122,16 @@
             <div class="tab-content">
                 <!-- 我的追劇 -->
                 <div class="tab-pane fade show active" id="my-dramas-panel" role="tabpanel">
+                    <!-- 搜尋與分類選單 -->
+                    <div class="glass-card p-3 mb-3 d-flex gap-2 align-items-center">
+                        <div class="flex-grow-1 position-relative">
+                            <i class="fa-solid fa-magnifying-glass text-secondary position-absolute" style="left: 12px; top: 10px;"></i>
+                            <input type="text" id="my-dramas-search" class="form-control form-control-sm rounded-pill ps-4" placeholder="搜尋我的劇集..." oninput="triggerMyDramasSearch()">
+                        </div>
+                        <select id="my-dramas-cat-select" class="form-select form-select-sm rounded-pill w-auto" onchange="triggerMyDramasSearch()">
+                            <option value="">所有分類</option>
+                        </select>
+                    </div>
                     <div id="my-dramas-list" class="d-flex flex-column gap-3"></div>
                     <div id="my-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
                         <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="my-prev-btn" onclick="changePage(-1)">上一頁</button>
@@ -397,6 +407,7 @@
             currentTab = tab;
             if (tab === "my_dramas") {
                 fetchDramas("my_dramas", myDramasPage);
+                fetchCategories();
             } else if (tab === "recommendations") {
                 fetchDramas("recommendations", recsPage);
             } else if (tab === "all_dramas") {
@@ -430,6 +441,11 @@
             if (tab === "all_dramas") {
                 reqBody.q = document.getElementById("all-dramas-search").value;
                 reqBody.category = document.getElementById("all-dramas-cat-select").value;
+            } else if (tab === "my_dramas") {
+                const searchInput = document.getElementById("my-dramas-search");
+                const catSelect = document.getElementById("my-dramas-cat-select");
+                reqBody.q = searchInput ? searchInput.value.trim() : "";
+                reqBody.category = catSelect ? catSelect.value : "";
             }
 
             fetch(apiBaseUrl + "/line/api/dramas/", {
@@ -1154,17 +1170,47 @@
             })
             .then(data => {
                 if (data.status === "success") {
+                    // 計算總部數
+                    let totalAll = 0;
+                    if (data.all_counts) {
+                        Object.values(data.all_counts).forEach(v => totalAll += v);
+                    }
+                    let totalMy = 0;
+                    if (data.my_counts) {
+                        Object.values(data.my_counts).forEach(v => totalMy += v);
+                    }
+
+                    // 1. 全部劇集的分類選單
                     const searchSelect = document.getElementById("all-dramas-cat-select");
                     if (searchSelect) {
-                        searchSelect.innerHTML = `<option value="">所有分類</option>`;
+                        const currentVal = searchSelect.value;
+                        searchSelect.innerHTML = `<option value="">所有分類 (${totalAll}部)</option>`;
                         data.categories.forEach(cat => {
                             const opt = document.createElement("option");
                             opt.value = cat;
-                            opt.innerText = cat;
+                            const count = data.all_counts ? (data.all_counts[cat] || 0) : 0;
+                            opt.innerText = `${cat} (${count}部)`;
                             searchSelect.appendChild(opt);
                         });
+                        searchSelect.value = currentVal;
                     }
 
+                    // 2. 我的追劇的分類選單
+                    const mySelect = document.getElementById("my-dramas-cat-select");
+                    if (mySelect) {
+                        const currentVal = mySelect.value;
+                        mySelect.innerHTML = `<option value="">所有分類 (${totalMy}部)</option>`;
+                        data.categories.forEach(cat => {
+                            const opt = document.createElement("option");
+                            opt.value = cat;
+                            const count = data.my_counts ? (data.my_counts[cat] || 0) : 0;
+                            opt.innerText = `${cat} (${count}部)`;
+                            mySelect.appendChild(opt);
+                        });
+                        mySelect.value = currentVal;
+                    }
+
+                    // 3. 彈出視窗（建立/編輯劇集）的分類選單
                     const modalSelect = document.getElementById("drama-category-select");
                     if (modalSelect) {
                         modalSelect.innerHTML = "";
@@ -1210,6 +1256,16 @@
             allDramasSearchTimeout = setTimeout(() => {
                 allDramasPage = 1;
                 fetchDramas("all_dramas", 1);
+            }, 300);
+        }
+
+        // 我的追劇即時搜尋與分類過濾
+        let myDramasSearchTimeout = null;
+        function triggerMyDramasSearch() {
+            clearTimeout(myDramasSearchTimeout);
+            myDramasSearchTimeout = setTimeout(() => {
+                myDramasPage = 1;
+                fetchDramas("my_dramas", 1);
             }, 300);
         }
     </script>
