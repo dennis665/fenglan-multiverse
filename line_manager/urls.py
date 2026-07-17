@@ -38,4 +38,29 @@ urlpatterns = [
     path("api/dramas/categories/", views.api_get_categories, name="api_get_categories"),
     path("api/friends/", views.api_get_friends, name="api_get_friends"),
     path("api/friends/add/", views.api_add_friend, name="api_add_friend"),
+
+    # LINE 寵物系統 API 與頁面
+    path("liff/pet/", views.liff_pet, name="liff_pet"),
+    path("api/pet/status/", views.api_line_pet_status, name="api_line_pet_status"),
+    path("api/pet/sync_steps/", views.api_line_pet_sync_steps, name="api_line_pet_sync_steps"),
+    path("api/pet/buy_item/", views.api_line_pet_buy_item, name="api_line_pet_buy_item"),
+    path("api/pet/use_item/", views.api_line_pet_use_item, name="api_line_pet_use_item"),
+    path("api/pet/evolve/", views.api_line_pet_evolve, name="api_line_pet_evolve"),
+    path("api/pet/switch_active/", views.api_line_pet_switch_active, name="api_line_pet_switch_active"),
+
+    # Google Fit 步數綁定路由
+    path("liff/pet/google/login/", views.liff_pet_google_login, name="liff_pet_google_login"),
+    path("liff/pet/google/callback/", views.liff_pet_google_callback, name="liff_pet_google_callback"),
+    path("api/pet/sync_google_fit/", views.api_line_pet_sync_google_fit, name="api_line_pet_sync_google_fit"),
+    path("api/pet/unlink_google_fit/", views.api_line_pet_unlink_google_fit, name="api_line_pet_unlink_google_fit"),
+
+    # 新增：每日登入、裝飾商城、派遣系統、爬塔闖關 API
+    path("api/pet/claim_daily_login/", views.api_line_pet_claim_daily_login, name="api_line_pet_claim_daily_login"),
+    path("api/pet/buy_accessory/", views.api_line_pet_buy_accessory, name="api_line_pet_buy_accessory"),
+    path("api/pet/equip_accessory/", views.api_line_pet_equip_accessory, name="api_line_pet_equip_accessory"),
+    path("api/pet/tower_battle/", views.api_line_pet_tower_battle, name="api_line_pet_tower_battle"),
+    path("api/pet/start_expedition/", views.api_line_pet_start_expedition, name="api_line_pet_start_expedition"),
+    path("api/pet/cancel_expedition/", views.api_line_pet_cancel_expedition, name="api_line_pet_cancel_expedition"),
+    path("api/pet/claim_expedition/", views.api_line_pet_claim_expedition, name="api_line_pet_claim_expedition"),
+    path("api/pet/claim_maintenance_gift/", views.api_line_pet_claim_maintenance_gift, name="api_line_pet_claim_maintenance_gift"),
 ]

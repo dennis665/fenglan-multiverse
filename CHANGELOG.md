@@ -8,6 +8,33 @@
 
 ---
 
+## [1.17.7] - 2026-07-17
+### Added (新增)
+* **全新「寵物動畫圖鑑」分頁**：
+    * 於 LINE 寵物系統首頁 (`liff_pet.html`) 中實裝「寵物動畫圖鑑」分頁。
+    * 根據使用者當前解鎖的寵物型態（包含幻獸綠龍、烈火幼犬各階段共 13 種型態）顯示，未解鎖的寵物呈現半透明剪影。
+    * 提供 5 種動畫預覽（爬行、彈跳、睡覺、待機、吃乾糧），點擊即可即時播放該寵物的動態 Canvas 像素動畫。
+
+### Fixed (修復)
+* **iOS Webview / Safari 上的 DOMException 崩潰錯誤**：
+    * 實裝圖片 URL 空白轉義 `%20` 機制，解決包含空格的圖片路徑在 iOS WebView 裡用 `fetch()` 加載時會拋出 `The string did not match the expected pattern` 錯誤的問題。
+    * 徹底刪除了前端對 `window.history.replaceState` 的調用，徹底杜絕 iOS WebView 原源不符 (Origin mismatch) 引發的異步例外崩潰。
+    * 升級前端全域 `window.onerror` 與 `onunhandledrejection` 錯誤處理器，將 Promise 異步錯誤與全域例外轉化為包含 Stack Trace 的 SweetAlert2 彈窗。
+* ** models.py 丟失引起的 ImportError 500 錯誤**：
+    * 在後端 `pet_system/models.py` 中完整補全了 LINE 專屬的 5 個模型結構（`LinePet`、`LinePetProfile`、`LinePetInventory`、`LinePetExpedition`、以及 `GoogleFitToken`），解決後端 status API 崩潰問題。
+* **探索派遣任務在切換寵物時離奇消失與領取失敗**：
+    * 重構後端 `LinePetExpedition` 查詢與領取邏輯，將原本與出戰寵物單一綁定的查詢，優化為與使用者帳號（`pet__user=user`）進行整體綁定，確保完成派遣後必定能安全領取金幣與藥水。
+    * 升級前端領取派遣獎勵 API 點選事件的 `.catch` 處理，加入錯誤訊息 Swal 彈窗，消除任何靜默失敗的隱患。
+* **阻斷瀏覽器 `/favicon.ico` 302 重導向日誌洗版**：
+    * 前端顯式宣告空的 `data:image/x-icon;` favicon 鏈接，成功從客戶端阻斷了所有多餘的 `/favicon.ico` 伺服器請求。
+
+### Changed (變更)
+* **拆分與重構「購買道具」與「使用道具」API 邏輯**：
+    * 切分 `api_line_pet_buy_item` 中的「進化藥水購買」與「進化藥水使用」邏輯。
+    * 新增獨立的 `api_line_pet_use_item` 接口，使購買藥水（消耗 10 金幣、獲得 1 藥水）與使用藥水（消耗 1 藥水、出戰寵物成長度 +20）各司其職，修復了藥水購買失敗的 Bug。
+
+---
+
 ## [1.17.6] - 2026-07-14
 ### Added (新增)
 * **時間未定有興趣行程功能 (Unscheduled/Interested Itinerary)**：

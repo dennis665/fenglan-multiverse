@@ -17,7 +17,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import localtime, make_aware, now
 from django.views.decorators.csrf import csrf_exempt
@@ -2471,3 +2472,1396 @@ def liff_drama(request):
     response["Pragma"] = "no-cache"
     response["Expires"] = "0"
     return response
+
+
+def liff_pet(request):
+    """LINE Bot 寵物系統 LIFF 頁面渲染視圖"""
+    context = {
+        "liff_id": settings.LINE_LIFF_ID,
+    }
+    response = render(request, "line_manager/liff_pet.html", context)
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    return response
+
+
+@csrf_exempt
+def api_line_pet_status(request):
+    import traceback
+    with open('django_api_call.log', 'a', encoding='utf-8') as log_f:
+        log_f.write('api_line_pet_status called\n')
+    
+    """API 端點：取得 LINE 寵物系統首頁所需的完整狀態資料"""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            access_token = data.get("access_token")
+        except Exception:
+            return JsonResponse({"error": "Invalid request body"}, status=400)
+    elif request.method == "GET":
+        access_token = request.GET.get("access_token")
+    else:
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from datetime import date
+
+    from django.utils.timezone import now
+
+    from pet_system.models import (
+        LinePet,
+        LinePetExpedition,
+        LinePetInventory,
+        LinePetProfile,
+        TowerProgress,
+        UserAccessory,
+    )
+    from pet_system.views import ACCESSORY_SHOP
+
+    # 取得或初始化
+    profile, _ = LinePetProfile.objects.get_or_create(user=user)
+    inventory, _ = LinePetInventory.objects.get_or_create(user=user)
+    active_pet = LinePet.objects.filter(user=user, is_active=True).first()
+
+    pet_data = None
+    if active_pet:
+        # 定義像素化渲染路徑
+        pixel_img = "/static/pet_system/images/pet_egg.webp"
+        if active_pet.pet_type == "DRAGON" and active_pet.stage == 0:
+            pixel_img = "/static/pet_system/images/Mythical Beast Green Dragon Egg.webp"
+        if active_pet.pet_type == "DRAGON":
+            if active_pet.stage == 1:
+                pixel_img = "/static/pet_system/images/baby_dragon.webp"
+            elif active_pet.stage == 2:
+                pixel_img = "/static/pet_system/images/growth_dragon.webp"
+            elif active_pet.stage == 3:
+                pixel_img = "/static/pet_system/images/complete_dragon.webp"
+            elif active_pet.stage == 4:
+                if active_pet.personality == "CHUBBY":
+                    pixel_img = "/static/pet_system/images/pixel_chubby_dragon.webp"
+                elif active_pet.personality == "BRAVE":
+                    pixel_img = "/static/pet_system/images/pixel_star_dragon.webp"
+                else:
+                    pixel_img = "/static/pet_system/images/pixel_emerald_dragon.webp"
+        else:  # PUPPY
+            if active_pet.stage == 1:
+                pixel_img = "/static/pet_system/images/baby_puppy.webp"
+            elif active_pet.stage == 2:
+                pixel_img = "/static/pet_system/images/growth_puppy.webp"
+            elif active_pet.stage == 3:
+                pixel_img = "/static/pet_system/images/complete_puppy.webp"
+            elif active_pet.stage == 4:
+                if active_pet.personality == "CHUBBY":
+                    pixel_img = "/static/pet_system/images/pixel_chubby_puppy.webp"
+                elif active_pet.personality == "BRAVE":
+                    pixel_img = "/static/pet_system/images/pixel_star_puppy.webp"
+                else:
+                    pixel_img = "/static/pet_system/images/pixel_emerald_puppy.webp"
+
+        pet_data = {
+            "id": active_pet.id,
+            "name": active_pet.name,
+            "pet_type": active_pet.pet_type,
+            "pet_type_display": active_pet.get_pet_type_display(),
+            "stage": active_pet.stage,
+            "stage_display": active_pet.get_stage_display(),
+            "growth_progress": active_pet.growth_progress,
+            "image": pixel_img,
+            "equipped_head": active_pet.equipped_head,
+            "equipped_face": active_pet.equipped_face,
+            "equipped_back": active_pet.equipped_back,
+            "personality": active_pet.personality,
+            "personality_display": active_pet.get_personality_display(),
+        }
+
+    # 查詢所有待機中 (is_active=False) 的寵物
+    inactive_pets = LinePet.objects.filter(user=user, is_active=False)
+    inactive_pets_data = []
+    for pet in inactive_pets:
+        pixel_img = "/static/pet_system/images/pet_egg.webp"
+        if pet.pet_type == "DRAGON" and pet.stage == 0:
+            pixel_img = "/static/pet_system/images/Mythical Beast Green Dragon Egg.webp"
+        if pet.pet_type == "DRAGON":
+            if pet.stage == 1:
+                pixel_img = "/static/pet_system/images/baby_dragon.webp"
+            elif pet.stage == 2:
+                pixel_img = "/static/pet_system/images/growth_dragon.webp"
+            elif pet.stage == 3:
+                pixel_img = "/static/pet_system/images/complete_dragon.webp"
+            elif pet.stage == 4:
+                if pet.personality == "CHUBBY":
+                    pixel_img = "/static/pet_system/images/pixel_chubby_dragon.webp"
+                elif pet.personality == "BRAVE":
+                    pixel_img = "/static/pet_system/images/pixel_star_dragon.webp"
+                else:
+                    pixel_img = "/static/pet_system/images/pixel_emerald_dragon.webp"
+        else:  # PUPPY
+            if pet.stage == 1:
+                pixel_img = "/static/pet_system/images/baby_puppy.webp"
+            elif pet.stage == 2:
+                pixel_img = "/static/pet_system/images/growth_puppy.webp"
+            elif pet.stage == 3:
+                pixel_img = "/static/pet_system/images/complete_puppy.webp"
+            elif pet.stage == 4:
+                if pet.personality == "CHUBBY":
+                    pixel_img = "/static/pet_system/images/pixel_chubby_puppy.webp"
+                elif pet.personality == "BRAVE":
+                    pixel_img = "/static/pet_system/images/pixel_star_puppy.webp"
+                else:
+                    pixel_img = "/static/pet_system/images/pixel_emerald_puppy.webp"
+
+        inactive_pets_data.append(
+            {
+                "id": pet.id,
+                "name": pet.name,
+                "pet_type": pet.pet_type,
+                "pet_type_display": pet.get_pet_type_display(),
+                "stage": pet.stage,
+                "stage_display": pet.get_stage_display(),
+                "growth_progress": pet.growth_progress,
+                "image": pixel_img,
+                "equipped_head": pet.equipped_head,
+                "equipped_face": pet.equipped_face,
+                "equipped_back": pet.equipped_back,
+                "personality": pet.personality,
+                "personality_display": pet.get_personality_display(),
+            }
+        )
+
+    from pet_system.models import GoogleFitToken
+
+    token_obj = GoogleFitToken.objects.filter(user=user).first()
+    has_google_fit = token_obj is not None
+    google_email = token_obj.google_email if token_obj else None
+
+    # 獲取爬塔與裝飾配件進度
+    tower, _ = TowerProgress.objects.get_or_create(user=user)
+    unlocked_accessories = list(
+        UserAccessory.objects.filter(user=user).values_list("accessory_id", flat=True)
+    )
+    has_daily_claim_today = profile.last_daily_claim == date.today()
+
+    # 獲取當前出戰寵物的探索任務
+    active_pet_expedition = None
+    if active_pet:
+        exp = LinePetExpedition.objects.filter(pet__user=user).exclude(status="CLAIMED").first()
+        if exp:
+            if exp.status == "ACTIVE" and now() >= exp.end_time:
+                exp.status = "COMPLETED"
+                exp.save()
+            active_pet_expedition = {
+                "id": exp.id,
+                "duration_hours": exp.duration_hours,
+                "end_time": exp.end_time.isoformat(),
+                "status": exp.status,
+                "seconds_left": max(0, int((exp.end_time - now()).total_seconds())),
+            }
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "coins": profile.pet_gold_coins,
+            "last_sync_date": str(profile.last_sync_date) if profile.last_sync_date else "無",
+            "last_sync_steps": profile.last_sync_steps,
+            "has_google_fit": has_google_fit,
+            "google_email": google_email,
+            "has_daily_claim_today": has_daily_claim_today,
+            "tower_floor": tower.current_floor,
+            "unlocked_accessories": unlocked_accessories,
+            "accessory_shop": ACCESSORY_SHOP,
+            "active_pet_expedition": active_pet_expedition,
+            "inventory": {
+                "eggs_dragon": inventory.eggs_dragon,
+                "eggs_puppy": inventory.eggs_puppy,
+                "evo_potions": inventory.evo_potions,
+            },
+            "active_pet": pet_data,
+            "inactive_pets": inactive_pets_data,
+        }
+    )
+
+    from pet_system.models import GoogleFitToken
+
+    token_obj = GoogleFitToken.objects.filter(user=user).first()
+    has_google_fit = token_obj is not None
+    google_email = token_obj.google_email if token_obj else None
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "coins": profile.pet_gold_coins,
+            "last_sync_date": str(profile.last_sync_date) if profile.last_sync_date else "無",
+            "last_sync_steps": profile.last_sync_steps,
+            "has_google_fit": has_google_fit,
+            "google_email": google_email,
+            "inventory": {
+                "eggs_dragon": inventory.eggs_dragon,
+                "eggs_puppy": inventory.eggs_puppy,
+                "evo_potions": inventory.evo_potions,
+            },
+            "active_pet": pet_data,
+            "inactive_pets": inactive_pets_data,
+        }
+    )
+
+
+@csrf_exempt
+def api_line_pet_sync_steps(request):
+    """API 端點：同步 iOS 走路步數，並折算為金幣 (每 100 步折算 1 金幣)"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        steps = int(data.get("steps", 0))
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+    if steps < 0:
+        return JsonResponse({"error": "Steps cannot be negative"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from datetime import date
+
+    from pet_system.models import LinePetProfile
+
+    profile, _ = LinePetProfile.objects.get_or_create(user=user)
+
+    today = date.today()
+    coins_added = 0
+
+    # 設置每日上限步數 20,000 步 (即每日最多拿 200 金幣)
+    effective_steps = min(steps, 20000)
+
+    if profile.last_sync_date == today:
+        # 同一天重複同步：只計算步數差值增量
+        if effective_steps > profile.last_sync_steps:
+            diff = effective_steps - profile.last_sync_steps
+            coins_added = diff // 100
+            profile.pet_gold_coins += coins_added
+            profile.last_sync_steps = effective_steps
+            profile.save()
+    else:
+        # 新的一天：重新累算今日步數
+        coins_added = effective_steps // 100
+        profile.pet_gold_coins += coins_added
+        profile.last_sync_date = today
+        profile.last_sync_steps = effective_steps
+        profile.save()
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "coins_added": coins_added,
+            "total_coins": profile.pet_gold_coins,
+            "synced_steps": steps,
+        }
+    )
+
+
+@csrf_exempt
+def api_line_pet_buy_item(request):
+    """API 端點：以 LINE 寵物金幣購買蛋或進化藥水"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        item_type = data.get("item_type")  # EGG_DRAGON, EGG_PUPPY, EVO_POTION
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not item_type:
+        return JsonResponse({"error": "Missing parameters"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    # 定義售價
+    prices = {"EGG_DRAGON": 50, "EGG_PUPPY": 50, "EVO_POTION": 10}
+    if item_type not in prices:
+        return JsonResponse({"error": "Invalid item type"}, status=400)
+
+    cost = prices[item_type]
+    from django.db import transaction
+
+    from pet_system.models import LinePetInventory, LinePetProfile
+
+    with transaction.atomic():
+        profile, _ = LinePetProfile.objects.get_or_create(user=user)
+        inventory, _ = LinePetInventory.objects.get_or_create(user=user)
+
+        if profile.pet_gold_coins < cost:
+            return JsonResponse({"error": "金幣餘額不足！"}, status=400)
+
+        profile.pet_gold_coins -= cost
+        profile.save()
+
+        if item_type == "EGG_DRAGON":
+            inventory.eggs_dragon += 1
+        elif item_type == "EGG_PUPPY":
+            inventory.eggs_puppy += 1
+        elif item_type == "EVO_POTION":
+            inventory.evo_potions += 1
+            inventory.save()
+            msg = "成功購買奇蹟進化藥水！"
+
+        else:
+            return JsonResponse({"error": "Invalid item type"}, status=400)
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "message": msg,
+            "inventory": {
+                "eggs_dragon": inventory.eggs_dragon,
+                "eggs_puppy": inventory.eggs_puppy,
+                "evo_potions": inventory.evo_potions,
+            },
+        }
+    )
+
+
+@csrf_exempt
+def api_line_pet_evolve(request):
+    """API 端點：進行 LINE 寵物進化形態升級"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from pet_system.models import LinePet
+
+    pet = LinePet.objects.filter(user=user, is_active=True).first()
+    if not pet:
+        return JsonResponse({"error": "找不到出戰中的寵物"}, status=404)
+
+    if pet.growth_progress < 100:
+        return JsonResponse({"error": "成長值未達 100%，無法進化！"}, status=400)
+
+    if pet.stage >= 4:
+        return JsonResponse({"error": "寵物已達到最大進化型態！"}, status=400)
+
+    pet.stage += 1
+    if pet.stage < 4:
+        pet.growth_progress = 0
+    else:
+        pet.growth_progress = 100
+
+    # 進化改名與分支性格
+    if pet.stage == 1:
+        pet.name = "綠色雛龍" if pet.pet_type == "DRAGON" else "烈火幼犬"
+    elif pet.stage == 2:
+        pet.name = "成長體綠龍" if pet.pet_type == "DRAGON" else "成長體火犬"
+    elif pet.stage == 3:
+        pet.name = "完全體綠龍" if pet.pet_type == "DRAGON" else "完全體火犬"
+    elif pet.stage == 4:
+        if pet.feed_items_consumed == 0 and pet.potions_consumed == 0:
+            pet.personality = "CHUBBY"
+            pet.name = "肥嘟嘟守護龍" if pet.pet_type == "DRAGON" else "肥嘟嘟烈火犬"
+        elif pet.potions_consumed > pet.feed_items_consumed:
+            pet.personality = "BRAVE"
+            pet.name = "烈焰星光龍" if pet.pet_type == "DRAGON" else "地獄烈焰犬"
+        else:
+            pet.personality = "NORMAL"
+            pet.name = "自然翡翠龍" if pet.pet_type == "DRAGON" else "麒麟火犬"
+    pet.save()
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "message": f"恭喜！寵物成功進化為：{pet.name}！",
+            "stage": pet.stage,
+            "name": pet.name,
+        }
+    )
+
+
+@csrf_exempt
+def liff_pet_google_login(request):
+    """將用戶重導向至 Google OAuth2 授權畫面，請求 Google Fit 步數讀取權限"""
+    access_token = request.GET.get("access_token")
+    if not access_token:
+        return HttpResponse("LINE Access Token 缺失", status=400)
+
+    google_app = settings.SOCIALACCOUNT_PROVIDERS.get("google", {}).get("APP", {})
+    client_id = google_app.get("client_id")
+    if not client_id:
+        return HttpResponse("系統未設定 GOOGLE_CLIENT_ID", status=500)
+
+    # 取得當前網頁的 host 以動態建立 redirect_uri
+    redirect_uri = request.build_absolute_uri(reverse("line_manager:liff_pet_google_callback"))
+
+    # 授權 URL
+    auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
+    params = {
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "https://www.googleapis.com/auth/fitness.activity.read email",
+        "access_type": "offline",
+        "prompt": "select_account consent",
+        "state": access_token,  # 傳遞 LINE access_token 用以在 callback 辨識使用者
+    }
+
+    from urllib.parse import urlencode
+
+    return redirect(f"{auth_url}?{urlencode(params)}")
+
+
+@csrf_exempt
+def liff_pet_google_callback(request):
+    """Google 授權完成後的 CallBack 端點：交換 Token 並保存"""
+    code = request.GET.get("code")
+    access_token = request.GET.get("state")  # state 中帶的是 LINE access_token
+
+    if not code or not access_token:
+        return HttpResponse("授權參數缺失", status=400)
+
+    # 驗證 LINE 使用者
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return HttpResponse("驗證 LINE 憑證失敗", status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    # 交換 Google Token
+    google_app = settings.SOCIALACCOUNT_PROVIDERS.get("google", {}).get("APP", {})
+    client_id = google_app.get("client_id")
+    client_secret = google_app.get("secret")
+    redirect_uri = request.build_absolute_uri(reverse("line_manager:liff_pet_google_callback"))
+
+    token_url = "https://oauth2.googleapis.com/token"
+    data = {
+        "code": code,
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "redirect_uri": redirect_uri,
+        "grant_type": "authorization_code",
+    }
+
+    res = requests.post(token_url, data=data)
+    if res.status_code != 200:
+        return HttpResponse(f"Google 授權交換失敗：{res.text}", status=400)
+
+    res_json = res.json()
+    g_access_token = res_json.get("access_token")
+    g_refresh_token = res_json.get(
+        "refresh_token"
+    )  # offline 且 prompt=consent 時 Google 一定會給 refresh_token
+    expires_in = res_json.get("expires_in", 3600)
+
+    import time
+
+    from pet_system.models import GoogleFitToken
+
+    # 嘗試呼叫 Google Userinfo API 獲取使用者 Email
+    g_email = None
+    try:
+        userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+        userinfo_res = requests.get(
+            userinfo_url, headers={"Authorization": f"Bearer {g_access_token}"}
+        )
+        if userinfo_res.status_code == 200:
+            g_email = userinfo_res.json().get("email")
+    except Exception as e:
+        print("Failed to fetch Google UserInfo:", e)
+
+    # 保存或更新 (使用安全 filter+init 機製，避開 MySQL 的 get_or_create 插入 null IntegrityError)
+    token_obj = GoogleFitToken.objects.filter(user=user).first()
+    if not token_obj:
+        token_obj = GoogleFitToken(user=user)
+
+    token_obj.access_token = g_access_token
+    token_obj.google_email = g_email
+    if g_refresh_token:
+        token_obj.refresh_token = g_refresh_token
+    token_obj.expires_at = time.time() + expires_in
+    token_obj.save()
+
+    # 建立一個精美的成功跳導向 HTML，解決部分 Android Chrome 下 liff.line.me 重導向空白頁的問題
+    success_html = f"""
+    <!DOCTYPE html>
+    <html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Google Fit 連結成功</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            body {{
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                color: #fff;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                padding: 20px;
+            }}
+            .glass-card {{
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 24px;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+                padding: 40px;
+                text-align: center;
+                max-width: 450px;
+                width: 100%;
+            }}
+            .success-icon {{
+                font-size: 60px;
+                color: #38ef7d;
+                margin-bottom: 20px;
+                animation: scaleIn 0.5s ease;
+            }}
+            .btn-back {{
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+                border: none;
+                border-radius: 50px;
+                font-weight: bold;
+                padding: 12px 30px;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                display: inline-block;
+                margin-top: 20px;
+                box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
+            }}
+            .btn-back:hover {{
+                transform: translateY(-2px);
+                opacity: 0.95;
+            }}
+            @keyframes scaleIn {{
+                0% {{ transform: scale(0); }}
+                100% {{ transform: scale(1); }}
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="glass-card">
+            <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <h4 class="fw-bold mb-2">Google Fit 連結成功！</h4>
+            <p class="small text-white-50 mb-4">帳號已成功綁定。我們正嘗試自動開啟 LINE 返回遊戲，若手機沒有反應，請點擊下方按鈕或手動回 LINE 檢視。</p>
+            <a href="line://app/{settings.LINE_LIFF_ID}?page=pet&google_success=1" class="btn-back">
+                <i class="fa-brands fa-line me-2"></i>開啟 LINE 返回遊戲
+            </a>
+        </div>
+        <script>
+            // 嘗試自動呼叫 LINE App 原生連結進行跳轉
+            setTimeout(function() {{
+                window.location.href = "line://app/{settings.LINE_LIFF_ID}?page=pet&google_success=1";
+            }}, 1200);
+        </script>
+    </body>
+    </html>
+    """
+    return HttpResponse(success_html)
+
+
+@csrf_exempt
+def api_line_pet_sync_google_fit(request):
+    """API 端點：拉取 Google Fit 步數並進行同步"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from pet_system.models import GoogleFitToken, LinePetProfile
+
+    token_obj = GoogleFitToken.objects.filter(user=user).first()
+    if not token_obj:
+        return JsonResponse({"error": "unlinked", "message": "尚未連結 Google Fit"}, status=400)
+
+    google_app = settings.SOCIALACCOUNT_PROVIDERS.get("google", {}).get("APP", {})
+    client_id = google_app.get("client_id")
+    client_secret = google_app.get("secret")
+
+    import time
+
+    # 檢查並自動刷新 token
+    now = time.time()
+    if token_obj.expires_at <= now + 60:
+        if not token_obj.refresh_token:
+            return JsonResponse(
+                {"error": "unlinked", "message": "Google Fit 憑證已過期，請重新綁定！"}, status=400
+            )
+
+        # 刷新 Google token
+        token_url = "https://oauth2.googleapis.com/token"
+        refresh_data = {
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "refresh_token": token_obj.refresh_token,
+            "grant_type": "refresh_token",
+        }
+        ref_res = requests.post(token_url, data=refresh_data)
+        if ref_res.status_code == 200:
+            ref_json = ref_res.json()
+            token_obj.access_token = ref_json["access_token"]
+            token_obj.expires_at = time.time() + ref_json["expires_in"]
+            token_obj.save()
+        else:
+            return JsonResponse(
+                {"error": "unlinked", "message": "Google 授權過期且刷新失敗，請重新綁定！"},
+                status=400,
+            )
+
+    # 開始向 Google Fit API 取得今日步數
+    from datetime import date, datetime
+
+    today = date.today()
+    start_dt = datetime.combine(today, datetime.min.time())
+    end_dt = datetime.combine(today, datetime.max.time())
+    start_ms = int(start_dt.timestamp() * 1000)
+    end_ms = int(end_dt.timestamp() * 1000)
+
+    fit_url = "https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate"
+    headers = {
+        "Authorization": f"Bearer {token_obj.access_token}",
+        "Content-Type": "application/json",
+    }
+    body = {
+        "aggregateBy": [{"dataTypeName": "com.google.step_count.delta"}],
+        "bucketByTime": {"durationMillis": 86400000},
+        "startTimeMillis": start_ms,
+        "endTimeMillis": end_ms,
+    }
+
+    try:
+        fit_res = requests.post(fit_url, json=body, headers=headers)
+        if fit_res.status_code != 200:
+            return JsonResponse(
+                {"error": "api_error", "message": f"Google Fit API 回傳錯誤: {fit_res.text}"},
+                status=400,
+            )
+
+        fit_json = fit_res.json()
+        buckets = fit_json.get("bucket", [])
+        total_steps = 0
+        for b in buckets:
+            dataset = b.get("dataset", [])
+            for ds in dataset:
+                point = ds.get("point", [])
+                for p in point:
+                    value = p.get("value", [])
+                    for v in value:
+                        int_val = v.get("intVal")
+                        fp_val = v.get("fpVal")
+                        if int_val is not None:
+                            total_steps += int_val
+                        elif fp_val is not None:
+                            total_steps += int(fp_val)
+    except Exception as e:
+        return JsonResponse(
+            {"error": "api_error", "message": f"連線 Google Fit 失敗: {e}"}, status=500
+        )
+
+    # 執行步數折算與存摺同步
+    profile, _ = LinePetProfile.objects.get_or_create(user=user)
+    coins_added = 0
+
+    # 設置每日上限步數 20,000 步 (即每日最多拿 200 金幣)
+    effective_steps = min(total_steps, 20000)
+
+    if profile.last_sync_date == today:
+        if effective_steps > profile.last_sync_steps:
+            diff = effective_steps - profile.last_sync_steps
+            coins_added = diff // 100
+            profile.pet_gold_coins += coins_added
+            profile.last_sync_steps = effective_steps
+            profile.save()
+    else:
+        coins_added = effective_steps // 100
+        profile.pet_gold_coins += coins_added
+        profile.last_sync_date = today
+        profile.last_sync_steps = effective_steps
+        profile.save()
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "coins_added": coins_added,
+            "total_coins": profile.pet_gold_coins,
+            "synced_steps": total_steps,
+        }
+    )
+
+
+@csrf_exempt
+def api_line_pet_switch_active(request):
+    """API 端點：切換召喚出戰的 LINE 寵物"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        pet_id = data.get("pet_id")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not pet_id:
+        return JsonResponse({"error": "Parameters missing"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from pet_system.models import LinePet
+
+    pet = LinePet.objects.filter(user=user, id=pet_id).first()
+    if not pet:
+        return JsonResponse({"error": "pet_not_found", "message": "找不到該寵物"}, status=404)
+
+    # 切換出戰
+    pet.is_active = True
+    pet.save()  # LinePet 的 save 方法中會自動將該使用者的其它寵物 is_active 設為 False
+
+    return JsonResponse({"status": "success", "message": f"成功召喚 {pet.name} 出戰！"})
+
+
+@csrf_exempt
+def api_line_pet_unlink_google_fit(request):
+    """API 端點：解除綁定並刪除用戶的 Google Fit Token"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from pet_system.models import GoogleFitToken
+
+    GoogleFitToken.objects.filter(user=user).delete()
+
+    return JsonResponse({"status": "success", "message": "已成功解除 Google Fit 帳號連結！"})
+
+
+@csrf_exempt
+def api_line_pet_claim_daily_login(request):
+    """API 端點：領取每日登入金幣 (50 金幣)"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from datetime import date
+
+    from pet_system.models import LinePetProfile
+
+    profile, _ = LinePetProfile.objects.get_or_create(user=user)
+
+    today = date.today()
+    if profile.last_daily_claim == today:
+        return JsonResponse({"error": "您今天已經領取過每日登入獎勵囉！"}, status=400)
+
+    profile.pet_gold_coins += 50
+    profile.last_daily_claim = today
+    profile.save()
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "message": "成功領取每日登入獎勵 50 金幣！",
+            "coins": profile.pet_gold_coins,
+        }
+    )
+
+
+@csrf_exempt
+def api_line_pet_buy_accessory(request):
+    """API 端點：以 LINE 寵物金幣購買飾品配件"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        accessory_id = data.get("accessory_id")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not accessory_id:
+        return JsonResponse({"error": "Missing parameters"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    from pet_system.views import ACCESSORY_SHOP
+
+    if accessory_id not in ACCESSORY_SHOP:
+        return JsonResponse({"error": "商品不存在！"}, status=400)
+
+    price = ACCESSORY_SHOP[accessory_id]["price"]
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from django.db import transaction
+
+    from pet_system.models import LinePetProfile, UserAccessory
+
+    with transaction.atomic():
+        profile, _ = LinePetProfile.objects.select_for_update().get_or_create(user=user)
+
+        # 檢查是否已擁有
+        owned = UserAccessory.objects.filter(user=user, accessory_id=accessory_id).exists()
+        if owned:
+            return JsonResponse({"error": "您已經擁有該裝飾品囉，不須重複購買！"}, status=400)
+
+        if profile.pet_gold_coins < price:
+            return JsonResponse(
+                {"error": "您的寵物金幣餘額不足，快去同步計步或挑戰關卡賺取！"}, status=400
+            )
+
+        # 扣款並發貨
+        profile.pet_gold_coins -= price
+        profile.save()
+
+        UserAccessory.objects.create(user=user, accessory_id=accessory_id, quantity=1)
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "message": f"成功購買裝飾品：{ACCESSORY_SHOP[accessory_id]['name']}！",
+            "coins": profile.pet_gold_coins,
+        }
+    )
+
+
+@csrf_exempt
+def api_line_pet_equip_accessory(request):
+    """API 端點：穿戴或卸下 LINE 寵物的裝扮配件"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        slot = data.get("slot")  # head, face, back
+        accessory_id = data.get("accessory_id")  # 可為空字串，代表脫下
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not slot:
+        return JsonResponse({"error": "Missing parameters"}, status=400)
+
+    if slot not in ["head", "face", "back"]:
+        return JsonResponse({"error": "無效的裝備槽位！"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from pet_system.models import LinePet, UserAccessory
+    from pet_system.views import ACCESSORY_SHOP
+
+    pet = LinePet.objects.filter(user=user, is_active=True).first()
+    if not pet:
+        return JsonResponse({"error": "找不到出戰中的寵物"}, status=404)
+
+    if accessory_id:
+        # 檢查玩家是否擁有此配件
+        owned = UserAccessory.objects.filter(user=user, accessory_id=accessory_id).exists()
+        if not owned:
+            return JsonResponse({"error": "您尚未擁有該配件，請先到商城購買！"}, status=400)
+
+        # 檢查槽位是否匹配
+        if ACCESSORY_SHOP.get(accessory_id, {}).get("slot") != slot:
+            return JsonResponse({"error": "裝備槽位與配件類型不相符！"}, status=400)
+
+    # 進行裝備/脫下
+    if slot == "head":
+        pet.equipped_head = accessory_id or None
+    elif slot == "face":
+        pet.equipped_face = accessory_id or None
+    elif slot == "back":
+        pet.equipped_back = accessory_id or None
+
+    pet.save()
+
+    return JsonResponse({"status": "success", "message": "已成功更新寵物裝備！"})
+
+
+@csrf_exempt
+def api_line_pet_tower_battle(request):
+    """API 端點：LINE 寵物闖關爬塔結算"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        victory = data.get("victory") == True
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from django.db import transaction
+
+    from pet_system.models import LinePetProfile, TowerProgress
+
+    tower, _ = TowerProgress.objects.get_or_create(user=user)
+
+    if not victory:
+        return JsonResponse(
+            {
+                "status": "success",
+                "message": "挑戰失敗！請提升寵物屬性或裝備後再次嘗試！",
+                "current_floor": tower.current_floor,
+            }
+        )
+
+    # 獲得金幣 = 當前層數 * 10
+    reward_coins = tower.current_floor * 10
+
+    with transaction.atomic():
+        profile, _ = LinePetProfile.objects.select_for_update().get_or_create(user=user)
+        profile.pet_gold_coins += reward_coins
+        profile.save()
+
+        tower.current_floor += 1
+        tower.save()
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "message": f"恭喜挑戰成功！進入第 {tower.current_floor} 層！獲得寵物金幣 x{reward_coins}！",
+            "reward_coins": reward_coins,
+            "new_floor": tower.current_floor,
+            "coins": profile.pet_gold_coins,
+        }
+    )
+
+
+@csrf_exempt
+def api_line_pet_start_expedition(request):
+    """API 端點：開始派遣 LINE 寵物探索"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        hours = int(data.get("hours", 1))
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or hours not in [1, 2, 4, 20]:
+        return JsonResponse({"error": "Missing parameters or invalid hours"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from datetime import timedelta
+
+    from django.utils.timezone import now
+
+    from pet_system.models import LinePet, LinePetExpedition
+
+    pet = LinePet.objects.filter(user=user, is_active=True).first()
+    if not pet:
+        return JsonResponse({"error": "目前沒有出戰的寵物！"}, status=400)
+
+    # 檢查是否有未完成的派遣
+    exists = LinePetExpedition.objects.filter(pet=pet).exclude(status="CLAIMED").exists()
+    if exists:
+        return JsonResponse({"error": "該寵物已在探索中，或是正等待領取獎勵！"}, status=400)
+
+    end_time = now() + timedelta(hours=hours)
+    LinePetExpedition.objects.create(
+        pet=pet, duration_hours=hours, end_time=end_time, status="ACTIVE"
+    )
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "message": f"成功召喚 {pet.name} 出發探索！預計時長 {hours} 小時。",
+            "end_time": end_time.isoformat(),
+        }
+    )
+
+
+@csrf_exempt
+def api_line_pet_cancel_expedition(request):
+    """API 端點：取消探索派遣"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from pet_system.models import LinePet, LinePetExpedition
+
+    pet = LinePet.objects.filter(user=user, is_active=True).first()
+    if not pet:
+        return JsonResponse({"error": "找不到出戰中的寵物"}, status=400)
+
+    exp = LinePetExpedition.objects.filter(pet__user=user, status="ACTIVE").first()
+    if not exp:
+        return JsonResponse({"error": "沒有正在進行的探索任務可供取消"}, status=400)
+
+    exp.delete()
+    return JsonResponse({"status": "success", "message": "已成功取消探索派遣，寵物已歸隊。"})
+
+
+@csrf_exempt
+def api_line_pet_claim_expedition(request):
+    """API 端點：領取探索派遣獎勵"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    import random
+
+    from django.db import transaction
+    from django.utils.timezone import now
+
+    from pet_system.models import (
+        LinePet,
+        LinePetExpedition,
+        LinePetInventory,
+        LinePetProfile,
+        UserAccessory,
+    )
+    from pet_system.views import ACCESSORY_SHOP
+
+    pet = LinePet.objects.filter(user=user, is_active=True).first()
+    if not pet:
+        return JsonResponse({"error": "找不到出戰中的寵物"}, status=400)
+
+    exp = LinePetExpedition.objects.filter(pet__user=user).exclude(status="CLAIMED").first()
+    if not exp:
+        return JsonResponse({"error": "沒有可領取的探索獎勵！"}, status=400)
+
+    # 自動更新逾期狀態為 COMPLETED
+    if exp.status == "ACTIVE" and now() >= exp.end_time:
+        exp.status = "COMPLETED"
+        exp.save()
+
+    if exp.status != "COMPLETED":
+        return JsonResponse({"error": "探索尚未結束，請耐心等待！"}, status=400)
+
+    # 計算隨機獎勵
+    coins_earned = 0
+    won_accessory = None
+    won_potion = False
+    accessories_pool = list(ACCESSORY_SHOP.keys())
+
+    if exp.duration_hours == 1:
+        coins_earned = random.randint(10, 20)
+        if random.random() < 0.10:
+            won_accessory = random.choice(accessories_pool)
+        if random.random() < 0.02:
+            won_potion = True
+    elif exp.duration_hours == 2:
+        coins_earned = random.randint(25, 45)
+        if random.random() < 0.20:
+            won_accessory = random.choice(accessories_pool)
+        if random.random() < 0.05:
+            won_potion = True
+    elif exp.duration_hours == 4:
+        coins_earned = random.randint(60, 100)
+        if random.random() < 0.40:
+            won_accessory = random.choice(accessories_pool)
+        if random.random() < 0.15:
+            won_potion = True
+    elif exp.duration_hours == 20:
+        coins_earned = random.randint(350, 500)
+        won_accessory = random.choice(accessories_pool)
+        if random.random() < 0.40:
+            won_potion = True
+
+    with transaction.atomic():
+        profile, _ = LinePetProfile.objects.select_for_update().get_or_create(user=user)
+        profile.pet_gold_coins += coins_earned
+        profile.save()
+
+        if won_accessory:
+            acc, _ = UserAccessory.objects.get_or_create(user=user, accessory_id=won_accessory)
+            acc.quantity += 1
+            acc.save()
+
+        if won_potion:
+            inv, _ = LinePetInventory.objects.get_or_create(user=user)
+            inv.evo_potions += 1
+            inv.save()
+
+        exp.status = "CLAIMED"
+        exp.save()
+
+    acc_name = ACCESSORY_SHOP.get(won_accessory, {}).get("name", "") if won_accessory else ""
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "message": f"探索完成！獲得金幣 x{coins_earned}"
+            + (f"，飾品：{acc_name}" if won_accessory else "")
+            + ("，進化藥水 x1" if won_potion else "")
+            + "！",
+            "coins_earned": coins_earned,
+            "accessory_won": won_accessory,
+            "accessory_won_display": acc_name,
+            "potion_won": won_potion,
+            "coins": profile.pet_gold_coins,
+        }
+    )
+
+
+# ==========================================
+# 使用道具 (例如使用奇蹟進化藥水)
+# ==========================================
+@csrf_exempt
+def api_line_pet_use_item(request):
+    """API 供用戶使用道具（如奇蹟進化藥水）"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        item_type = data.get("item_type")  # EVO_POTION
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not item_type:
+        return JsonResponse({"error": "Missing parameters"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from django.db import transaction
+    from pet_system.models import LinePet, LinePetInventory
+
+    with transaction.atomic():
+        inventory, _ = LinePetInventory.objects.get_or_create(user=user)
+
+        if item_type == "EVO_POTION":
+            if inventory.evo_potions < 1:
+                return JsonResponse({"error": "背包中沒有奇蹟進化藥水！"}, status=400)
+
+            pet = LinePet.objects.filter(user=user, is_active=True).first()
+            if not pet:
+                return JsonResponse({"error": "目前沒有出戰寵物，請先讓出戰寵物在庭院中顯示！"}, status=400)
+
+            if pet.stage >= 4:
+                return JsonResponse({"error": "寵物已達最大進化階段，無法使用進化藥水！"}, status=400)
+
+            inventory.evo_potions -= 1
+            inventory.save()
+
+            pet.growth_progress = min(pet.growth_progress + 20, 100)
+            pet.potions_consumed += 1
+            pet.save()
+            msg = f"成功使用奇蹟進化藥水！目前成長進度：{pet.growth_progress}%"
+        else:
+            return JsonResponse({"error": "Invalid item type"}, status=400)
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "message": msg,
+            "inventory": {
+                "eggs_dragon": inventory.eggs_dragon,
+                "eggs_puppy": inventory.eggs_puppy,
+                "evo_potions": inventory.evo_potions,
+            },
+        }
+    )
+
+
+
+# ==========================================
+# 領取更版維護金幣 100
+# ==========================================
+@csrf_exempt
+def api_line_pet_claim_maintenance_gift(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "error": "Method not allowed"}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        if not access_token:
+            return JsonResponse({"status": "error", "error": "Access token required"}, status=400)
+        
+        # 驗證用戶
+        line_user_id, display_name = _verify_token_with_cache(access_token)
+        if not line_user_id:
+            return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+        
+        line_profile = _get_or_create_profile(line_user_id, display_name)
+        user = line_profile.user
+        if not user:
+            return JsonResponse({"status": "error", "error": "Invalid token"}, status=401)
+        
+        # 檢查是否已領取 (JSON 快取防重領)
+        claimed_file = "claimed_maintenance_gift_users.json"
+        claimed_users = []
+        import os
+        if os.path.exists(claimed_file):
+            try:
+                with open(claimed_file, 'r') as f:
+                    claimed_users = json.load(f)
+            except:
+                pass
+        
+        if user.id in claimed_users:
+            return JsonResponse({"status": "error", "error": "您已領取過維護禮包囉！"}, status=400)
+        
+        # 給予 100 金幣
+        from pet_system.models import LinePetProfile
+        profile, _ = LinePetProfile.objects.get_or_create(user=user)
+        profile.pet_gold_coins += 100
+        profile.save()
+        
+        # 標記為已領取
+        claimed_users.append(user.id)
+        with open(claimed_file, 'w') as f:
+            json.dump(claimed_users, f)
+            
+        return JsonResponse({
+            "status": "success",
+            "message": "🎉 成功領取更版維護禮包！恭喜獲得 100 寵物金幣！"
+        })
+        
+    except Exception as e:
+        import traceback
+        with open("django_error.log", "a", encoding="utf-8") as f:
+            f.write("=== api_line_pet_claim_maintenance_gift error ===\n")
+            traceback.print_exc(file=f)
+        return JsonResponse({"status": "error", "error": str(e)}, status=500)

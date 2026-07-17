@@ -184,6 +184,11 @@
                 window.location.href = `/line/liff/drama/?${urlParams.toString()}`;
                 return;
             }
+            if (pageParam === "pet") {
+                urlParams.set("_t", new Date().getTime());
+                window.location.href = `/line/liff/pet/?${urlParams.toString()}`;
+                return;
+            }
             initLiff();
         });
 

@@ -63,7 +63,15 @@ class DjangoTranslator:
             translated_data = translated_data.rstrip() + f" (⚡ 總啟動耗時：{duration:.1f} 秒)\n"
             self.has_printed_duration = True
 
-        self.stream.write(translated_data)
+        try:
+            self.stream.write(translated_data)
+        except UnicodeEncodeError:
+            encoding = getattr(self.stream, 'encoding', 'ascii') or 'ascii'
+            try:
+                safe_data = translated_data.encode(encoding, errors='replace').decode(encoding)
+                self.stream.write(safe_data)
+            except Exception:
+                pass
 
     def flush(self):
         self.stream.flush()
