@@ -631,13 +631,31 @@ Stack: ${stack}`;
         // 生成唯一的快取清除版本號 (使用時間戳記)，強制手機每次整理都讀取硬碟最新圖資
         window.petCacheVersion = new Date().getTime();
 
+        // 預加載寵物的所有動作動畫圖片，寫入記憶體 Blob 快取以達到動作無縫瞬時切換的流暢體驗
+        function preloadPetImages(petData) {
+            if (!petData) return;
+            const actions = ["idle", "walk", "jump", "sleep"];
+            const directions = [true, false];
+            
+            actions.forEach(action => {
+                directions.forEach(facingRight => {
+                    const animUrl = getPetAnimUrl(petData, action, facingRight);
+                    getSafeImageUrl(animUrl).catch(err => {});
+                });
+            });
+        }
+
         // 0. 強效防破圖機制：使用帶有跳過警告標頭的 fetch 獲取圖片 Blob，並生成 Object URL
         const imageUrlCache = {};
         async function getSafeImageUrl(url) {
             if (!url) return "";
-            
+            let targetUrl = url;
+            if (url.startsWith("/static/pet_system/images/")) {
+                targetUrl = "https://cdn.jsdelivr.net/gh/dennis665/fenglan-multiverse@main" + url;
+            }
+
             // 加上快取清除參數 (Cache Buster)，強制手機瀏覽器載入最新修改的動畫圖檔
-            const encodedUrl = url.replace(/ /g, "%20");
+            const encodedUrl = targetUrl.replace(/ /g, "%20");
             let fetchUrl = encodedUrl;
             if (!encodedUrl.startsWith("data:") && !encodedUrl.startsWith("blob:")) {
                 const separator = encodedUrl.includes("?") ? "&" : "?";
@@ -649,10 +667,14 @@ Stack: ${stack}`;
             }
             
             try {
+                // 針對外部 CDN 的 fetch 跨域請求，切記不能發送非標準的自訂 header (如 ngrok-skip-browser-warning)，否則會被 CDN 伺服器的 CORS 預檢政策阻斷！
+                const fetchHeaders = {};
+                if (!fetchUrl.startsWith("https://cdn.jsdelivr.net/")) {
+                    fetchHeaders["ngrok-skip-browser-warning"] = "true";
+                }
+                
                 const response = await fetch(fetchUrl, {
-                    headers: {
-                        "ngrok-skip-browser-warning": "true"
-                    }
+                    headers: fetchHeaders
                 });
                 if (!response.ok) {
                     throw new Error("HTTP error " + response.status);
@@ -1391,6 +1413,14 @@ Stack: ${stack}`;
                     accessoryShopDataGlobal = data.accessory_shop || {};
                     towerFloorGlobal = data.tower_floor || 1;
                     inactivePetsGlobal = data.inactive_pets || [];
+
+                    // 異步在背景預加載出戰寵物與培育室內所有寵物的動畫影格，確保做動作時絲滑流暢不重新加載
+                    if (data.active_pet) {
+                        preloadPetImages(data.active_pet);
+                    }
+                    if (data.inactive_pets) {
+                        data.inactive_pets.forEach(pet => preloadPetImages(pet));
+                    }
 
                     document.getElementById("coin-count").innerText = data.coins;
                     // 每日登入領取提示 (每日金幣)
