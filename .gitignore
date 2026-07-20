@@ -52,3 +52,10 @@ profile_results.prof
 
 #! 辨識套件
 sh_recognition/rtdetrv2_pytorch/
+
+#! 個人操作筆記與私密草稿
+操作筆記.txt
+*筆記*
+*note*
+*草稿*
+claimed_maintenance_gift_users.json

@@ -2823,15 +2823,17 @@ def api_line_pet_buy_item(request):
 
         if item_type == "EGG_DRAGON":
             inventory.eggs_dragon += 1
+            msg = "成功購買幻獸綠龍蛋！"
         elif item_type == "EGG_PUPPY":
             inventory.eggs_puppy += 1
+            msg = "成功購買烈火幼犬蛋！"
         elif item_type == "EVO_POTION":
             inventory.evo_potions += 1
-            inventory.save()
             msg = "成功購買奇蹟進化藥水！"
-
         else:
             return JsonResponse({"error": "Invalid item type"}, status=400)
+        
+        inventory.save()
 
     return JsonResponse(
         {
