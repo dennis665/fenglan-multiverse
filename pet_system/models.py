@@ -171,21 +171,23 @@ class UserInventory(models.Model):
 
 
 # ==============================================================================
-# LINE 寵物系統專用 Model 定義
+# LINE 休閒小站 角色系統 Model 定義
 # ==============================================================================
 
 class LinePet(models.Model):
     PET_TYPE_CHOICES = [
-        ('DRAGON', _('幻獸綠龍')),
+        ('FRIEREN', _('芙莉蓮')),
+        ('RIMURU', _('利姆路')),
+        ('DRAGON', _('綠光小龍')),
         ('PUPPY', _('烈火幼犬')),
     ]
     
     STAGE_CHOICES = [
-        (0, _('寵物蛋')),
-        (1, _('幼年體')),
-        (2, _('成長體')),
-        (3, _('完全體')),
-        (4, _('進化體')),
+        (0, _('未解鎖')),
+        (1, _('冒險者')),
+        (2, _('精英')),
+        (3, _('大師')),
+        (4, _('傳奇')),
     ]
     
     PERSONALITY_CHOICES = [
@@ -197,35 +199,29 @@ class LinePet(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='line_pets', verbose_name=_("擁有者"))
-    name = models.CharField(default='未命名寵物', max_length=50, verbose_name=_("寵物名字"))
-    pet_type = models.CharField(choices=PET_TYPE_CHOICES, default='DRAGON', max_length=20, verbose_name=_("寵物種類"))
-    stage = models.IntegerField(choices=STAGE_CHOICES, default=0, verbose_name=_("成長階段"))
+    name = models.CharField(default='芙莉蓮', max_length=50, verbose_name=_("角色名字"))
+    pet_type = models.CharField(choices=PET_TYPE_CHOICES, default='FRIEREN', max_length=20, verbose_name=_("角色種類"))
+    stage = models.IntegerField(choices=STAGE_CHOICES, default=1, verbose_name=_("階級"))
     is_active = models.BooleanField(default=False, verbose_name=_("是否出戰"))
+    level = models.PositiveIntegerField(default=1, verbose_name=_("角色等級"))
+    exp = models.PositiveIntegerField(default=0, verbose_name=_("角色經驗值"))
     growth_progress = models.PositiveIntegerField(default=0, verbose_name=_("成長進度"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("領養時間"))
-    
-    # 裝扮欄位
-    equipped_head = models.CharField(blank=True, max_length=50, null=True, verbose_name=_("頭部裝飾"))
-    equipped_face = models.CharField(blank=True, max_length=50, null=True, verbose_name=_("臉部裝飾"))
-    equipped_back = models.CharField(blank=True, max_length=50, null=True, verbose_name=_("背部裝飾"))
-    
-    # 消耗紀錄與性格
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("解鎖時間"))
     feed_items_consumed = models.PositiveIntegerField(default=0, verbose_name=_("普通乾糧消耗數"))
     potions_consumed = models.PositiveIntegerField(default=0, verbose_name=_("奇蹟藥水消耗數"))
-    personality = models.CharField(choices=PERSONALITY_CHOICES, default='NORMAL', max_length=20, verbose_name=_("寵物性格"))
+    personality = models.CharField(choices=PERSONALITY_CHOICES, default='NORMAL', max_length=20, verbose_name=_("角色性格"))
 
     class Meta:
-        verbose_name = _("LINE 寵物")
-        verbose_name_plural = _("LINE 寵物")
+        verbose_name = _("休閒小站角色")
+        verbose_name_plural = _("休閒小站角色")
 
     def save(self, *args, **kwargs):
-        # 自動將其它寵物設為非出戰狀態
         if self.is_active:
             LinePet.objects.filter(user=self.user, is_active=True).exclude(id=self.id).update(is_active=False)
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.username} - {self.name} ({self.get_pet_type_display()} - {self.get_stage_display()})"
+        return f"{self.user.username} - {self.name} (Lv.{self.level} {self.get_pet_type_display()})"
 
 
 class LinePetInventory(models.Model):

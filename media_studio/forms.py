@@ -74,7 +74,7 @@ class VideoStudioForm(forms.Form):
     )
     quality = forms.IntegerField(
         label=_("輸出品質 (0-100)"),
-        initial=80,
+        initial=100,
         min_value=1,
         max_value=100,
         help_text=_("數值越高畫質越好，但檔案越大 (建議 50-80)"),

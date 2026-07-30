@@ -2528,46 +2528,64 @@ def api_line_pet_status(request):
     )
     from pet_system.views import ACCESSORY_SHOP
 
-    # 取得或初始化
+    # 取得或初始化角色 (若有舊寵物自動全數兌換為金幣補償並刪除)
     profile, _ = LinePetProfile.objects.get_or_create(user=user)
     inventory, _ = LinePetInventory.objects.get_or_create(user=user)
+
+    # 檢查並自動將舊寵物 (DRAGON, PUPPY) 兌換為金幣補償並刪除
+    legacy_pets = LinePet.objects.filter(user=user, pet_type__in=["DRAGON", "PUPPY"])
+    if legacy_pets.exists():
+        legacy_count = legacy_pets.count()
+        compensation_coins = legacy_count * 300  # 每隻舊寵物補償 300 金幣
+        profile.pet_gold_coins += compensation_coins
+        profile.save()
+        legacy_pets.delete()
+
     active_pet = LinePet.objects.filter(user=user, is_active=True).first()
+    
+    if not active_pet:
+        # 如果使用者連非出戰的角色都沒有，預設免費贈送芙莉蓮
+        frieren_pet = LinePet.objects.filter(user=user, pet_type="FRIEREN").first()
+        if not frieren_pet:
+            active_pet = LinePet.objects.create(
+                user=user,
+                name="芙莉蓮",
+                pet_type="FRIEREN",
+                stage=1,
+                is_active=True,
+                level=1,
+                exp=0
+            )
+        else:
+            frieren_pet.is_active = True
+            frieren_pet.save()
+            active_pet = frieren_pet
+
+    def get_char_assets(c_type):
+        folder = "Frieren" if c_type == "FRIEREN" else "Rimuru"
+        base = f"/static/leisure_station/images/{folder}"
+        return {
+            "avatar": f"{base}/avatar.webp",
+            "idle": f"{base}/idle.webp",
+            "hanging": f"{base}/hanging.webp",
+            "walk_up": f"{base}/walk_up.webp",
+            "walk_down": f"{base}/walk_down.webp",
+            "walk_right": f"{base}/walk_right.webp",
+            "walk_left": f"{base}/walk_left.webp",
+            "skill1": f"{base}/skill1.webp",
+            "skill2": f"{base}/skill2.webp",
+            "skill3": f"{base}/skill3.webp" if c_type == "FRIEREN" else f"{base}/skill2.webp",
+        }
 
     pet_data = None
     if active_pet:
-        # 定義像素化渲染路徑
-        pixel_img = "/static/pet_system/images/pet_egg.webp"
-        if active_pet.pet_type == "DRAGON" and active_pet.stage == 0:
-            pixel_img = "/static/pet_system/images/Mythical Beast Green Dragon Egg.webp"
-        if active_pet.pet_type == "DRAGON":
-            if active_pet.stage == 1:
-                pixel_img = "/static/pet_system/images/baby_dragon.webp"
-            elif active_pet.stage == 2:
-                pixel_img = "/static/pet_system/images/growth_dragon.webp"
-            elif active_pet.stage == 3:
-                pixel_img = "/static/pet_system/images/complete_dragon.webp"
-            elif active_pet.stage == 4:
-                if active_pet.personality == "CHUBBY":
-                    pixel_img = "/static/pet_system/images/pixel_chubby_dragon.webp"
-                elif active_pet.personality == "BRAVE":
-                    pixel_img = "/static/pet_system/images/pixel_star_dragon.webp"
-                else:
-                    pixel_img = "/static/pet_system/images/pixel_emerald_dragon.webp"
-        else:  # PUPPY
-            if active_pet.stage == 1:
-                pixel_img = "/static/pet_system/images/baby_puppy.webp"
-            elif active_pet.stage == 2:
-                pixel_img = "/static/pet_system/images/growth_puppy.webp"
-            elif active_pet.stage == 3:
-                pixel_img = "/static/pet_system/images/complete_puppy.webp"
-            elif active_pet.stage == 4:
-                if active_pet.personality == "CHUBBY":
-                    pixel_img = "/static/pet_system/images/pixel_chubby_puppy.webp"
-                elif active_pet.personality == "BRAVE":
-                    pixel_img = "/static/pet_system/images/pixel_star_puppy.webp"
-                else:
-                    pixel_img = "/static/pet_system/images/pixel_emerald_puppy.webp"
+        level = getattr(active_pet, 'level', 1) or 1
+        exp = getattr(active_pet, 'exp', 0) or 0
+        max_exp = level * 100
+        hp = 100 + (level - 1) * 25
+        atk = 15 + (level - 1) * 5
 
+        assets = get_char_assets(active_pet.pet_type)
         pet_data = {
             "id": active_pet.id,
             "name": active_pet.name,
@@ -2575,68 +2593,33 @@ def api_line_pet_status(request):
             "pet_type_display": active_pet.get_pet_type_display(),
             "stage": active_pet.stage,
             "stage_display": active_pet.get_stage_display(),
-            "growth_progress": active_pet.growth_progress,
-            "image": pixel_img,
-            "equipped_head": active_pet.equipped_head,
-            "equipped_face": active_pet.equipped_face,
-            "equipped_back": active_pet.equipped_back,
+            "level": level,
+            "exp": exp,
+            "max_exp": max_exp,
+            "hp": hp,
+            "atk": atk,
+            "image": assets["idle"],
+            "assets": assets,
             "personality": active_pet.personality,
             "personality_display": active_pet.get_personality_display(),
         }
 
-    # 查詢所有待機中 (is_active=False) 的寵物
-    inactive_pets = LinePet.objects.filter(user=user, is_active=False)
-    inactive_pets_data = []
-    for pet in inactive_pets:
-        pixel_img = "/static/pet_system/images/pet_egg.webp"
-        if pet.pet_type == "DRAGON" and pet.stage == 0:
-            pixel_img = "/static/pet_system/images/Mythical Beast Green Dragon Egg.webp"
-        if pet.pet_type == "DRAGON":
-            if pet.stage == 1:
-                pixel_img = "/static/pet_system/images/baby_dragon.webp"
-            elif pet.stage == 2:
-                pixel_img = "/static/pet_system/images/growth_dragon.webp"
-            elif pet.stage == 3:
-                pixel_img = "/static/pet_system/images/complete_dragon.webp"
-            elif pet.stage == 4:
-                if pet.personality == "CHUBBY":
-                    pixel_img = "/static/pet_system/images/pixel_chubby_dragon.webp"
-                elif pet.personality == "BRAVE":
-                    pixel_img = "/static/pet_system/images/pixel_star_dragon.webp"
-                else:
-                    pixel_img = "/static/pet_system/images/pixel_emerald_dragon.webp"
-        else:  # PUPPY
-            if pet.stage == 1:
-                pixel_img = "/static/pet_system/images/baby_puppy.webp"
-            elif pet.stage == 2:
-                pixel_img = "/static/pet_system/images/growth_puppy.webp"
-            elif pet.stage == 3:
-                pixel_img = "/static/pet_system/images/complete_puppy.webp"
-            elif pet.stage == 4:
-                if pet.personality == "CHUBBY":
-                    pixel_img = "/static/pet_system/images/pixel_chubby_puppy.webp"
-                elif pet.personality == "BRAVE":
-                    pixel_img = "/static/pet_system/images/pixel_star_puppy.webp"
-                else:
-                    pixel_img = "/static/pet_system/images/pixel_emerald_puppy.webp"
-
-        inactive_pets_data.append(
-            {
-                "id": pet.id,
-                "name": pet.name,
-                "pet_type": pet.pet_type,
-                "pet_type_display": pet.get_pet_type_display(),
-                "stage": pet.stage,
-                "stage_display": pet.get_stage_display(),
-                "growth_progress": pet.growth_progress,
-                "image": pixel_img,
-                "equipped_head": pet.equipped_head,
-                "equipped_face": pet.equipped_face,
-                "equipped_back": pet.equipped_back,
-                "personality": pet.personality,
-                "personality_display": pet.get_personality_display(),
-            }
-        )
+    # 取得玩家已解鎖的所有角色圖鑑 (Only unlocked characters shown)
+    all_user_pets = LinePet.objects.filter(user=user)
+    unlocked_characters = []
+    for pet in all_user_pets:
+        p_level = getattr(pet, 'level', 1) or 1
+        assets = get_char_assets(pet.pet_type)
+        unlocked_characters.append({
+            "id": pet.id,
+            "name": pet.name,
+            "pet_type": pet.pet_type,
+            "pet_type_display": pet.get_pet_type_display(),
+            "level": p_level,
+            "is_active": pet.is_active,
+            "avatar": assets["avatar"],
+            "idle": assets["idle"],
+        })
 
     from pet_system.models import GoogleFitToken
 
@@ -2644,7 +2627,6 @@ def api_line_pet_status(request):
     has_google_fit = token_obj is not None
     google_email = token_obj.google_email if token_obj else None
 
-    # 獲取爬塔與裝飾配件進度
     tower, _ = TowerProgress.objects.get_or_create(user=user)
     unlocked_accessories = list(
         UserAccessory.objects.filter(user=user).values_list("accessory_id", flat=True)
@@ -2667,28 +2649,7 @@ def api_line_pet_status(request):
                 "seconds_left": max(0, int((exp.end_time - now()).total_seconds())),
             }
 
-    return JsonResponse(
-        {
-            "status": "success",
-            "coins": profile.pet_gold_coins,
-            "last_sync_date": str(profile.last_sync_date) if profile.last_sync_date else "無",
-            "last_sync_steps": profile.last_sync_steps,
-            "has_google_fit": has_google_fit,
-            "google_email": google_email,
-            "has_daily_claim_today": has_daily_claim_today,
-            "tower_floor": tower.current_floor,
-            "unlocked_accessories": unlocked_accessories,
-            "accessory_shop": ACCESSORY_SHOP,
-            "active_pet_expedition": active_pet_expedition,
-            "inventory": {
-                "eggs_dragon": inventory.eggs_dragon,
-                "eggs_puppy": inventory.eggs_puppy,
-                "evo_potions": inventory.evo_potions,
-            },
-            "active_pet": pet_data,
-            "inactive_pets": inactive_pets_data,
-        }
-    )
+
 
     from pet_system.models import GoogleFitToken
 
@@ -2696,6 +2657,8 @@ def api_line_pet_status(request):
     has_google_fit = token_obj is not None
     google_email = token_obj.google_email if token_obj else None
 
+    unlocked_types = list(LinePet.objects.filter(user=user).values_list('pet_type', flat=True))
+
     return JsonResponse(
         {
             "status": "success",
@@ -2710,7 +2673,8 @@ def api_line_pet_status(request):
                 "evo_potions": inventory.evo_potions,
             },
             "active_pet": pet_data,
-            "inactive_pets": inactive_pets_data,
+            "unlocked_characters": unlocked_characters,
+            "unlocked_types": unlocked_types,
         }
     )
 
@@ -2801,49 +2765,49 @@ def api_line_pet_buy_item(request):
     line_profile = _get_or_create_profile(line_user_id, display_name)
     user = line_profile.user
 
-    # 定義售價
-    prices = {"EGG_DRAGON": 50, "EGG_PUPPY": 50, "EVO_POTION": 10}
+    # 定義角色解鎖價格
+    prices = {"FRIEREN": 500, "RIMURU": 800}
     if item_type not in prices:
-        return JsonResponse({"error": "Invalid item type"}, status=400)
+        return JsonResponse({"error": "不支援的角色商品"}, status=400)
 
     cost = prices[item_type]
+    char_name = "芙莉蓮" if item_type == "FRIEREN" else "利姆路"
+    
     from django.db import transaction
-
-    from pet_system.models import LinePetInventory, LinePetProfile
+    from pet_system.models import LinePet, LinePetProfile
 
     with transaction.atomic():
         profile, _ = LinePetProfile.objects.get_or_create(user=user)
-        inventory, _ = LinePetInventory.objects.get_or_create(user=user)
+
+        # 檢查玩家是否已解鎖該角色
+        existing = LinePet.objects.filter(user=user, pet_type=item_type).first()
+        if existing:
+            return JsonResponse({"error": f"您已經解鎖過「{char_name}」了！"}, status=400)
 
         if profile.pet_gold_coins < cost:
-            return JsonResponse({"error": "金幣餘額不足！"}, status=400)
+            return JsonResponse({"error": f"金幣餘額不足！解鎖「{char_name}」需要 {cost} 金幣。"}, status=400)
 
         profile.pet_gold_coins -= cost
         profile.save()
 
-        if item_type == "EGG_DRAGON":
-            inventory.eggs_dragon += 1
-            msg = "成功購買幻獸綠龍蛋！"
-        elif item_type == "EGG_PUPPY":
-            inventory.eggs_puppy += 1
-            msg = "成功購買烈火幼犬蛋！"
-        elif item_type == "EVO_POTION":
-            inventory.evo_potions += 1
-            msg = "成功購買奇蹟進化藥水！"
-        else:
-            return JsonResponse({"error": "Invalid item type"}, status=400)
-        
-        inventory.save()
+        # 自動創建新角色並設為當前出戰角色
+        new_pet = LinePet.objects.create(
+            user=user,
+            name=char_name,
+            pet_type=item_type,
+            stage=1,
+            is_active=True,
+            level=1,
+            exp=0
+        )
+        msg = f"🎉 成功解鎖並契約角色「{char_name}」！"
 
     return JsonResponse(
         {
             "status": "success",
             "message": msg,
-            "inventory": {
-                "eggs_dragon": inventory.eggs_dragon,
-                "eggs_puppy": inventory.eggs_puppy,
-                "evo_potions": inventory.evo_potions,
-            },
+            "coins": profile.pet_gold_coins,
+            "character_id": new_pet.id
         }
     )
 
@@ -3512,22 +3476,43 @@ def api_line_pet_tower_battle(request):
             }
         )
 
-    # 獲得金幣 = 當前層數 * 10
-    reward_coins = tower.current_floor * 10
+    # 獲得金幣 = 當前層數 * 15, 經驗值 = 當前層數 * 50
+    reward_coins = tower.current_floor * 15
+    reward_exp = tower.current_floor * 50
 
     with transaction.atomic():
         profile, _ = LinePetProfile.objects.select_for_update().get_or_create(user=user)
         profile.pet_gold_coins += reward_coins
         profile.save()
 
+        # 角色經驗值獎勵與升級
+        active_pet = LinePet.objects.filter(user=user, is_active=True).first()
+        leveled_up = False
+        if active_pet:
+            active_pet.exp = (getattr(active_pet, 'exp', 0) or 0) + reward_exp
+            pet_level = getattr(active_pet, 'level', 1) or 1
+            max_exp = pet_level * 100
+            while active_pet.exp >= max_exp:
+                active_pet.exp -= max_exp
+                pet_level += 1
+                max_exp = pet_level * 100
+                leveled_up = True
+            active_pet.level = pet_level
+            active_pet.save()
+
         tower.current_floor += 1
         tower.save()
+
+    msg = f"⚔️ 挑戰成功！進入第 {tower.current_floor} 層！獲得金幣 x{reward_coins}，經驗值 +{reward_exp}！"
+    if leveled_up:
+        msg += f" 🎉 角色提升至 Lv.{active_pet.level}！"
 
     return JsonResponse(
         {
             "status": "success",
-            "message": f"恭喜挑戰成功！進入第 {tower.current_floor} 層！獲得寵物金幣 x{reward_coins}！",
+            "message": msg,
             "reward_coins": reward_coins,
+            "reward_exp": reward_exp,
             "new_floor": tower.current_floor,
             "coins": profile.pet_gold_coins,
         }
@@ -3674,68 +3659,45 @@ def api_line_pet_claim_expedition(request):
     if exp.status != "COMPLETED":
         return JsonResponse({"error": "探索尚未結束，請耐心等待！"}, status=400)
 
-    # 計算隨機獎勵
-    coins_earned = 0
-    won_accessory = None
-    won_potion = False
-    accessories_pool = list(ACCESSORY_SHOP.keys())
-
-    if exp.duration_hours == 1:
-        coins_earned = random.randint(10, 20)
-        if random.random() < 0.10:
-            won_accessory = random.choice(accessories_pool)
-        if random.random() < 0.02:
-            won_potion = True
-    elif exp.duration_hours == 2:
-        coins_earned = random.randint(25, 45)
-        if random.random() < 0.20:
-            won_accessory = random.choice(accessories_pool)
-        if random.random() < 0.05:
-            won_potion = True
-    elif exp.duration_hours == 4:
-        coins_earned = random.randint(60, 100)
-        if random.random() < 0.40:
-            won_accessory = random.choice(accessories_pool)
-        if random.random() < 0.15:
-            won_potion = True
-    elif exp.duration_hours == 20:
-        coins_earned = random.randint(350, 500)
-        won_accessory = random.choice(accessories_pool)
-        if random.random() < 0.40:
-            won_potion = True
+    # 計算經驗值與金幣獎勵
+    coins_earned = exp.duration_hours * random.randint(25, 40)
+    exp_earned = exp.duration_hours * 80
 
     with transaction.atomic():
         profile, _ = LinePetProfile.objects.select_for_update().get_or_create(user=user)
         profile.pet_gold_coins += coins_earned
         profile.save()
 
-        if won_accessory:
-            acc, _ = UserAccessory.objects.get_or_create(user=user, accessory_id=won_accessory)
-            acc.quantity += 1
-            acc.save()
+        # 角色獲得經驗值與升級判斷
+        pet.exp = (getattr(pet, 'exp', 0) or 0) + exp_earned
+        pet_level = getattr(pet, 'level', 1) or 1
+        max_exp = pet_level * 100
+        leveled_up = False
+        
+        while pet.exp >= max_exp:
+            pet.exp -= max_exp
+            pet_level += 1
+            max_exp = pet_level * 100
+            leveled_up = True
 
-        if won_potion:
-            inv, _ = LinePetInventory.objects.get_or_create(user=user)
-            inv.evo_potions += 1
-            inv.save()
+        pet.level = pet_level
+        pet.save()
 
         exp.status = "CLAIMED"
         exp.save()
 
-    acc_name = ACCESSORY_SHOP.get(won_accessory, {}).get("name", "") if won_accessory else ""
+    msg = f"🏆 探索完成！獲得 {coins_earned} 金幣與 {exp_earned} 角色經驗值！"
+    if leveled_up:
+        msg += f" 🎉 恭喜角色等級提升至 Lv.{pet.level}！"
 
     return JsonResponse(
         {
             "status": "success",
-            "message": f"探索完成！獲得金幣 x{coins_earned}"
-            + (f"，飾品：{acc_name}" if won_accessory else "")
-            + ("，進化藥水 x1" if won_potion else "")
-            + "！",
-            "coins_earned": coins_earned,
-            "accessory_won": won_accessory,
-            "accessory_won_display": acc_name,
-            "potion_won": won_potion,
+            "message": msg,
             "coins": profile.pet_gold_coins,
+            "exp_earned": exp_earned,
+            "current_level": pet.level,
+            "current_exp": pet.exp,
         }
     )
 

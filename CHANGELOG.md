@@ -8,6 +8,35 @@
 
 ---
 
+## [1.17.8] - 2026-07-30
+### Added (新增)
+* **LINE 官方圖文選單與系統更名：【休閒小站】**：
+    * LINE 官方帳號 Rich Menu 圖文選單全面升級為 **「🎮 休閒小站」** 視覺風格。
+    * 正式將原本的「寵物之家」全面轉型為 **「休閒小站 (Leisure Station)」角色冒險成長系統**。
+* **二次元 Q 版角色系統 (Character System)**：
+    * 首波推出 **芙莉蓮 (Frieren)** 與 **利姆路 (Rimuru)** 兩位經典人氣角色。
+    * 全體玩家初始免費獲得並預設解鎖出戰 **芙莉蓮**。
+    * 完成 19 個角色動畫 WebP 素材全英文命名化（`avatar.webp`, `idle.webp`, `hanging.webp`, `walk_left.webp`, `skill1.webp` 等）。
+    * **全新數值與成長公式**：角色可透過試煉塔與派遣獲得經驗值 (EXP) 升級，能力值公式：`生命值 HP = 100 + (Lv - 1) * 25`，`攻擊力 ATK = 15 + (Lv - 1) * 5`。
+* **舊資料轉型金幣補償與全資料庫自動清理 (Legacy Data Migration)**：
+    * 自動掃描並將資料庫中的舊寵物（`DRAGON` / `PUPPY`）以 **每隻 +300 金幣** 方式發放補償入帳並安全清理。
+
+### Fixed & Optimized (修復與優化)
+* **解決 LINE LIFF Login 400 Bad Request 跳轉死鎖**：
+    * 修復在 LINE App 內建瀏覽器環境開啟 LIFF 時，因強制觸發 `liff.login()` 與 Token/Cookie 差異導致跳轉至 LINE Login 回傳 `400 Bad Request` 的錯誤。
+    * 優化 `liff.init()` 容錯加載機制，即使環境 Token 異常也能平滑顯示「休閒小站」網頁內容。
+* **LIFF 前端全盤升級 ([liff_pet.html](file:///d:/SI1403/dennis/csi_server/templates/line_manager/liff_pet.html))**：
+    * 角色圖鑑 (Gallery Modal) 僅展示玩家已解鎖角色卡，支援即時一鍵切換出戰角色。
+    * 角色招募商城 (Shop Modal) 改為僅販售角色解鎖卡（芙莉蓮標記 `預設贈送`，利姆路售價 `800 金幣`）。已擁有角色按鈕自動變灰並顯示 `已解鎖 / 已擁有` 防止重複扣金幣。
+    * 完整保留 Google Fit 與 iOS 健康步數折算機制（每 100 步折算 1 金幣），並還原升級 iOS iPhone 捷徑萬用設定導引教學。
+* **影片編輯器功能優化 (Media Studio)**：
+    * 影片輸出品質預設值提升至 `100` (`media_studio/forms.py`)。
+    * 上傳新影片時，自動隱藏/清除右側舊處理結果並將容器寬度還原為預設比例。
+* **後端代碼清理與系統穩定度提升**：
+    * 修正 `api_line_pet_status` 視圖中殘留引用的 `inactive_pets_data` 變數導致的 `NameError`。
+
+---
+
 ## [1.17.7] - 2026-07-17
 ### Added (新增)
 * **全新「寵物動畫圖鑑」分頁**：

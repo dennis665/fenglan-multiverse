@@ -54,7 +54,7 @@ class Command(BaseCommand):
                 "height": 843
             },
             "selected": True,
-            "name": "CSI Portal 三區選單 V4",
+            "name": "CSI Portal 三區選單 V5",
             "chatBarText": "選單功能",
             "areas": [
                 {
@@ -92,7 +92,7 @@ class Command(BaseCommand):
                     },
                     "action": {
                         "type": "uri",
-                        "label": "寵物之家",
+                        "label": "休閒小站",
                         "uri": f"https://liff.line.me/{liff_id}?page=pet"
                     }
                 }
@@ -109,7 +109,7 @@ class Command(BaseCommand):
             if list_res.status_code == 200:
                 existing_menus = list_res.json().get("richmenus", [])
                 for menu in existing_menus:
-                    if menu.get("name") == "CSI Portal 三區選單 V4":
+                    if menu.get("name") == "CSI Portal 三區選單 V5":
                         existing_areas = menu.get("areas", [])
 
                         # 比對各按鈕區域的連結，完全一致就直接重用並設為預設

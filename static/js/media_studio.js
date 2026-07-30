@@ -77,6 +77,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (videoInput && fragmentContainer) {
         videoInput.addEventListener('change', function (e) {
             fragmentContainer.innerHTML = ''; //* 清除舊片段
+            
+            // 上傳新影片時，清掉並隱藏上一次處理完的右側資訊畫面，並恢復左側為初始的 8 欄寬度
+            const resultCont = document.getElementById('video-result-container');
+            if (resultCont) {
+                resultCont.classList.add('d-none');
+            }
+            const formCont = document.getElementById('video-form-container');
+            if (formCont) {
+                formCont.classList.remove('col-md-5');
+                formCont.classList.add('col-md-8');
+            }
+
             const files = e.target.files;
 
             Array.from(files).forEach((file, index) => {
