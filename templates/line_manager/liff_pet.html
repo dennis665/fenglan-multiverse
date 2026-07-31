@@ -20,6 +20,10 @@
             min-height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             padding-bottom: 90px;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
 
         .glass-card {
@@ -69,28 +73,6 @@
             transform: translateY(-2px);
         }
         
-        /* 角色展示大圖與視窗 */
-        .char-stage-box {
-            position: relative;
-            width: 100%;
-            height: 240px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.5);
-        }
-        .char-sprite {
-            max-height: 200px;
-            max-width: 85%;
-            object-fit: contain;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
-            transition: transform 0.2s ease;
-        }
-        
         .char-card-item {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
@@ -103,27 +85,67 @@
             background: rgba(255, 215, 0, 0.15);
         }
 
-        .tower-log {
-            background: #0d1117;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+        .pet-tab-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
             border-radius: 12px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.8rem;
-            color: #38ef7d;
-            height: 150px;
-            overflow-y: auto;
-            padding: 10px;
-            text-align: left;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        .pet-tab-btn.active {
+            background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+            border-color: #ff5858;
+            font-weight: bold;
+        }
+
+        /* 全螢幕自由隨意走動桌寵懸浮圖像 */
+        #shimeji-char-sprite {
+            position: fixed;
+            z-index: 9999;
+            width: 95px;
+            height: 95px;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 15px rgba(0,0,0,0.5));
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-user-drag: none;
+            touch-action: none;
+            will-change: transform, left, top;
+        }
+        #shimeji-char-sprite:active {
+            cursor: grabbing;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        // 早期捕獲：無論是通過何種網址開啟，一秒抓取 steps 參數
+        (function catchStepsEarly() {
+            try {
+                const fullUrl = decodeURIComponent(window.location.href);
+                const match = fullUrl.match(/steps=(\d+)/i);
+                if (match && match[1]) {
+                    const steps = parseInt(match[1], 10);
+                    if (steps > 0) {
+                        localStorage.setItem('pending_sync_steps', steps);
+                    }
+                }
+            } catch(e) {}
+        })();
+    </script>
 </head>
 <body>
+    <!-- 全頁面隨意走動的漫遊角色精靈 -->
+    <img id="shimeji-char-sprite" src="https://raw.githubusercontent.com/dennis665/fenglan-multiverse/main/static/leisure_station/images/Frieren/idle.webp" alt="Character Sprite" draggable="false" oncontextmenu="return false;">
+
     <div class="container py-4">
         <!-- 頂部標題與金幣 -->
         <div class="glass-card p-4 mb-4 text-center">
             <h3 class="fw-bold mb-1"><i class="fa-solid fa-gamepad me-2 text-warning"></i>休閒小站</h3>
-            <p class="small text-white-50 mb-3">走路步數累積金幣 • 角色冒險成長</p>
+            <p class="small text-white-50 mb-3">走路步數累積金幣 • 角色全頁面漫遊冒險</p>
             <div class="d-flex justify-content-center align-items-center gap-2">
                 <span class="fs-4 fw-bold gold-glow"><i class="fa-solid fa-coins me-1 text-warning"></i><span id="coin-count">0</span></span>
                 <span class="text-white-50">金幣</span>
@@ -134,21 +156,16 @@
             <div class="spinner-border text-light" role="status">
                 <span class="visually-hidden">載入中...</span>
             </div>
-            <p class="mt-2 text-white-50">正在與 LINE 連線並加載資料...</p>
+            <p class="mt-2 text-white-50">正在加載角色冒險數據...</p>
         </div>
 
         <div id="main-section" class="d-none">
-            <!-- 當前出戰角色主卡片 -->
+            <!-- 當前出戰角色數據主卡片 -->
             <div class="glass-card p-4 mb-4 text-center">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span class="badge bg-warning text-dark fs-6" id="char-level-badge">Lv.1</span>
                     <h4 class="fw-bold mb-0 text-white" id="char-name">芙莉蓮</h4>
                     <span class="badge bg-info" id="char-type-badge">冒險者</span>
-                </div>
-
-                <!-- 角色 Stage 舞台動畫區 -->
-                <div class="char-stage-box mb-3">
-                    <img id="char-main-sprite" src="/static/leisure_station/images/Frieren/idle.webp" class="char-sprite" alt="Character">
                 </div>
 
                 <!-- 屬性與經驗值 -->
@@ -191,7 +208,7 @@
                     </button>
                 </div>
                 <div class="col-3">
-                    <button class="btn btn-action w-100" onclick="openTowerModal()">
+                    <button class="btn btn-action w-100" onclick="handleTowerClick()">
                         <i class="fa-solid fa-chess-rook text-warning fs-4 d-block mb-1"></i>冒險試煉
                     </button>
                 </div>
@@ -223,8 +240,8 @@
                     <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-circle-play me-1"></i>iPhone 捷徑一鍵同步 (設定導引)</h6>
                     <p class="small text-white-50 mb-3">您只需在 iPhone 的「捷徑」App 中新增一個 2 動作的小捷徑，就能一鍵將今天真實步數帶入並自動完成金幣折算：</p>
                     <div class="small text-white-50 mb-3 text-start">
-                        <div class="mb-2">1. 動作一：搜尋並加入<b>「尋找健康樣本」</b>（點擊<b>開始日期</b>改為<b>今天</b>，類型為<b>步數</b>，分組為<b>天</b>，合計數值）。</div>
-                        <div class="mb-2">2. 動作二：搜尋並加入<b>「在 Safari 中開啟 URL」</b>（貼上複製的網址，然後在網址最尾端插入剛才取得的<b>健康步數變數</b>即可）。</div>
+                        <div class="mb-2">1. 動作一：搜尋並加入<b>「尋找健康樣本」</b>（點擊<b>開始日期</b>改為<b>今天</b>，類型為<b>Steps</b>，單位為<b>步</b>，分類方式為<b>天</b>）。</div>
+                        <div class="mb-2">2. 動作二：搜尋並加入<b>「在 Safari 中開啟 URL」</b>（貼上點擊下方複製的<b>專屬連結</b>，並在最尾端插入<b>【健康樣本】</b>變數即可）。</div>
                         <div class="text-info mt-2" style="font-size: 0.85rem; line-height: 1.4;">
                             <i class="fa-solid fa-circle-info me-1"></i><b>重複同步說明</b>：每日上報不限次數。若您當天多次同步，後端僅會計算<b>「增加的步數差額」</b>來發放金幣；若步數無增加，則會獲得 +0 金幣，防止重複刷金幣。
                         </div>
@@ -264,7 +281,7 @@
         </div>
     </div>
 
-    <!-- 角色圖鑑 Modal (僅顯示已解鎖的角色) -->
+    <!-- 角色圖鑑 Modal -->
     <div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-card text-white border-0">
@@ -292,26 +309,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="row g-3" id="shop-char-container">
-                        <!-- 動態渲染商城角色卡 (已解鎖顯示已擁有所屬) -->
+                        <!-- 動態渲染商城角色卡 -->
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 冒險試煉塔 Modal -->
-    <div class="modal fade" id="towerModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content glass-card text-white border-0">
-                <div class="modal-header border-bottom border-white border-opacity-10">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-chess-rook text-warning me-2"></i>冒險試煉塔</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <h4 class="fw-bold mb-2 text-warning">第 <span id="tower-floor">1</span> 層</h4>
-                    <p class="small text-white-50 mb-3">挑戰試煉成功可獲得大量金幣與角色經驗值 (EXP)！</p>
-                    <div id="tower-battle-log" class="tower-log mb-3">準備進行試煉...</div>
-                    <button class="btn btn-liff w-100 py-2" id="tower-challenge-btn" onclick="startTowerBattle()"><i class="fa-solid fa-sword me-1"></i>發動試煉挑戰</button>
                 </div>
             </div>
         </div>
@@ -326,17 +325,12 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="expedition-status-box" class="mb-3 d-none">
-                        <!-- 正在派遣或領取狀態 -->
+                    <div class="d-flex gap-2 mb-3 overflow-x-auto pb-1" id="expedition-pet-tabs">
+                        <!-- 動態生成角色頁籤 -->
                     </div>
-                    <div id="expedition-select-box">
-                        <p class="small text-white-50 mb-3">派遣角色前往地城探索，完成後可獲得金幣與角色經驗值：</p>
-                        <div class="row g-2">
-                            <div class="col-6 mb-2"><button class="btn btn-outline-light w-100 p-2" onclick="startExpedition(1)">1小時 (約80 EXP)</button></div>
-                            <div class="col-6 mb-2"><button class="btn btn-outline-light w-100 p-2" onclick="startExpedition(2)">2小時 (約160 EXP)</button></div>
-                            <div class="col-6 mb-2"><button class="btn btn-outline-light w-100 p-2" onclick="startExpedition(4)">4小時 (約320 EXP)</button></div>
-                            <div class="col-6 mb-2"><button class="btn btn-outline-light w-100 p-2" onclick="startExpedition(20)">20小時 (超大豐收)</button></div>
-                        </div>
+
+                    <div id="expedition-panel" class="p-3 rounded bg-dark bg-opacity-40 border border-white border-opacity-10 text-center">
+                        <!-- 動態渲染狀態 -->
                     </div>
                 </div>
             </div>
@@ -350,27 +344,259 @@
         const MY_LIFF_ID = "{{ liff_id|default:'2007018318-zM3d88XJ' }}";
         let userAccessToken = "";
         let currentUnlockedTypes = [];
+        let currentUnlockedChars = [];
+        let selectedExpeditionPetId = null;
+        let shimejiEngine = null;
+        let countdownTimerInterval = null;
+
+        function fixUrl(url) {
+            if (!url) return '';
+            let targetUrl = url;
+            if (targetUrl.startsWith('/static/')) {
+                targetUrl = 'https://raw.githubusercontent.com/dennis665/fenglan-multiverse/main' + targetUrl;
+            }
+            return targetUrl.replace(/ /g, "%20");
+        }
+
+        class LeisureShimeji {
+            constructor(elementId) {
+                this.el = document.getElementById(elementId);
+                this.x = Math.random() * (window.innerWidth - 110);
+                this.y = window.innerHeight - 150;
+                
+                this.state = 'idle';
+                this.vx = 0;
+                this.vy = 0;
+                this.moveSpeed = 1.8;
+                
+                this.currentSkillUrl = '';
+                this.actionTimer = null;
+                this.assets = {};
+
+                this.init();
+            }
+
+            setAssets(assets) {
+                this.assets = {
+                    avatar: fixUrl(assets.avatar),
+                    idle: fixUrl(assets.idle),
+                    hanging: fixUrl(assets.hanging),
+                    walk_left: fixUrl(assets.walk_left),
+                    walk_right: fixUrl(assets.walk_right),
+                    walk_up: fixUrl(assets.walk_up),
+                    walk_down: fixUrl(assets.walk_down),
+                    skill1: fixUrl(assets.skill1),
+                    skill2: fixUrl(assets.skill2),
+                    skill3: fixUrl(assets.skill3)
+                };
+                this.updateSprite();
+            }
+
+            updateSprite() {
+                if (!this.assets.idle) return;
+
+                if (this.state === 'idle') {
+                    this.el.src = this.assets.idle;
+                } else if (this.state === 'walk') {
+                    if (Math.abs(this.vx) > Math.abs(this.vy)) {
+                        this.el.src = (this.vx > 0) ? (this.assets.walk_right || this.assets.idle) : (this.assets.walk_left || this.assets.idle);
+                    } else {
+                        this.el.src = (this.vy > 0) ? (this.assets.walk_down || this.assets.idle) : (this.assets.walk_up || this.assets.idle);
+                    }
+                } else if (this.state === 'skill') {
+                    this.el.src = this.currentSkillUrl || this.assets.skill1 || this.assets.idle;
+                } else if (this.state === 'dragging') {
+                    this.el.src = this.assets.hanging || this.assets.idle;
+                }
+            }
+
+            init() {
+                this.updatePosition();
+
+                let isPointerDown = false;
+                let isLongPressed = false;
+                let longPressTimer = null;
+                let startX, startY, initialX, initialY;
+
+                const onStart = (e) => {
+                    isPointerDown = true;
+                    isLongPressed = false;
+
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    startX = clientX;
+                    startY = clientY;
+                    initialX = this.x;
+                    initialY = this.y;
+
+                    if (this.actionTimer) clearTimeout(this.actionTimer);
+
+                    const availableSkills = [this.assets.skill1, this.assets.skill2, this.assets.skill3].filter(Boolean);
+                    if (availableSkills.length > 0) {
+                        this.currentSkillUrl = availableSkills[Math.floor(Math.random() * availableSkills.length)];
+                    } else {
+                        this.currentSkillUrl = this.assets.idle;
+                    }
+
+                    this.state = 'skill';
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.updateSprite();
+
+                    try {
+                        confetti({ particleCount: 40, spread: 60, origin: { x: (this.x + 50)/window.innerWidth, y: (this.y + 50)/window.innerHeight } });
+                    } catch(e) {}
+
+                    if (longPressTimer) clearTimeout(longPressTimer);
+                    longPressTimer = setTimeout(() => {
+                        if (isPointerDown) {
+                            isLongPressed = true;
+                            this.state = 'dragging';
+                            this.updateSprite();
+                        }
+                    }, 2000);
+                };
+
+                const onMove = (e) => {
+                    if (!isPointerDown) return;
+
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    const dx = clientX - startX;
+                    const dy = clientY - startY;
+
+                    if (isLongPressed) {
+                        this.x = Math.max(10, Math.min(window.innerWidth - 105, initialX + dx));
+                        this.y = Math.max(60, Math.min(window.innerHeight - 110, initialY + dy));
+                        this.updatePosition();
+                    }
+                };
+
+                const onEnd = () => {
+                    if (!isPointerDown) return;
+                    if (longPressTimer) clearTimeout(longPressTimer);
+
+                    if (!isLongPressed) {
+                        isPointerDown = false;
+                        this.actionTimer = setTimeout(() => {
+                            this.decideNextAction();
+                        }, 8000);
+                    } else {
+                        isPointerDown = false;
+                        isLongPressed = false;
+                        this.decideNextAction();
+                    }
+                };
+
+                this.el.addEventListener('mousedown', onStart);
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onEnd);
+
+                this.el.addEventListener('touchstart', onStart, { passive: true });
+                window.addEventListener('touchmove', onMove, { passive: true });
+                window.addEventListener('touchend', onEnd);
+
+                requestAnimationFrame(() => this.gameLoop());
+                this.decideNextAction();
+            }
+
+            updatePosition() {
+                this.el.style.left = this.x + 'px';
+                this.el.style.top = this.y + 'px';
+            }
+
+            gameLoop() {
+                if (this.state === 'walk') {
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    let hitBoundary = false;
+
+                    if (this.x <= 10) {
+                        this.x = 10;
+                        hitBoundary = true;
+                    } else if (this.x >= window.innerWidth - 105) {
+                        this.x = window.innerWidth - 105;
+                        hitBoundary = true;
+                    }
+
+                    if (this.y <= 60) {
+                        this.y = 60;
+                        hitBoundary = true;
+                    } else if (this.y >= window.innerHeight - 110) {
+                        this.y = window.innerHeight - 110;
+                        hitBoundary = true;
+                    }
+
+                    this.updatePosition();
+
+                    if (hitBoundary) {
+                        if (this.actionTimer) clearTimeout(this.actionTimer);
+                        this.decideNextAction();
+                        requestAnimationFrame(() => this.gameLoop());
+                        return;
+                    }
+                }
+
+                requestAnimationFrame(() => this.gameLoop());
+            }
+
+            decideNextAction() {
+                if (this.actionTimer) clearTimeout(this.actionTimer);
+                if (this.state === 'dragging') return;
+
+                const isWalk = Math.random() < 0.55;
+
+                if (isWalk) {
+                    this.state = 'walk';
+                    const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+                    const angleDeg = angles[Math.floor(Math.random() * angles.length)];
+                    const rad = angleDeg * (Math.PI / 180);
+                    
+                    this.vx = Math.cos(rad) * this.moveSpeed;
+                    this.vy = Math.sin(rad) * this.moveSpeed;
+
+                    this.updateSprite();
+
+                    const duration = 3000 + Math.random() * 2000;
+                    this.actionTimer = setTimeout(() => {
+                        this.decideNextAction();
+                    }, duration);
+
+                } else {
+                    this.state = 'idle';
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.updateSprite();
+
+                    const duration = 3000 + Math.random() * 5000;
+                    this.actionTimer = setTimeout(() => {
+                        this.decideNextAction();
+                    }, duration);
+                }
+            }
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
+            shimejiEngine = new LeisureShimeji('shimeji-char-sprite');
+
             if (typeof liff !== 'undefined' && MY_LIFF_ID) {
                 liff.init({ liffId: MY_LIFF_ID }).then(() => {
                     if (liff.isLoggedIn()) {
                         userAccessToken = liff.getAccessToken();
-                    } else {
-                        try {
-                            userAccessToken = liff.getAccessToken() || "";
-                        } catch(e) {}
                     }
                     fetchStatusData();
+                    checkAndAutoSyncSteps();
                 }).catch((err) => {
                     console.error("LIFF Init Error:", err);
                     fetchStatusData();
+                    checkAndAutoSyncSteps();
                 });
             } else {
                 fetchStatusData();
+                checkAndAutoSyncSteps();
             }
 
-            // 辨識平台顯示專屬步數同步區域
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
             if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
                 document.getElementById('ios-sync-section')?.classList.remove('d-none');
@@ -379,13 +605,60 @@
             } else {
                 document.getElementById('ios-sync-section')?.classList.remove('d-none');
             }
+
+            startGlobalCountdownEngine();
         });
+
+        // 智慧自動解析 steps 並發送同步請求
+        function checkAndAutoSyncSteps() {
+            let stepsToSync = null;
+
+            const pendingSteps = localStorage.getItem('pending_sync_steps');
+            if (pendingSteps) {
+                stepsToSync = parseInt(pendingSteps, 10);
+            }
+
+            if (!stepsToSync) {
+                try {
+                    const fullUrl = decodeURIComponent(window.location.href);
+                    const match = fullUrl.match(/steps=(\d+)/i);
+                    if (match && match[1]) {
+                        stepsToSync = parseInt(match[1], 10);
+                    }
+                } catch(e) {}
+            }
+
+            if (stepsToSync && stepsToSync > 0) {
+                fetch('/line/api/pet/sync_steps/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ access_token: userAccessToken || "", steps: stepsToSync })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        localStorage.removeItem('pending_sync_steps');
+                        if (data.coins_added > 0) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '🎉 步數自動同步成功！',
+                                text: `成功同步 ${data.synced_steps} 步，折算獲得 +${data.coins_added} 金幣！`,
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        }
+                        fetchStatusData();
+                    }
+                })
+                .catch(err => console.error("Auto sync steps error:", err));
+            }
+        }
 
         function fetchStatusData() {
             fetch('/line/api/pet/status/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ access_token: userAccessToken })
+                body: JSON.stringify({ access_token: userAccessToken || "" })
             })
             .then(res => res.json())
             .then(data => {
@@ -405,6 +678,7 @@
         function renderMainUI(data) {
             document.getElementById('coin-count').innerText = data.coins || 0;
             currentUnlockedTypes = data.unlocked_types || ['FRIEREN'];
+            currentUnlockedChars = data.unlocked_characters || [];
             
             if (data.active_pet) {
                 const pet = data.active_pet;
@@ -421,8 +695,10 @@
                 const pct = Math.min(100, Math.round((currentExp / maxExp) * 100));
                 document.getElementById('exp-bar').style.width = pct + '%';
 
-                if (pet.image) {
-                    document.getElementById('char-main-sprite').src = pet.image;
+                if (pet.assets) {
+                    shimejiEngine.setAssets(pet.assets);
+                } else if (pet.image) {
+                    shimejiEngine.setAssets({ idle: pet.image });
                 }
             }
 
@@ -431,13 +707,15 @@
                 document.getElementById('last-sync-steps').innerText = data.last_sync_steps || 0;
             }
 
-            // 渲染已解鎖圖鑑角色列表
             if (data.unlocked_characters) {
                 renderGalleryList(data.unlocked_characters);
             }
 
-            // 動態更新商城角色列表
             renderShopModalUI(currentUnlockedTypes);
+
+            if (selectedExpeditionPetId !== null) {
+                renderExpeditionUI();
+            }
         }
 
         function renderGalleryList(list) {
@@ -448,10 +726,10 @@
                 card.className = `char-card-item d-flex justify-content-between align-items-center ${c.is_active ? 'active' : ''}`;
                 card.innerHTML = `
                     <div class="d-flex align-items-center gap-3">
-                        <img src="${c.avatar}" class="rounded" style="width: 45px; height: 45px; object-fit: contain;">
+                        <img src="${fixUrl(c.avatar)}" class="rounded" style="width: 45px; height: 45px; object-fit: contain;">
                         <div>
                             <h6 class="fw-bold mb-0 text-white">${c.name}</h6>
-                            <small class="text-white-50">Lv.${c.level} • ${c.pet_type_display}</small>
+                            <small class="text-white-50">Lv.${c.level} • ${c.pet_type_display} (${c.exp}/${c.max_exp} EXP)</small>
                         </div>
                     </div>
                     ${c.is_active ? '<span class="badge bg-warning text-dark"><i class="fa-solid fa-check me-1"></i>出戰中</span>' : `<button class="btn btn-xs btn-outline-light" onclick="switchActiveCharacter(${c.id})">切換出戰</button>`}
@@ -465,8 +743,8 @@
             container.innerHTML = '';
 
             const characters = [
-                { type: 'FRIEREN', name: '芙莉蓮', avatar: '/static/leisure_station/images/Frieren/avatar.webp', price: 500, defaultGift: true },
-                { type: 'RIMURU', name: '利姆路', avatar: '/static/leisure_station/images/Rimuru/avatar.webp', price: 800, defaultGift: false }
+                { type: 'FRIEREN', name: '芙莉蓮', avatar: fixUrl('/static/leisure_station/images/Frieren/avatar.webp'), price: 500, defaultGift: true },
+                { type: 'RIMURU', name: '利姆路', avatar: fixUrl('/static/leisure_station/images/Rimuru/avatar.webp'), price: 800, defaultGift: false }
             ];
 
             characters.forEach(c => {
@@ -496,11 +774,180 @@
             });
         }
 
+        function handleTowerClick() {
+            Swal.fire({
+                icon: 'info',
+                title: '🚧 功能開發中',
+                text: '冒險試煉塔功能尚在精心研發中，敬請期待未來更新！',
+                confirmButtonColor: '#ff9a9e'
+            });
+        }
+
+        function openExpeditionModal() {
+            if (currentUnlockedChars.length === 0) return;
+            if (selectedExpeditionPetId === null || !currentUnlockedChars.some(c => c.id === selectedExpeditionPetId)) {
+                selectedExpeditionPetId = currentUnlockedChars[0].id;
+            }
+            renderExpeditionUI();
+            new bootstrap.Modal(document.getElementById('expeditionModal')).show();
+        }
+
+        function selectExpeditionPet(petId) {
+            selectedExpeditionPetId = petId;
+            renderExpeditionUI();
+        }
+
+        function renderExpeditionUI() {
+            const tabsContainer = document.getElementById('expedition-pet-tabs');
+            tabsContainer.innerHTML = '';
+
+            currentUnlockedChars.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = `pet-tab-btn ${c.id === selectedExpeditionPetId ? 'active' : ''}`;
+                btn.innerHTML = `<img src="${fixUrl(c.avatar)}" style="width:20px;height:20px;object-fit:contain;" class="me-1">${c.name} (Lv.${c.level})`;
+                btn.onclick = () => selectExpeditionPet(c.id);
+                tabsContainer.appendChild(btn);
+            });
+
+            const currentPet = currentUnlockedChars.find(c => c.id === selectedExpeditionPetId);
+            const panel = document.getElementById('expedition-panel');
+
+            if (!currentPet) {
+                panel.innerHTML = `<div class="text-white-50">請選擇派遣角色</div>`;
+                return;
+            }
+
+            const exp = currentPet.expedition;
+
+            if (exp && (exp.status === 'ACTIVE' || exp.status === 'COMPLETED')) {
+                if (exp.seconds_left <= 0 || exp.status === 'COMPLETED') {
+                    panel.innerHTML = `
+                        <h5 class="fw-bold text-warning mb-2"><i class="fa-solid fa-gift me-2"></i>${currentPet.name} 探索完成！</h5>
+                        <p class="small text-white-50 mb-3">派遣任務已順利結束，點擊下方按鈕領取大豐收獎勵與經驗值：</p>
+                        <button class="btn btn-warning fw-bold w-100 py-2 rounded-pill shadow" onclick="claimExpedition(${currentPet.id})">
+                            <i class="fa-solid fa-coins me-1"></i>🎁 領取探險獎勵 (金幣 & EXP)
+                        </button>
+                    `;
+                } else {
+                    const formatTime = (secs) => {
+                        const h = String(Math.floor(secs / 3600)).padStart(2, '0');
+                        const m = String(Math.floor((secs % 3600) / 60)).padStart(2, '0');
+                        const s = String(secs % 60).padStart(2, '0');
+                        return `${h}:${m}:${s}`;
+                    };
+
+                    panel.innerHTML = `
+                        <h5 class="fw-bold text-info mb-2"><i class="fa-solid fa-compass spin me-2"></i>${currentPet.name} 探索中...</h5>
+                        <div class="display-6 fw-bold text-warning my-2">${formatTime(exp.seconds_left)}</div>
+                        <p class="small text-white-50 mb-3">預計時長：${exp.duration_hours} 小時</p>
+                        <button class="btn btn-outline-danger btn-sm w-100 py-2 rounded-pill" onclick="cancelExpedition(${currentPet.id})">
+                            <i class="fa-solid fa-ban me-1"></i>❌ 取消派遣 (取消無任何獎勵)
+                        </button>
+                    `;
+                }
+            } else {
+                panel.innerHTML = `
+                    <h6 class="fw-bold mb-2">派遣 ${currentPet.name} 前往地城探索</h6>
+                    <p class="small text-white-50 mb-3">探索完成可獲得大量的金幣與專屬經驗值 (EXP)：</p>
+                    <div class="row g-2">
+                        <div class="col-6 mb-2"><button class="btn btn-outline-light w-100 p-2" onclick="startExpedition(1, ${currentPet.id})">1小時 (約80 EXP)</button></div>
+                        <div class="col-6 mb-2"><button class="btn btn-outline-light w-100 p-2" onclick="startExpedition(2, ${currentPet.id})">2小時 (約160 EXP)</button></div>
+                        <div class="col-6 mb-2"><button class="btn btn-outline-light w-100 p-2" onclick="startExpedition(4, ${currentPet.id})">4小時 (約320 EXP)</button></div>
+                        <div class="col-6 mb-2"><button class="btn btn-outline-light w-100 p-2" onclick="startExpedition(20, ${currentPet.id})">20小時 (超大豐收)</button></div>
+                    </div>
+                `;
+            }
+        }
+
+        function startGlobalCountdownEngine() {
+            if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+            countdownTimerInterval = setInterval(() => {
+                let updated = false;
+                currentUnlockedChars.forEach(c => {
+                    if (c.expedition && c.expedition.status === 'ACTIVE' && c.expedition.seconds_left > 0) {
+                        c.expedition.seconds_left -= 1;
+                        if (c.expedition.seconds_left <= 0) {
+                            c.expedition.status = 'COMPLETED';
+                        }
+                        updated = true;
+                    }
+                });
+                if (updated && selectedExpeditionPetId !== null) {
+                    renderExpeditionUI();
+                }
+            }, 1000);
+        }
+
+        function startExpedition(hours, petId) {
+            fetch('/line/api/pet/start_expedition/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ access_token: userAccessToken || "", hours: hours, pet_id: petId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({ icon: 'success', title: '出發派遣！', text: data.message, timer: 1500, showConfirmButton: false });
+                    fetchStatusData();
+                } else {
+                    Swal.fire({ icon: 'error', title: '無法出發', text: data.error });
+                }
+            });
+        }
+
+        function cancelExpedition(petId) {
+            Swal.fire({
+                title: '確定取消派遣？',
+                text: '⚠️ 取消後將直接歸隊，本次派遣不會獲得任何金幣與經驗值獎勵！',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '確定取消',
+                cancelButtonText: '繼續探索'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/line/api/pet/cancel_expedition/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ access_token: userAccessToken || "", pet_id: petId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire({ icon: 'info', title: '已取消', text: data.message, timer: 1500, showConfirmButton: false });
+                            fetchStatusData();
+                        } else {
+                            Swal.fire({ icon: 'error', title: '取消失敗', text: data.error });
+                        }
+                    });
+                }
+            });
+        }
+
+        function claimExpedition(petId) {
+            fetch('/line/api/pet/claim_expedition/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ access_token: userAccessToken || "", pet_id: petId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                    Swal.fire({ icon: 'success', title: '🎉 領取成功！', text: data.message });
+                    fetchStatusData();
+                } else {
+                    Swal.fire({ icon: 'error', title: '領取失敗', text: data.error });
+                }
+            });
+        }
+
         function switchActiveCharacter(petId) {
             fetch('/line/api/pet/switch_active/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ access_token: userAccessToken, pet_id: petId })
+                body: JSON.stringify({ access_token: userAccessToken || "", pet_id: petId })
             })
             .then(res => res.json())
             .then(data => {
@@ -518,7 +965,7 @@
             fetch('/line/api/pet/buy_item/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ access_token: userAccessToken, item_type: charType })
+                body: JSON.stringify({ access_token: userAccessToken || "", item_type: charType })
             })
             .then(res => res.json())
             .then(data => {
@@ -535,49 +982,17 @@
 
         function openGalleryModal() { new bootstrap.Modal(document.getElementById('galleryModal')).show(); }
         function openShopModal() { new bootstrap.Modal(document.getElementById('shopModal')).show(); }
-        function openTowerModal() { new bootstrap.Modal(document.getElementById('towerModal')).show(); }
-        function openExpeditionModal() { new bootstrap.Modal(document.getElementById('expeditionModal')).show(); }
 
-        function startTowerBattle() {
-            const btn = document.getElementById('tower-challenge-btn');
-            btn.disabled = true;
-            fetch('/line/api/pet/tower_battle/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ access_token: userAccessToken })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.disabled = false;
-                if (data.status === 'success') {
-                    document.getElementById('tower-battle-log').innerText = data.message;
-                    fetchStatusData();
-                } else {
-                    Swal.fire({ icon: 'error', title: '試煉失敗', text: data.error });
-                }
-            });
-        }
-
-        function startExpedition(hours) {
-            fetch('/line/api/pet/start_expedition/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ access_token: userAccessToken, hours: hours })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire({ icon: 'success', title: '已出發派遣探險！', text: data.message });
-                    bootstrap.Modal.getInstance(document.getElementById('expeditionModal'))?.hide();
-                } else {
-                    Swal.fire({ icon: 'error', title: '無法出發', text: data.error });
-                }
-            });
-        }
-
+        // 正確複製標準預備捷徑連結 (window.location.origin + window.location.pathname + "?page=pet&steps=")
         function copyShortcutLink() {
-            navigator.clipboard.writeText(window.location.href);
-            Swal.fire({ icon: 'success', title: '已複製！', text: '請開啟 iPhone 捷徑進行設定', timer: 1500, showConfirmButton: false });
+            const cleanBaseUrl = window.location.origin + window.location.pathname + "?page=pet&steps=";
+            navigator.clipboard.writeText(cleanBaseUrl);
+            Swal.fire({
+                icon: 'success',
+                title: '已複製專屬捷徑連結！',
+                html: '請開啟 iPhone 捷徑，在「在 Safari 中開啟 URL」動作中貼上此連結，並在最尾端插入<b>【健康樣本】</b>變數即可！<br><br><small class="text-warning text-break">' + cleanBaseUrl + '</small>',
+                confirmButtonColor: '#38ef7d'
+            });
         }
     </script>
 </body>

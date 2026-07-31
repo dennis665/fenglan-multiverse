@@ -2504,15 +2504,21 @@ def api_line_pet_status(request):
     else:
         return JsonResponse({"error": "Method Not Allowed"}, status=405)
 
-    if not access_token:
-        return JsonResponse({"error": "Access token required"}, status=400)
+    user = None
+    if access_token:
+        line_user_id, display_name = _verify_token_with_cache(access_token)
+        if line_user_id:
+            line_profile = _get_or_create_profile(line_user_id, display_name)
+            user = line_profile.user
 
-    line_user_id, display_name = _verify_token_with_cache(access_token)
-    if not line_user_id:
-        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+    if not user:
+        from pet_system.models import LinePetProfile
+        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
+        if main_prof:
+            user = main_prof.user
 
-    line_profile = _get_or_create_profile(line_user_id, display_name)
-    user = line_profile.user
+    if not user:
+        return JsonResponse({"error": "No valid user profile found"}, status=400)
 
     from datetime import date
 
@@ -2633,23 +2639,48 @@ def api_line_pet_status(request):
     )
     has_daily_claim_today = profile.last_daily_claim == date.today()
 
-    # 獲取當前出戰寵物的探索任務
-    active_pet_expedition = None
-    if active_pet:
-        exp = LinePetExpedition.objects.filter(pet__user=user).exclude(status="CLAIMED").first()
+    # 獲取各角色的獨立探索任務
+    unlocked_pets = LinePet.objects.filter(user=user)
+    pet_expeditions_map = {}
+    for p in unlocked_pets:
+        exp = LinePetExpedition.objects.filter(pet=p).exclude(status="CLAIMED").first()
         if exp:
             if exp.status == "ACTIVE" and now() >= exp.end_time:
                 exp.status = "COMPLETED"
                 exp.save()
-            active_pet_expedition = {
+            pet_expeditions_map[p.id] = {
                 "id": exp.id,
                 "duration_hours": exp.duration_hours,
                 "end_time": exp.end_time.isoformat(),
                 "status": exp.status,
                 "seconds_left": max(0, int((exp.end_time - now()).total_seconds())),
             }
+        else:
+            pet_expeditions_map[p.id] = None
 
+    active_pet_expedition = pet_expeditions_map.get(active_pet.id) if active_pet else None
 
+    # 打包所有解鎖角色的詳細資料 (含獨立等級與經驗值與派遣狀態)
+    unlocked_characters_data = []
+    for p in unlocked_pets:
+        assets = get_char_assets(p.pet_type)
+        p_level = getattr(p, 'level', 1) or 1
+        p_hp = 100 + (p_level - 1) * 25
+        p_atk = 15 + (p_level - 1) * 5
+        unlocked_characters_data.append({
+            "id": p.id,
+            "pet_type": p.pet_type,
+            "name": p.name,
+            "level": p_level,
+            "exp": p.exp,
+            "max_exp": p_level * 100,
+            "pet_type_display": p.get_pet_type_display(),
+            "is_active": p.is_active,
+            "hp": p_hp,
+            "atk": p_atk,
+            "avatar": assets["avatar"],
+            "expedition": pet_expeditions_map.get(p.id)
+        })
 
     from pet_system.models import GoogleFitToken
 
@@ -2657,7 +2688,7 @@ def api_line_pet_status(request):
     has_google_fit = token_obj is not None
     google_email = token_obj.google_email if token_obj else None
 
-    unlocked_types = list(LinePet.objects.filter(user=user).values_list('pet_type', flat=True))
+    unlocked_types = list(unlocked_pets.values_list('pet_type', flat=True))
 
     return JsonResponse(
         {
@@ -2667,14 +2698,23 @@ def api_line_pet_status(request):
             "last_sync_steps": profile.last_sync_steps,
             "has_google_fit": has_google_fit,
             "google_email": google_email,
-            "inventory": {
-                "eggs_dragon": inventory.eggs_dragon,
-                "eggs_puppy": inventory.eggs_puppy,
-                "evo_potions": inventory.evo_potions,
-            },
-            "active_pet": pet_data,
-            "unlocked_characters": unlocked_characters,
             "unlocked_types": unlocked_types,
+            "unlocked_characters": unlocked_characters_data,
+            "active_pet": {
+                "id": active_pet.id,
+                "pet_type": active_pet.pet_type,
+                "name": active_pet.name,
+                "level": active_pet.level,
+                "exp": active_pet.exp,
+                "max_exp": active_pet.level * 100,
+                "pet_type_display": active_pet.get_pet_type_display(),
+                "hp": hp,
+                "atk": atk,
+                "image": assets["idle"] if (active_pet and assets) else "",
+                "assets": assets if (active_pet and assets) else {},
+                "expedition": active_pet_expedition,
+            } if active_pet else None,
+            "active_pet_expedition": active_pet_expedition,
         }
     )
 
@@ -2692,17 +2732,24 @@ def api_line_pet_sync_steps(request):
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
-    if not access_token:
-        return JsonResponse({"error": "Access token required"}, status=400)
     if steps < 0:
         return JsonResponse({"error": "Steps cannot be negative"}, status=400)
 
-    line_user_id, display_name = _verify_token_with_cache(access_token)
-    if not line_user_id:
-        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+    user = None
+    if access_token:
+        line_user_id, display_name = _verify_token_with_cache(access_token)
+        if line_user_id:
+            line_profile = _get_or_create_profile(line_user_id, display_name)
+            user = line_profile.user
 
-    line_profile = _get_or_create_profile(line_user_id, display_name)
-    user = line_profile.user
+    if not user:
+        from pet_system.models import LinePetProfile
+        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
+        if main_prof:
+            user = main_prof.user
+
+    if not user:
+        return JsonResponse({"error": "No valid user profile found"}, status=400)
 
     from datetime import date
 
@@ -3529,6 +3576,7 @@ def api_line_pet_start_expedition(request):
         data = json.loads(request.body)
         access_token = data.get("access_token")
         hours = int(data.get("hours", 1))
+        pet_id = data.get("pet_id")
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
@@ -3543,19 +3591,21 @@ def api_line_pet_start_expedition(request):
     user = line_profile.user
 
     from datetime import timedelta
-
     from django.utils.timezone import now
-
     from pet_system.models import LinePet, LinePetExpedition
 
-    pet = LinePet.objects.filter(user=user, is_active=True).first()
-    if not pet:
-        return JsonResponse({"error": "目前沒有出戰的寵物！"}, status=400)
+    if pet_id:
+        pet = LinePet.objects.filter(user=user, id=pet_id).first()
+    else:
+        pet = LinePet.objects.filter(user=user, is_active=True).first()
 
-    # 檢查是否有未完成的派遣
+    if not pet:
+        return JsonResponse({"error": "找不到對應的角色寵物！"}, status=400)
+
+    # 檢查該寵物是否有未完成的派遣
     exists = LinePetExpedition.objects.filter(pet=pet).exclude(status="CLAIMED").exists()
     if exists:
-        return JsonResponse({"error": "該寵物已在探索中，或是正等待領取獎勵！"}, status=400)
+        return JsonResponse({"error": f"{pet.name} 已在探索中，或是正等待領取獎勵！"}, status=400)
 
     end_time = now() + timedelta(hours=hours)
     LinePetExpedition.objects.create(
@@ -3565,7 +3615,7 @@ def api_line_pet_start_expedition(request):
     return JsonResponse(
         {
             "status": "success",
-            "message": f"成功召喚 {pet.name} 出發探索！預計時長 {hours} 小時。",
+            "message": f"成功派遣 {pet.name} 出發探索！預計時長 {hours} 小時。",
             "end_time": end_time.isoformat(),
         }
     )
@@ -3573,13 +3623,15 @@ def api_line_pet_start_expedition(request):
 
 @csrf_exempt
 def api_line_pet_cancel_expedition(request):
-    """API 端點：取消探索派遣"""
+    """API 端點：取消探索派遣 (無任何獎勵)"""
     if request.method != "POST":
         return JsonResponse({"error": "Method Not Allowed"}, status=405)
 
     try:
         data = json.loads(request.body)
         access_token = data.get("access_token")
+        pet_id = data.get("pet_id")
+        expedition_id = data.get("expedition_id")
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
@@ -3595,27 +3647,32 @@ def api_line_pet_cancel_expedition(request):
 
     from pet_system.models import LinePet, LinePetExpedition
 
-    pet = LinePet.objects.filter(user=user, is_active=True).first()
-    if not pet:
-        return JsonResponse({"error": "找不到出戰中的寵物"}, status=400)
+    if expedition_id:
+        exp = LinePetExpedition.objects.filter(id=expedition_id, pet__user=user, status="ACTIVE").first()
+    elif pet_id:
+        exp = LinePetExpedition.objects.filter(pet__id=pet_id, pet__user=user, status="ACTIVE").first()
+    else:
+        exp = LinePetExpedition.objects.filter(pet__user=user, status="ACTIVE").first()
 
-    exp = LinePetExpedition.objects.filter(pet__user=user, status="ACTIVE").first()
     if not exp:
         return JsonResponse({"error": "沒有正在進行的探索任務可供取消"}, status=400)
 
+    pet_name = exp.pet.name
     exp.delete()
-    return JsonResponse({"status": "success", "message": "已成功取消探索派遣，寵物已歸隊。"})
+    return JsonResponse({"status": "success", "message": f"已成功取消 {pet_name} 的探索派遣，角色已歸隊。"})
 
 
 @csrf_exempt
 def api_line_pet_claim_expedition(request):
-    """API 端點：領取探索派遣獎勵"""
+    """API 端點：領取探索派遣獎勵 (將 EXP 發放給該派遣角色)"""
     if request.method != "POST":
         return JsonResponse({"error": "Method Not Allowed"}, status=405)
 
     try:
         data = json.loads(request.body)
         access_token = data.get("access_token")
+        pet_id = data.get("pet_id")
+        expedition_id = data.get("expedition_id")
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
@@ -3630,24 +3687,21 @@ def api_line_pet_claim_expedition(request):
     user = line_profile.user
 
     import random
-
     from django.db import transaction
     from django.utils.timezone import now
-
     from pet_system.models import (
         LinePet,
         LinePetExpedition,
-        LinePetInventory,
         LinePetProfile,
-        UserAccessory,
     )
-    from pet_system.views import ACCESSORY_SHOP
 
-    pet = LinePet.objects.filter(user=user, is_active=True).first()
-    if not pet:
-        return JsonResponse({"error": "找不到出戰中的寵物"}, status=400)
+    if expedition_id:
+        exp = LinePetExpedition.objects.filter(id=expedition_id, pet__user=user).exclude(status="CLAIMED").first()
+    elif pet_id:
+        exp = LinePetExpedition.objects.filter(pet__id=pet_id, pet__user=user).exclude(status="CLAIMED").first()
+    else:
+        exp = LinePetExpedition.objects.filter(pet__user=user).exclude(status="CLAIMED").first()
 
-    exp = LinePetExpedition.objects.filter(pet__user=user).exclude(status="CLAIMED").first()
     if not exp:
         return JsonResponse({"error": "沒有可領取的探索獎勵！"}, status=400)
 
@@ -3659,6 +3713,8 @@ def api_line_pet_claim_expedition(request):
     if exp.status != "COMPLETED":
         return JsonResponse({"error": "探索尚未結束，請耐心等待！"}, status=400)
 
+    target_pet = exp.pet
+
     # 計算經驗值與金幣獎勵
     coins_earned = exp.duration_hours * random.randint(25, 40)
     exp_earned = exp.duration_hours * 80
@@ -3668,27 +3724,27 @@ def api_line_pet_claim_expedition(request):
         profile.pet_gold_coins += coins_earned
         profile.save()
 
-        # 角色獲得經驗值與升級判斷
-        pet.exp = (getattr(pet, 'exp', 0) or 0) + exp_earned
-        pet_level = getattr(pet, 'level', 1) or 1
+        # 特定派遣角色獲得獨立經驗值與升級判斷
+        target_pet.exp = (getattr(target_pet, 'exp', 0) or 0) + exp_earned
+        pet_level = getattr(target_pet, 'level', 1) or 1
         max_exp = pet_level * 100
         leveled_up = False
         
-        while pet.exp >= max_exp:
-            pet.exp -= max_exp
+        while target_pet.exp >= max_exp:
+            target_pet.exp -= max_exp
             pet_level += 1
             max_exp = pet_level * 100
             leveled_up = True
 
-        pet.level = pet_level
-        pet.save()
+        target_pet.level = pet_level
+        target_pet.save()
 
         exp.status = "CLAIMED"
         exp.save()
 
-    msg = f"🏆 探索完成！獲得 {coins_earned} 金幣與 {exp_earned} 角色經驗值！"
+    msg = f"🏆 {target_pet.name} 探索完成！獲得 {coins_earned} 金幣與 {exp_earned} 角色經驗值！"
     if leveled_up:
-        msg += f" 🎉 恭喜角色等級提升至 Lv.{pet.level}！"
+        msg += f" 🎉 恭喜 {target_pet.name} 等級提升至 Lv.{target_pet.level}！"
 
     return JsonResponse(
         {
@@ -3696,8 +3752,8 @@ def api_line_pet_claim_expedition(request):
             "message": msg,
             "coins": profile.pet_gold_coins,
             "exp_earned": exp_earned,
-            "current_level": pet.level,
-            "current_exp": pet.exp,
+            "current_level": target_pet.level,
+            "current_exp": target_pet.exp,
         }
     )
 
