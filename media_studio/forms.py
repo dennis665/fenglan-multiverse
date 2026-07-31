@@ -45,7 +45,7 @@ class ImageCompressForm(forms.Form):
         label=_("壓縮品質 (1-100)"),
         min_value=1,
         max_value=100,
-        initial=85,
+        initial=100,
         help_text=_("數值越低檔案越小，畫質越差。對 PNG 無效。"),
     )
     output_format = forms.ChoiceField(
