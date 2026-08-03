@@ -178,38 +178,16 @@ class LinePet(models.Model):
     PET_TYPE_CHOICES = [
         ('FRIEREN', _('芙莉蓮')),
         ('RIMURU', _('利姆路')),
-        ('DRAGON', _('綠光小龍')),
-        ('PUPPY', _('烈火幼犬')),
-    ]
-    
-    STAGE_CHOICES = [
-        (0, _('未解鎖')),
-        (1, _('冒險者')),
-        (2, _('精英')),
-        (3, _('大師')),
-        (4, _('傳奇')),
-    ]
-    
-    PERSONALITY_CHOICES = [
-        ('NORMAL', _('普通')),
-        ('BRAVE', _('勇敢')),
-        ('LAZY', _('懶散')),
-        ('SMART', _('聰明')),
-        ('CHUBBY', _('肥嘟嘟')),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='line_pets', verbose_name=_("擁有者"))
     name = models.CharField(default='芙莉蓮', max_length=50, verbose_name=_("角色名字"))
     pet_type = models.CharField(choices=PET_TYPE_CHOICES, default='FRIEREN', max_length=20, verbose_name=_("角色種類"))
-    stage = models.IntegerField(choices=STAGE_CHOICES, default=1, verbose_name=_("階級"))
     is_active = models.BooleanField(default=False, verbose_name=_("是否出戰"))
     level = models.PositiveIntegerField(default=1, verbose_name=_("角色等級"))
     exp = models.PositiveIntegerField(default=0, verbose_name=_("角色經驗值"))
-    growth_progress = models.PositiveIntegerField(default=0, verbose_name=_("成長進度"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("解鎖時間"))
-    feed_items_consumed = models.PositiveIntegerField(default=0, verbose_name=_("普通乾糧消耗數"))
-    potions_consumed = models.PositiveIntegerField(default=0, verbose_name=_("奇蹟藥水消耗數"))
-    personality = models.CharField(choices=PERSONALITY_CHOICES, default='NORMAL', max_length=20, verbose_name=_("角色性格"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("最後更新時間"))
 
     class Meta:
         verbose_name = _("休閒小站角色")

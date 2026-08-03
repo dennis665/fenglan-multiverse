@@ -120,7 +120,6 @@
             cursor: grabbing;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
         // 早期捕獲：無論是通過何種網址開啟，一秒抓取 steps 參數
         (function catchStepsEarly() {
@@ -139,7 +138,7 @@
 </head>
 <body>
     <!-- 全頁面隨意走動的漫遊角色精靈 -->
-    <img id="shimeji-char-sprite" src="https://raw.githubusercontent.com/dennis665/fenglan-multiverse/main/static/leisure_station/images/Frieren/idle.webp" alt="Character Sprite" draggable="false" oncontextmenu="return false;">
+    <img id="shimeji-char-sprite" src="" alt="Character Sprite" draggable="false" oncontextmenu="return false;" style="display: none;">
 
     <div class="container py-4">
         <!-- 頂部標題與金幣 -->
@@ -377,6 +376,7 @@
             }
 
             setAssets(assets) {
+                if (!assets) return;
                 this.assets = {
                     avatar: fixUrl(assets.avatar),
                     idle: fixUrl(assets.idle),
@@ -389,6 +389,10 @@
                     skill2: fixUrl(assets.skill2),
                     skill3: fixUrl(assets.skill3)
                 };
+                this.state = 'idle';
+                if (this.el && this.assets.idle) {
+                    this.el.src = this.assets.idle;
+                }
                 this.updateSprite();
             }
 
@@ -444,7 +448,6 @@
                     this.updateSprite();
 
                     try {
-                        confetti({ particleCount: 40, spread: 60, origin: { x: (this.x + 50)/window.innerWidth, y: (this.y + 50)/window.innerHeight } });
                     } catch(e) {}
 
                     if (longPressTimer) clearTimeout(longPressTimer);
@@ -682,9 +685,9 @@
             
             if (data.active_pet) {
                 const pet = data.active_pet;
-                document.getElementById('char-name').innerText = pet.name || '芙莉蓮';
+                document.getElementById('char-name').innerText = pet.name || '冒險者';
                 document.getElementById('char-level-badge').innerText = 'Lv.' + (pet.level || 1);
-                document.getElementById('char-type-badge').innerText = pet.pet_type_display || '冒險者';
+                document.getElementById('char-type-badge').innerText = pet.pet_type_display || '夥伴';
                 
                 document.getElementById('char-hp').innerText = pet.hp || 100;
                 document.getElementById('char-atk').innerText = pet.atk || 15;
@@ -695,9 +698,13 @@
                 const pct = Math.min(100, Math.round((currentExp / maxExp) * 100));
                 document.getElementById('exp-bar').style.width = pct + '%';
 
-                if (pet.assets) {
+                // 顯示桌寵元素並載入當前真實出戰角色的資產
+                const spriteEl = document.getElementById('shimeji-char-sprite');
+                if (spriteEl) spriteEl.style.display = 'block';
+
+                if (pet.assets && shimejiEngine) {
                     shimejiEngine.setAssets(pet.assets);
-                } else if (pet.image) {
+                } else if (pet.image && shimejiEngine) {
                     shimejiEngine.setAssets({ idle: pet.image });
                 }
             }
@@ -934,7 +941,6 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
                     Swal.fire({ icon: 'success', title: '🎉 領取成功！', text: data.message });
                     fetchStatusData();
                 } else {
@@ -944,6 +950,11 @@
         }
 
         function switchActiveCharacter(petId) {
+            // 先釋放焦點，徹底解決 Blocked aria-hidden 警告與 Modal 關閉中斷死鎖
+            if (document.activeElement) {
+                try { document.activeElement.blur(); } catch(e) {}
+            }
+
             fetch('/line/api/pet/switch_active/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -952,12 +963,19 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    Swal.fire({ icon: 'success', title: '切換成功！', text: data.message, timer: 1500, showConfirmButton: false });
-                    bootstrap.Modal.getInstance(document.getElementById('galleryModal'))?.hide();
+                    const modalEl = document.getElementById('galleryModal');
+                    if (modalEl) {
+                        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                        if (modalInstance) modalInstance.hide();
+                    }
+                    Swal.fire({ icon: 'success', title: '切換成功！', text: data.message, timer: 1200, showConfirmButton: false });
                     fetchStatusData();
                 } else {
                     Swal.fire({ icon: 'error', title: '錯誤', text: data.error || '切換失敗' });
                 }
+            })
+            .catch(err => {
+                console.error("Switch active error:", err);
             });
         }
 
@@ -970,7 +988,6 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
                     Swal.fire({ icon: 'success', title: '解鎖成功！', text: data.message });
                     bootstrap.Modal.getInstance(document.getElementById('shopModal'))?.hide();
                     fetchStatusData();

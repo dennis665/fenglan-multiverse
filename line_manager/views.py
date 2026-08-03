@@ -2585,8 +2585,7 @@ def api_line_pet_status(request):
                 user=user,
                 name="芙莉蓮",
                 pet_type="FRIEREN",
-                stage=1,
-                is_active=True,
+                                is_active=True,
                 level=1,
                 exp=0
             )
@@ -2625,8 +2624,6 @@ def api_line_pet_status(request):
             "name": active_pet.name,
             "pet_type": active_pet.pet_type,
             "pet_type_display": active_pet.get_pet_type_display(),
-            "stage": active_pet.stage,
-            "stage_display": active_pet.get_stage_display(),
             "level": level,
             "exp": exp,
             "max_exp": max_exp,
@@ -2634,8 +2631,6 @@ def api_line_pet_status(request):
             "atk": atk,
             "image": assets["idle"],
             "assets": assets,
-            "personality": active_pet.personality,
-            "personality_display": active_pet.get_personality_display(),
         }
 
     # 取得玩家已解鎖的所有角色圖鑑 (Only unlocked characters shown)
@@ -2879,8 +2874,7 @@ def api_line_pet_buy_item(request):
             user=user,
             name=char_name,
             pet_type=item_type,
-            stage=1,
-            is_active=True,
+                        is_active=True,
             level=1,
             exp=0
         )
@@ -2965,7 +2959,6 @@ def api_line_pet_evolve(request):
         {
             "status": "success",
             "message": f"恭喜！寵物成功進化為：{pet.name}！",
-            "stage": pet.stage,
             "name": pet.name,
         }
     )
@@ -3355,8 +3348,7 @@ def api_line_pet_switch_active(request):
             user=user,
             name=char_name,
             pet_type=target_type,
-            stage=1,
-            is_active=True,
+                        is_active=True,
             level=1,
             exp=0
         )
