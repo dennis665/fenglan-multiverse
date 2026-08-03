@@ -8,6 +8,38 @@
 
 ---
 
+## [1.17.9] - 2026-08-03
+### Added (新增)
+* **LIFF 酷炫音樂平台升級 (`liff_music.html`)**：
+    * 為酷炫音樂影音平台與全曲 21 首動漫原聲歌曲（包含《不才惡女》）實裝與角色圖片同等規格的轉譯機制 (`fixUrl`)。
+    * 支援直接讀取二進制串流與跨域 Web 播放，徹底突破手機 LINE App LIFF 內嵌 WebView 與 iOS/Android 瀏覽器阻擋問題。
+* **桌寵互動 2 秒長按懸掛與墜落回原位物理機制 (`liff_pet.html`)**：
+  * 新增 2 秒長按懸掛與重力物理下落反饋。
+  * 拖拉按住 2 秒內放開可任意平滑移動角色位置；持續按住滿 2 秒後切換為懸掛抓取狀態 (`hanging.webp`)，放開瞬間觸發重力下落彈回至拖拉前原始位置，並播放撞擊彈跳 (`scale`) 與落地招式動畫。
+* **網頁主介面 Console 即時除錯日誌 (Sprite Tracking)**：
+  * 在 DOM 引擎與角色切換事件中加入高可視度 Console 追蹤日誌（包含 `🎨 [Main UI]`、`⚔️ [Character Switch]`、`📸 [Shimeji Engine]`），方便開發除錯與即時掌握角色資產狀態。
+
+### Changed & Refactored (變更與重構)
+* **資料庫模型極致精簡與清理 (DB Model Optimization)**：
+  * **資料清理**：清理 `pet_system_linepet` 資料表中舊寵物紀錄，僅保留「芙莉蓮 (`FRIEREN`)」與「利姆路 (`RIMURU`)」核心角色。
+  * **LinePet 模型精簡**：移除廢棄舊養成欄位（`stage`、`growth_progress`、`personality`、`feed_items_consumed`、`potions_consumed`），新增 `updated_at` 欄位。
+  * **刪除舊模型**：完全移除 `LinePetInventory` 模型與資料庫 Table，並生成遷移檔 `0007` & `0008` 完成 MySQL 資料庫同步。
+* **LIFF 寵物頁面無寫死預設角色與動態加載 (No Hardcoded Default Character)**：
+  * 徹底清理 `liff_pet.html` 中寫死的初始角色圖片與文字，頁面進入後 100% 由後端 `/line/api/pet/status/` 讀取資料庫真實出戰角色（Single Source of Truth），實現 0 閃跳無縫渲染。
+
+### Fixed & Optimized (修復與優化)
+* **後端 View 作用域與帳號 Fallback 死鎖修復 (`line_manager/views.py`)**：
+  * 將 `get_char_assets` 提升至模組全域作用域 (Global Module Scope)，修復 `api_line_pet_switch_active` 中觸發的 `NameError: name 'get_char_assets' is not defined`。
+  * 修復 `api_line_pet_status` 內部用戶 fallback 錯誤抓取非 active 用戶 Profile 導致的「名稱為芙莉蓮，圖片卻被覆蓋回 Rimuru」的資料錯位問題。
+* **全網頁 Bootstrap Modal Focus 死鎖與 Blocked aria-hidden 修復**：
+  * 在 `liff_pet.html` 中實裝全頁面 `hide.bs.modal` 通用離焦觸發器（`document.activeElement.blur()`），徹底、全局解決包含 `#expeditionModal` 與 `#galleryModal` 在關閉時引起的 `Blocked aria-hidden` 控制台警告。
+* **DOM 圖片瀏覽器快取突破與強制重繪 (DOM Force Repaint)**：
+  * 為 Shimeji 引擎更換資產時加上動態時間戳 (`?t=Date.now()`)，徹底擊碎 WebView 快取死鎖，確保點擊切換時 DOM 圖片 100% 瞬間強制重繪。
+* **界面視覺清理**：
+  * 移除點擊桌寵主角與解鎖商店時的彩花噴出特效 (Confetti burst) 與外部 `canvas-confetti` CDN 引用，提升頁面加載速度。
+
+---
+
 ## [1.17.8] - 2026-07-30
 ### Added (新增)
 * **LINE 官方圖文選單與系統更名：【休閒小站】**：

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSI Cyber Studio - 酷炫音樂影音平台</title>
+    <title>Cyber Studio - 酷炫音樂影音平台</title>
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -169,7 +169,7 @@
         <!-- 頂部標題區 -->
         <div class="glass-card p-4 mb-4 text-center">
             <h3 class="fw-bold mb-1" style="background: linear-gradient(135deg, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                <i class="fa-solid fa-compact-disc me-2 text-info"></i>CSI 酷炫音樂影音平台
+                <i class="fa-solid fa-compact-disc me-2 text-info"></i>酷炫音樂影音平台
             </h3>
             <p class="small text-white-50 mb-0">21 首動漫原聲全數匯入 • 支援單曲循環 / 全曲循環 / 隨機播放</p>
         </div>
@@ -288,6 +288,15 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+                function fixUrl(url) {
+            if (!url) return '';
+            let targetUrl = url;
+            if (targetUrl.startsWith('/static/')) {
+                targetUrl = 'https://raw.githubusercontent.com/dennis665/fenglan-multiverse/main' + targetUrl;
+            }
+            return targetUrl.replace(/ /g, "%20");
+        }
+
         const MY_LIFF_ID = "{{ liff_id|default:'2007018318-zM3d88XJ' }}";
         const playlistData = [{"id": "不才惡女", "title": "熱門動漫原聲 不才惡女", "mp3": "/static/video/不才惡女.mp3", "mp4": "/static/video/不才惡女.mp4"}, {"id": "世界最強後衛", "title": "熱門動漫原聲 世界最強後衛", "mp3": "/static/video/世界最強後衛.mp3", "mp4": "/static/video/世界最強後衛.mp4"}, {"id": "向日葵馬戲團", "title": "熱門動漫原聲 向日葵馬戲團", "mp3": "/static/video/向日葵馬戲團.mp3", "mp4": "/static/video/向日葵馬戲團.mp4"}, {"id": "大小姐才不玩格鬥遊戲", "title": "熱門動漫原聲 大小姐才不玩格鬥遊戲", "mp3": "/static/video/大小姐才不玩格鬥遊戲.mp3", "mp4": "/static/video/大小姐才不玩格鬥遊戲.mp4"}, {"id": "奇招百出的維多利亞", "title": "熱門動漫原聲 奇招百出的維多利亞", "mp3": "/static/video/奇招百出的維多利亞.mp3", "mp4": "/static/video/奇招百出的維多利亞.mp4"}, {"id": "奈葉 EXCEEDS", "title": "熱門動漫原聲 奈葉 EXCEEDS", "mp3": "/static/video/奈葉 EXCEEDS.mp3", "mp4": "/static/video/奈葉 EXCEEDS.mp4"}, {"id": "奔馳於透明之夜", "title": "熱門動漫原聲 奔馳於透明之夜", "mp3": "/static/video/奔馳於透明之夜.mp3", "mp4": "/static/video/奔馳於透明之夜.mp4"}, {"id": "女性向遊戲世界第二季", "title": "熱門動漫原聲 女性向遊戲世界第二季", "mp3": "/static/video/女性向遊戲世界第二季.mp3", "mp4": "/static/video/女性向遊戲世界第二季.mp4"}, {"id": "小書痴第二季", "title": "熱門動漫原聲 小書痴第二季", "mp3": "/static/video/小書痴第二季.mp3", "mp4": "/static/video/小書痴第二季.mp4"}, {"id": "尼古喵喵", "title": "熱門動漫原聲 尼古喵喵", "mp3": "/static/video/尼古喵喵.mp3", "mp4": "/static/video/尼古喵喵.mp4"}, {"id": "幼女戰記第二季", "title": "熱門動漫原聲 幼女戰記第二季", "mp3": "/static/video/幼女戰記第二季.mp3", "mp4": "/static/video/幼女戰記第二季.mp4"}, {"id": "擅長逃跑的殿下第二季", "title": "熱門動漫原聲 擅長逃跑的殿下第二季", "mp3": "/static/video/擅長逃跑的殿下第二季.mp3", "mp4": "/static/video/擅長逃跑的殿下第二季.mp4"}, {"id": "無用聖女的異世界美食之旅", "title": "熱門動漫原聲 無用聖女的異世界美食之旅", "mp3": "/static/video/無用聖女的異世界美食之旅.mp3", "mp4": "/static/video/無用聖女的異世界美食之旅.mp4"}, {"id": "相反的你和我第二季", "title": "熱門動漫原聲 相反的你和我第二季", "mp3": "/static/video/相反的你和我第二季.mp3", "mp4": "/static/video/相反的你和我第二季.mp4"}, {"id": "相戀到生命盡頭", "title": "熱門動漫原聲 相戀到生命盡頭", "mp3": "/static/video/相戀到生命盡頭.mp3", "mp4": "/static/video/相戀到生命盡頭.mp4"}, {"id": "碧藍之海第三季", "title": "熱門動漫原聲 碧藍之海第三季", "mp3": "/static/video/碧藍之海第三季.mp3", "mp4": "/static/video/碧藍之海第三季.mp4"}, {"id": "超市後門抽菸的兩人", "title": "熱門動漫原聲 超市後門抽菸的兩人", "mp3": "/static/video/超市後門抽菸的兩人.mp3", "mp4": "/static/video/超市後門抽菸的兩人.mp4"}, {"id": "轉生成史萊姆第四季2", "title": "熱門動漫原聲 轉生成史萊姆第四季2", "mp3": "/static/video/轉生成史萊姆第四季2.mp3", "mp4": "/static/video/轉生成史萊姆第四季2.mp4"}, {"id": "重騎士", "title": "熱門動漫原聲 重騎士", "mp3": "/static/video/重騎士.mp3", "mp4": "/static/video/重騎士.mp4"}, {"id": "骸骨騎士第二季", "title": "熱門動漫原聲 骸骨騎士第二季", "mp3": "/static/video/骸骨騎士第二季.mp3", "mp4": "/static/video/骸骨騎士第二季.mp4"}, {"id": "魔獸之王第二季", "title": "熱門動漫原聲 魔獸之王第二季", "mp3": "/static/video/魔獸之王第二季.mp3", "mp4": "/static/video/魔獸之王第二季.mp4"}];
 
@@ -397,7 +406,7 @@
             currentIndex = index;
             const item = playlistData[currentIndex];
             const audio = document.getElementById('audio-player');
-            audio.src = item.mp3;
+            audio.src = fixUrl(item.mp3);
 
             document.getElementById('current-title').innerText = item.title;
             document.getElementById('current-subtitle').innerText = `索引 #${currentIndex + 1} / ${playlistData.length} • 128k VBR 高音質`;
@@ -414,7 +423,7 @@
             currentVideoIndex = index;
             const item = playlistData[currentVideoIndex];
             const video = document.getElementById('video-player');
-            video.src = item.mp4;
+            video.src = fixUrl(item.mp4);
 
             document.getElementById('video-current-title').innerText = item.title;
             document.getElementById('video-current-subtitle').innerText = `索引 #${currentVideoIndex + 1} / ${playlistData.length} • H.264 高清視訊`;
