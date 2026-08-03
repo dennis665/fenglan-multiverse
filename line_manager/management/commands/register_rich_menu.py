@@ -51,17 +51,17 @@ class Command(BaseCommand):
         rich_menu_data = {
             "size": {
                 "width": 2500,
-                "height": 843
+                "height": 1686
             },
             "selected": True,
-            "name": "CSI Portal 三區選單 V5",
+            "name": "CSI Portal 4區酷炫選單 V6",
             "chatBarText": "選單功能",
             "areas": [
                 {
                     "bounds": {
                         "x": 0,
                         "y": 0,
-                        "width": 833,
+                        "width": 1250,
                         "height": 843
                     },
                     "action": {
@@ -72,22 +72,35 @@ class Command(BaseCommand):
                 },
                 {
                     "bounds": {
-                        "x": 833,
+                        "x": 1250,
                         "y": 0,
-                        "width": 834,
+                        "width": 1250,
                         "height": 843
                     },
                     "action": {
                         "type": "uri",
-                        "label": "追劇行程",
+                        "label": "追劇影視",
                         "uri": f"https://liff.line.me/{liff_id}?page=drama"
                     }
                 },
                 {
                     "bounds": {
-                        "x": 1667,
-                        "y": 0,
-                        "width": 833,
+                        "x": 0,
+                        "y": 843,
+                        "width": 1250,
+                        "height": 843
+                    },
+                    "action": {
+                        "type": "uri",
+                        "label": "酷炫音樂",
+                        "uri": f"https://liff.line.me/{liff_id}?page=music"
+                    }
+                },
+                {
+                    "bounds": {
+                        "x": 1250,
+                        "y": 843,
+                        "width": 1250,
                         "height": 843
                     },
                     "action": {

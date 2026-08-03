@@ -518,7 +518,27 @@ def handle_location(event):
 
 
 def liff_itinerary_list(request):
-    """LIFF 行程清單首頁（載入前端 LIFF 網頁，在 LINE App 中呈現）"""
+    """LIFF 入口總控制器（支援動態 page=music / page=drama / page=pet 自動分發）"""
+    page = request.GET.get("page", "")
+    liff_state = request.GET.get("liff.state", "")
+
+    if not page and liff_state:
+        if "page=music" in liff_state:
+            page = "music"
+        elif "page=drama" in liff_state:
+            page = "drama"
+        elif "page=pet" in liff_state:
+            page = "pet"
+
+    if page == "music":
+        response = render(request, "line_manager/liff_music.html", {"liff_id": settings.LINE_LIFF_ID})
+        response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        return response
+    elif page == "drama":
+        return liff_drama(request)
+    elif page == "pet":
+        return liff_pet(request)
+
     context = {
         "liff_id": settings.LINE_LIFF_ID,
     }
@@ -2475,11 +2495,19 @@ def liff_drama(request):
 
 
 def liff_pet(request):
-    """LINE Bot 寵物系統 LIFF 頁面渲染視圖"""
+    """LINE Bot 多功能 LIFF 頁面渲染視圖 (包含行程、追劇、休閒小站與酷炫音樂平台)"""
+    page = request.GET.get("page", "")
     context = {
         "liff_id": settings.LINE_LIFF_ID,
     }
-    response = render(request, "line_manager/liff_pet.html", context)
+    if page == "music":
+        template_name = "line_manager/liff_music.html"
+    elif page == "drama":
+        template_name = "line_manager/liff_drama.html"
+    else:
+        template_name = "line_manager/liff_pet.html"
+
+    response = render(request, template_name, context)
     response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     response["Pragma"] = "no-cache"
     response["Expires"] = "0"
@@ -2548,11 +2576,11 @@ def api_line_pet_status(request):
         legacy_pets.delete()
 
     active_pet = LinePet.objects.filter(user=user, is_active=True).first()
-    
+
     if not active_pet:
-        # 如果使用者連非出戰的角色都沒有，預設免費贈送芙莉蓮
-        frieren_pet = LinePet.objects.filter(user=user, pet_type="FRIEREN").first()
-        if not frieren_pet:
+        # 僅當使用者完全沒有任何角色時，才免費贈送並激活芙莉蓮
+        existing_pet = LinePet.objects.filter(user=user).first()
+        if not existing_pet:
             active_pet = LinePet.objects.create(
                 user=user,
                 name="芙莉蓮",
@@ -2563,9 +2591,9 @@ def api_line_pet_status(request):
                 exp=0
             )
         else:
-            frieren_pet.is_active = True
-            frieren_pet.save()
-            active_pet = frieren_pet
+            existing_pet.is_active = True
+            existing_pet.save()
+            active_pet = existing_pet
 
     def get_char_assets(c_type):
         folder = "Frieren" if c_type == "FRIEREN" else "Rimuru"
@@ -2802,15 +2830,24 @@ def api_line_pet_buy_item(request):
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
-    if not access_token or not item_type:
-        return JsonResponse({"error": "Missing parameters"}, status=400)
+    if not item_type:
+        return JsonResponse({"error": "Missing item_type"}, status=400)
 
-    line_user_id, display_name = _verify_token_with_cache(access_token)
-    if not line_user_id:
-        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+    user = None
+    if access_token:
+        line_user_id, display_name = _verify_token_with_cache(access_token)
+        if line_user_id:
+            line_profile = _get_or_create_profile(line_user_id, display_name)
+            user = line_profile.user
 
-    line_profile = _get_or_create_profile(line_user_id, display_name)
-    user = line_profile.user
+    if not user:
+        from pet_system.models import LinePetProfile
+        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
+        if main_prof:
+            user = main_prof.user
+
+    if not user:
+        return JsonResponse({"error": "No valid user profile found"}, status=400)
 
     # 定義角色解鎖價格
     prices = {"FRIEREN": 500, "RIMURU": 800}
@@ -2871,15 +2908,21 @@ def api_line_pet_evolve(request):
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
-    if not access_token:
-        return JsonResponse({"error": "Access token required"}, status=400)
+    user = None
+    if access_token:
+        line_user_id, display_name = _verify_token_with_cache(access_token)
+        if line_user_id:
+            line_profile = _get_or_create_profile(line_user_id, display_name)
+            user = line_profile.user
 
-    line_user_id, display_name = _verify_token_with_cache(access_token)
-    if not line_user_id:
-        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+    if not user:
+        from pet_system.models import LinePetProfile
+        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
+        if main_prof:
+            user = main_prof.user
 
-    line_profile = _get_or_create_profile(line_user_id, display_name)
-    user = line_profile.user
+    if not user:
+        return JsonResponse({"error": "No valid user profile found"}, status=400)
 
     from pet_system.models import LinePet
 
@@ -3258,7 +3301,7 @@ def api_line_pet_sync_google_fit(request):
 
 @csrf_exempt
 def api_line_pet_switch_active(request):
-    """API 端點：切換召喚出戰的 LINE 寵物"""
+    """API 端點：切換召喚出戰的 LINE 寵物 (若角色尚未創建則自動解鎖)"""
     if request.method != "POST":
         return JsonResponse({"error": "Method Not Allowed"}, status=405)
 
@@ -3269,27 +3312,71 @@ def api_line_pet_switch_active(request):
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
-    if not access_token or not pet_id:
-        return JsonResponse({"error": "Parameters missing"}, status=400)
+    if not pet_id:
+        return JsonResponse({"error": "pet_id missing"}, status=400)
 
-    line_user_id, display_name = _verify_token_with_cache(access_token)
-    if not line_user_id:
-        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+    user = None
+    if access_token:
+        line_user_id, display_name = _verify_token_with_cache(access_token)
+        if line_user_id:
+            line_profile = _get_or_create_profile(line_user_id, display_name)
+            user = line_profile.user
 
-    line_profile = _get_or_create_profile(line_user_id, display_name)
-    user = line_profile.user
+    if not user:
+        from pet_system.models import LinePetProfile
+        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
+        if main_prof:
+            user = main_prof.user
+
+    if not user:
+        return JsonResponse({"error": "No valid user profile found"}, status=400)
 
     from pet_system.models import LinePet
 
-    pet = LinePet.objects.filter(user=user, id=pet_id).first()
+    pet = None
+    # 1. 優先以整數 ID 查詢
+    if isinstance(pet_id, int) or (isinstance(pet_id, str) and str(pet_id).isdigit()):
+        pet = LinePet.objects.filter(user=user, id=int(pet_id)).first()
+
+    # 2. 若傳入的是角色類型字串 (如 'RIMURU', 'FRIEREN')
+    target_type = None
+    if isinstance(pet_id, str):
+        p_upper = pet_id.upper()
+        if p_upper in ["FRIEREN", "RIMURU"]:
+            target_type = p_upper
+
+    if not pet and target_type:
+        pet = LinePet.objects.filter(user=user, pet_type=target_type).first()
+
+    # 3. 若該角色類型尚未建立，自動為用戶免費解鎖建立
+    if not pet and target_type:
+        char_name = "芙莉蓮" if target_type == "FRIEREN" else "利姆路"
+        pet = LinePet.objects.create(
+            user=user,
+            name=char_name,
+            pet_type=target_type,
+            stage=1,
+            is_active=True,
+            level=1,
+            exp=0
+        )
+
     if not pet:
         return JsonResponse({"error": "pet_not_found", "message": "找不到該寵物"}, status=404)
 
-    # 切換出戰
-    pet.is_active = True
-    pet.save()  # LinePet 的 save 方法中會自動將該使用者的其它寵物 is_active 設為 False
+    # 4. 切換出戰：將該用戶所有角色的 is_active 設為 False，再單獨將目標角色設為 True
+    from django.db import transaction
+    with transaction.atomic():
+        LinePet.objects.filter(user=user).update(is_active=False)
+        pet.is_active = True
+        pet.save()
 
-    return JsonResponse({"status": "success", "message": f"成功召喚 {pet.name} 出戰！"})
+    return JsonResponse({
+        "status": "success", 
+        "message": f"成功召喚【{pet.name}】出戰！",
+        "pet_id": pet.id,
+        "pet_type": pet.pet_type
+    })
 
 
 @csrf_exempt

@@ -139,7 +139,7 @@
 </head>
 <body>
     <!-- 全頁面隨意走動的漫遊角色精靈 -->
-    <img id="shimeji-char-sprite" src="https://raw.githubusercontent.com/dennis665/fenglan-multiverse/main/static/leisure_station/images/Frieren/idle.webp" alt="Character Sprite" draggable="false" oncontextmenu="return false;">
+    <img id="shimeji-char-sprite" src="/static/leisure_station/images/Frieren/idle.webp" alt="Character Sprite" draggable="false" oncontextmenu="return false;">
 
     <div class="container py-4">
         <!-- 頂部標題與金幣 -->
@@ -353,7 +353,7 @@
             if (!url) return '';
             let targetUrl = url;
             if (targetUrl.startsWith('/static/')) {
-                targetUrl = 'https://raw.githubusercontent.com/dennis665/fenglan-multiverse/main' + targetUrl;
+                targetUrl = window.location.origin + targetUrl;
             }
             return targetUrl.replace(/ /g, "%20");
         }
@@ -377,6 +377,7 @@
             }
 
             setAssets(assets) {
+                if (!assets) return;
                 this.assets = {
                     avatar: fixUrl(assets.avatar),
                     idle: fixUrl(assets.idle),
@@ -389,6 +390,10 @@
                     skill2: fixUrl(assets.skill2),
                     skill3: fixUrl(assets.skill3)
                 };
+                this.state = 'idle';
+                if (this.el && this.assets.idle) {
+                    this.el.src = this.assets.idle;
+                }
                 this.updateSprite();
             }
 
@@ -718,21 +723,33 @@
             }
         }
 
-        function renderGalleryList(list) {
+        function renderGalleryList(unlockedList) {
             const container = document.getElementById('gallery-char-list');
             container.innerHTML = '';
-            list.forEach(c => {
+
+            const allCharacters = [
+                { type: 'FRIEREN', defaultName: '芙莉蓮', avatar: '/static/leisure_station/images/Frieren/avatar.webp' },
+                { type: 'RIMURU', defaultName: '利姆路', avatar: '/static/leisure_station/images/Rimuru/avatar.webp' }
+            ];
+
+            allCharacters.forEach(char => {
+                const userPet = (unlockedList || []).find(p => p.pet_type === char.type);
+                const isActive = userPet ? userPet.is_active : false;
+                const petId = userPet ? userPet.id : char.type;
+                const name = userPet ? userPet.name : char.defaultName;
+                const level = userPet ? (userPet.level || 1) : 1;
+
                 const card = document.createElement('div');
-                card.className = `char-card-item d-flex justify-content-between align-items-center ${c.is_active ? 'active' : ''}`;
+                card.className = `char-card-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ${isActive ? 'bg-primary bg-opacity-25 border border-info' : 'bg-dark bg-opacity-50'}`;
                 card.innerHTML = `
                     <div class="d-flex align-items-center gap-3">
-                        <img src="${fixUrl(c.avatar)}" class="rounded" style="width: 45px; height: 45px; object-fit: contain;">
+                        <img src="${fixUrl(userPet && userPet.avatar ? userPet.avatar : char.avatar)}" class="rounded" style="width: 48px; height: 48px; object-fit: contain;">
                         <div>
-                            <h6 class="fw-bold mb-0 text-white">${c.name}</h6>
-                            <small class="text-white-50">Lv.${c.level} • ${c.pet_type_display} (${c.exp}/${c.max_exp} EXP)</small>
+                            <h6 class="fw-bold mb-0 text-white">${name}</h6>
+                            <small class="text-white-50">Lv.${level} • ${char.defaultName}</small>
                         </div>
                     </div>
-                    ${c.is_active ? '<span class="badge bg-warning text-dark"><i class="fa-solid fa-check me-1"></i>出戰中</span>' : `<button class="btn btn-xs btn-outline-light" onclick="switchActiveCharacter(${c.id})">切換出戰</button>`}
+                    ${isActive ? '<span class="badge bg-warning text-dark px-3 py-2"><i class="fa-solid fa-star me-1"></i>出戰中</span>' : `<button class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="switchActiveCharacter('${petId}')">切換出戰</button>`}
                 `;
                 container.appendChild(card);
             });
