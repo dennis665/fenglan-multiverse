@@ -2514,6 +2514,23 @@ def liff_pet(request):
     return response
 
 
+def get_char_assets(c_type):
+    clean_type = str(c_type or "").upper().strip()
+    folder = "Frieren" if clean_type in ["FRIEREN", "芙莉蓮"] else "Rimuru"
+    base = f"/static/leisure_station/images/{folder}"
+    return {
+        "avatar": f"{base}/avatar.webp",
+        "idle": f"{base}/idle.webp",
+        "hanging": f"{base}/hanging.webp",
+        "walk_up": f"{base}/walk_up.webp",
+        "walk_down": f"{base}/walk_down.webp",
+        "walk_right": f"{base}/walk_right.webp",
+        "walk_left": f"{base}/walk_left.webp",
+        "skill1": f"{base}/skill1.webp",
+        "skill2": f"{base}/skill2.webp",
+        "skill3": f"{base}/skill3.webp" if clean_type in ["FRIEREN", "芙莉蓮"] else f"{base}/skill2.webp",
+    }
+
 @csrf_exempt
 def api_line_pet_status(request):
     import traceback
@@ -2594,23 +2611,8 @@ def api_line_pet_status(request):
             existing_pet.save()
             active_pet = existing_pet
 
-    def get_char_assets(c_type):
-        folder = "Frieren" if c_type == "FRIEREN" else "Rimuru"
-        base = f"/static/leisure_station/images/{folder}"
-        return {
-            "avatar": f"{base}/avatar.webp",
-            "idle": f"{base}/idle.webp",
-            "hanging": f"{base}/hanging.webp",
-            "walk_up": f"{base}/walk_up.webp",
-            "walk_down": f"{base}/walk_down.webp",
-            "walk_right": f"{base}/walk_right.webp",
-            "walk_left": f"{base}/walk_left.webp",
-            "skill1": f"{base}/skill1.webp",
-            "skill2": f"{base}/skill2.webp",
-            "skill3": f"{base}/skill3.webp" if c_type == "FRIEREN" else f"{base}/skill2.webp",
-        }
 
-    pet_data = None
+    pet_data = {}
     if active_pet:
         level = getattr(active_pet, 'level', 1) or 1
         exp = getattr(active_pet, 'exp', 0) or 0
@@ -2733,8 +2735,8 @@ def api_line_pet_status(request):
                 "pet_type_display": active_pet.get_pet_type_display(),
                 "hp": hp,
                 "atk": atk,
-                "image": assets["idle"] if (active_pet and assets) else "",
-                "assets": assets if (active_pet and assets) else {},
+                "image": pet_data["image"],
+                "assets": pet_data["assets"],
                 "expedition": active_pet_expedition,
             } if active_pet else None,
             "active_pet_expedition": active_pet_expedition,
@@ -3363,11 +3365,15 @@ def api_line_pet_switch_active(request):
         pet.is_active = True
         pet.save()
 
+    char_assets = get_char_assets(pet.pet_type)
+
     return JsonResponse({
         "status": "success", 
         "message": f"成功召喚【{pet.name}】出戰！",
         "pet_id": pet.id,
-        "pet_type": pet.pet_type
+        "pet_type": pet.pet_type,
+        "pet_name": pet.name,
+        "assets": char_assets
     })
 
 

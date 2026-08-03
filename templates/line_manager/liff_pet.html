@@ -1011,6 +1011,29 @@
                 confirmButtonColor: '#38ef7d'
             });
         }
-    </script>
+    
+        // 全局自動解決所有 Bootstrap Modal 關閉時的 Blocked aria-hidden Focus 死鎖
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.modal').forEach(modalEl => {
+                modalEl.addEventListener('hide.bs.modal', function () {
+                    if (document.activeElement && (modalEl.contains(document.activeElement) || document.activeElement === modalEl)) {
+                        try { document.activeElement.blur(); } catch(e) {}
+                    }
+                });
+            });
+        });
+        // 全局自動解決所有 Bootstrap Modal 關閉時的 Blocked aria-hidden Focus 死鎖
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.modal').forEach(modalEl => {
+                modalEl.addEventListener('hide.bs.modal', function () {
+                    if (document.activeElement && (modalEl.contains(document.activeElement) || document.activeElement === modalEl)) {
+                        try { document.activeElement.blur(); } catch(e) {}
+                    }
+                });
+            });
+        });
+
+
+</script>
 </body>
 </html>
