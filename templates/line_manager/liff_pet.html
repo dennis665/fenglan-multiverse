@@ -433,23 +433,13 @@
                     initialX = this.x;
                     initialY = this.y;
 
+                    // 📍 紀錄拖拉之前的原始座標
+                    this.dragStartX = this.x;
+                    this.dragStartY = this.y;
+
                     if (this.actionTimer) clearTimeout(this.actionTimer);
 
-                    const availableSkills = [this.assets.skill1, this.assets.skill2, this.assets.skill3].filter(Boolean);
-                    if (availableSkills.length > 0) {
-                        this.currentSkillUrl = availableSkills[Math.floor(Math.random() * availableSkills.length)];
-                    } else {
-                        this.currentSkillUrl = this.assets.idle;
-                    }
-
-                    this.state = 'skill';
-                    this.vx = 0;
-                    this.vy = 0;
-                    this.updateSprite();
-
-                    try {
-                    } catch(e) {}
-
+                    // ⏳ 嚴格壓著滿 2 秒才進入懸掛拖拉狀態 (dragging)
                     if (longPressTimer) clearTimeout(longPressTimer);
                     longPressTimer = setTimeout(() => {
                         if (isPointerDown) {
@@ -468,28 +458,37 @@
                     const dx = clientX - startX;
                     const dy = clientY - startY;
 
-                    if (isLongPressed) {
-                        this.x = Math.max(10, Math.min(window.innerWidth - 105, initialX + dx));
-                        this.y = Math.max(60, Math.min(window.innerHeight - 110, initialY + dy));
-                        this.updatePosition();
-                    }
+                    // 2 秒內直接即時跟隨移動改變位置 (移除距離判定)
+                    this.x = Math.max(10, Math.min(window.innerWidth - 105, initialX + dx));
+                    this.y = Math.max(60, Math.min(window.innerHeight - 110, initialY + dy));
+                    this.updatePosition();
                 };
 
                 const onEnd = () => {
                     if (!isPointerDown) return;
                     if (longPressTimer) clearTimeout(longPressTimer);
 
-                    if (!isLongPressed) {
-                        isPointerDown = false;
-                        this.actionTimer = setTimeout(() => {
-                            this.decideNextAction();
-                        }, 8000);
-                    } else {
+                    if (isLongPressed) {
                         isPointerDown = false;
                         isLongPressed = false;
-                        this.decideNextAction();
+                        
+                        // 🪂 滿 2 秒懸掛狀態下放開：掉落在【原始拖拉前的位置】
+                        this.fallBackToOriginLocation();
+                    } else {
+                        isPointerDown = false;
+                        // 2 秒內放開：停留在當前放置位置
+                        const availableSkills = [this.assets.skill1, this.assets.skill2, this.assets.skill3].filter(Boolean);
+                        this.currentSkillUrl = availableSkills.length > 0 ? availableSkills[Math.floor(Math.random() * availableSkills.length)] : this.assets.idle;
+                        this.state = 'skill';
+                        this.updateSprite();
+
+                        this.actionTimer = setTimeout(() => {
+                            this.decideNextAction();
+                        }, 2000);
                     }
                 };
+
+
 
                 this.el.addEventListener('mousedown', onStart);
                 window.addEventListener('mousemove', onMove);
@@ -501,6 +500,65 @@
 
                 requestAnimationFrame(() => this.gameLoop());
                 this.decideNextAction();
+            }
+
+            
+            
+
+            triggerLandingReaction() {
+                this.state = 'skill';
+                this.currentSkillUrl = this.assets.skill1 || this.assets.idle;
+                this.updateSprite();
+
+                // 播放彈跳輕微震動效果
+                if (this.el) {
+                    this.el.style.transform = 'scale(1.15, 0.85)';
+                    setTimeout(() => {
+                        this.el.style.transform = 'scale(1, 1)';
+                    }, 200);
+                }
+
+                // 1.5 秒後恢復正常決策漫步
+                this.actionTimer = setTimeout(() => {
+                    this.decideNextAction();
+                }, 1500);
+            }
+
+            
+            fallBackToOriginLocation() {
+                const targetX = this.dragStartX;
+                const targetY = this.dragStartY;
+
+                this.state = 'dragging';
+                this.updateSprite();
+
+                const fallInterval = setInterval(() => {
+                    let reachedX = false;
+                    let reachedY = false;
+
+                    // X 軸漸進回彈
+                    if (Math.abs(this.x - targetX) < 12) {
+                        this.x = targetX;
+                        reachedX = true;
+                    } else {
+                        this.x += (targetX > this.x ? 12 : -12);
+                    }
+
+                    // Y 軸自由墜落/回彈
+                    if (Math.abs(this.y - targetY) < 18) {
+                        this.y = targetY;
+                        reachedY = true;
+                    } else {
+                        this.y += (targetY > this.y ? 18 : -18);
+                    }
+
+                    this.updatePosition();
+
+                    if (reachedX && reachedY) {
+                        clearInterval(fallInterval);
+                        this.triggerLandingReaction();
+                    }
+                }, 16);
             }
 
             updatePosition() {
