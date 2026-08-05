@@ -531,7 +531,7 @@ def liff_itinerary_list(request):
             page = "pet"
 
     if page == "music":
-        response = render(request, "line_manager/liff_music.html", {"liff_id": settings.LINE_LIFF_ID})
+        response = render(request, "line_manager/liff_music.html", {"liff_id": settings.LINE_LIFF_ID, "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False)})
         response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
         return response
     elif page == "drama":
@@ -541,6 +541,7 @@ def liff_itinerary_list(request):
 
     context = {
         "liff_id": settings.LINE_LIFF_ID,
+        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     response = render(request, "line_manager/liff_list.html", context)
     response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
@@ -553,6 +554,7 @@ def liff_itinerary_create(request):
     """LIFF 新增行程網頁"""
     context = {
         "liff_id": settings.LINE_LIFF_ID,
+        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     return render(request, "line_manager/liff_create.html", context)
 
@@ -561,6 +563,7 @@ def liff_bind_account(request):
     """LIFF 綁定既有帳號網頁"""
     context = {
         "liff_id": settings.LINE_LIFF_ID,
+        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     return render(request, "line_manager/liff_bind.html", context)
 
@@ -2486,6 +2489,7 @@ def liff_drama(request):
     """追劇行程 LIFF 頁面渲染視圖"""
     context = {
         "liff_id": settings.LINE_LIFF_ID,
+        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     response = render(request, "line_manager/liff_drama.html", context)
     response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
@@ -2494,11 +2498,71 @@ def liff_drama(request):
     return response
 
 
+_VIDEO_CACHE = {
+    "timestamp": 0,
+    "data": None
+}
+
+def get_github_video_playlist():
+    """
+    動態從 GitHub 儲存庫 (dennis665/fenglan-media-assets) tree/main/video 讀取歌單與影片。
+    含有 10 分鐘快取與傳統 fallback 備援。
+    """
+    now_time = time.time()
+    if _VIDEO_CACHE["data"] and (now_time - _VIDEO_CACHE["timestamp"] < 600):
+        return _VIDEO_CACHE["data"]
+
+    url = "https://api.github.com/repos/dennis665/fenglan-media-assets/contents/video"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "CSI-Server"})
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            files = json.loads(resp.read().decode('utf-8'))
+
+        songs_map = {}
+        for f in files:
+            name = f.get("name", "")
+            if name.endswith(".mp3"):
+                base_name = name[:-4]
+                if base_name not in songs_map:
+                    songs_map[base_name] = {"mp3": True, "mp4": False}
+                else:
+                    songs_map[base_name]["mp3"] = True
+            elif name.endswith(".mp4"):
+                base_name = name[:-4]
+                if base_name not in songs_map:
+                    songs_map[base_name] = {"mp3": False, "mp4": True}
+                else:
+                    songs_map[base_name]["mp4"] = True
+
+        playlist = []
+        for song_id, flags in songs_map.items():
+            item = {
+                "id": song_id,
+                "title": f"熱門動漫原聲 {song_id}",
+                "mp3": f"/video/{song_id}.mp3" if flags["mp3"] else (f"/video/{song_id}.mp4" if flags["mp4"] else None),
+                "mp4": f"/video/{song_id}.mp4" if flags["mp4"] else (f"/video/{song_id}.mp3" if flags["mp3"] else None)
+            }
+            playlist.append(item)
+
+        if playlist:
+            _VIDEO_CACHE["timestamp"] = now_time
+            _VIDEO_CACHE["data"] = playlist
+            return playlist
+    except Exception as e:
+        print(f"[Video Playlist Loader Warning] Failed to fetch GitHub videos: {e}")
+
+    return [
+        {"id": "不才惡女", "title": "熱門動漫原聲 不才惡女", "mp3": "/video/不才惡女.mp3", "mp4": "/video/不才惡女.mp4"},
+        {"id": "世界最強後衛", "title": "熱門動漫原聲 世界最強後衛", "mp3": "/video/世界最強後衛.mp3", "mp4": "/video/世界最強後衛.mp4"},
+    ]
+
+
 def liff_pet(request):
     """LINE Bot 多功能 LIFF 頁面渲染視圖 (包含行程、追劇、休閒小站與酷炫音樂平台)"""
     page = request.GET.get("page", "")
     context = {
         "liff_id": settings.LINE_LIFF_ID,
+        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     if page == "music":
         template_name = "line_manager/liff_music.html"

@@ -171,19 +171,19 @@
             <h3 class="fw-bold mb-1" style="background: linear-gradient(135deg, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                 <i class="fa-solid fa-compact-disc me-2 text-info"></i>酷炫音樂影音平台
             </h3>
-            <p class="small text-white-50 mb-0">21 首動漫原聲全數匯入 • 支援單曲循環 / 全曲循環 / 隨機播放</p>
+            <p class="small text-white-50 mb-0"><span id="header-song-count">21</span> 首動漫原聲全數匯入 • 支援單曲循環 / 全曲循環 / 隨機播放</p>
         </div>
 
         <!-- 2 大核心分頁 -->
         <ul class="nav nav-tabs mb-4 justify-content-center border-bottom border-secondary" id="mediaTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="music-tab" data-bs-toggle="tab" data-bs-target="#music-panel" type="button" role="tab">
-                    <i class="fa-solid fa-headphones me-2"></i>MP3 音樂大碟 (21首)
+                    <i class="fa-solid fa-headphones me-2"></i>MP3 音樂大碟 (<span id="mp3-tab-count">21</span>首)
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-panel" type="button" role="tab">
-                    <i class="fa-solid fa-film me-2"></i>MP4 高清視訊 (21首)
+                    <i class="fa-solid fa-film me-2"></i>MP4 高清視訊 (<span id="mp4-tab-count">21</span>首)
                 </button>
             </li>
         </ul>
@@ -237,7 +237,7 @@
                 <div class="glass-card p-3">
                     <div class="d-flex justify-content-between align-items-center mb-2 px-2">
                         <h6 class="fw-bold mb-0 text-info"><i class="fa-solid fa-list-ul me-2"></i>全部歌單 (點擊即刻播放)</h6>
-                        <span class="badge bg-secondary rounded-pill">共 21 首</span>
+                        <span class="badge bg-secondary rounded-pill" id="audio-badge-count">共 21 首</span>
                     </div>
                     <div class="playlist-container" id="audio-playlist">
                         <!-- 動態渲染清單項目 -->
@@ -274,7 +274,7 @@
                 <div class="glass-card p-3">
                     <div class="d-flex justify-content-between align-items-center mb-2 px-2">
                         <h6 class="fw-bold mb-0 text-warning"><i class="fa-solid fa-film me-2"></i>影片劇集清單 (點擊播放)</h6>
-                        <span class="badge bg-secondary rounded-pill">共 21 支</span>
+                        <span class="badge bg-secondary rounded-pill" id="video-badge-count">共 21 支</span>
                     </div>
                     <div class="playlist-container" id="video-playlist">
                         <!-- 動態渲染影片清單項目 -->
@@ -298,7 +298,7 @@
         }
 
         const MY_LIFF_ID = "{{ liff_id|default:'2007018318-zM3d88XJ' }}";
-        const playlistData = [{"id": "不才惡女", "title": "熱門動漫原聲 不才惡女", "mp3": "/video/不才惡女.mp3", "mp4": "/video/不才惡女.mp4"}, {"id": "世界最強後衛", "title": "熱門動漫原聲 世界最強後衛", "mp3": "/video/世界最強後衛.mp3", "mp4": "/video/世界最強後衛.mp4"}, {"id": "向日葵馬戲團", "title": "熱門動漫原聲 向日葵馬戲團", "mp3": "/video/向日葵馬戲團.mp3", "mp4": "/video/向日葵馬戲團.mp4"}, {"id": "大小姐才不玩格鬥遊戲", "title": "熱門動漫原聲 大小姐才不玩格鬥遊戲", "mp3": "/video/大小姐才不玩格鬥遊戲.mp3", "mp4": "/video/大小姐才不玩格鬥遊戲.mp4"}, {"id": "奇招百出的維多利亞", "title": "熱門動漫原聲 奇招百出的維多利亞", "mp3": "/video/奇招百出的維多利亞.mp3", "mp4": "/video/奇招百出的維多利亞.mp4"}, {"id": "奈葉 EXCEEDS", "title": "熱門動漫原聲 奈葉 EXCEEDS", "mp3": "/video/奈葉 EXCEEDS.mp3", "mp4": "/video/奈葉 EXCEEDS.mp4"}, {"id": "奔馳於透明之夜", "title": "熱門動漫原聲 奔馳於透明之夜", "mp3": "/video/奔馳於透明之夜.mp3", "mp4": "/video/奔馳於透明之夜.mp4"}, {"id": "女性向遊戲世界第二季", "title": "熱門動漫原聲 女性向遊戲世界第二季", "mp3": "/video/女性向遊戲世界第二季.mp3", "mp4": "/video/女性向遊戲世界第二季.mp4"}, {"id": "小書痴第二季", "title": "熱門動漫原聲 小書痴第二季", "mp3": "/video/小書痴第二季.mp3", "mp4": "/video/小書痴第二季.mp4"}, {"id": "尼古喵喵", "title": "熱門動漫原聲 尼古喵喵", "mp3": "/video/尼古喵喵.mp3", "mp4": "/video/尼古喵喵.mp4"}, {"id": "幼女戰記第二季", "title": "熱門動漫原聲 幼女戰記第二季", "mp3": "/video/幼女戰記第二季.mp3", "mp4": "/video/幼女戰記第二季.mp4"}, {"id": "擅長逃跑的殿下第二季", "title": "熱門動漫原聲 擅長逃跑的殿下第二季", "mp3": "/video/擅長逃跑的殿下第二季.mp3", "mp4": "/video/擅長逃跑的殿下第二季.mp4"}, {"id": "無用聖女的異世界美食之旅", "title": "熱門動漫原聲 無用聖女的異世界美食之旅", "mp3": "/video/無用聖女的異世界美食之旅.mp3", "mp4": "/video/無用聖女的異世界美食之旅.mp4"}, {"id": "相反的你和我第二季", "title": "熱門動漫原聲 相反的你和我第二季", "mp3": "/video/相反的你和我第二季.mp3", "mp4": "/video/相反的你和我第二季.mp4"}, {"id": "相戀到生命盡頭", "title": "熱門動漫原聲 相戀到生命盡頭", "mp3": "/video/相戀到生命盡頭.mp3", "mp4": "/video/相戀到生命盡頭.mp4"}, {"id": "碧藍之海第三季", "title": "熱門動漫原聲 碧藍之海第三季", "mp3": "/video/碧藍之海第三季.mp3", "mp4": "/video/碧藍之海第三季.mp4"}, {"id": "超市後門抽菸的兩人", "title": "熱門動漫原聲 超市後門抽菸的兩人", "mp3": "/video/超市後門抽菸的兩人.mp3", "mp4": "/video/超市後門抽菸的兩人.mp4"}, {"id": "轉生成史萊姆第四季2", "title": "熱門動漫原聲 轉生成史萊姆第四季2", "mp3": "/video/轉生成史萊姆第四季2.mp3", "mp4": "/video/轉生成史萊姆第四季2.mp4"}, {"id": "重騎士", "title": "熱門動漫原聲 重騎士", "mp3": "/video/重騎士.mp3", "mp4": "/video/重騎士.mp4"}, {"id": "骸骨騎士第二季", "title": "熱門動漫原聲 骸骨騎士第二季", "mp3": "/video/骸骨騎士第二季.mp3", "mp4": "/video/骸骨騎士第二季.mp4"}, {"id": "魔獸之王第二季", "title": "熱門動漫原聲 魔獸之王第二季", "mp3": "/video/魔獸之王第二季.mp3", "mp4": "/video/魔獸之王第二季.mp4"}];
+        let playlistData = {{ playlist_json|safe|default:"[]" }};
 
         // 循環模式: 'ALL' (全曲循環), 'ONE' (單曲循環), 'SHUFFLE' (隨機播放)
         let loopMode = 'ALL'; 
@@ -311,6 +311,42 @@
             if (typeof liff !== 'undefined' && MY_LIFF_ID) {
                 liff.init({ liffId: MY_LIFF_ID }).catch(err => console.error("LIFF Init Error:", err));
             }
+
+            
+            // 動態從 GitHub video API 取得最新歌單清單
+            fetch('https://api.github.com/repos/dennis665/fenglan-media-assets/contents/video')
+                .then(res => res.json())
+                .then(files => {
+                    if (Array.isArray(files) && files.length > 0) {
+                        const map = {};
+                        files.forEach(f => {
+                            const n = f.name || "";
+                            if (n.endsWith(".mp3")) {
+                                const k = n.slice(0, -4);
+                                if (!map[k]) map[k] = { mp3: true, mp4: false };
+                                else map[k].mp3 = true;
+                            } else if (n.endsWith(".mp4")) {
+                                const k = n.slice(0, -4);
+                                if (!map[k]) map[k] = { mp3: false, mp4: true };
+                                else map[k].mp4 = true;
+                            }
+                        });
+                        const newPlaylist = [];
+                        Object.keys(map).forEach(k => {
+                            newPlaylist.push({
+                                id: k,
+                                title: `熱門動漫原聲 ${k}`,
+                                mp3: map[k].mp3 ? `/video/${k}.mp3` : (map[k].mp4 ? `/video/${k}.mp4` : null),
+                                mp4: map[k].mp4 ? `/video/${k}.mp4` : (map[k].mp3 ? `/video/${k}.mp3` : null)
+                            });
+                        });
+                        if (newPlaylist.length > 0) {
+                            playlistData = newPlaylist;
+                            renderAudioPlaylist();
+                            renderVideoPlaylist();
+                        }
+                    }
+                }).catch(e => console.log("Live GitHub playlist fetch skipped:", e));
 
             renderAudioPlaylist();
             renderVideoPlaylist();
@@ -365,7 +401,23 @@
             });
         });
 
+        function updatePlaylistCountUI() {
+            const count = playlistData ? playlistData.length : 0;
+            const headerCount = document.getElementById('header-song-count');
+            const mp3TabCount = document.getElementById('mp3-tab-count');
+            const mp4TabCount = document.getElementById('mp4-tab-count');
+            const audioBadgeCount = document.getElementById('audio-badge-count');
+            const videoBadgeCount = document.getElementById('video-badge-count');
+
+            if (headerCount) headerCount.innerText = count;
+            if (mp3TabCount) mp3TabCount.innerText = count;
+            if (mp4TabCount) mp4TabCount.innerText = count;
+            if (audioBadgeCount) audioBadgeCount.innerText = `共 ${count} 首`;
+            if (videoBadgeCount) videoBadgeCount.innerText = `共 ${count} 支`;
+        }
+
         function renderAudioPlaylist() {
+            updatePlaylistCountUI();
             const container = document.getElementById('audio-playlist');
             container.innerHTML = '';
             playlistData.forEach((item, index) => {
@@ -384,6 +436,7 @@
         }
 
         function renderVideoPlaylist() {
+            updatePlaylistCountUI();
             const container = document.getElementById('video-playlist');
             container.innerHTML = '';
             playlistData.forEach((item, index) => {
@@ -410,6 +463,42 @@
 
             document.getElementById('current-title').innerText = item.title;
             document.getElementById('current-subtitle').innerText = `索引 #${currentIndex + 1} / ${playlistData.length} • 128k VBR 高音質`;
+
+            
+            // 動態從 GitHub video API 取得最新歌單清單
+            fetch('https://api.github.com/repos/dennis665/fenglan-media-assets/contents/video')
+                .then(res => res.json())
+                .then(files => {
+                    if (Array.isArray(files) && files.length > 0) {
+                        const map = {};
+                        files.forEach(f => {
+                            const n = f.name || "";
+                            if (n.endsWith(".mp3")) {
+                                const k = n.slice(0, -4);
+                                if (!map[k]) map[k] = { mp3: true, mp4: false };
+                                else map[k].mp3 = true;
+                            } else if (n.endsWith(".mp4")) {
+                                const k = n.slice(0, -4);
+                                if (!map[k]) map[k] = { mp3: false, mp4: true };
+                                else map[k].mp4 = true;
+                            }
+                        });
+                        const newPlaylist = [];
+                        Object.keys(map).forEach(k => {
+                            newPlaylist.append ? newPlaylist.push({
+                                id: k,
+                                title: `熱門動漫原聲 ${k}`,
+                                mp3: map[k].mp3 ? `/video/${k}.mp3` : (map[k].mp4 ? `/video/${k}.mp4` : null),
+                                mp4: map[k].mp4 ? `/video/${k}.mp4` : (map[k].mp3 ? `/video/${k}.mp3` : null)
+                            }) : null;
+                        });
+                        if (newPlaylist.length > 0) {
+                            playlistData = newPlaylist;
+                            renderAudioPlaylist();
+                            renderVideoPlaylist();
+                        }
+                    }
+                }).catch(e => console.log("Live GitHub playlist fetch skipped:", e));
 
             renderAudioPlaylist();
 
