@@ -2514,10 +2514,81 @@ def liff_pet(request):
     return response
 
 
-def get_char_assets(c_type):
-    clean_type = str(c_type or "").upper().strip()
-    folder = "Frieren" if clean_type in ["FRIEREN", "芙莉蓮"] else "Rimuru"
-    base = f"/images/{folder}"
+import time
+import urllib.request
+import json
+
+_CHAR_CACHE = {
+    "timestamp": 0,
+    "data": None
+}
+
+def get_available_characters():
+    """
+    動態從 GitHub 儲存庫 (dennis665/fenglan-media-assets) images/ 目錄判斷與新增角色清單。
+    包含 10 分鐘快取與安全 fallback 備援機制。
+    """
+    now_time = time.time()
+    if _CHAR_CACHE["data"] and (now_time - _CHAR_CACHE["timestamp"] < 600):
+        return _CHAR_CACHE["data"]
+
+    url = "https://api.github.com/repos/dennis665/fenglan-media-assets/contents/images"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "CSI-Server"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            dirs = json.loads(resp.read().decode('utf-8'))
+
+        result = {}
+        for d in dirs:
+            if d.get("type") == "dir":
+                char_name = d["name"]
+                files_url = d.get("url")
+                has_skill3 = True
+                if files_url:
+                    try:
+                        f_req = urllib.request.Request(files_url, headers={"User-Agent": "CSI-Server"})
+                        with urllib.request.urlopen(f_req, timeout=5) as f_resp:
+                            file_list = [f["name"] for f in json.loads(f_resp.read().decode('utf-8'))]
+                            has_skill3 = ("skill3.webp" in file_list)
+                    except Exception:
+                        has_skill3 = (char_name == "芙莉蓮")
+
+                result[char_name] = {
+                    "name": char_name,
+                    "has_skill3": has_skill3,
+                    "avatar": f"/images/{char_name}/avatar.webp",
+                    "price": 0 if char_name == "芙莉蓮" else 800
+                }
+
+        if result:
+            _CHAR_CACHE["timestamp"] = now_time
+            _CHAR_CACHE["data"] = result
+            return result
+    except Exception as e:
+        print(f"[Character Loader] Failed to fetch GitHub characters, using fallback: {e}")
+
+    fallback = {
+        "芙莉蓮": {"name": "芙莉蓮", "has_skill3": True, "avatar": "/images/芙莉蓮/avatar.webp", "price": 0},
+        "利姆路": {"name": "利姆路", "has_skill3": False, "avatar": "/images/利姆路/avatar.webp", "price": 800},
+    }
+    return fallback
+
+
+def get_char_assets(c_name):
+    """根據中文角色名稱動態回傳角色動圖資產。若該角色無 skill3 則 skill3 為 None。"""
+    clean_name = str(c_name or "芙莉蓮").strip()
+    
+    # 相容以前舊的標記 FRIEREN / RIMURU
+    if clean_name.upper() == "FRIEREN":
+        clean_name = "芙莉蓮"
+    elif clean_name.upper() == "RIMURU":
+        clean_name = "利姆路"
+
+    chars = get_available_characters()
+    char_info = chars.get(clean_name)
+    has_skill3 = char_info["has_skill3"] if char_info else (clean_name == "芙莉蓮")
+
+    base = f"/images/{clean_name}"
     return {
         "avatar": f"{base}/avatar.webp",
         "idle": f"{base}/idle.webp",
@@ -2528,7 +2599,7 @@ def get_char_assets(c_type):
         "walk_left": f"{base}/walk_left.webp",
         "skill1": f"{base}/skill1.webp",
         "skill2": f"{base}/skill2.webp",
-        "skill3": f"{base}/skill3.webp" if clean_type in ["FRIEREN", "芙莉蓮"] else f"{base}/skill2.webp",
+        "skill3": f"{base}/skill3.webp" if has_skill3 else None,
     }
 
 @csrf_exempt
@@ -2620,12 +2691,12 @@ def api_line_pet_status(request):
         hp = 100 + (level - 1) * 25
         atk = 15 + (level - 1) * 5
 
-        assets = get_char_assets(active_pet.pet_type)
+        assets = get_char_assets(active_pet.name)
         pet_data = {
             "id": active_pet.id,
             "name": active_pet.name,
             "pet_type": active_pet.pet_type,
-            "pet_type_display": active_pet.get_pet_type_display(),
+            "pet_type_display": active_pet.name,
             "level": level,
             "exp": exp,
             "max_exp": max_exp,
@@ -2640,12 +2711,12 @@ def api_line_pet_status(request):
     unlocked_characters = []
     for pet in all_user_pets:
         p_level = getattr(pet, 'level', 1) or 1
-        assets = get_char_assets(pet.pet_type)
+        assets = get_char_assets(pet.name)
         unlocked_characters.append({
             "id": pet.id,
             "name": pet.name,
             "pet_type": pet.pet_type,
-            "pet_type_display": pet.get_pet_type_display(),
+            "pet_type_display": pet.name,
             "level": p_level,
             "is_active": pet.is_active,
             "avatar": assets["avatar"],
@@ -2688,7 +2759,7 @@ def api_line_pet_status(request):
     # 打包所有解鎖角色的詳細資料 (含獨立等級與經驗值與派遣狀態)
     unlocked_characters_data = []
     for p in unlocked_pets:
-        assets = get_char_assets(p.pet_type)
+        assets = get_char_assets(p.name)
         p_level = getattr(p, 'level', 1) or 1
         p_hp = 100 + (p_level - 1) * 25
         p_atk = 15 + (p_level - 1) * 5
@@ -2699,7 +2770,7 @@ def api_line_pet_status(request):
             "level": p_level,
             "exp": p.exp,
             "max_exp": p_level * 100,
-            "pet_type_display": p.get_pet_type_display(),
+            "pet_type_display": p.name,
             "is_active": p.is_active,
             "hp": p_hp,
             "atk": p_atk,
@@ -2713,7 +2784,18 @@ def api_line_pet_status(request):
     has_google_fit = token_obj is not None
     google_email = token_obj.google_email if token_obj else None
 
-    unlocked_types = list(unlocked_pets.values_list('pet_type', flat=True))
+    all_avail = get_available_characters()
+    unlocked_names = list(unlocked_pets.values_list('name', flat=True))
+    shop_characters = []
+    for c_name, c_info in all_avail.items():
+        shop_characters.append({
+            "name": c_name,
+            "avatar": c_info["avatar"],
+            "price": c_info["price"],
+            "has_skill3": c_info["has_skill3"],
+            "is_unlocked": (c_name in unlocked_names)
+        })
+    unlocked_types = unlocked_names
 
     return JsonResponse(
         {
@@ -2724,6 +2806,7 @@ def api_line_pet_status(request):
             "has_google_fit": has_google_fit,
             "google_email": google_email,
             "unlocked_types": unlocked_types,
+            "shop_characters": shop_characters,
             "unlocked_characters": unlocked_characters_data,
             "active_pet": {
                 "id": active_pet.id,
@@ -2732,7 +2815,7 @@ def api_line_pet_status(request):
                 "level": active_pet.level,
                 "exp": active_pet.exp,
                 "max_exp": active_pet.level * 100,
-                "pet_type_display": active_pet.get_pet_type_display(),
+                "pet_type_display": active_pet.name,
                 "hp": hp,
                 "atk": atk,
                 "image": pet_data["image"],
@@ -2861,7 +2944,7 @@ def api_line_pet_buy_item(request):
         profile, _ = LinePetProfile.objects.get_or_create(user=user)
 
         # 檢查玩家是否已解鎖該角色
-        existing = LinePet.objects.filter(user=user, pet_type=item_type).first()
+        existing = LinePet.objects.filter(user=user, name=char_name).first() or LinePet.objects.filter(user=user, pet_type=item_type).first()
         if existing:
             return JsonResponse({"error": f"您已經解鎖過「{char_name}」了！"}, status=400)
 
@@ -2875,8 +2958,8 @@ def api_line_pet_buy_item(request):
         new_pet = LinePet.objects.create(
             user=user,
             name=char_name,
-            pet_type=item_type,
-                        is_active=True,
+            pet_type=char_name,
+            is_active=True,
             level=1,
             exp=0
         )
@@ -3365,7 +3448,7 @@ def api_line_pet_switch_active(request):
         pet.is_active = True
         pet.save()
 
-    char_assets = get_char_assets(pet.pet_type)
+    char_assets = get_char_assets(pet.name)
 
     return JsonResponse({
         "status": "success", 

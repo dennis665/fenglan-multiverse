@@ -387,7 +387,7 @@
                     walk_down: fixUrl(assets.walk_down),
                     skill1: fixUrl(assets.skill1),
                     skill2: fixUrl(assets.skill2),
-                    skill3: fixUrl(assets.skill3)
+                    skill3: assets.skill3 ? fixUrl(assets.skill3) : null
                 };
                 this.state = 'idle';
                 if (this.el && this.assets.idle) {
@@ -738,7 +738,8 @@
 
         function renderMainUI(data) {
             document.getElementById('coin-count').innerText = data.coins || 0;
-            currentUnlockedTypes = data.unlocked_types || ['FRIEREN'];
+            currentUnlockedTypes = data.unlocked_types || ['芙莉蓮'];
+            window.allShopCharacters = data.shop_characters || [];
             currentUnlockedChars = data.unlocked_characters || [];
             
             if (data.active_pet) {
@@ -807,28 +808,28 @@
             const container = document.getElementById('shop-char-container');
             container.innerHTML = '';
 
-            const characters = [
-                { type: 'FRIEREN', name: '芙莉蓮', avatar: fixUrl('/images/Frieren/avatar.webp'), price: 500, defaultGift: true },
-                { type: 'RIMURU', name: '利姆路', avatar: fixUrl('/images/Rimuru/avatar.webp'), price: 800, defaultGift: false }
+            const characters = window.allShopCharacters || [
+                { name: '芙莉蓮', avatar: '/images/芙莉蓮/avatar.webp', price: 0, is_unlocked: true },
+                { name: '利姆路', avatar: '/images/利姆路/avatar.webp', price: 800, is_unlocked: unlockedTypes.includes('利姆路') }
             ];
 
             characters.forEach(c => {
-                const isUnlocked = unlockedTypes.includes(c.type);
+                const isUnlocked = c.is_unlocked || unlockedTypes.includes(c.name);
                 const col = document.createElement('div');
-                col.className = 'col-6';
+                col.className = 'col-6 mb-3';
                 
                 let badgeHTML = `<span class="badge bg-warning text-dark mb-2">${c.price} 金幣</span>`;
-                let btnHTML = `<button class="btn btn-sm btn-liff w-100" onclick="buyCharacter('${c.type}')">解鎖契約</button>`;
+                let btnHTML = `<button class="btn btn-sm btn-liff w-100" onclick="buyCharacter('${c.name}')">解鎖契約</button>`;
 
                 if (isUnlocked) {
-                    badgeHTML = c.defaultGift ? `<span class="badge bg-secondary mb-2">預設贈送 (已解鎖)</span>` : `<span class="badge bg-success mb-2">已解鎖</span>`;
+                    badgeHTML = (c.price === 0) ? `<span class="badge bg-secondary mb-2">預設贈送 (已解鎖)</span>` : `<span class="badge bg-success mb-2">已解鎖</span>`;
                     btnHTML = `<button class="btn btn-sm btn-secondary w-100" disabled><i class="fa-solid fa-check me-1"></i>已擁有</button>`;
                 }
 
                 col.innerHTML = `
                     <div class="p-3 rounded bg-dark bg-opacity-50 text-center border border-white border-opacity-10 h-100 d-flex flex-column justify-content-between">
                         <div>
-                            <img src="${c.avatar}" class="img-fluid mb-2 rounded" style="max-height: 80px; object-fit: contain;">
+                            <img src="${fixUrl(c.avatar)}" class="img-fluid mb-2 rounded" style="max-height: 80px; object-fit: contain;">
                             <h6 class="fw-bold mb-1">${c.name}</h6>
                             ${badgeHTML}
                         </div>

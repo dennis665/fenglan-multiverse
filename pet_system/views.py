@@ -144,7 +144,7 @@ def api_get_dashboard_data(request):
             "id": active_pet_obj.id,
             "name": active_pet_obj.name,
             "pet_type": active_pet_obj.pet_type,
-            "pet_type_display": active_pet_obj.get_pet_type_display(),
+            "pet_type_display": getattr(active_pet_obj, 'name', getattr(active_pet_obj, 'pet_type', '')),
             "stage": active_pet_obj.stage,
             "stage_display": active_pet_obj.get_stage_display(),
             "growth_progress": active_pet_obj.growth_progress,
@@ -179,7 +179,7 @@ def api_get_dashboard_data(request):
             "id": p.id,
             "name": p.name,
             "pet_type": p.pet_type,
-            "pet_type_display": p.get_pet_type_display(),
+            "pet_type_display": getattr(p, 'name', getattr(p, 'pet_type', '')),
             "stage": p.stage,
             "stage_display": p.get_stage_display(),
             "growth_progress": p.growth_progress,
@@ -360,7 +360,7 @@ def api_hatch_egg(request):
 
     return JsonResponse({
         "status": "success",
-        "message": f"成功孵化了一顆{new_pet.get_pet_type_display()}！",
+        "message": f"成功孵化了一顆{getattr(new_pet, 'name', getattr(new_pet, 'pet_type', ''))}！",
         "pet_id": new_pet.id,
         "story": story_dict[0]
     })

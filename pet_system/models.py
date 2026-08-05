@@ -140,7 +140,7 @@ class PetStoryUnlock(models.Model):
         verbose_name_plural = _("劇情解鎖紀錄")
 
     def __str__(self):
-        return f"{self.user.username} - {self.get_pet_type_display()} (Stage {self.max_stage_reached})"
+        return f"{self.user.username} - {getattr(self, 'name', getattr(self, 'pet_type', ''))} (Stage {self.max_stage_reached})"
 
 
 class DailyLoginLog(models.Model):
@@ -175,14 +175,9 @@ class UserInventory(models.Model):
 # ==============================================================================
 
 class LinePet(models.Model):
-    PET_TYPE_CHOICES = [
-        ('FRIEREN', _('芙莉蓮')),
-        ('RIMURU', _('利姆路')),
-    ]
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='line_pets', verbose_name=_("擁有者"))
-    name = models.CharField(default='芙莉蓮', max_length=50, verbose_name=_("角色名字"))
-    pet_type = models.CharField(choices=PET_TYPE_CHOICES, default='FRIEREN', max_length=20, verbose_name=_("角色種類"))
+    name = models.CharField(default='芙莉蓮', max_length=50, verbose_name=_("角色名稱"))
+    pet_type = models.CharField(default='芙莉蓮', max_length=50, verbose_name=_("角色種類/識別標籤"))
     is_active = models.BooleanField(default=False, verbose_name=_("是否出戰"))
     level = models.PositiveIntegerField(default=1, verbose_name=_("角色等級"))
     exp = models.PositiveIntegerField(default=0, verbose_name=_("角色經驗值"))
@@ -199,7 +194,7 @@ class LinePet(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.username} - {self.name} (Lv.{self.level} {self.get_pet_type_display()})"
+        return f"{self.user.username} - {self.name} (Lv.{self.level})"
 
 
 class LinePetInventory(models.Model):
