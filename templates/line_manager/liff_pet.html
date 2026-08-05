@@ -351,8 +351,8 @@
         function fixUrl(url) {
             if (!url) return '';
             let targetUrl = url;
-            if (targetUrl.startsWith('/static/')) {
-                targetUrl = 'https://raw.githubusercontent.com/dennis665/fenglan-multiverse/main' + targetUrl;
+            if (targetUrl.startsWith('/images/')) {
+                targetUrl = 'https://raw.githubusercontent.com/dennis665/fenglan-media-assets/main' + targetUrl;
             }
             return targetUrl.replace(/ /g, "%20");
         }
@@ -808,8 +808,8 @@
             container.innerHTML = '';
 
             const characters = [
-                { type: 'FRIEREN', name: '芙莉蓮', avatar: fixUrl('/static/leisure_station/images/Frieren/avatar.webp'), price: 500, defaultGift: true },
-                { type: 'RIMURU', name: '利姆路', avatar: fixUrl('/static/leisure_station/images/Rimuru/avatar.webp'), price: 800, defaultGift: false }
+                { type: 'FRIEREN', name: '芙莉蓮', avatar: fixUrl('/images/Frieren/avatar.webp'), price: 500, defaultGift: true },
+                { type: 'RIMURU', name: '利姆路', avatar: fixUrl('/images/Rimuru/avatar.webp'), price: 800, defaultGift: false }
             ];
 
             characters.forEach(c => {

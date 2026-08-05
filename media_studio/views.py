@@ -39,7 +39,6 @@ def media_studio_view(request):
             form = ImageCompressForm(request.POST, request.FILES)
             if form.is_valid():
                 uploaded_file = form.cleaned_data["image"]
-                remove_bg = form.cleaned_data["remove_bg"]
                 scale_percent = form.cleaned_data["scale_percent"]
                 quality = form.cleaned_data["quality"]
                 output_format = form.cleaned_data["output_format"]
@@ -48,9 +47,6 @@ def media_studio_view(request):
                 img = Image.open(uploaded_file)
                 original_width, original_height = img.size
 
-                if remove_bg:
-                    from rembg import remove
-                    img = remove(img)
 
                 if output_format == "JPEG" and img.mode in ("RGBA", "P"):  # pyright: ignore[reportAttributeAccessIssue]
                     background = Image.new("RGB", img.size, (255, 255, 255))  # pyright: ignore[reportAttributeAccessIssue, reportArgumentType]

@@ -2517,7 +2517,7 @@ def liff_pet(request):
 def get_char_assets(c_type):
     clean_type = str(c_type or "").upper().strip()
     folder = "Frieren" if clean_type in ["FRIEREN", "芙莉蓮"] else "Rimuru"
-    base = f"/static/leisure_station/images/{folder}"
+    base = f"/images/{folder}"
     return {
         "avatar": f"{base}/avatar.webp",
         "idle": f"{base}/idle.webp",

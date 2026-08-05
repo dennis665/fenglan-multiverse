@@ -26,13 +26,6 @@ class ImageCompressForm(forms.Form):
     #! 圖片上傳與壓縮設定表單
     image = forms.ImageField(label=_("選擇圖片"), required=True)
 
-    #! 新增自動去背選項
-    remove_bg = forms.BooleanField(
-        label=_("自動去背 (AI 移除背景)"),
-        required=False,
-        initial=False,
-        help_text=_("勾選後將使用 AI 智慧去背。建議輸出格式選擇 PNG 或 WebP 以保留透明背景。"),
-    )
 
     scale_percent = forms.IntegerField(
         label=_("縮放比例 (%)"),
