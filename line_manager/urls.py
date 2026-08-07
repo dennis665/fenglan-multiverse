@@ -5,6 +5,7 @@ from . import views
 app_name = "line_manager"
 
 urlpatterns = [
+    path('api/pet/claim_broadcast_gift/', views.api_line_pet_claim_broadcast_gift, name='api_line_pet_claim_broadcast_gift'),
     #! LINE Webhook
     path("webhook/", views.line_webhook, name="line_webhook"),
 

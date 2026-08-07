@@ -272,6 +272,134 @@ def line_webhook(request):
     return HttpResponse("OK")
 
 
+def broadcast_coins_to_all_users(coins, message_text="🎉 系統獎勵金幣已發放！", title_text="🎉 感謝大家支持！"):
+    """向所有 LINE Profile 使用者推播 Flex Box 禮物卡，點進 LIFF 才領取金幣"""
+    import uuid
+    import urllib.parse
+    from pet_system.models import LinePetProfile
+    from linebot.v3.messaging import (
+        ApiClient,
+        Configuration,
+        MessagingApi,
+        PushMessageRequest,
+        FlexMessage,
+        FlexContainer,
+    )
+    configuration = Configuration(access_token=settings.LINE_CHANNEL_ACCESS_TOKEN)
+    profiles = LineProfile.objects.all()
+    success_count = 0
+    fail_count = 0
+    gift_id = f"gift_{uuid.uuid4().hex[:8]}"
+    encoded_msg = urllib.parse.quote(str(message_text))
+
+    with ApiClient(configuration) as api_client:
+        api_instance = MessagingApi(api_client)
+
+        for prof in profiles:
+            if prof.line_user_id:
+                liff_claim_url = f"https://liff.line.me/{settings.LINE_LIFF_ID}?page=pet&claim_coins={coins}&gift_id={gift_id}&gift_msg={encoded_msg}"
+
+                flex_contents = {
+                    "type": "bubble",
+                    "size": "mega",
+                    "header": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "🎁 禮物獎勵領取通知",
+                                "weight": "bold",
+                                "size": "sm",
+                                "color": "#ffffff"
+                            }
+                        ],
+                        "backgroundColor": "#ff9a9e",
+                        "paddingAll": "15px"
+                    },
+                    "body": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": title_text,
+                                "weight": "bold",
+                                "size": "lg",
+                                "color": "#111111",
+                                "wrap": True
+                            },
+                            {
+                                "type": "text",
+                                "text": message_text,
+                                "size": "sm",
+                                "color": "#555555",
+                                "wrap": True,
+                                "margin": "md"
+                            },
+                            {
+                                "type": "box",
+                                "layout": "baseline",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": "獎勵金額：",
+                                        "size": "xs",
+                                        "color": "#888888"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": f"+{coins} 金幣",
+                                        "weight": "bold",
+                                        "size": "md",
+                                        "color": "#e67e22"
+                                    }
+                                ],
+                                "margin": "lg"
+                            }
+                        ],
+                        "paddingAll": "20px"
+                    },
+                    "footer": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "uri",
+                                    "label": f"🎁 點擊領取 {coins} 金幣",
+                                    "uri": liff_claim_url
+                                },
+                                "style": "primary",
+                                "color": "#ff9a9e",
+                                "height": "sm"
+                            }
+                        ],
+                        "paddingAll": "15px"
+                    }
+                }
+
+                try:
+                    api_instance.push_message(
+                        PushMessageRequest(
+                            to=prof.line_user_id,
+                            messages=[
+                                FlexMessage(
+                                    alt_text=f"🎁【領取通知】{title_text} (+{coins}金幣)",
+                                    contents=FlexContainer.from_dict(flex_contents)
+                                )
+                            ]
+                        )
+                    )
+                    success_count += 1
+                except Exception as e:
+                    print(f"[Push Flex Error] {e}")
+                    fail_count += 1
+
+    return success_count, fail_count
+
+
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
     """處理收到的文字訊息：暫停 Gemini AI 解析，改為直接回傳看板連結"""
@@ -303,6 +431,28 @@ def handle_message(event):
         is_triggered = True
 
     if not is_triggered:
+        return
+
+# 判斷是否為管理員發放金幣指令 (格式: 發放金幣 100 訊息 / 廣播金幣 200 / /gift 500)
+    if text.startswith("廣播金幣") or text.startswith("發放金幣") or text.startswith("/gift"):
+        parts = text.split(maxsplit=2)
+        try:
+            coins_num = int(parts[1]) if len(parts) > 1 else 100
+            custom_msg = parts[2] if len(parts) > 2 else "🎉 感謝支持！金幣獎勵已發放！"
+            
+            s_count, f_count = broadcast_coins_to_all_users(coins_num, custom_msg)
+            reply_text = f"🎉【金幣廣播完成】\n已成功向 {s_count} 位 LINE 使用者發放每人 +{coins_num} 金幣！\n\n附加訊息：\n{custom_msg}"
+        except Exception as err:
+            reply_text = f"❌ 指令格式錯誤！標準用法範例：\n發放金幣 100 感謝大家支持！"
+
+        with ApiClient(configuration) as api_client:
+            api_instance = MessagingApi(api_client)
+            api_instance.reply_message(
+                ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[TextMessage(text=reply_text)]
+                )
+            )
         return
 
     # 建立 LIFF 看板連結
@@ -4125,3 +4275,65 @@ def api_line_pet_claim_maintenance_gift(request):
             f.write("=== api_line_pet_claim_maintenance_gift error ===\n")
             traceback.print_exc(file=f)
         return JsonResponse({"status": "error", "error": str(e)}, status=500)
+
+
+@csrf_exempt
+def api_line_pet_claim_broadcast_gift(request):
+    """API 端點：用戶點擊 Flex Box 連結進入 LIFF 領取禮物金幣 (帶有 gift_id 避免重複領取)"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        coins = int(data.get("coins", 800))
+        gift_id = str(data.get("gift_id") or "gift_default")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    user = None
+    if access_token:
+        line_user_id, display_name = _verify_token_with_cache(access_token)
+        if line_user_id:
+            line_profile = _get_or_create_profile(line_user_id, display_name)
+            user = line_profile.user
+
+    if not user:
+        from pet_system.models import LinePetProfile
+        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
+        if main_prof:
+            user = main_prof.user
+
+    if not user:
+        return JsonResponse({"error": "No valid user profile found"}, status=400)
+
+    from django.db import transaction
+    from pet_system.models import LinePetProfile
+
+    with transaction.atomic():
+        profile, _ = LinePetProfile.objects.get_or_create(user=user)
+        
+        # 檢查紀錄，防重複領取
+        try:
+            claimed_list = json.loads(profile.notes) if profile.notes and profile.notes.startswith("[") else []
+        except Exception:
+            claimed_list = []
+
+        if gift_id in claimed_list:
+            return JsonResponse({
+                "status": "already_claimed",
+                "message": f"您已經領取過此禮物 ({coins} 金幣) 囉！",
+                "coins": profile.pet_gold_coins
+            })
+
+        profile.pet_gold_coins += coins
+        claimed_list.append(gift_id)
+        profile.notes = json.dumps(claimed_list)
+        profile.save()
+
+    return JsonResponse({
+        "status": "success",
+        "message": f"🎉 成功領取禮物金幣 +{coins}！已存入您的休閒小站帳號。",
+        "claimed_coins": coins,
+        "coins": profile.pet_gold_coins
+    })

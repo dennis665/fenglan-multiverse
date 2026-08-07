@@ -719,14 +719,17 @@
                         userAccessToken = liff.getAccessToken();
                     }
                     fetchStatusData();
+            checkAndClaimFlexBroadcastGift();
                     checkAndAutoSyncSteps();
                 }).catch((err) => {
                     console.error("LIFF Init Error:", err);
                     fetchStatusData();
+            checkAndClaimFlexBroadcastGift();
                     checkAndAutoSyncSteps();
                 });
             } else {
                 fetchStatusData();
+            checkAndClaimFlexBroadcastGift();
                 checkAndAutoSyncSteps();
             }
 
@@ -781,6 +784,7 @@
                             });
                         }
                         fetchStatusData();
+            checkAndClaimFlexBroadcastGift();
                     }
                 })
                 .catch(err => console.error("Auto sync steps error:", err));
@@ -1027,6 +1031,7 @@
                 if (data.status === 'success') {
                     Swal.fire({ icon: 'success', title: '出發派遣！', text: data.message, timer: 1500, showConfirmButton: false });
                     fetchStatusData();
+            checkAndClaimFlexBroadcastGift();
                 } else {
                     Swal.fire({ icon: 'error', title: '無法出發', text: data.error });
                 }
@@ -1055,6 +1060,7 @@
                         if (data.status === 'success') {
                             Swal.fire({ icon: 'info', title: '已取消', text: data.message, timer: 1500, showConfirmButton: false });
                             fetchStatusData();
+            checkAndClaimFlexBroadcastGift();
                         } else {
                             Swal.fire({ icon: 'error', title: '取消失敗', text: data.error });
                         }
@@ -1074,6 +1080,7 @@
                 if (data.status === 'success') {
                     Swal.fire({ icon: 'success', title: '🎉 領取成功！', text: data.message });
                     fetchStatusData();
+            checkAndClaimFlexBroadcastGift();
                 } else {
                     Swal.fire({ icon: 'error', title: '領取失敗', text: data.error });
                 }
@@ -1101,6 +1108,7 @@
                     }
                     Swal.fire({ icon: 'success', title: '切換成功！', text: data.message, timer: 1200, showConfirmButton: false });
                     fetchStatusData();
+            checkAndClaimFlexBroadcastGift();
                 } else {
                     Swal.fire({ icon: 'error', title: '錯誤', text: data.error || '切換失敗' });
                 }
@@ -1122,6 +1130,7 @@
                     Swal.fire({ icon: 'success', title: '解鎖成功！', text: data.message });
                     bootstrap.Modal.getInstance(document.getElementById('shopModal'))?.hide();
                     fetchStatusData();
+            checkAndClaimFlexBroadcastGift();
                 } else {
                     Swal.fire({ icon: 'error', title: '買失敗', text: data.error || '金幣不足或已解鎖' });
                 }
@@ -1132,6 +1141,54 @@
         function openShopModal() { new bootstrap.Modal(document.getElementById('shopModal')).show(); }
 
         // 正確複製標準預備捷徑連結 (window.location.origin + window.location.pathname + "?page=pet&steps=")
+        // 🎁 檢測並自動領取點擊 Flex Message 禮物卡進來的獎勵金幣
+        function checkAndClaimFlexBroadcastGift() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const claimCoins = urlParams.get('claim_coins');
+                const giftId = urlParams.get('gift_id');
+                const giftMsg = urlParams.get('gift_msg') || '禮物金幣獎勵';
+
+                if (claimCoins && giftId) {
+                    // 清除 URL 參數避免重覆觸發 UI
+                    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?page=pet";
+                    window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+
+                    fetch('/line/api/pet/claim_broadcast_gift/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            access_token: userAccessToken || "",
+                            coins: claimCoins,
+                            gift_id: giftId
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            document.getElementById('coin-count').innerText = data.coins;
+                            Swal.fire({
+                                icon: 'success',
+                                title: '🎁 禮物領取成功！',
+                                html: `<h2 class="text-warning fw-bold my-2">+${data.claimed_coins} 金幣</h2><p class="text-white-50">${giftMsg}</p>`,
+                                confirmButtonColor: '#ff9a9e',
+                                confirmButtonText: '✨ 收下大禮包！'
+                            });
+                        } else if (data.status === 'already_claimed') {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'ℹ️ 提示',
+                                text: data.message,
+                                confirmButtonColor: '#ff9a9e'
+                            });
+                        }
+                    });
+                }
+            } catch(e) {
+                console.error("Check claim gift error:", e);
+            }
+        }
+
         function copyShortcutLink() {
             const cleanBaseUrl = window.location.origin + window.location.pathname + "?page=pet&steps=";
             navigator.clipboard.writeText(cleanBaseUrl);
