@@ -2993,13 +2993,21 @@ def api_line_pet_buy_item(request):
     if not user:
         return JsonResponse({"error": "No valid user profile found"}, status=400)
 
-    # 定義角色解鎖價格
-    prices = {"FRIEREN": 500, "RIMURU": 800}
-    if item_type not in prices:
-        return JsonResponse({"error": "不支援的角色商品"}, status=400)
+    # 動態從 GitHub 角色字典獲取商品價格，支援任意角色
+    all_avail = get_available_characters()
+    char_name = str(item_type or "").strip()
+    if char_name.upper() == "FRIEREN":
+        char_name = "芙莉蓮"
+    elif char_name.upper() == "RIMURU":
+        char_name = "利姆路"
 
-    cost = prices[item_type]
-    char_name = "芙莉蓮" if item_type == "FRIEREN" else "利姆路"
+    if not char_name:
+        return JsonResponse({"error": "無效的角色名稱"}, status=400)
+
+    if char_name in all_avail:
+        cost = all_avail[char_name].get("price", 800)
+    else:
+        cost = 800
     
     from django.db import transaction
     from pet_system.models import LinePet, LinePetProfile

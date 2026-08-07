@@ -100,12 +100,15 @@
             font-weight: bold;
         }
 
+        :root {
+            --pet-size: 95px;
+        }
         /* 全螢幕自由隨意走動桌寵懸浮圖像 */
         #shimeji-char-sprite {
             position: fixed;
             z-index: 9999;
-            width: 95px;
-            height: 95px;
+            width: var(--pet-size, 95px) !important;
+            height: var(--pet-size, 95px) !important;
             object-fit: contain;
             filter: drop-shadow(0 6px 15px rgba(0,0,0,0.5));
             cursor: grab;
@@ -134,11 +137,72 @@
                 }
             } catch(e) {}
         })();
+// 🔍 角色 100% ~ 150% 全域縮放控制函數 (+/- 按鈕與滑桿)
+        function adjustPetScaleStep(delta) {
+            const sliderEl = document.getElementById("pet-scale-slider");
+            let currentVal = sliderEl ? parseInt(sliderEl.value, 10) : 100;
+            let newVal = Math.max(100, Math.min(150, currentVal + delta));
+            if (sliderEl) sliderEl.value = newVal;
+            updatePetScaleFromSlider(newVal);
+        }
+
+        function updatePetScaleFromSlider(val) {
+            const num = parseInt(val, 10);
+            const ratio = num / 100.0;
+            const textEl = document.getElementById("pet-scale-text");
+            if (textEl) textEl.innerText = `${num}%`;
+
+            const baseSize = 95;
+            const pxSize = Math.round(baseSize * ratio);
+
+            document.documentElement.style.setProperty('--pet-size', pxSize + 'px');
+
+            const spriteEl = document.getElementById("shimeji-char-sprite");
+            if (spriteEl) {
+                spriteEl.style.setProperty('width', pxSize + 'px', 'important');
+                spriteEl.style.setProperty('height', pxSize + 'px', 'important');
+            }
+
+            if (typeof shimejiEngine !== 'undefined' && shimejiEngine) {
+                shimejiEngine.scaleRatio = ratio;
+                shimejiEngine.updatePosition();
+            }
+            localStorage.setItem('pet_scale_ratio', ratio);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const savedScale = parseFloat(localStorage.getItem('pet_scale_ratio')) || 1.0;
+            const pct = Math.round(savedScale * 100);
+            const sliderEl = document.getElementById("pet-scale-slider");
+            if (sliderEl) sliderEl.value = pct;
+            updatePetScaleFromSlider(pct);
+
+            const handleWheelZoom = function(e) {
+                e.preventDefault();
+                let delta = e.deltaY < 0 ? 5 : -5;
+                adjustPetScaleStep(delta);
+            };
+
+            const spriteEl = document.getElementById("shimeji-char-sprite");
+            if (spriteEl) spriteEl.addEventListener("wheel", handleWheelZoom, { passive: false });
+            const ctrlEl = document.getElementById("pet-scale-control");
+            if (ctrlEl) ctrlEl.addEventListener("wheel", handleWheelZoom, { passive: false });
+        });
     </script>
 </head>
 <body>
     <!-- 全頁面隨意走動的漫遊角色精靈 -->
     <img id="shimeji-char-sprite" src="" alt="Character Sprite" draggable="false" oncontextmenu="return false;" style="display: none;">
+
+    
+    <!-- 🔍 角色縮放 100%~150% 控制膠囊 -->
+    <div id="pet-scale-control" style="position: fixed; top: 15px; left: 15px; z-index: 10000; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); border: 1.5px solid rgba(0,242,254,0.6); border-radius: 50px; padding: 4px 12px; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 6px; user-select: none;">
+        <i class="fa-solid fa-magnifying-glass-plus text-info"></i>
+        <button type="button" class="btn btn-xs btn-outline-info rounded-circle px-2 py-0 text-white fw-bold" onclick="adjustPetScaleStep(-10)" title="縮小">-</button>
+        <input type="range" id="pet-scale-slider" min="100" max="150" value="100" step="5" style="width: 65px; accent-color: #00f2fe; cursor: pointer; touch-action: manipulation;" oninput="updatePetScaleFromSlider(this.value)" onchange="updatePetScaleFromSlider(this.value)">
+        <button type="button" class="btn btn-xs btn-outline-info rounded-circle px-2 py-0 text-white fw-bold" onclick="adjustPetScaleStep(10)" title="放大">+</button>
+        <span id="pet-scale-text" class="badge bg-info text-dark fw-bold" style="font-size: 0.75rem;">100%</span>
+    </div>
 
     <div class="container py-4">
         <!-- 頂部標題與金幣 -->
@@ -368,6 +432,9 @@
                 this.vy = 0;
                 this.moveSpeed = 1.8;
                 
+                const savedScale = parseFloat(localStorage.getItem('pet_scale_ratio')) || 1.0;
+                this.scaleRatio = Math.max(1.0, Math.min(1.5, savedScale));
+
                 this.currentSkillUrl = '';
                 this.actionTimer = null;
                 this.assets = {};
@@ -484,7 +551,7 @@
 
                         this.actionTimer = setTimeout(() => {
                             this.decideNextAction();
-                        }, 2000);
+                        }, 10000);
                     }
                 };
 
@@ -514,14 +581,14 @@
                 if (this.el) {
                     this.el.style.transform = 'scale(1.15, 0.85)';
                     setTimeout(() => {
-                        this.el.style.transform = 'scale(1, 1)';
+                        this.el.style.transform = 'none';
                     }, 200);
                 }
 
-                // 1.5 秒後恢復正常決策漫步
+                // 10 秒後恢復正常決策漫步
                 this.actionTimer = setTimeout(() => {
                     this.decideNextAction();
-                }, 1500);
+                }, 10000);
             }
 
             
@@ -564,6 +631,11 @@
             updatePosition() {
                 this.el.style.left = this.x + 'px';
                 this.el.style.top = this.y + 'px';
+                const baseSize = 95;
+                const ratio = this.scaleRatio || 1.0;
+                const pxSize = Math.round(baseSize * ratio);
+                this.el.style.width = pxSize + 'px';
+                this.el.style.height = pxSize + 'px';
             }
 
             gameLoop() {
