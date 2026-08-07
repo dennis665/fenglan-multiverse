@@ -4279,7 +4279,7 @@ def api_line_pet_claim_maintenance_gift(request):
 
 @csrf_exempt
 def api_line_pet_claim_broadcast_gift(request):
-    """API 端點：用戶點擊 Flex Box 連結進入 LIFF 領取禮物金幣 (帶有 gift_id 避免重複領取)"""
+    """API 端點：用戶點擊 Flex Box 連結進入 LIFF 領取禮物金幣 (DB 級 LinePetGiftClaim unique 鎖定，絕不重複)"""
     if request.method != "POST":
         return JsonResponse({"error": "Method Not Allowed"}, status=405)
 
@@ -4287,7 +4287,7 @@ def api_line_pet_claim_broadcast_gift(request):
         data = json.loads(request.body)
         access_token = data.get("access_token")
         coins = int(data.get("coins", 800))
-        gift_id = str(data.get("gift_id") or "gift_default")
+        gift_id = str(data.get("gift_id") or "gift_default").strip()
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
@@ -4307,29 +4307,36 @@ def api_line_pet_claim_broadcast_gift(request):
     if not user:
         return JsonResponse({"error": "No valid user profile found"}, status=400)
 
-    from django.db import transaction
-    from pet_system.models import LinePetProfile
+    from django.db import transaction, IntegrityError
+    from pet_system.models import LinePetProfile, LinePetGiftClaim
 
-    with transaction.atomic():
+    # 1. 查詢 DB 是否已有該 user 與 gift_id 的領取紀錄
+    if LinePetGiftClaim.objects.filter(user=user, gift_id=gift_id).exists():
         profile, _ = LinePetProfile.objects.get_or_create(user=user)
-        
-        # 檢查紀錄，防重複領取
-        try:
-            claimed_list = json.loads(profile.notes) if profile.notes and profile.notes.startswith("[") else []
-        except Exception:
-            claimed_list = []
+        return JsonResponse({
+            "status": "already_claimed",
+            "message": f"您已經領取過此禮物 ({coins} 金幣) 囉！",
+            "coins": profile.pet_gold_coins
+        })
 
-        if gift_id in claimed_list:
-            return JsonResponse({
-                "status": "already_claimed",
-                "message": f"您已經領取過此禮物 ({coins} 金幣) 囉！",
-                "coins": profile.pet_gold_coins
-            })
-
-        profile.pet_gold_coins += coins
-        claimed_list.append(gift_id)
-        profile.notes = json.dumps(claimed_list)
-        profile.save()
+    # 2. 資料庫原子交易，建立 Claim 紀錄 (獨一無二鎖定) + 增加金額
+    try:
+        with transaction.atomic():
+            LinePetGiftClaim.objects.create(
+                user=user,
+                gift_id=gift_id,
+                coins=coins
+            )
+            profile, _ = LinePetProfile.objects.get_or_create(user=user)
+            profile.pet_gold_coins += coins
+            profile.save()
+    except IntegrityError:
+        profile, _ = LinePetProfile.objects.get_or_create(user=user)
+        return JsonResponse({
+            "status": "already_claimed",
+            "message": f"您已經領取過此禮物 ({coins} 金幣) 囉！",
+            "coins": profile.pet_gold_coins
+        })
 
     return JsonResponse({
         "status": "success",

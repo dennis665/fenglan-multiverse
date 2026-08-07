@@ -260,3 +260,19 @@ class LinePetExpedition(models.Model):
 
     def __str__(self):
         return f"{self.pet.name} - 派遣狀態: {self.get_status_display()}"
+
+
+class LinePetGiftClaim(models.Model):
+    """紀錄使用者已領取的廣播禮物，防止重複領取 (DBUnique 鎖定)"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="gift_claims", verbose_name=_("使用者"))
+    gift_id = models.CharField(max_length=100, verbose_name=_("禮物識別碼"))
+    coins = models.PositiveIntegerField(default=0, verbose_name=_("領取金額"))
+    claimed_at = models.DateTimeField(auto_now_add=True, verbose_name=_("領取時間"))
+
+    class Meta:
+        verbose_name = _("禮物領取紀錄")
+        verbose_name_plural = _("禮物領取紀錄")
+        unique_together = ("user", "gift_id")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.gift_id} (+{self.coins})"
