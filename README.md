@@ -4,7 +4,7 @@
 
 這是一個基於 **Django 6.0.x** 與 **MySQL 8.x** 建立的多功能整合入口網站系統（CSI Portal），具備豐富的商業管理與 AI 應用模組。專案支援 **Google OAuth 2.0** 登入、**WebSocket (Daphne)** 即時通訊與 **Docker** 容器化部署，並結合了多種先進的機器學習與雲端 AI 引擎。
 
-*   **最新版本**：`v1.17.9`
+*   **最新版本**：`v1.17.10`
 *   **更新摘要**：[點此查看完整變更歷程 (CHANGELOG.md)](CHANGELOG.md)
 
 ---
@@ -191,9 +191,11 @@ docker compose exec web python manage.py shell_plus
     ```bash
     python manage.py update_prices
     ```
-*   **啟動排程更新服務**（需開獨立終端機常駐執行，自動於週一至週五 14:30 爬取股價）：
+*   **啟動排程更新服務**（需開獨立終端機常駐執行，自動於週一至週五 14:30 爬取股價、每日 16:00 爬取最新季番/電影至 `line_manager/resources/*.csv` 並同步 DB）：
     ```bash
     python manage.py start_scheduler
+    # 手動即時觸發一次劇集與電影更新任務
+    python manage.py start_scheduler --now
     ```
 *   **語系翻譯與編譯**（支援繁中、英文、日文多國語系）：
     ```bash

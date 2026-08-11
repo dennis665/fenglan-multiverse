@@ -27,11 +27,4 @@ class LineManagerConfig(AppConfig):
             except Exception as e:
                 jinfo_error(e, "⚠️ 背景自動註冊圖文選單失敗")
 
-            try:
-                from django.core.management import call_command
-                jinfo("🤖 正在自動比對並匯入基礎新番清單...")
-                call_command('import_base_dramas')
-            except Exception as e:
-                jinfo_error(e, "⚠️ 自動匯入基礎劇集失敗")
-
         threading.Thread(target=auto_register, daemon=True).start()

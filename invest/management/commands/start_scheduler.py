@@ -9,6 +9,7 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django_apscheduler.jobstores import DjangoJobStore
 
+from line_manager.management.commands.start_scheduler import run_daily_drama_update
 from utils.logger_utils import jinfo, jinfo_error
 
 
@@ -128,7 +129,10 @@ def check_itinerary_reminders_job():
 
 
 class Command(BaseCommand):
-    help = "啟動背景排程器，每天定時更新股價"
+    help = "啟動背景排程器，每天定時更新股價與劇集電影"
+
+    def add_arguments(self, parser):
+        parser.add_argument('--now', action='store_true', help='立即觸發一次劇集與電影更新任務')
 
     def handle(self, *args, **options):
         #! 初始化排程器，並綁定 Django 的時區
@@ -154,9 +158,23 @@ class Command(BaseCommand):
                 replace_existing=True,
             )
 
-            self.stdout.write(self.style.SUCCESS("啟動成功！排程器正在背景監聽中..."))
-            self.stdout.write(self.style.SUCCESS("⏰ 已設定為：每週一至週五 14:30 自動更新股價。"))
-            self.stdout.write(self.style.WARNING("按 Ctrl+C 可以安全關閉此排程器。"))
+            #! 新增：每日下午 4:00 (16:00) 自動更新 TV 季番 (2026/07+) 與 動畫電影 (2026+) 至 resources/*.csv 並同步 DB
+            scheduler.add_job(
+                run_daily_drama_update,
+                trigger=CronTrigger(hour=16, minute=0),
+                id="daily_drama_update_job",
+                max_instances=1,
+                replace_existing=True,
+            )
+
+            if options.get('now'):
+                self.stdout.write("[SCHEDULER] --now flag detected. Running daily drama update now...")
+                run_daily_drama_update()
+
+            self.stdout.write(self.style.SUCCESS("[SCHEDULER] Scheduler service started successfully in background."))
+            self.stdout.write(self.style.SUCCESS("[SCHEDULER] Job 1: Mon-Fri 14:30 update stock prices."))
+            self.stdout.write(self.style.SUCCESS("[SCHEDULER] Job 2: Daily 16:00 (4:00 PM) update TV (2026/07+) & Movie (2026+) into resources/*.csv and DB."))
+            self.stdout.write(self.style.WARNING("Press Ctrl+C to exit."))
 
             #! 開始阻擋並持續運行
             scheduler.start()

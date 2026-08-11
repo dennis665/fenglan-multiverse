@@ -6,6 +6,27 @@
 * **Minor (Y)**：新增功能。
 * **Patch (Z)**：Bug 修復或效能優化。
 
+## [1.17.10] - 2026-08-11
+### Added (新增)
+* **每日下午 4:00 (16:00) 自動爬取更新與資源檔放置排程 (`start_scheduler.py`)**：
+  * **增量爬取**：自動抓取 TV 季番 (動畫化決定 & 2026年7月(含)之後所有季度) 與 動畫電影 (日本動畫電影製作決定 & 2026年(含)之後日版/台版電影)。
+  * **資源檔維護**：爬取結果自動更新寫入專屬資源檔 📄 `line_manager\resources\tv_dramas.csv` (393筆) 與 📄 `line_manager\resources\movie_dramas.csv` (163筆)。
+  * **0遺漏 DB 自動同步**：自動融合 resources 與 test 歷史存量，完成 Django MySQL 劇集資料庫的增刪補缺 Diff 同步。
+  * **手動觸發旗標**：指令支援 `python manage.py start_scheduler --now` 供管理員即時觸發手動更新。
+
+### Changed & Refactored (變更與重構)
+* **伺服器啟動流程輕量化 (Server Startup Optimization)**：
+  * 徹底去除 `line_manager\apps.py` 中原始在 Django 啟動 Server 時自動呼叫執行的 `import_base_dramas` 匯入指令，避免併發鎖定並大幅提升 Server 啟動與重載速度。
+* **LIFF 追劇管理介面尊榮暗色主題 (`liff_drama.html`)**：
+  * 全頁升級為 Cyberpunk / Dark Glassmorphism 漆黑奢華玻璃質感深色主題（`#090d16` ➔ `#111827` 漸變），搭配雪白高對比度文字與半透明磨砂卡片。
+
+### Fixed & Optimized (修復與優化)
+* **快捷分類點擊平滑跳轉 (Smooth ScrollIntoView)**：
+  * 在 `selectCategoryFromChip` 中實裝平滑捲動，點擊頂部快捷分類 Chip 標籤後自動平滑滑動至底下劇集搜尋框與清單開頭。
+* **NEW 提醒徽章顯示精準化 (NEW Badge Fine-Tuning)**：
+  * 移除大選項標題 `📺 季番動畫` 與 `🎬 動畫電影` 後方的大標題 NEW 徽章，改為僅在有新未讀內容的細項按鈕選項（如 `動畫化決定`、`2027年10月新番`、`日本動畫電影製作決定`）上顯示動態發光 `NEW` 提醒。
+  * 修復 `toggleCategorySubItems` 中全庫未讀分類判斷盲點，點擊細項標籤或大標題時可 100% 精準標記已讀並消除 NEW 徽章。
+
 ---
 
 ## [1.17.9] - 2026-08-03

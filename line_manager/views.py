@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import datetime
 
 import requests
@@ -1863,10 +1864,11 @@ def api_get_dramas(request):
     try:
         data = json.loads(request.body)
         access_token = data.get("access_token")
-        tab = data.get("tab", "my_dramas")  # my_dramas, recommendations
+        tab = data.get("tab", "my_dramas")
         page = int(data.get("page", 1))
-        if page < 1:
-            page = 1
+        page_size = int(data.get("page_size", 6))
+        if page_size < 1:
+            page_size = 6
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
@@ -1880,7 +1882,6 @@ def api_get_dramas(request):
 
     line_profile = _get_or_create_profile(line_user_id, display_name)
     user = line_profile.user
-    page_size = 6
     start = (page - 1) * page_size
     end = start + page_size
 
@@ -2029,7 +2030,20 @@ def api_get_dramas(request):
                 }
             )
 
-    return JsonResponse({"status": "success", "list": list_data, "has_more": has_more})
+    from math import ceil
+    total_pages = ceil(total_count / page_size) if total_count > 0 else 1
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "list": list_data,
+            "has_more": has_more,
+            "total_count": total_count,
+            "total_pages": total_pages,
+            "current_page": page,
+            "page_size": page_size,
+        }
+    )
 
 
 @csrf_exempt
@@ -2576,7 +2590,7 @@ def api_join_drama(request, pk):
 
 @csrf_exempt
 def api_get_categories(request):
-    """API 端點：取得目前資料庫中所有唯一的劇集分類與對應數量"""
+    """API 端點：取得目前資料庫中所有唯一的劇集分類與對應數量 (僅限動畫類與動畫電影類，由新至舊排序)"""
     from .models import Drama, UserDramaProgress
 
     # 取得所有的劇集分類
@@ -2587,15 +2601,28 @@ def api_get_categories(request):
     for cat in categories_qs:
         if cat:
             clean_cat = cat.strip()
-            if clean_cat:
+            # 僅保留「動畫類」與「動畫電影類」
+            if ("新番" in clean_cat or "動畫" in clean_cat or "劇場版" in clean_cat) and clean_cat not in ["日劇", "韓劇", "美劇", "其他", "電影"]:
                 all_counts[clean_cat] = all_counts.get(clean_cat, 0) + 1
 
-    # 確保預設分類存在於 all_counts 中
-    for default_cat in ["2026年7月新番", "動畫", "美劇", "日劇", "韓劇", "其他"]:
-        if default_cat not in all_counts:
-            all_counts[default_cat] = 0
+    # 解析年份與月份/類型的排序 key (由新至舊，年份越大/月份越大越靠前)
+    def parse_sort_key(cat_name):
+        # 尋找年份 (例如 2027, 2026, 1968)
+        year_match = re.search(r'(19\d{2}|20\d{2})', cat_name)
+        year = int(year_match.group(1)) if year_match else 0
+        
+        # 尋找月份或季度 (例如 10月, 7月, 4月, 1月)
+        month_match = re.search(r'(\d+)月', cat_name)
+        month = int(month_match.group(1)) if month_match else 0
+        
+        # 電影次序 (台版/日版)
+        is_movie = 1 if ("電影" in cat_name or "劇場版" in cat_name) else 0
+        is_tw = 1 if "台版" in cat_name else 0
+        
+        # 排序權重：年份 (降序), 類型 (電影/TV), 月份 (降序)
+        return (-year, -is_movie, -month, -is_tw, cat_name)
 
-    categories = list(all_counts.keys())
+    categories = sorted(list(all_counts.keys()), key=parse_sort_key)
 
     # 檢查是否有傳入 access_token 以計算該使用者的追劇分類數量
     my_counts = {cat: 0 for cat in categories}
@@ -2620,12 +2647,13 @@ def api_get_categories(request):
     except Exception:
         pass
 
-    # 排序分類列表
-    categories.sort()
+    # 個人有追過 (my_counts > 0) 的分類清單 (保持由新至舊排序)
+    my_categories = [cat for cat in categories if my_counts.get(cat, 0) > 0]
 
     response = JsonResponse({
         "status": "success",
         "categories": categories,
+        "my_categories": my_categories,
         "all_counts": all_counts,
         "my_counts": my_counts
     })

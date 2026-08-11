@@ -14,55 +14,159 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #090d16 0%, #111827 50%, #0f172a 100%);
             min-height: 100vh;
+            color: #f1f5f9;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
+            background: rgba(30, 41, 59, 0.75) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            color: #f8fafc;
+        }
+        .text-dark {
+            color: #f8fafc !important;
+        }
+        .text-muted {
+            color: #94a3b8 !important;
+        }
+        .text-secondary {
+            color: #cbd5e1 !important;
+        }
+        .bg-white {
+            background-color: rgba(15, 23, 42, 0.6) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #f8fafc !important;
+        }
+        .bg-light {
+            background-color: rgba(30, 41, 59, 0.9) !important;
+            color: #cbd5e1 !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+        .border {
+            border-color: rgba(255, 255, 255, 0.12) !important;
+        }
+        .form-control, .form-select {
+            background-color: rgba(15, 23, 42, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            color: #f8fafc !important;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(15, 23, 42, 0.95) !important;
+            color: #ffffff !important;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25) !important;
+        }
+        .form-select option, .form-select optgroup {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
         }
         .btn-line {
-            background-color: #1DB446;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
             border-radius: 50px;
             font-weight: bold;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
             transition: all 0.3s ease;
         }
         .btn-line:hover {
-            background-color: #158b32;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
             color: white;
             transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
         }
-        .nav-tabs {
-            border-bottom: none;
-        }
-        .nav-tabs .nav-link {
-            border: none;
-            color: #666;
+        .nav-pills .nav-link {
+            color: #94a3b8;
             font-weight: bold;
-            border-radius: 50px;
-            margin: 0 5px;
-            padding: 8px 20px;
         }
-        .nav-tabs .nav-link.active {
-            background-color: #1DB446;
-            color: white;
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .btn-outline-primary {
+            color: #38bdf8 !important;
+            border-color: rgba(56, 189, 248, 0.5) !important;
+        }
+        .btn-outline-primary:hover {
+            background-color: rgba(56, 189, 248, 0.15) !important;
+            border-color: #38bdf8 !important;
+            color: #7dd3fc !important;
+        }
+        .btn-outline-danger {
+            color: #fb7185 !important;
+            border-color: rgba(251, 113, 133, 0.5) !important;
+        }
+        .btn-outline-danger:hover {
+            background-color: rgba(251, 113, 133, 0.15) !important;
+            border-color: #fb7185 !important;
+            color: #fda4af !important;
+        }
+        .btn-outline-secondary {
+            color: #cbd5e1 !important;
+            border-color: rgba(203, 213, 225, 0.3) !important;
+        }
+        .btn-outline-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+        }
+        .modal-content {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        }
+        .modal-header .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        .card {
+            background-color: rgba(30, 41, 59, 0.8) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #f8fafc !important;
+        }
+        .list-group-item {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        .list-group-item-action:hover {
+            background-color: #334155 !important;
+            color: #38bdf8 !important;
         }
         .drama-item {
-            border-left: 5px solid #00bcff;
+            border-left: 5px solid #38bdf8;
             transition: transform 0.2s ease;
         }
         .drama-item:hover {
             transform: scale(1.02);
         }
+        /* 強效 NEW 脈衝提醒徽章 (相容 iOS Safari / LINE WebView) */
+        .badge-new-pulse,
+        .btn .badge-new-pulse,
+        .btn-outline-primary .badge-new-pulse,
+        .btn-outline-danger .badge-new-pulse {
+            background: #ff3b30 !important;
+            background-color: #ff3b30 !important;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            font-weight: 900 !important;
+            font-size: 0.65rem !important;
+            padding: 0.25em 0.55em !important;
+            border-radius: 50rem !important;
+            box-shadow: 0 0 10px rgba(255, 59, 48, 0.7) !important;
+            display: inline-block !important;
+            line-height: 1 !important;
+            vertical-align: middle !important;
+            letter-spacing: 0.5px !important;
+            opacity: 1 !important;
+        }
         .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #1DB446;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid #10b981;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -118,13 +222,51 @@
                 </li>
             </ul>
 
+            <!-- 可折疊分類導航視覺面板 (季番與動畫電影大類可折疊/展開，細項預設顯示前5項且可展開/折疊) -->
+            <div class="glass-card p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2 cursor-pointer" onclick="toggleMainCategorySection()">
+                    <h6 class="fw-bold text-success mb-0">
+                        <i class="fa-solid fa-layer-group me-1"></i>快捷年度分類導航
+                    </h6>
+                    <span class="badge bg-light text-secondary border small" id="main-cat-toggle-icon">
+                        <i class="fa-solid fa-chevron-up me-1"></i>折疊面板
+                    </span>
+                </div>
+                <div id="main-cat-container">
+                    <!-- 季番動畫區塊 (可折疊) -->
+                    <div class="border rounded p-2 mb-2 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-1 cursor-pointer" onclick="toggleCategorySubItems('tv', true)">
+                            <span class="fw-bold small text-primary">
+                                <i class="fa-solid fa-tv me-1"></i>📺 季番動畫 (依年度由新至舊)
+                            </span>
+                            <button class="btn btn-sm btn-link text-decoration-none text-muted p-0 small" id="toggle-tv-btn" style="font-size: 0.75rem;">
+                                <i class="fa-solid fa-angle-down me-1"></i><span id="tv-toggle-label">展開更多細項</span>
+                            </button>
+                        </div>
+                        <div id="tv-cat-chips" class="d-flex flex-wrap gap-1"></div>
+                    </div>
+                    <!-- 動畫電影區塊 (可折疊) -->
+                    <div class="border rounded p-2 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-1 cursor-pointer" onclick="toggleCategorySubItems('movie', true)">
+                            <span class="fw-bold small text-danger">
+                                <i class="fa-solid fa-film me-1"></i>🎬 動畫電影 / 劇場版 (依年度由新至舊)
+                            </span>
+                            <button class="btn btn-sm btn-link text-decoration-none text-muted p-0 small" id="toggle-movie-btn" style="font-size: 0.75rem;">
+                                <i class="fa-solid fa-angle-down me-1"></i><span id="movie-toggle-label">展開更多細項</span>
+                            </button>
+                        </div>
+                        <div id="movie-cat-chips" class="d-flex flex-wrap gap-1"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 分頁內容 -->
             <div class="tab-content">
                 <!-- 我的追劇 -->
                 <div class="tab-pane fade show active" id="my-dramas-panel" role="tabpanel">
                     <!-- 搜尋與分類選單 -->
-                    <div class="glass-card p-3 mb-3 d-flex gap-2 align-items-center">
-                        <div class="flex-grow-1 position-relative">
+                    <div class="glass-card p-3 mb-3 d-flex gap-2 align-items-center flex-wrap">
+                        <div class="flex-grow-1 position-relative" style="min-width: 150px;">
                             <i class="fa-solid fa-magnifying-glass text-secondary position-absolute" style="left: 12px; top: 10px;"></i>
                             <input type="text" id="my-dramas-search" class="form-control form-control-sm rounded-pill ps-4" placeholder="搜尋我的劇集..." oninput="triggerMyDramasSearch()">
                         </div>
@@ -133,18 +275,40 @@
                         </select>
                     </div>
                     <div id="my-dramas-list" class="d-flex flex-column gap-3"></div>
-                    <div id="my-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
-                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="my-prev-btn" onclick="changePage(-1)">上一頁</button>
-                        <span class="small text-muted fw-bold">第 <span id="my-page-num" class="text-success">1</span> 頁</span>
-                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="my-next-btn" onclick="changePage(1)">下一頁</button>
+                    
+                    <!-- 底部分頁列：筆數選擇 + 上/下一頁 + 總頁數顯示 + 指定頁數跳轉 -->
+                    <div id="my-pagination" class="glass-card p-3 mt-3 d-none flex-column gap-2">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">每頁:</span>
+                                <select id="my-page-size-select" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="changePageSize(this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10" selected>10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted fw-bold">
+                                第 <span id="my-page-num" class="text-success fw-bold">1</span> / 共 <span id="my-total-pages" class="text-dark fw-bold">1</span> 頁 (<span id="my-total-count" class="text-primary">0</span>筆)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 pt-1 border-top">
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="my-prev-btn" onclick="changePage(-1)">上一頁</button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">跳至:</span>
+                                <select id="my-jump-page-select" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="jumpToPage(this.value)">
+                                    <!-- 動態填入頁碼 -->
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="my-next-btn" onclick="changePage(1)">下一頁</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 探索新番/劇庫 -->
                 <div class="tab-pane fade" id="all-dramas-panel" role="tabpanel">
                     <!-- 搜尋與分類選單 -->
-                    <div class="glass-card p-3 mb-3 d-flex gap-2 align-items-center">
-                        <div class="flex-grow-1 position-relative">
+                    <div class="glass-card p-3 mb-3 d-flex gap-2 align-items-center flex-wrap">
+                        <div class="flex-grow-1 position-relative" style="min-width: 150px;">
                             <i class="fa-solid fa-magnifying-glass text-secondary position-absolute" style="left: 12px; top: 10px;"></i>
                             <input type="text" id="all-dramas-search" class="form-control form-control-sm rounded-pill ps-4" placeholder="搜尋劇名或新番..." oninput="triggerAllDramasSearch()">
                         </div>
@@ -153,20 +317,62 @@
                         </select>
                     </div>
                     <div id="all-dramas-list" class="d-flex flex-column gap-3"></div>
-                    <div id="all-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
-                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="all-prev-btn" onclick="changePage(-1)">上一頁</button>
-                        <span class="small text-muted fw-bold">第 <span id="all-page-num" class="text-success">1</span> 頁</span>
-                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="all-next-btn" onclick="changePage(1)">下一頁</button>
+                    
+                    <!-- 底部分頁列：筆數選擇 + 上/下一頁 + 總頁數顯示 + 指定頁數跳轉 -->
+                    <div id="all-pagination" class="glass-card p-3 mt-3 d-none flex-column gap-2">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">每頁:</span>
+                                <select id="all-page-size-select" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="changePageSize(this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10" selected>10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted fw-bold">
+                                第 <span id="all-page-num" class="text-success fw-bold">1</span> / 共 <span id="all-total-pages" class="text-dark fw-bold">1</span> 頁 (<span id="all-total-count" class="text-primary">0</span>筆)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 pt-1 border-top">
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="all-prev-btn" onclick="changePage(-1)">上一頁</button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">跳至:</span>
+                                <select id="all-jump-page-select" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="jumpToPage(this.value)">
+                                    <!-- 動態填入頁碼 -->
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="all-next-btn" onclick="changePage(1)">下一頁</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 好友推薦 -->
                 <div class="tab-pane fade" id="recs-panel" role="tabpanel">
                     <div id="recs-list" class="d-flex flex-column gap-3"></div>
-                    <div id="recs-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
-                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="recs-prev-btn" onclick="changePage(-1)">上一頁</button>
-                        <span class="small text-muted fw-bold">第 <span id="recs-page-num" class="text-success">1</span> 頁</span>
-                        <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="recs-next-btn" onclick="changePage(1)">下一頁</button>
+                    <div id="recs-pagination" class="glass-card p-3 mt-3 d-none flex-column gap-2">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">每頁:</span>
+                                <select id="recs-page-size-select" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="changePageSize(this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10" selected>10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted fw-bold">
+                                第 <span id="recs-page-num" class="text-success fw-bold">1</span> / 共 <span id="recs-total-pages" class="text-dark fw-bold">1</span> 頁 (<span id="recs-total-count" class="text-primary">0</span>筆)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 pt-1 border-top">
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="recs-prev-btn" onclick="changePage(-1)">上一頁</button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">跳至:</span>
+                                <select id="recs-jump-page-select" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="jumpToPage(this.value)">
+                                    <!-- 動態填入頁碼 -->
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="recs-next-btn" onclick="changePage(1)">下一頁</button>
+                        </div>
                     </div>
                 </div>
 
@@ -324,14 +530,29 @@
         // 分頁與狀態變數
         let currentTab = "my_dramas";
         let myDramasPage = 1;
+        let myDramasPageSize = 10;
         let recsPage = 1;
+        let recsPageSize = 10;
         let allDramasPage = 1;
+        let allDramasPageSize = 10;
+
+        // 全前前端資料庫 Master Lists
+        let myDramasMasterList = null;
+        let allDramasMasterList = null;
+        let recsMasterList = null;
+
         let displayPrefs = {
             category: true,
             links: true,
             total: true,
             creator: true
         };
+
+        // 快捷分類面板折疊狀態
+        let mainCategoryCollapsed = false;
+        let tvSubExpanded = false;
+        let movieSubExpanded = false;
+        let cachedCategoriesData = null;
 
         // 好友快取
         let myFriendsList = [];
@@ -340,6 +561,229 @@
             loadDisplaySettings();
             initLiff();
         });
+
+        // 規範化搜尋文字輔助函數 (忽略大小寫、空格、書名號、波浪號、冒號等所有符號)
+        function normalizeSearchText(text) {
+            if (!text) return "";
+            return text.toString().toLowerCase().replace(/[\s《》『』~∼〜〰⁓:：!！?？\-_—–]/g, "");
+        }
+
+        // 大類面板整體折疊/展開
+        function toggleMainCategorySection() {
+            mainCategoryCollapsed = !mainCategoryCollapsed;
+            const container = document.getElementById("main-cat-container");
+            const icon = document.getElementById("main-cat-toggle-icon");
+            if (mainCategoryCollapsed) {
+                container.classList.add("d-none");
+                icon.innerHTML = `<i class="fa-solid fa-chevron-down me-1"></i>展開面板`;
+            } else {
+                container.classList.remove("d-none");
+                icon.innerHTML = `<i class="fa-solid fa-chevron-up me-1"></i>折疊面板`;
+            }
+        }
+
+        // 判斷是否屬於 NEW 提醒類別：
+        // TV：2026年7月(含)之後 + "動畫化決定"
+        // 劇場版：2026年(含)之後 + "日本動畫電影製作決定"
+        function isNewCategory(cat) {
+            if (!cat) return false;
+            if (cat === "動畫化決定" || cat === "日本動畫電影製作決定") return true;
+
+            // TV 季番判定
+            const tvMatch = cat.match(/^(\d{4})年(\d{1,2})月/);
+            if (tvMatch) {
+                const year = parseInt(tvMatch[1]);
+                const month = parseInt(tvMatch[2]);
+                if (year > 2026 || (year === 2026 && month >= 7)) {
+                    return true;
+                }
+            }
+
+            // 劇場版/電影判定
+            const movieMatch = cat.match(/^(\d{4})年.*電影/);
+            if (movieMatch) {
+                const year = parseInt(movieMatch[1]);
+                if (year >= 2026) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 取得目前使用者的獨立已讀標籤 Storage Key
+        function getReadTagsKey() {
+            let uid = "universal_user";
+            if (typeof userProfile !== "undefined" && userProfile && userProfile.userId) {
+                uid = userProfile.userId;
+            } else if (userAccessToken && userAccessToken.length > 5) {
+                uid = userAccessToken.substring(0, 15);
+            }
+            return "drama_read_new_tags_" + uid;
+        }
+
+        function getReadTags() {
+            try {
+                const data = localStorage.getItem(getReadTagsKey());
+                return data ? JSON.parse(data) : [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function markTagsAsRead(tagsArray) {
+            const readList = new Set(getReadTags());
+            tagsArray.forEach(t => readList.add(t));
+            try {
+                localStorage.setItem(getReadTagsKey(), JSON.stringify(Array.from(readList)));
+            } catch(e) {}
+        }
+
+        // 細項折疊/展開控制 (點擊大選項標題列即把當前所有 NEW 細項設為已讀，100% 消除 NEW 徽章)
+        function toggleCategorySubItems(type) {
+            if (cachedCategoriesData) {
+                const fullList = (cachedCategoriesData.categories || []).concat(cachedCategoriesData.my_categories || []);
+                if (type === 'tv') {
+                    tvSubExpanded = !tvSubExpanded;
+                    const newTvTags = fullList.filter(c => !c.includes("電影") && !c.includes("劇場版") && isNewCategory(c));
+                    markTagsAsRead(newTvTags);
+                } else if (type === 'movie') {
+                    movieSubExpanded = !movieSubExpanded;
+                    const newMovieTags = fullList.filter(c => (c.includes("電影") || c.includes("劇場版")) && isNewCategory(c));
+                    markTagsAsRead(newMovieTags);
+                }
+                renderVisualChips(cachedCategoriesData);
+            }
+        }
+
+        // 渲染細項 Chips (預設前 5 項，按右側按鈕展開/折疊，顯示個人化 NEW 提醒徽章)
+        function renderVisualChips(data) {
+            cachedCategoriesData = data;
+            const tvContainer = document.getElementById("tv-cat-chips");
+            const movieContainer = document.getElementById("movie-cat-chips");
+            if (!tvContainer || !movieContainer) return;
+
+            tvContainer.innerHTML = "";
+            movieContainer.innerHTML = "";
+
+            const tvCats = [];
+            const movieCats = [];
+            const readTags = new Set(getReadTags());
+
+            const catList = (currentTab === 'my_dramas' && data.my_categories) ? data.my_categories : data.categories;
+            const countsObj = (currentTab === 'my_dramas') ? data.my_counts : data.all_counts;
+
+            catList.forEach(cat => {
+                if (cat.includes("電影") || cat.includes("劇場版")) {
+                    movieCats.push(cat);
+                } else {
+                    tvCats.push(cat);
+                }
+            });
+
+            // 將「動畫化決定」與「日本動畫電影製作決定」置頂放到最前面
+            const tvUnknownIdx = tvCats.indexOf("動畫化決定");
+            if (tvUnknownIdx > -1) {
+                tvCats.splice(tvUnknownIdx, 1);
+                tvCats.unshift("動畫化決定");
+            }
+
+            const movieUnknownIdx = movieCats.indexOf("日本動畫電影製作決定");
+            if (movieUnknownIdx > -1) {
+                movieCats.splice(movieUnknownIdx, 1);
+                movieCats.unshift("日本動畫電影製作決定");
+            }
+
+            // 1. 渲染季番動畫 Chips (預設前 5 項)
+            const tvVisible = tvSubExpanded ? tvCats : tvCats.slice(0, 5);
+            tvVisible.forEach(cat => {
+                const count = countsObj ? (countsObj[cat] || 0) : 0;
+                const isNew = isNewCategory(cat);
+                const isUnread = isNew && !readTags.has(cat);
+                const btn = document.createElement("button");
+                btn.className = "btn btn-sm btn-outline-primary rounded-pill py-0 px-2 small position-relative";
+                btn.style.fontSize = "0.75rem";
+                
+                let badgeHtml = isUnread ? `<span class="badge badge-new-pulse ms-1">NEW</span>` : `<span class="badge bg-primary text-white ms-1">${count}</span>`;
+                btn.innerHTML = `${cat} ${badgeHtml}`;
+                btn.onclick = function() {
+                    if (isNew) markTagsAsRead([cat]);
+                    selectCategoryFromChip(cat);
+                    renderVisualChips(cachedCategoriesData);
+                };
+                tvContainer.appendChild(btn);
+            });
+
+            const tvToggleBtn = document.getElementById("toggle-tv-btn");
+            const tvToggleLabel = document.getElementById("tv-toggle-label");
+            if (tvCats.length <= 5) {
+                tvToggleBtn.classList.add("d-none");
+            } else {
+                tvToggleBtn.classList.remove("d-none");
+                if (tvSubExpanded) {
+                    tvToggleLabel.innerText = "折疊收起 (全" + tvCats.length + "項)";
+                    tvToggleBtn.querySelector("i").className = "fa-solid fa-angle-up me-1";
+                } else {
+                    tvToggleLabel.innerText = "展開更多細項 (共" + tvCats.length + "項)";
+                    tvToggleBtn.querySelector("i").className = "fa-solid fa-angle-down me-1";
+                }
+            }
+
+            // 2. 渲染動畫電影 Chips (預設前 5 項)
+            const movieVisible = movieSubExpanded ? movieCats : movieCats.slice(0, 5);
+            movieVisible.forEach(cat => {
+                const count = countsObj ? (countsObj[cat] || 0) : 0;
+                const isNew = isNewCategory(cat);
+                const isUnread = isNew && !readTags.has(cat);
+                const btn = document.createElement("button");
+                btn.className = "btn btn-sm btn-outline-danger rounded-pill py-0 px-2 small position-relative";
+                btn.style.fontSize = "0.75rem";
+                
+                let badgeHtml = isUnread ? `<span class="badge badge-new-pulse ms-1">NEW</span>` : `<span class="badge bg-danger text-white ms-1">${count}</span>`;
+                btn.innerHTML = `${cat} ${badgeHtml}`;
+                btn.onclick = function() {
+                    if (isNew) markTagsAsRead([cat]);
+                    selectCategoryFromChip(cat);
+                    renderVisualChips(cachedCategoriesData);
+                };
+                movieContainer.appendChild(btn);
+            });
+
+            const movieToggleBtn = document.getElementById("toggle-movie-btn");
+            const movieToggleLabel = document.getElementById("movie-toggle-label");
+            if (movieCats.length <= 5) {
+                movieToggleBtn.classList.add("d-none");
+            } else {
+                movieToggleBtn.classList.remove("d-none");
+                if (movieSubExpanded) {
+                    movieToggleLabel.innerText = "折疊收起 (全" + movieCats.length + "項)";
+                    movieToggleBtn.querySelector("i").className = "fa-solid fa-angle-up me-1";
+                } else {
+                    movieToggleLabel.innerText = "展開更多細項 (共" + movieCats.length + "項)";
+                    movieToggleBtn.querySelector("i").className = "fa-solid fa-angle-down me-1";
+                }
+            }
+        }
+
+        function selectCategoryFromChip(cat) {
+            let selectId = "all-dramas-cat-select";
+            if (currentTab === "my_dramas") {
+                selectId = "my-dramas-cat-select";
+            }
+            const selectEl = document.getElementById(selectId);
+            if (selectEl) {
+                selectEl.value = cat;
+                if (currentTab === "my_dramas") {
+                    triggerMyDramasSearch();
+                } else {
+                    triggerAllDramasSearch();
+                }
+                setTimeout(() => {
+                    selectEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 50);
+            }
+        }
+
+        let userProfile = null;
 
         function initLiff() {
             liff.init({ liffId: liffId })
@@ -352,7 +796,16 @@
 
                         // 獲取使用者個人資料並設定問候語
                         liff.getProfile().then(profile => {
-                            document.getElementById("user-display-name").innerText = profile.displayName;
+                            userProfile = profile;
+                            const el = document.getElementById("user-display-name") || document.getElementById("user-name");
+                            if (el) el.innerText = profile.displayName;
+                            if (profile.pictureUrl) {
+                                const avatarEl = document.getElementById("user-avatar-container");
+                                if (avatarEl) avatarEl.innerHTML = `<img src="${profile.pictureUrl}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">`;
+                            }
+                            if (cachedCategoriesData) {
+                                renderVisualChips(cachedCategoriesData);
+                            }
                         }).catch(err => {
                             console.error("Failed to get profile", err);
                         });
@@ -367,7 +820,10 @@
                 })
                 .catch((err) => {
                     console.error("LIFF initialization failed", err);
-                    alert("LIFF 啟動失敗，請於 LINE 內開啟！");
+                    // 外部瀏覽器降級支援
+                    fetchCategories();
+                    fetchDramas("my_dramas", 1);
+                    fetchDramas("all_dramas", 1);
                 });
         }
 
@@ -416,14 +872,23 @@
             }
         }
 
-        // 讀取追劇列表或推薦
-        function fetchDramas(tab, page) {
-            let listContainerId = "my-dramas-list";
-            if (tab === "recommendations") {
-                listContainerId = "recs-list";
-            } else if (tab === "all_dramas") {
-                listContainerId = "all-dramas-list";
+        // 讀取追劇列表或推薦 (一次性載入全量 MasterList，隨後於前端實施 0 毫秒極速搜尋與分頁)
+        function fetchDramas(tab, page, forceReload = false) {
+            let masterList = null;
+            if (tab === "my_dramas") masterList = myDramasMasterList;
+            else if (tab === "all_dramas") masterList = allDramasMasterList;
+            else if (tab === "recommendations") masterList = recsMasterList;
+
+            // 若已有 MasterList 且不強制重載，直接執行前端極速渲染
+            if (masterList && !forceReload) {
+                renderClientSideFilteredData(tab, page);
+                return;
             }
+
+            let listContainerId = "my-dramas-list";
+            if (tab === "recommendations") listContainerId = "recs-list";
+            else if (tab === "all_dramas") listContainerId = "all-dramas-list";
+            
             const listContainer = document.getElementById(listContainerId);
             listContainer.innerHTML = `
                 <div class="text-center py-4">
@@ -433,20 +898,13 @@
                 </div>
             `;
 
+            // 向後端請求全量 MasterList (帶入大 page_size)
             const reqBody = {
                 access_token: userAccessToken,
                 tab: tab,
-                page: page
+                page: 1,
+                page_size: 10000
             };
-            if (tab === "all_dramas") {
-                reqBody.q = document.getElementById("all-dramas-search").value;
-                reqBody.category = document.getElementById("all-dramas-cat-select").value;
-            } else if (tab === "my_dramas") {
-                const searchInput = document.getElementById("my-dramas-search");
-                const catSelect = document.getElementById("my-dramas-cat-select");
-                reqBody.q = searchInput ? searchInput.value.trim() : "";
-                reqBody.category = catSelect ? catSelect.value : "";
-            }
 
             fetch(apiBaseUrl + "/line/api/dramas/", {
                 method: "POST",
@@ -460,8 +918,11 @@
                     document.getElementById("main-section").classList.remove("d-none");
                 }
                 if (data.status === "success") {
-                    renderDramaList(data.list, tab);
-                    updatePaginationControls(tab, page, data.has_more);
+                    if (tab === "my_dramas") myDramasMasterList = data.list || [];
+                    else if (tab === "all_dramas") allDramasMasterList = data.list || [];
+                    else if (tab === "recommendations") recsMasterList = data.list || [];
+                    
+                    renderClientSideFilteredData(tab, page);
                 } else {
                     listContainer.innerHTML = `<div class="alert alert-danger text-center small py-2">載入失敗：${data.error}</div>`;
                 }
@@ -470,6 +931,63 @@
                 console.error(err);
                 listContainer.innerHTML = `<div class="alert alert-danger text-center small py-2">伺服器連線失敗</div>`;
             });
+        }
+
+        // 前端 0 毫秒極速過濾、搜尋與分頁切片渲染
+        function renderClientSideFilteredData(tab, targetPage) {
+            let masterList = [];
+            let searchInputId = "all-dramas-search";
+            let catSelectId = "all-dramas-cat-select";
+            let pageSize = allDramasPageSize;
+            let page = targetPage || allDramasPage;
+
+            if (tab === "my_dramas") {
+                masterList = myDramasMasterList || [];
+                searchInputId = "my-dramas-search";
+                catSelectId = "my-dramas-cat-select";
+                pageSize = myDramasPageSize;
+                page = targetPage || myDramasPage;
+            } else if (tab === "recommendations") {
+                masterList = recsMasterList || [];
+                pageSize = recsPageSize;
+                page = targetPage || recsPage;
+            } else {
+                masterList = allDramasMasterList || [];
+            }
+
+            const searchInput = document.getElementById(searchInputId);
+            const catSelect = document.getElementById(catSelectId);
+            const rawQ = searchInput ? searchInput.value.trim() : "";
+            const normQ = normalizeSearchText(rawQ);
+            const catVal = catSelect ? catSelect.value.trim() : "";
+
+            // 前端 0ms 記憶體過濾
+            const filteredList = masterList.filter(item => {
+                if (catVal && item.category !== catVal) return false;
+                if (normQ) {
+                    const normTitle = normalizeSearchText(item.title);
+                    if (!normTitle.includes(normQ)) return false;
+                }
+                return true;
+            });
+
+            const totalCount = filteredList.length;
+            const totalPages = Math.ceil(totalCount / pageSize) || 1;
+            
+            if (page > totalPages) page = totalPages;
+            if (page < 1) page = 1;
+
+            if (tab === "my_dramas") myDramasPage = page;
+            else if (tab === "all_dramas") allDramasPage = page;
+            else if (tab === "recommendations") recsPage = page;
+
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const slicedList = filteredList.slice(start, end);
+            const hasMore = page < totalPages;
+
+            renderDramaList(slicedList, tab);
+            updatePaginationControls(tab, page, totalPages, totalCount, hasMore);
         }
 
         function renderDramaList(list, tab) {
@@ -630,8 +1148,8 @@
             });
         }
 
-        // 分頁控制
-        function updatePaginationControls(tab, page, hasMore) {
+        // 分頁控制 (動態頁數、每頁筆數與跳頁選單)
+        function updatePaginationControls(tab, page, totalPages, totalCount, hasMore) {
             let prefix = "my";
             if (tab === "recommendations") {
                 prefix = "recs";
@@ -640,16 +1158,74 @@
             }
             const paginationDiv = document.getElementById(`${prefix}-pagination`);
             const pageNumSpan = document.getElementById(`${prefix}-page-num`);
+            const totalPagesSpan = document.getElementById(`${prefix}-total-pages`);
+            const totalCountSpan = document.getElementById(`${prefix}-total-count`);
             const prevBtn = document.getElementById(`${prefix}-prev-btn`);
             const nextBtn = document.getElementById(`${prefix}-next-btn`);
+            const jumpSelect = document.getElementById(`${prefix}-jump-page-select`);
 
-            pageNumSpan.innerText = page;
-            prevBtn.disabled = (page <= 1);
-            nextBtn.disabled = !hasMore;
-            if (page > 1 || hasMore) {
-                paginationDiv.classList.remove("d-none");
-            } else {
-                paginationDiv.classList.add("d-none");
+            if (pageNumSpan) pageNumSpan.innerText = page;
+            if (totalPagesSpan) totalPagesSpan.innerText = totalPages;
+            if (totalCountSpan) totalCountSpan.innerText = totalCount;
+
+            if (prevBtn) prevBtn.disabled = (page <= 1);
+            if (nextBtn) nextBtn.disabled = !hasMore && (page >= totalPages);
+
+            // 填補跳頁 Dropdown <option>
+            if (jumpSelect) {
+                jumpSelect.innerHTML = "";
+                for (let i = 1; i <= totalPages; i++) {
+                    const opt = document.createElement("option");
+                    opt.value = i;
+                    opt.innerText = `第 ${i} 頁`;
+                    if (i === page) opt.selected = true;
+                    jumpSelect.appendChild(opt);
+                }
+            }
+
+            if (paginationDiv) {
+                if (totalPages >= 1 || totalCount > 0) {
+                    paginationDiv.classList.remove("d-none");
+                    paginationDiv.classList.add("d-flex");
+                } else {
+                    paginationDiv.classList.add("d-none");
+                    paginationDiv.classList.remove("d-flex");
+                }
+            }
+        }
+
+        // 修改每頁顯示筆數 (前端0ms即時分頁)
+        function changePageSize(newSize) {
+            const size = parseInt(newSize);
+            if (currentTab === "my_dramas") {
+                myDramasPageSize = size;
+                myDramasPage = 1;
+                renderClientSideFilteredData("my_dramas", 1);
+            } else if (currentTab === "recommendations") {
+                recsPageSize = size;
+                recsPage = 1;
+                renderClientSideFilteredData("recommendations", 1);
+            } else if (currentTab === "all_dramas") {
+                allDramasPageSize = size;
+                allDramasPage = 1;
+                renderClientSideFilteredData("all_dramas", 1);
+            }
+        }
+
+        // 直接跳轉至指定頁數 (前端0ms即時跳轉)
+        function jumpToPage(targetPage) {
+            const page = parseInt(targetPage);
+            if (isNaN(page) || page < 1) return;
+
+            if (currentTab === "my_dramas") {
+                myDramasPage = page;
+                renderClientSideFilteredData("my_dramas", page);
+            } else if (currentTab === "recommendations") {
+                recsPage = page;
+                renderClientSideFilteredData("recommendations", page);
+            } else if (currentTab === "all_dramas") {
+                allDramasPage = page;
+                renderClientSideFilteredData("all_dramas", page);
             }
         }
 
@@ -657,16 +1233,28 @@
             if (currentTab === "my_dramas") {
                 myDramasPage += offset;
                 if (myDramasPage < 1) myDramasPage = 1;
-                fetchDramas("my_dramas", myDramasPage);
+                renderClientSideFilteredData("my_dramas", myDramasPage);
             } else if (currentTab === "recommendations") {
                 recsPage += offset;
                 if (recsPage < 1) recsPage = 1;
-                fetchDramas("recommendations", recsPage);
+                renderClientSideFilteredData("recommendations", recsPage);
             } else if (currentTab === "all_dramas") {
                 allDramasPage += offset;
                 if (allDramasPage < 1) allDramasPage = 1;
-                fetchDramas("all_dramas", allDramasPage);
+                renderClientSideFilteredData("all_dramas", allDramasPage);
             }
+        }
+
+        // 探索新番即時搜尋與分類過濾 (前端0ms打字即時響應)
+        function triggerAllDramasSearch() {
+            allDramasPage = 1;
+            renderClientSideFilteredData("all_dramas", 1);
+        }
+
+        // 我的追劇即時搜尋與分類過濾 (前端0ms打字即時響應)
+        function triggerMyDramasSearch() {
+            myDramasPage = 1;
+            renderClientSideFilteredData("my_dramas", 1);
         }
 
         // 快捷：追劇+1集
@@ -1154,7 +1742,7 @@
             });
         }
 
-        // 抓取所有唯一的分類並填入下拉選單
+        // 抓取所有唯一的分類並填入下拉選單 (分組：動畫類 vs 動畫電影類，由新至舊排序)
         function fetchCategories() {
             const url = apiBaseUrl + "/line/api/dramas/categories/";
             fetch(url, {
@@ -1180,46 +1768,73 @@
                         Object.values(data.my_counts).forEach(v => totalMy += v);
                     }
 
-                    // 1. 全部劇集的分類選單
+                    // 輔助函數：將分類清單拆分為「動畫新番」與「動畫電影」兩個分組
+                    function buildGroupedOptions(catList, countsObj) {
+                        const tvCats = [];
+                        const movieCats = [];
+                        
+                        catList.forEach(cat => {
+                            if (cat.includes("電影") || cat.includes("劇場版")) {
+                                movieCats.push(cat);
+                            } else {
+                                tvCats.push(cat);
+                            }
+                        });
+
+                        const tvUnknownIdx = tvCats.indexOf("動畫化決定");
+                        if (tvUnknownIdx > -1) {
+                            tvCats.splice(tvUnknownIdx, 1);
+                            tvCats.unshift("動畫化決定");
+                        }
+
+                        const movieUnknownIdx = movieCats.indexOf("日本動畫電影製作決定");
+                        if (movieUnknownIdx > -1) {
+                            movieCats.splice(movieUnknownIdx, 1);
+                            movieCats.unshift("日本動畫電影製作決定");
+                        }
+
+                        let html = "";
+                        if (tvCats.length > 0) {
+                            html += `<optgroup label="📺 季番動畫 (由新至舊)">`;
+                            tvCats.forEach(cat => {
+                                const count = countsObj ? (countsObj[cat] || 0) : 0;
+                                html += `<option value="${cat}">${cat} (${count}部)</option>`;
+                            });
+                            html += `</optgroup>`;
+                        }
+                        if (movieCats.length > 0) {
+                            html += `<optgroup label="🎬 動畫電影 / 劇場版 (由新至舊)">`;
+                            movieCats.forEach(cat => {
+                                const count = countsObj ? (countsObj[cat] || 0) : 0;
+                                html += `<option value="${cat}">${cat} (${count}部)</option>`;
+                            });
+                            html += `</optgroup>`;
+                        }
+                        return html;
+                    }
+
+                    // 1. 全部劇集的分類選單 (探索新番)
                     const searchSelect = document.getElementById("all-dramas-cat-select");
                     if (searchSelect) {
                         const currentVal = searchSelect.value;
-                        searchSelect.innerHTML = `<option value="">所有分類 (${totalAll}部)</option>`;
-                        data.categories.forEach(cat => {
-                            const opt = document.createElement("option");
-                            opt.value = cat;
-                            const count = data.all_counts ? (data.all_counts[cat] || 0) : 0;
-                            opt.innerText = `${cat} (${count}部)`;
-                            searchSelect.appendChild(opt);
-                        });
+                        searchSelect.innerHTML = `<option value="">所有分類 (${totalAll}部)</option>` + buildGroupedOptions(data.categories, data.all_counts);
                         searchSelect.value = currentVal;
                     }
 
-                    // 2. 我的追劇的分類選單
+                    // 2. 我的追劇分類選單 (個人清單：只顯示個人有追過的分類選項 count > 0)
                     const mySelect = document.getElementById("my-dramas-cat-select");
                     if (mySelect) {
                         const currentVal = mySelect.value;
-                        mySelect.innerHTML = `<option value="">所有分類 (${totalMy}部)</option>`;
-                        data.categories.forEach(cat => {
-                            const opt = document.createElement("option");
-                            opt.value = cat;
-                            const count = data.my_counts ? (data.my_counts[cat] || 0) : 0;
-                            opt.innerText = `${cat} (${count}部)`;
-                            mySelect.appendChild(opt);
-                        });
+                        const myCategoriesOnly = data.my_categories || data.categories.filter(cat => (data.my_counts && data.my_counts[cat] > 0));
+                        mySelect.innerHTML = `<option value="">所有我的追劇 (${totalMy}部)</option>` + buildGroupedOptions(myCategoriesOnly, data.my_counts);
                         mySelect.value = currentVal;
                     }
 
-                    // 3. 彈出視窗（建立/編輯劇集）的分類選單
+                    // 渲染快捷年度視覺 Chips 導航面板 (季番 vs 電影，預設前5項)
+                    renderVisualChips(data);
                     const modalSelect = document.getElementById("drama-category-select");
                     if (modalSelect) {
-                        modalSelect.innerHTML = "";
-                        data.categories.forEach(cat => {
-                            const opt = document.createElement("option");
-                            opt.value = cat;
-                            opt.innerText = cat;
-                            modalSelect.appendChild(opt);
-                        });
+                        modalSelect.innerHTML = buildGroupedOptions(data.categories, null);
                         const customOpt = document.createElement("option");
                         customOpt.value = "__custom__";
                         customOpt.innerText = "➕ 自訂新分類...";
@@ -1231,7 +1846,6 @@
             })
             .catch(err => {
                 console.error("fetchCategories failed", err);
-                alert("分類讀取錯誤: " + err.message);
             });
         }
 
