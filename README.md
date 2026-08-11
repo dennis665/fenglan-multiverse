@@ -2,7 +2,7 @@
 
 ![Django Version](https://img.shields.io/badge/Django-6.0.7-green) ![Python Version](https://img.shields.io/badge/Python-3.13+-blue) ![Docker](https://img.shields.io/badge/Docker-Supported-blue)
 
-這是一個基於 **Django 6.0.x** 與 **MySQL 8.x** 建立的多功能整合入口網站系統（CSI Portal），具備豐富的商業管理與 AI 應用模組。專案支援 **Google OAuth 2.0** 登入、**WebSocket (Daphne)** 即時通訊與 **Docker** 容器化部署，並結合了多種先進的機器學習與雲端 AI 引擎。
+這是一個基於 **Django 6.1** 與 **MySQL 8.x** 建立的多功能整合入口網站系統（CSI Portal），具備豐富的商業管理與 AI 應用模組。專案支援 **Google OAuth 2.0** 登入、**WebSocket (Daphne)** 即時通訊與 **Docker** 容器化部署，並結合了多種先進的機器學習與雲端 AI 引擎。
 
 *   **最新版本**：`v1.17.10`
 *   **更新摘要**：[點此查看完整變更歷程 (CHANGELOG.md)](CHANGELOG.md)

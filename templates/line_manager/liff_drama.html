@@ -1088,7 +1088,7 @@
                         `;
                     } else {
                         joinBtnHtml = `
-                            <button class="btn btn-sm btn-success py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="joinDrama(${item.drama_id})">
+                            <button class="btn btn-sm btn-success py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="joinDrama(${item.drama_id}, this)">
                                 <i class="fa-solid fa-plus me-1"></i>加入清單
                             </button>
                         `;
@@ -1724,7 +1724,21 @@
         });
 
         // 探索劇庫：將特定劇集加入個人追劇清單
-        function joinDrama(id) {
+        function joinDrama(id, btnEl) {
+            // --- 樂觀更新 UI (Optimistic Update) ---
+            // 1. 立即把按鈕換成「已在清單」，防止重複點擊
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.className = "btn btn-sm btn-secondary py-1 px-2 text-nowrap text-white";
+                btnEl.style.cssText = "font-size: 0.75rem; cursor: default;";
+                btnEl.innerHTML = '<i class="fa-solid fa-check me-1"></i>已在清單';
+            }
+            // 2. 同步更新內存中的 allDramasMasterList，使切換頁面後按鈕狀態也正確
+            if (allDramasMasterList) {
+                const item = allDramasMasterList.find(d => d.drama_id === id);
+                if (item) item.is_added = true;
+            }
+
             fetch(`/line/api/dramas/join/${id}/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1734,10 +1748,36 @@
             .then(data => {
                 if (data.status === "success") {
                     Swal.fire({ title: '成功加入個人清單！', icon: 'success', timer: 1000, showConfirmButton: false });
-                    fetchDramas("all_dramas", allDramasPage);
-                    fetchDramas("my_dramas", 1);
+                    // 強制從伺服器重載「我的清單」以反映最新資料
+                    myDramasMasterList = null;
+                    fetchDramas("my_dramas", 1, true);
                 } else {
                     Swal.fire("錯誤", "加入失敗：" + data.error, "error");
+                    // 失敗時還原按鈕
+                    if (btnEl) {
+                        btnEl.disabled = false;
+                        btnEl.className = "btn btn-sm btn-success py-1 px-2 text-nowrap";
+                        btnEl.style.cssText = "font-size: 0.75rem;";
+                        btnEl.innerHTML = '<i class="fa-solid fa-plus me-1"></i>加入清單';
+                    }
+                    if (allDramasMasterList) {
+                        const item = allDramasMasterList.find(d => d.drama_id === id);
+                        if (item) item.is_added = false;
+                    }
+                }
+            })
+            .catch(err => {
+                console.error("joinDrama error:", err);
+                // 網路錯誤時也還原
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.className = "btn btn-sm btn-success py-1 px-2 text-nowrap";
+                    btnEl.style.cssText = "font-size: 0.75rem;";
+                    btnEl.innerHTML = '<i class="fa-solid fa-plus me-1"></i>加入清單';
+                }
+                if (allDramasMasterList) {
+                    const item = allDramasMasterList.find(d => d.drama_id === id);
+                    if (item) item.is_added = false;
                 }
             });
         }
