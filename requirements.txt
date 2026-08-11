@@ -1,6 +1,6 @@
 #! 核心框架與伺服器部署
 #* Web 應用程式核心框架
-django==6.0.7
+django==6.1
 #* 生產環境用的 Python WSGI HTTP 伺服器
 gunicorn==26.0.0
 #* 協助 Django 在生產環境中高效伺服靜態檔案
@@ -18,14 +18,14 @@ pyodbc==5.3.0
 
 #! 認證與安全性
 #* 處理會員註冊與 OAuth 2.0 (Google) 登入
-django-allauth==65.18.0
+django-allauth==65.19.0
 #* 處理 JSON Web Tokens 的編碼與解碼
 PyJWT==2.13.0
 #* 提供加密演算法支援
-cryptography==49.0.0
+cryptography==50.0.0
 #* 發送 HTTP 請求與管理 SSL 憑證
 requests==2.34.2
-certifi==2026.6.17
+certifi==2026.7.22
 #* 專案程式碼與依賴套件的安全漏洞掃描
 bandit==1.9.4
 safety==3.8.1
@@ -33,11 +33,11 @@ safety==3.8.1
 
 #! AI 與機器學習 (雲端 API 與邊緣運算)
 #* 串接 Google Gemini 模型
-google-genai==2.10.0
+google-genai==2.17.0
 #* 本地端語音轉文字模型
 openai-whisper==20250625
 #* 執行 YOLO 模型進行物件偵測
-ultralytics==8.4.90
+ultralytics==8.4.117
 #* 執行 PaddleOCR 進行光學字元辨識
 paddlepaddle==3.3.1
 paddleocr==3.7.0
@@ -45,6 +45,7 @@ paddleocr==3.7.0
 pytesseract==0.3.13
 #* 模型效能評估與訓練視覺化 (世祥辨識專用)
 faster-coco-eval==1.7.2
+#* tensorboard 版本不能動
 tensorboard==2.20.0
 #! -------------------
 
@@ -61,7 +62,7 @@ django-ranged-response==0.2.0
 
 #! 文件與資料處理
 #* 讀寫與分析 Excel 試算表資料
-pandas==3.0.3
+pandas==3.0.5
 openpyxl==3.1.5
 #* 解析 PDF 文件與擷取文字/表格
 pdfplumber==0.11.10
@@ -71,7 +72,7 @@ python-docx==1.2.0
 
 #! 外部資料抓取與處理
 #* 獲取 Yahoo Finance 金融數據
-yfinance==1.5.1
+yfinance==1.5.2
 #* 下載 YouTube 影片與音訊
 yt-dlp==2026.7.4
 #* 擷取 YouTube 影片字幕
@@ -84,20 +85,20 @@ deep-translator==1.11.4
 django-fsm-2==4.2.4
 #* 實作 WebSocket 以支援即時雙向通訊
 channels==4.3.2
-daphne==4.2.2
+daphne==4.2.3
 #* 處理定時排程任務
 django-apscheduler==0.7.0
 #! -------------------
 
 #! 開發輔助與 UI 渲染
 #* 快速渲染與美化前端表單
-django-crispy-forms==2.6
+django-crispy-forms==2.7
 crispy-bootstrap5==2026.3
 #* 提供 shell_plus 等強大開發與除錯指令
 django-extensions==4.1
 #* 處理多執行緒/多進程環境下的日誌記錄
 concurrent-log-handler==0.9.29
-djangorestframework==3.17.1
+djangorestframework==3.18.0
 #! -------------------
 
 #! 依賴相容與漏洞修補鎖定版
