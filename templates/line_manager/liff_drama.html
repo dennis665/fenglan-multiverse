@@ -471,6 +471,10 @@
                         </div>
                     </div>
                     <div class="mb-2">
+                        <label class="form-label fw-bold small">預覽圖連結 (可輸入多個，每行一個)</label>
+                        <textarea id="drama-image-url" class="form-control form-control-sm" rows="2" placeholder="https://d28s5ztqvkii64.cloudfront.net/images/...\nhttps://..." autocomplete="off"></textarea>
+                    </div>
+                    <div class="mb-2">
                         <label class="form-label fw-bold small d-flex justify-content-between align-items-center">
                             相關資訊連結
                             <button class="btn btn-xs btn-outline-success py-0 px-2" onclick="addLinkRow()"><i class="fa-solid fa-plus"></i></button>
@@ -516,6 +520,24 @@
                     <button type="button" class="btn btn-line px-4" onclick="submitRecommendForm()">發送推薦</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 全屏預覽圖 Lightbox Overlay -->
+    <div id="imageLightboxOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-none justify-content-center align-items-center" style="z-index: 10000; background: rgba(0, 0, 0, 0.94); backdrop-filter: blur(8px);" onclick="handleLightboxBackdropClick(event)">
+        <!-- 頂部列：圖片計數與關閉按鈕 -->
+        <div class="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-center px-3 py-3" style="z-index: 10002; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);">
+            <span id="lightbox-badge" class="badge bg-dark bg-opacity-75 text-white px-3 py-2 fs-6 rounded-pill border border-secondary shadow-sm">1 / 1</span>
+            <button type="button" class="btn text-white fs-3 p-1 lh-1 border-0" onclick="closeLightbox()" style="text-shadow: 0 2px 8px rgba(0,0,0,0.8); cursor: pointer;" title="關閉">✕</button>
+        </div>
+        
+        <!-- 切換按鈕 (左右) -->
+        <button id="lightbox-prev-btn" type="button" class="btn text-white position-absolute top-50 start-0 translate-middle-y ms-2 d-flex align-items-center justify-content-center border-0 rounded-circle shadow-lg" style="width: 44px; height: 44px; background: rgba(0,0,0,0.6); font-size: 1.8rem; z-index: 10002; display: none;" onclick="navigateLightbox(-1)">‹</button>
+        <button id="lightbox-next-btn" type="button" class="btn text-white position-absolute top-50 end-0 translate-middle-y me-2 d-flex align-items-center justify-content-center border-0 rounded-circle shadow-lg" style="width: 44px; height: 44px; background: rgba(0,0,0,0.6); font-size: 1.8rem; z-index: 10002; display: none;" onclick="navigateLightbox(1)">›</button>
+        
+        <!-- 圖片滾動區域 (全屏滑動) -->
+        <div id="lightbox-carousel" class="d-flex align-items-center w-100 h-100" style="overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none;" onscroll="onLightboxScroll(this)">
+            <!-- 動態插入全屏圖片 -->
         </div>
     </div>
 
@@ -1026,25 +1048,30 @@
                         linksHtml += '</div>';
                     }
 
+                    let imgHtml = renderPreviewImagesHtml(item.image_url);
+
                     const html = `
                         <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center">
-                            <div class="flex-grow-1 me-2" style="max-width: 80%;">
-                                <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
-                                    <span class="badge bg-primary small pref-category ${displayPrefs.category ? '' : 'd-none'}">${item.category}</span>
-                                    <span class="badge ${item.is_tracked ? 'bg-success' : 'bg-secondary'} small" style="cursor: pointer;" onclick="toggleTrack(${item.drama_id}, ${!item.is_tracked})">
-                                        <i class="fa-solid fa-bell me-1"></i>${item.is_tracked ? '追蹤中' : '開啟追蹤'}
-                                    </span>
-                                </div>
-                                <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
-                                <div class="text-success small fw-bold mb-1">
-                                    目前看至：第 ${item.current_season} 季 第 ${item.current_episode} 集
-                                </div>
-                                <div class="text-muted small pref-total ${displayPrefs.total ? '' : 'd-none'}" style="font-size: 0.8rem;">
-                                    總集數：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
-                                </div>
-                                ${linksHtml}
-                                <div class="text-muted pref-creator ${displayPrefs.creator ? '' : 'd-none'}" style="font-size: 0.7rem; margin-top: 5px;">
-                                    發起人: ${item.creator} | 更新: ${item.updated_at}
+                            <div class="d-flex align-items-center flex-grow-1 me-2" style="max-width: 80%;">
+                                ${imgHtml}
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
+                                        <span class="badge bg-primary small pref-category ${displayPrefs.category ? '' : 'd-none'}">${item.category}</span>
+                                        <span class="badge ${item.is_tracked ? 'bg-success' : 'bg-secondary'} small" style="cursor: pointer;" onclick="toggleTrack(${item.drama_id}, ${!item.is_tracked})">
+                                            <i class="fa-solid fa-bell me-1"></i>${item.is_tracked ? '追蹤中' : '開啟追蹤'}
+                                        </span>
+                                    </div>
+                                    <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
+                                    <div class="text-success small fw-bold mb-1">
+                                        目前看至：第 ${item.current_season} 季 第 ${item.current_episode} 集
+                                    </div>
+                                    <div class="text-muted small pref-total ${displayPrefs.total ? '' : 'd-none'}" style="font-size: 0.8rem;">
+                                        總集數：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
+                                    </div>
+                                    ${linksHtml}
+                                    <div class="text-muted pref-creator ${displayPrefs.creator ? '' : 'd-none'}" style="font-size: 0.7rem; margin-top: 5px;">
+                                        發起人: ${item.creator} | 更新: ${item.updated_at}
+                                    </div>
                                 </div>
                             </div>
                             <div class="d-flex flex-column gap-1">
@@ -1054,11 +1081,14 @@
                                 <button class="btn btn-sm btn-outline-primary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaProgressModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', ${item.current_season}, ${item.current_episode})">
                                     <i class="fa-regular fa-pen-to-square me-1"></i>進度
                                 </button>
-                                <button class="btn btn-sm btn-outline-info py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaDetailsModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', '${item.category.replace(/'/g, "\\'")}', ${item.total_seasons}, ${item.total_episodes}, ${JSON.stringify(item.info_links).replace(/"/g, '&quot;')})">
+                                <button class="btn btn-sm btn-outline-info py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaDetailsModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', '${item.category.replace(/'/g, "\\'")}', ${item.total_seasons}, ${item.total_episodes}, ${JSON.stringify(item.info_links).replace(/"/g, '&quot;')}, '${(item.image_url || '').replace(/'/g, "\\'")}')">
                                     <i class="fa-solid fa-gear me-1"></i>編輯
                                 </button>
                                 <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="openRecommendModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}')">
                                     <i class="fa-solid fa-share-nodes me-1"></i>推薦
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="removeDrama(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', this)">
+                                    <i class="fa-solid fa-trash-can me-1"></i>移除
                                 </button>
                             </div>
                         </div>
@@ -1094,24 +1124,29 @@
                         `;
                     }
 
+                    let allImgHtml = renderPreviewImagesHtml(item.image_url);
+
                     const html = `
                         <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center">
-                            <div class="flex-grow-1 me-2" style="max-width: 80%;">
-                                <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
-                                    <span class="badge bg-primary small">${item.category}</span>
-                                </div>
-                                <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
-                                <div class="text-muted small" style="font-size: 0.8rem;">
-                                    總集數：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
-                                </div>
-                                ${linksHtml}
-                                <div class="text-muted" style="font-size: 0.7rem; margin-top: 5px;">
-                                    發起人: ${item.creator} | 更新: ${item.updated_at}
+                            <div class="d-flex align-items-center flex-grow-1 me-2" style="max-width: 80%;">
+                                ${allImgHtml}
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
+                                        <span class="badge bg-primary small">${item.category}</span>
+                                    </div>
+                                    <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
+                                    <div class="text-muted small" style="font-size: 0.8rem;">
+                                        總集數：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
+                                    </div>
+                                    ${linksHtml}
+                                    <div class="text-muted" style="font-size: 0.7rem; margin-top: 5px;">
+                                        發起人: ${item.creator} | 更新: ${item.updated_at}
+                                    </div>
                                 </div>
                             </div>
                             <div class="d-flex flex-column gap-1">
                                 ${joinBtnHtml}
-                                <button class="btn btn-sm btn-outline-info py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaDetailsModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', '${item.category.replace(/'/g, "\\'")}', ${item.total_seasons}, ${item.total_episodes}, ${JSON.stringify(item.info_links).replace(/"/g, '&quot;')})">
+                                <button class="btn btn-sm btn-outline-info py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaDetailsModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', '${item.category.replace(/'/g, "\\'")}', ${item.total_seasons}, ${item.total_episodes}, ${JSON.stringify(item.info_links).replace(/"/g, '&quot;')}, '${(item.image_url || '').replace(/'/g, "\\'")}')">
                                     <i class="fa-solid fa-gear me-1"></i>編輯
                                 </button>
                                 <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="openRecommendModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}')">
@@ -1123,17 +1158,22 @@
                     container.innerHTML += html;
                 } else {
                     // 推薦清單
+                    let recImgHtml = renderPreviewImagesHtml(item.image_url);
+
                     const html = `
                         <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center" style="border-left-color: #ff9f43;">
-                            <div class="flex-grow-1 me-2" style="max-width: 80%;">
-                                <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
-                                    <span class="badge bg-warning text-dark small">${item.category}</span>
-                                    <span class="small text-muted"><i class="fa-regular fa-user me-1"></i>推薦人: ${item.from_user}</span>
-                                </div>
-                                <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem;">${item.title}</h5>
-                                ${item.recommend_notes ? `<div class="bg-light p-2 rounded text-secondary mb-2 small" style="border-left: 2px solid #ff9f43;">推薦短評: ${item.recommend_notes}</div>` : ""}
-                                <div class="text-muted small" style="font-size: 0.8rem;">
-                                    總集數規格：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
+                            <div class="d-flex align-items-center flex-grow-1 me-2" style="max-width: 80%;">
+                                ${recImgHtml}
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
+                                        <span class="badge bg-warning text-dark small">${item.category}</span>
+                                        <span class="small text-muted"><i class="fa-regular fa-user me-1"></i>推薦人: ${item.from_user}</span>
+                                    </div>
+                                    <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem;">${item.title}</h5>
+                                    ${item.recommend_notes ? `<div class="bg-light p-2 rounded text-secondary mb-2 small" style="border-left: 2px solid #ff9f43;">推薦短評: ${item.recommend_notes}</div>` : ""}
+                                    <div class="text-muted small" style="font-size: 0.8rem;">
+                                        總集數規格：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
+                                    </div>
                                 </div>
                             </div>
                             <div>
@@ -1364,6 +1404,159 @@
         }
 
         // 新增劇集
+        // 全屏預覽圖 Lightbox 互動邏輯
+        let currentLightboxUrls = [];
+        let currentLightboxIndex = 0;
+
+        function openLightbox(urls, initialIdx = 0) {
+            if (!urls || urls.length === 0) return;
+            currentLightboxUrls = urls;
+            currentLightboxIndex = initialIdx;
+
+            const overlay = document.getElementById("imageLightboxOverlay");
+            const carousel = document.getElementById("lightbox-carousel");
+            const prevBtn = document.getElementById("lightbox-prev-btn");
+            const nextBtn = document.getElementById("lightbox-next-btn");
+            const badge = document.getElementById("lightbox-badge");
+
+            carousel.innerHTML = urls.map((u, i) => `
+                <div class="d-flex align-items-center justify-content-center w-100 h-100 flex-shrink-0" style="scroll-snap-align: center; width: 100vw; height: 100vh;">
+                    <img src="${u}" style="max-width: 95vw; max-height: 85vh; object-fit: contain; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.8);" alt="預覽圖 ${i+1}">
+                </div>
+            `).join('');
+
+            if (urls.length > 1) {
+                prevBtn.style.display = 'flex';
+                nextBtn.style.display = 'flex';
+                badge.style.display = 'inline-block';
+                badge.innerText = `${initialIdx + 1} / ${urls.length}`;
+            } else {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                badge.style.display = 'none';
+            }
+
+            overlay.classList.remove("d-none");
+            overlay.classList.add("d-flex");
+            document.body.style.overflow = "hidden";
+
+            setTimeout(() => {
+                carousel.scrollLeft = initialIdx * carousel.clientWidth;
+            }, 50);
+        }
+
+        function closeLightbox() {
+            const overlay = document.getElementById("imageLightboxOverlay");
+            if (overlay) {
+                overlay.classList.remove("d-flex");
+                overlay.classList.add("d-none");
+            }
+            document.body.style.overflow = "";
+        }
+
+        function handleLightboxBackdropClick(e) {
+            if (e.target.id === 'imageLightboxOverlay' || e.target.classList.contains('w-100')) {
+                closeLightbox();
+            }
+        }
+
+        function navigateLightbox(dir) {
+            const carousel = document.getElementById("lightbox-carousel");
+            if (!carousel || currentLightboxUrls.length <= 1) return;
+            
+            let newIdx = currentLightboxIndex + dir;
+            if (newIdx < 0) newIdx = 0;
+            if (newIdx >= currentLightboxUrls.length) newIdx = currentLightboxUrls.length - 1;
+            
+            currentLightboxIndex = newIdx;
+            carousel.scrollTo({
+                left: newIdx * carousel.clientWidth,
+                behavior: 'smooth'
+            });
+        }
+
+        function onLightboxScroll(el) {
+            if (!el || currentLightboxUrls.length <= 1) return;
+            const idx = Math.round(el.scrollLeft / el.clientWidth);
+            if (idx >= 0 && idx < currentLightboxUrls.length) {
+                currentLightboxIndex = idx;
+                const badge = document.getElementById("lightbox-badge");
+                if (badge) {
+                    badge.innerText = `${idx + 1} / ${currentLightboxUrls.length}`;
+                }
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            const overlay = document.getElementById("imageLightboxOverlay");
+            if (overlay && !overlay.classList.contains("d-none")) {
+                if (e.key === "Escape") closeLightbox();
+                else if (e.key === "ArrowLeft") navigateLightbox(-1);
+                else if (e.key === "ArrowRight") navigateLightbox(1);
+            }
+        });
+
+        // 滑動切換多張預覽圖 (Carousel) 輔助函式
+        function scrollCarousel(uid, direction, btn) {
+            if (btn) event.stopPropagation();
+            const el = document.getElementById(uid);
+            if (el) {
+                el.scrollBy({ left: direction * 85, behavior: 'smooth' });
+            }
+        }
+
+        function updateCarouselBadge(uid, total, el) {
+            const badge = document.getElementById(uid + '-badge');
+            if (badge && el) {
+                const idx = Math.round(el.scrollLeft / 85) + 1;
+                badge.innerText = `${Math.max(1, Math.min(idx, total))}/${total}`;
+            }
+        }
+
+        function renderPreviewImagesHtml(imageUrlData) {
+            let urls = [];
+            if (Array.isArray(imageUrlData)) {
+                urls = imageUrlData;
+            } else if (typeof imageUrlData === 'string' && imageUrlData.trim()) {
+                const str = imageUrlData.trim();
+                if (str.startsWith('[')) {
+                    try {
+                        const arr = JSON.parse(str);
+                        if (Array.isArray(arr)) urls = arr;
+                    } catch(e) {
+                        urls = str.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+                    }
+                } else {
+                    urls = str.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+                }
+            }
+
+            urls = urls.filter(u => u && typeof u === 'string');
+            if (urls.length === 0) return '';
+
+            const urlsJson = JSON.stringify(urls).replace(/"/g, '&quot;');
+
+            if (urls.length === 1) {
+                return `<img src="${urls[0]}" class="drama-cover me-3" style="width: 85px; height: 115px; object-fit: cover; border-radius: 8px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;" onclick="openLightbox(${urlsJson}, 0)" onerror="this.style.display='none';" alt="預覽圖">`;
+            }
+
+            const uid = 'carousel-' + Math.random().toString(36).substr(2, 9);
+            const imgsHtml = urls.map((u, idx) => 
+                `<img src="${u}" style="width: 85px; height: 115px; object-fit: cover; scroll-snap-align: start; flex-shrink: 0; border-radius: 8px; cursor: pointer;" onclick="openLightbox(${urlsJson}, ${idx})" onerror="this.style.display='none';" alt="預覽圖 ${idx+1}">`
+            ).join('');
+
+            return `
+                <div class="drama-cover-carousel me-3 position-relative" style="width: 85px; height: 115px; flex-shrink: 0;">
+                    <div id="${uid}" class="d-flex" style="width: 85px; height: 115px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); scrollbar-width: none; -ms-overflow-style: none;" onscroll="updateCarouselBadge('${uid}', ${urls.length}, this)">
+                        ${imgsHtml}
+                    </div>
+                    <span id="${uid}-badge" class="badge bg-dark bg-opacity-75 text-white position-absolute" style="bottom: 3px; right: 3px; font-size: 0.55rem; padding: 2px 4px; border-radius: 4px; pointer-events: none; backdrop-filter: blur(2px); z-index: 3;">1/${urls.length}</span>
+                    <button type="button" class="btn p-0 text-white position-absolute top-50 start-0 translate-middle-y d-flex align-items-center justify-content-center" style="width: 16px; height: 26px; background: rgba(0,0,0,0.5); border: none; border-radius: 0 4px 4px 0; font-size: 0.75rem; z-index: 3; line-height: 1;" onclick="scrollCarousel('${uid}', -1, this)">‹</button>
+                    <button type="button" class="btn p-0 text-white position-absolute top-50 end-0 translate-middle-y d-flex align-items-center justify-content-center" style="width: 16px; height: 26px; background: rgba(0,0,0,0.5); border: none; border-radius: 4px 0 0 4px; font-size: 0.75rem; z-index: 3; line-height: 1;" onclick="scrollCarousel('${uid}', 1, this)">›</button>
+                </div>
+            `;
+        }
+
         function openAddDramaModal() {
             document.getElementById("dramaModalTitle").innerText = "新增劇集項目";
             document.getElementById("edit-drama-id").value = "";
@@ -1377,6 +1570,7 @@
 
             document.getElementById("drama-seasons").value = "1";
             document.getElementById("drama-episodes").value = "12";
+            document.getElementById("drama-image-url").value = "";
             document.getElementById("link-rows-container").innerHTML = "";
             
             const modal = new bootstrap.Modal(document.getElementById("dramaModal"));
@@ -1437,6 +1631,7 @@
 
             const totalSeasons = document.getElementById("drama-seasons").value;
             const totalEpisodes = document.getElementById("drama-episodes").value;
+            const imageUrl = document.getElementById("drama-image-url").value.trim();
 
             if (!title) {
                 alert("劇名不可空白！");
@@ -1460,7 +1655,8 @@
                 category: finalCategory,
                 total_seasons: parseInt(totalSeasons),
                 total_episodes: parseInt(totalEpisodes),
-                info_links: links
+                info_links: links,
+                image_url: imageUrl
             };
 
             fetch(url, {
@@ -1782,6 +1978,69 @@
             });
         }
 
+        // 我的清單：移除個人收藏
+        function removeDrama(id, title, btnEl) {
+            Swal.fire({
+                title: '確定移除收藏？',
+                html: `<span style="color:#ccc">將從清單移除：<br><b>${title}</b></span>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '確定移除',
+                cancelButtonText: '取消',
+                background: '#1a1a2e',
+                color: '#e0e0e0'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                // 樂觀更新：立即隱藏該卡片
+                const card = btnEl ? btnEl.closest('.drama-item') : null;
+                if (card) {
+                    card.style.transition = 'opacity 0.3s';
+                    card.style.opacity = '0';
+                    setTimeout(() => card.remove(), 300);
+                }
+                // 同步更新內存 masterList
+                if (myDramasMasterList) {
+                    myDramasMasterList = myDramasMasterList.filter(d => d.drama_id !== id);
+                }
+                // 同步還原 allDramasMasterList 的 is_added 狀態
+                if (allDramasMasterList) {
+                    const item = allDramasMasterList.find(d => d.drama_id === id);
+                    if (item) item.is_added = false;
+                }
+
+                fetch(`/line/api/dramas/remove/${id}/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ access_token: userAccessToken })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({ title: '已移除收藏', icon: 'success', timer: 1000, showConfirmButton: false,
+                            background: '#1a1a2e', color: '#e0e0e0' });
+                        // 強制重載確保計數正確
+                        myDramasMasterList = null;
+                        fetchDramas('my_dramas', 1, true);
+                        // 若目前也在 all_dramas tab，強制重載以同步按鈕狀態
+                        allDramasMasterList = null;
+                    } else {
+                        Swal.fire('錯誤', '移除失敗：' + data.error, 'error');
+                        // 失敗時重新載入還原畫面
+                        myDramasMasterList = null;
+                        fetchDramas('my_dramas', 1, true);
+                    }
+                })
+                .catch(err => {
+                    console.error('removeDrama error:', err);
+                    myDramasMasterList = null;
+                    fetchDramas('my_dramas', 1, true);
+                });
+            });
+        }
+
         // 抓取所有唯一的分類並填入下拉選單 (分組：動畫類 vs 動畫電影類，由新至舊排序)
         function fetchCategories() {
             const url = apiBaseUrl + "/line/api/dramas/categories/";
@@ -1925,3 +2184,4 @@
     </script>
 </body>
 </html>
+

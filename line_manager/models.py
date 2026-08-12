@@ -118,6 +118,7 @@ class Drama(models.Model):
     total_seasons = models.IntegerField(default=1, verbose_name=_("總季數"))
     total_episodes = models.IntegerField(default=0, verbose_name=_("總集數"))
     info_links = EncryptedTextField(blank=True, default="[]", verbose_name=_("相關資訊連結"))
+    image_url = EncryptedTextField(blank=True, default="", verbose_name=_("預覽圖連結"))
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_dramas", verbose_name=_("建立者"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))

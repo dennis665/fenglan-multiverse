@@ -55,7 +55,7 @@ def run_daily_drama_update():
     test_tv_csv = os.path.join(test_dir, "tv_dramas.csv")
     test_movie_csv = os.path.join(test_dir, "movie_dramas.csv")
 
-    fieldnames = ['title', 'category', 'total_seasons', 'total_episodes', 'info_links']
+    fieldnames = ['title', 'category', 'total_seasons', 'total_episodes', 'info_links', 'image_url']
 
     # ----------------------------------------------------
     # Part 1. 抓取 TV 季番 (動畫化決定 + 2026年7月(含)之後)
@@ -63,8 +63,54 @@ def run_daily_drama_update():
     print("\n[TV] [1/2] 正在抓取 TV 動畫 (動畫化決定 & 2026年7月(含)之後)...")
     tv_seasons = [f"{y}{m:02d}" for y in range(2026, 2029) for m in [1, 4, 7, 10] if not (y == 2026 and m < 7)]
     
-    tv_rows = []
-    tv_seen_keys = set()
+    aid_image_cache = {}
+
+    def get_anime_images(aid):
+        if aid in aid_image_cache:
+            return aid_image_cache[aid]
+        if not aid or not str(aid).isdigit():
+            return ""
+        url = f"https://youranimes.tw/animes/{aid}"
+        cmd = headers_curl + [url]
+        try:
+            raw_html = subprocess.check_output(cmd, timeout=10).decode('utf-8', errors='ignore')
+        except Exception:
+            raw_html = ""
+        if not raw_html:
+            aid_image_cache[aid] = ""
+            return ""
+
+        pattern = re.compile(rf'https://d28s5ztqvkii64\.cloudfront\.net/images/anime/{aid}/([^"\'\s\\<>]+)')
+        matches = pattern.findall(raw_html)
+        
+        bases = []
+        base_best_file = {}
+        for m in matches:
+            base = re.sub(r'(_2x|_thumbnail)?\.(webp|jpg|png|jpeg)', '', m)
+            if not base:
+                continue
+            if base not in bases:
+                bases.append(base)
+                
+            if base not in base_best_file:
+                base_best_file[base] = m
+            else:
+                cur = base_best_file[base]
+                if "_2x.webp" in m:
+                    base_best_file[base] = m
+                elif ".webp" in m and "_thumbnail" not in m and "_2x" not in cur:
+                    base_best_file[base] = m
+
+        res_urls = []
+        for b in bases:
+            f_name = base_best_file[b]
+            if "_thumbnail" in f_name:
+                f_name = f_name.replace("_thumbnail", "")
+            res_urls.append(f"https://d28s5ztqvkii64.cloudfront.net/images/anime/{aid}/{f_name}")
+            
+        result_str = "\n".join(res_urls)
+        aid_image_cache[aid] = result_str
+        return result_str
 
     def crawl_tv_page(url, tag_label):
         animes = []
@@ -87,7 +133,14 @@ def run_daily_drama_update():
                     clean_t = normalize_title(title)
                     if clean_t and len(clean_t) > 1 and "排行榜" not in clean_t:
                         seen_local.add(aid)
-                        animes.append({'title': clean_t, 'category': tag_label, 'url': f"https://youranimes.tw/animes/{aid}"})
+                        img_url = get_anime_images(aid)
+                        animes.append({
+                            'id': aid,
+                            'title': clean_t,
+                            'category': tag_label,
+                            'url': f"https://youranimes.tw/animes/{aid}",
+                            'image_url': img_url
+                        })
         except Exception as e:
             print(f"Fetch error for {url}: {e}")
         return animes
@@ -104,7 +157,8 @@ def run_daily_drama_update():
             tv_rows.append({
                 'title': clean_t, 'category': "動畫化決定",
                 'total_seasons': '1', 'total_episodes': '0',
-                'info_links': json.dumps(link_entry, ensure_ascii=False)
+                'info_links': json.dumps(link_entry, ensure_ascii=False),
+                'image_url': item.get('image_url', '')
             })
 
     # (2) 2026年7月(含)之後所有季度
@@ -124,7 +178,8 @@ def run_daily_drama_update():
                 tv_rows.append({
                     'title': clean_t, 'category': tag_label,
                     'total_seasons': '1', 'total_episodes': '0',
-                    'info_links': json.dumps(link_entry, ensure_ascii=False)
+                    'info_links': json.dumps(link_entry, ensure_ascii=False),
+                    'image_url': item.get('image_url', '')
                 })
         time.sleep(0.02)
 
@@ -161,7 +216,8 @@ def run_daily_drama_update():
             movie_rows.append({
                 'title': clean_t, 'category': "日本動畫電影製作決定",
                 'total_seasons': '1', 'total_episodes': '1',
-                'info_links': json.dumps(link_entry, ensure_ascii=False)
+                'info_links': json.dumps(link_entry, ensure_ascii=False),
+                'image_url': item.get('image_url', '')
             })
 
     # (2) 2026年(含)之後日版與台版電影
@@ -180,7 +236,8 @@ def run_daily_drama_update():
                     movie_rows.append({
                         'title': clean_t, 'category': tag_label,
                         'total_seasons': '1', 'total_episodes': '1',
-                        'info_links': json.dumps(link_entry, ensure_ascii=False)
+                        'info_links': json.dumps(link_entry, ensure_ascii=False),
+                        'image_url': item.get('image_url', '')
                     })
             time.sleep(0.02)
 
@@ -213,7 +270,8 @@ def run_daily_drama_update():
                     'category': cat,
                     'total_seasons': r.get('total_seasons', 1),
                     'total_episodes': r.get('total_episodes', 0),
-                    'info_links': r.get('info_links', '[]')
+                    'info_links': r.get('info_links', '[]'),
+                    'image_url': r.get('image_url', '')
                 }
 
     # 合併 resources 與 test CSV
@@ -242,6 +300,10 @@ def run_daily_drama_update():
         if key in csv_map:
             db_existing_keys.add(key)
             retained_count += 1
+            row = csv_map[key]
+            if row.get('image_url') and d.image_url != row['image_url']:
+                d.image_url = row['image_url']
+                d.save()
         else:
             for progress in list(d.progresses.all()):
                 progress.delete()
@@ -258,7 +320,8 @@ def run_daily_drama_update():
                 category=row['category'],
                 total_seasons=int(row['total_seasons']) if str(row['total_seasons']).isdigit() else 1,
                 total_episodes=int(row['total_episodes']) if str(row['total_episodes']).isdigit() else 0,
-                info_links=row['info_links']
+                info_links=row['info_links'],
+                image_url=row.get('image_url', '')
             )
             created_count += 1
 

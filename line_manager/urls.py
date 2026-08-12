@@ -36,6 +36,7 @@ urlpatterns = [
     path("api/dramas/accept_recommend/<int:pk>/", views.api_accept_recommendation, name="api_accept_recommendation"),
     path("api/dramas/search/", views.api_search_existing_dramas, name="api_search_existing_dramas"),
     path("api/dramas/join/<int:pk>/", views.api_join_drama, name="api_join_drama"),
+    path("api/dramas/remove/<int:pk>/", views.api_remove_drama, name="api_remove_drama"),
     path("api/dramas/categories/", views.api_get_categories, name="api_get_categories"),
     path("api/friends/", views.api_get_friends, name="api_get_friends"),
     path("api/friends/add/", views.api_add_friend, name="api_add_friend"),

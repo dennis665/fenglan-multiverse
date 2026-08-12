@@ -1936,6 +1936,7 @@ def api_get_dramas(request):
                     "total_seasons": d.total_seasons,
                     "total_episodes": d.total_episodes,
                     "info_links": links,
+                    "image_url": getattr(d, "image_url", "") or "",
                     "current_season": p.current_season,
                     "current_episode": p.current_episode,
                     "is_tracked": p.is_tracked,
@@ -1986,6 +1987,7 @@ def api_get_dramas(request):
                     "total_seasons": d.total_seasons,
                     "total_episodes": d.total_episodes,
                     "info_links": links,
+                    "image_url": getattr(d, "image_url", "") or "",
                     "creator": creator_name,
                     "is_added": d.pk in tracked_drama_ids,
                     "updated_at": localtime(d.updated_at).strftime("%Y-%m-%d %H:%M"),
@@ -2024,6 +2026,7 @@ def api_get_dramas(request):
                     "total_seasons": d.total_seasons,
                     "total_episodes": d.total_episodes,
                     "info_links": links,
+                    "image_url": getattr(d, "image_url", "") or "",
                     "from_user": from_name,
                     "recommend_notes": r.recommend_notes,
                     "created_at": localtime(r.created_at).strftime("%Y-%m-%d %H:%M"),
@@ -2060,6 +2063,7 @@ def api_create_drama(request):
         total_seasons = int(data.get("total_seasons", 1))
         total_episodes = int(data.get("total_episodes", 0))
         links = data.get("info_links", [])
+        image_url = data.get("image_url", "")
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
@@ -2086,6 +2090,7 @@ def api_create_drama(request):
         total_seasons=total_seasons,
         total_episodes=total_episodes,
         info_links=json.dumps(links, ensure_ascii=False),
+        image_url=image_url,
         creator=user,
     )
 
@@ -2153,6 +2158,7 @@ def api_update_drama(request, pk):
         total_seasons = data.get("total_seasons")
         total_episodes = data.get("total_episodes")
         links = data.get("info_links")
+        image_url = data.get("image_url")
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
@@ -2195,6 +2201,8 @@ def api_update_drama(request, pk):
         drama.total_episodes = int(total_episodes)
     if links is not None:
         drama.info_links = new_links_str
+    if image_url is not None:
+        drama.image_url = image_url
 
     drama.save()
 
@@ -2586,6 +2594,40 @@ def api_join_drama(request, pk):
     )
 
     return JsonResponse({"status": "success", "already_exists": not created})
+
+
+@csrf_exempt
+def api_remove_drama(request, pk):
+    """API 端點：從個人追劇清單移除指定劇集"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from .models import Drama, UserDramaProgress
+    drama = Drama.objects.filter(pk=pk).first()
+    if not drama:
+        return JsonResponse({"error": "Drama not found"}, status=404)
+
+    deleted_count, _ = UserDramaProgress.objects.filter(user=user, drama=drama).delete()
+    if deleted_count == 0:
+        return JsonResponse({"error": "Record not found in your list"}, status=404)
+
+    return JsonResponse({"status": "success"})
 
 
 @csrf_exempt
