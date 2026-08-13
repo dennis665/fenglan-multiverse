@@ -63,6 +63,8 @@ def run_daily_drama_update():
     print("\n[TV] [1/2] 正在抓取 TV 動畫 (動畫化決定 & 2026年7月(含)之後)...")
     tv_seasons = [f"{y}{m:02d}" for y in range(2026, 2029) for m in [1, 4, 7, 10] if not (y == 2026 and m < 7)]
     
+    tv_rows = []
+    tv_seen_keys = set()
     aid_image_cache = {}
 
     def get_anime_images(aid):
