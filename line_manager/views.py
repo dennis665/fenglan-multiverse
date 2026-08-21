@@ -853,10 +853,10 @@ def api_get_itineraries(request):
                         api_instance = MessagingApi(api_client)
                         summary = api_instance.get_group_summary(item.group_id)
                         group_name = summary.group_name
-                        cache.set(cache_key, group_name, timeout=86400)  # 快取 24 小時
                 except Exception as e:
-                    jinfo_error(e, f"Failed to fetch group summary for {item.group_id}")
+                    # 避免 Bot 不在群組時重複向 LINE API 請求並洗版 Log
                     group_name = f"群組 ({item.group_id[-6:]})"
+                cache.set(cache_key, group_name, timeout=86400)  # 快取 24 小時（即使失敗也快取，避免重複請求 404）
             group_source = f"群組: {group_name}"
 
         # 讀取建立者的 LINE 暱稱，若無則顯示系統帳號名稱
