@@ -14,60 +14,112 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: radial-gradient(ellipse at bottom, #0f172a 0%, #030712 100%);
             min-height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #f8fafc;
+            position: relative;
+            overflow-x: hidden;
         }
+        /* 全屏微光星空效果 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40px 70px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 50px 160px, #38bdf8, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #818cf8, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 130px 80px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 160px 120px, #a7f3d0, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 210px 190px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 260px 40px, #c084fc, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 310px 140px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 370px 80px, #60a5fa, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 420px 180px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 470px 60px, #f472b6, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 500px 320px;
+            opacity: 0.75;
+            pointer-events: none;
+            z-index: 0;
+            animation: starsTwinkle 5s ease-in-out infinite alternate;
+        }
+        @keyframes starsTwinkle {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 0.95; transform: scale(1.02); }
+        }
+
         .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.5);
+            color: #f1f5f9;
         }
         .btn-line {
-            background-color: #1DB446;
+            background: linear-gradient(135deg, #1DB446 0%, #10b981 100%);
             color: white;
             border: none;
             border-radius: 50px;
             font-weight: bold;
+            box-shadow: 0 4px 14px rgba(29, 180, 70, 0.4);
             transition: all 0.3s ease;
         }
         .btn-line:hover {
-            background-color: #158b32;
+            background: linear-gradient(135deg, #158b32 0%, #059669 100%);
             color: white;
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 180, 70, 0.6);
         }
         .nav-tabs {
             border-bottom: none;
         }
         .nav-tabs .nav-link {
-            border: none;
-            color: #666;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.6);
+            color: #94a3b8;
             font-weight: bold;
             border-radius: 50px;
-            margin: 0 5px;
-            padding: 8px 20px;
+            margin: 0 3px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
         }
         .nav-tabs .nav-link.active {
-            background-color: #1DB446;
+            background: linear-gradient(135deg, #1DB446 0%, #059669 100%);
             color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 14px rgba(29, 180, 70, 0.4);
         }
-        .badge-eat { background-color: #ff9f43; }
-        .badge-exhibit { background-color: #5f27cd; }
-        .badge-sport { background-color: #ff6b6b; }
-        .badge-travel { background-color: #10ac84; }
-        .badge-movie { background-color: #0abde3; }
-        .badge-other { background-color: #8395a7; }
+        .badge-tab-count {
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 50px;
+        }
+        .badge-eat { background-color: #f97316; }
+        .badge-exhibit { background-color: #8b5cf6; }
+        .badge-sport { background-color: #ef4444; }
+        .badge-travel { background-color: #10b981; }
+        .badge-movie { background-color: #06b6d4; }
+        .badge-other { background-color: #64748b; }
+
         .schedule-item {
             border-left: 5px solid #1DB446;
-            transition: transform 0.2s ease;
+            background: rgba(30, 41, 59, 0.88);
+            color: #f8fafc;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .schedule-item:hover {
-            transform: scale(1.02);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
         }
         .loader {
-            border: 5px solid #f3f3f3;
+            border: 5px solid rgba(255,255,255,0.1);
             border-top: 5px solid #1DB446;
             border-radius: 50%;
             width: 40px;
@@ -81,17 +133,17 @@
     </style>
 </head>
 <body class="py-4">
-    <div class="container" style="max-width: 500px;">
+    <div class="container position-relative" style="max-width: 520px; z-index: 1;">
         <!-- 載入中畫面 -->
         <div id="loading-section" class="text-center py-5">
             <div class="loader d-inline-block"></div>
-            <p class="mt-3 text-muted fw-bold">正在讀取 LINE 個人檔案與行程中...</p>
+            <p class="mt-3 text-light fw-bold">正在讀取 LINE 個人檔案與行程中...</p>
         </div>
 
         <!-- 主要列表畫面 -->
         <div id="main-section" class="d-none">
             <!-- 帳號未綁定提示橫幅 -->
-            <div id="bind-warning-banner" class="alert alert-warning py-2 px-3 mb-3 small d-none" style="border-radius: 12px; border: 1px solid #ffeeba; background-color: #fff3cd; color: #856404;">
+            <div id="bind-warning-banner" class="alert alert-warning py-2 px-3 mb-3 small d-none" style="border-radius: 12px; border: 1px solid #ffeeba; background-color: rgba(255, 243, 205, 0.95); color: #856404;">
                 <i class="fa-solid fa-triangle-exclamation me-1 text-warning"></i> 
                 目前使用臨時帳號。
                 <a href="/line/liff/bind/" id="bind-link" class="alert-link text-decoration-none fw-bold ms-1" style="color: #533f03;"><i class="fa-solid fa-link me-1"></i>點此安全連結 Google 帳號</a>
@@ -99,24 +151,30 @@
 
             <!-- 頂部 Header -->
             <div class="glass-card p-4 mb-4 text-center position-relative">
-                <h3 class="fw-bold mb-1"><i class="fa-regular fa-calendar-check text-success me-2"></i>行程小幫手</h3>
-                <p id="group-title" class="text-muted small mb-0"><i class="fa-solid fa-users me-1"></i>個人行程看板</p>
+                <h3 class="fw-bold mb-1 text-white"><i class="fa-regular fa-calendar-check text-success me-2"></i>行程小幫手</h3>
+                <p id="group-title" class="text-light text-opacity-75 small mb-0"><i class="fa-solid fa-users me-1"></i>個人行程看板</p>
                 <div class="mt-3 d-flex justify-content-between align-items-center">
-                    <span class="text-muted small">Hi, <span id="user-display-name" class="fw-bold text-success">LINE 用戶</span></span>
+                    <span class="text-light small">Hi, <span id="user-display-name" class="fw-bold text-success">LINE 用戶</span></span>
                     <a href="/line/liff/create/" id="add-btn" class="btn btn-sm btn-line px-3"><i class="fa-solid fa-plus me-1"></i>新增行程</a>
                 </div>
             </div>
 
-            <!-- 分頁 Tab -->
+            <!-- 分頁 Tab (附總筆數 Badges) -->
             <ul class="nav nav-tabs justify-content-center mb-3" id="scheduleTab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-panel" type="button" role="tab">🔔 即將到來</button>
+                    <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-panel" type="button" role="tab" onclick="switchTab('upcoming')">
+                        🔔 即將到來 <span id="badge-upcoming-count" class="badge badge-tab-count bg-white text-dark ms-1">0</span>
+                    </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="unscheduled-tab" data-bs-toggle="tab" data-bs-target="#unscheduled-panel" type="button" role="tab">🌟 有興趣/未定</button>
+                    <button class="nav-link" id="unscheduled-tab" data-bs-toggle="tab" data-bs-target="#unscheduled-panel" type="button" role="tab" onclick="switchTab('unscheduled')">
+                        🌟 有興趣/未定 <span id="badge-unscheduled-count" class="badge badge-tab-count bg-white text-dark ms-1">0</span>
+                    </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-panel" type="button" role="tab">📅 歷史紀錄</button>
+                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-panel" type="button" role="tab" onclick="switchTab('history')">
+                        📅 歷史紀錄 <span id="badge-history-count" class="badge badge-tab-count bg-white text-dark ms-1">0</span>
+                    </button>
                 </li>
             </ul>
 
@@ -127,10 +185,36 @@
                     <div id="upcoming-list" class="d-flex flex-column gap-3">
                         <!-- 動態插入 -->
                     </div>
-                    <div id="upcoming-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
-                        <button class="btn btn-sm btn-outline-success px-3" id="upcoming-prev-btn" onclick="changePage('upcoming', -1)" style="border-radius: 50px;">上一頁</button>
-                        <span class="small text-muted fw-bold">第 <span id="upcoming-page-num" class="text-success">1</span> 頁</span>
-                        <button class="btn btn-sm btn-outline-success px-3" id="upcoming-next-btn" onclick="changePage('upcoming', 1)" style="border-radius: 50px;">下一頁</button>
+                    <!-- 底部分頁與顯示數量控制項 -->
+                    <div id="upcoming-pagination" class="glass-card p-3 mt-3 d-flex flex-column gap-2 d-none" style="border-radius: 16px;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="small text-light">
+                                共 <span id="upcoming-total-count" class="fw-bold text-success">0</span> 筆 ‧ 
+                                第 <span id="upcoming-page-num" class="text-success fw-bold">1</span> / <span id="upcoming-total-pages" class="text-success fw-bold">1</span> 頁
+                            </div>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-light text-opacity-75" style="font-size: 0.75rem;">每頁：</span>
+                                <select id="upcoming-pagesize-select" class="form-select form-select-sm bg-dark text-white border-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem; width: auto;" onchange="changeTabPageSize('upcoming', this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10">10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-1" id="upcoming-prev-btn" onclick="changePage('upcoming', -1)" style="font-size: 0.8rem;">
+                                <i class="fa-solid fa-chevron-left me-1"></i>上一頁
+                            </button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-light text-opacity-75" style="font-size: 0.75rem;">頁數：</span>
+                                <select id="upcoming-page-select" class="form-select form-select-sm bg-dark text-white border-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem; width: auto;" onchange="goToTabSelectedPage('upcoming', this.value)">
+                                    <option value="1">1</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-1" id="upcoming-next-btn" onclick="changePage('upcoming', 1)" style="font-size: 0.8rem;">
+                                下一頁<i class="fa-solid fa-chevron-right ms-1"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -139,10 +223,36 @@
                     <div id="unscheduled-list" class="d-flex flex-column gap-3">
                         <!-- 動態插入 -->
                     </div>
-                    <div id="unscheduled-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
-                        <button class="btn btn-sm btn-outline-success px-3" id="unscheduled-prev-btn" onclick="changePage('unscheduled', -1)" style="border-radius: 50px;">上一頁</button>
-                        <span class="small text-muted fw-bold">第 <span id="unscheduled-page-num" class="text-success">1</span> 頁</span>
-                        <button class="btn btn-sm btn-outline-success px-3" id="unscheduled-next-btn" onclick="changePage('unscheduled', 1)" style="border-radius: 50px;">下一頁</button>
+                    <!-- 底部分頁與顯示數量控制項 -->
+                    <div id="unscheduled-pagination" class="glass-card p-3 mt-3 d-flex flex-column gap-2 d-none" style="border-radius: 16px;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="small text-light">
+                                共 <span id="unscheduled-total-count" class="fw-bold text-success">0</span> 筆 ‧ 
+                                第 <span id="unscheduled-page-num" class="text-success fw-bold">1</span> / <span id="unscheduled-total-pages" class="text-success fw-bold">1</span> 頁
+                            </div>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-light text-opacity-75" style="font-size: 0.75rem;">每頁：</span>
+                                <select id="unscheduled-pagesize-select" class="form-select form-select-sm bg-dark text-white border-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem; width: auto;" onchange="changeTabPageSize('unscheduled', this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10">10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-1" id="unscheduled-prev-btn" onclick="changePage('unscheduled', -1)" style="font-size: 0.8rem;">
+                                <i class="fa-solid fa-chevron-left me-1"></i>上一頁
+                            </button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-light text-opacity-75" style="font-size: 0.75rem;">頁數：</span>
+                                <select id="unscheduled-page-select" class="form-select form-select-sm bg-dark text-white border-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem; width: auto;" onchange="goToTabSelectedPage('unscheduled', this.value)">
+                                    <option value="1">1</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-1" id="unscheduled-next-btn" onclick="changePage('unscheduled', 1)" style="font-size: 0.8rem;">
+                                下一頁<i class="fa-solid fa-chevron-right ms-1"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -151,10 +261,36 @@
                     <div id="history-list" class="d-flex flex-column gap-3">
                         <!-- 動態插入 -->
                     </div>
-                    <div id="history-pagination" class="d-flex justify-content-between align-items-center mt-3 d-none">
-                        <button class="btn btn-sm btn-outline-success px-3" id="history-prev-btn" onclick="changePage('history', -1)" style="border-radius: 50px;">上一頁</button>
-                        <span class="small text-muted fw-bold">第 <span id="history-page-num" class="text-success">1</span> 頁</span>
-                        <button class="btn btn-sm btn-outline-success px-3" id="history-next-btn" onclick="changePage('history', 1)" style="border-radius: 50px;">下一頁</button>
+                    <!-- 底部分頁與顯示數量控制項 -->
+                    <div id="history-pagination" class="glass-card p-3 mt-3 d-flex flex-column gap-2 d-none" style="border-radius: 16px;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="small text-light">
+                                共 <span id="history-total-count" class="fw-bold text-success">0</span> 筆 ‧ 
+                                第 <span id="history-page-num" class="text-success fw-bold">1</span> / <span id="history-total-pages" class="text-success fw-bold">1</span> 頁
+                            </div>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-light text-opacity-75" style="font-size: 0.75rem;">每頁：</span>
+                                <select id="history-pagesize-select" class="form-select form-select-sm bg-dark text-white border-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem; width: auto;" onchange="changeTabPageSize('history', this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10">10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-1" id="history-prev-btn" onclick="changePage('history', -1)" style="font-size: 0.8rem;">
+                                <i class="fa-solid fa-chevron-left me-1"></i>上一頁
+                            </button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-light text-opacity-75" style="font-size: 0.75rem;">頁數：</span>
+                                <select id="history-page-select" class="form-select form-select-sm bg-dark text-white border-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem; width: auto;" onchange="goToTabSelectedPage('history', this.value)">
+                                    <option value="1">1</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-1" id="history-next-btn" onclick="changePage('history', 1)" style="font-size: 0.8rem;">
+                                下一頁<i class="fa-solid fa-chevron-right ms-1"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -168,12 +304,15 @@
         let userAccessToken = null;
         let lineContext = null;
 
-        // 分頁狀態變數
-        let upcomingPage = 1;
-        let unscheduledPage = 1;
-        let historyPage = 1;
+        // 分頁與每頁顯示筆數狀態追蹤
+        let tabState = {
+            upcoming: { page: 1, pageSize: 5, totalPages: 1, totalCount: 0 },
+            unscheduled: { page: 1, pageSize: 5, totalPages: 1, totalCount: 0 },
+            history: { page: 1, pageSize: 5, totalPages: 1, totalCount: 0 }
+        };
+        let currentActiveTab = "upcoming";
 
-        // 解析 URL 中的 groupId 參數 (防止 LINE 內外瀏覽器重導向造成 Context 遺失)
+        // 解析 URL 中的 groupId 參數
         const urlParams = new URLSearchParams(window.location.search);
         const urlGroupId = urlParams.get("groupId");
 
@@ -201,7 +340,6 @@
                         userAccessToken = liff.getAccessToken();
                         lineContext = liff.getContext();
                         
-                        // 更新行程新增按鈕 of URL 參數，以便攜帶 groupId
                         const addBtn = document.getElementById("add-btn");
                         const currentGroupId = urlGroupId || (lineContext ? lineContext.groupId : null);
                         if (currentGroupId) {
@@ -209,12 +347,11 @@
                             document.getElementById("group-title").innerHTML = `<i class="fa-solid fa-users me-1"></i>群組共享行程`;
                         }
 
-                        // 首次載入：各分頁分別請求第一頁
-                        fetchItineraries("upcoming", 1);
-                        fetchItineraries("unscheduled", 1);
-                        fetchItineraries("history", 1);
+                        // 首次載入：請求所有分頁資料
+                        fetchItineraries("upcoming");
+                        fetchItineraries("unscheduled");
+                        fetchItineraries("history");
                         
-                        // 行程分享快速加入動作檢測
                         checkUrlActions();
                     }
                 })
@@ -224,9 +361,14 @@
                 });
         }
 
-        function fetchItineraries(tab, page) {
+        function switchTab(tab) {
+            currentActiveTab = tab;
+        }
+
+        function fetchItineraries(tab) {
             let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
-            
+            const state = tabState[tab];
+
             const listContainer = document.getElementById(`${tab}-list`);
             listContainer.innerHTML = `
                 <div class="text-center py-4">
@@ -245,7 +387,8 @@
                     access_token: userAccessToken,
                     group_id: groupId,
                     tab: tab,
-                    page: page
+                    page: state.page,
+                    page_size: state.pageSize
                 })
             })
             .then(res => res.json())
@@ -258,7 +401,6 @@
                 }
 
                 if (!data.is_bound) {
-                    // 尚未綁定，跳轉至帳號綁定頁
                     let bindUrl = `/line/liff/bind/`;
                     if (groupId) {
                         bindUrl += `?groupId=${groupId}`;
@@ -270,7 +412,6 @@
                 document.getElementById("user-display-name").innerText = data.username;
                 document.getElementById("main-section").classList.remove("d-none");
 
-                // 如果是臨時用戶，顯示綁定提示
                 if (data.is_temporary) {
                     const bindLink = document.getElementById("bind-link");
                     if (groupId) {
@@ -283,51 +424,92 @@
                     document.getElementById("bind-warning-banner").classList.add("d-none");
                 }
 
-                // 渲染清單
+                // 更新頁籤總筆數 Badge
+                if (data.counts) {
+                    document.getElementById("badge-upcoming-count").innerText = data.counts.upcoming || 0;
+                    document.getElementById("badge-unscheduled-count").innerText = data.counts.unscheduled || 0;
+                    document.getElementById("badge-history-count").innerText = data.counts.history || 0;
+                }
+
+                // 更新狀態變數
+                state.page = data.page || 1;
+                state.pageSize = data.page_size || 5;
+                state.totalCount = data.total_count || 0;
+                state.totalPages = data.total_pages || 1;
+
+                // 渲染行程卡片清單
                 renderList(data.list, `${tab}-list`, tab === "upcoming");
                 
-                // 更新分頁按鈕狀態
-                updatePaginationControls(tab, page, data.has_more);
+                // 更新底部分頁控制項
+                updatePaginationControls(tab);
             })
             .catch(err => {
                 console.error("Error fetching data:", err);
                 listContainer.innerHTML = `
-                    <div class="alert alert-danger text-center small my-2">
+                    <div class="alert alert-danger text-center small my-2" style="background: rgba(220,53,69,0.2); border-color: #dc3545; color: #ff8585;">
                         伺服器連線失敗，請重試！
                     </div>
                 `;
             });
         }
 
-        function updatePaginationControls(tab, page, hasMore) {
+        function updatePaginationControls(tab) {
+            const state = tabState[tab];
             const paginationDiv = document.getElementById(`${tab}-pagination`);
-            const pageNumSpan = document.getElementById(`${tab}-page-num`);
+            
+            document.getElementById(`${tab}-total-count`).innerText = state.totalCount;
+            document.getElementById(`${tab}-page-num`).innerText = state.page;
+            document.getElementById(`${tab}-total-pages`).innerText = state.totalPages;
+            
+            // 同步每頁顯示選單選取值
+            const sizeSelect = document.getElementById(`${tab}-pagesize-select`);
+            if (sizeSelect) sizeSelect.value = state.pageSize;
+
+            // 建立直達頁數下拉選單選項
+            const pageSelect = document.getElementById(`${tab}-page-select`);
+            if (pageSelect) {
+                pageSelect.innerHTML = "";
+                for (let i = 1; i <= state.totalPages; i++) {
+                    const opt = document.createElement("option");
+                    opt.value = i;
+                    opt.innerText = i;
+                    if (i === state.page) opt.selected = true;
+                    pageSelect.appendChild(opt);
+                }
+            }
+
+            // 上一頁與下一頁按鈕啟用狀態
             const prevBtn = document.getElementById(`${tab}-prev-btn`);
             const nextBtn = document.getElementById(`${tab}-next-btn`);
+            prevBtn.disabled = (state.page <= 1);
+            nextBtn.disabled = (state.page >= state.totalPages);
             
-            pageNumSpan.innerText = page;
-            
-            // 啟用/停用按鈕
-            prevBtn.disabled = (page <= 1);
-            nextBtn.disabled = !hasMore;
-            
-            // 顯示分頁按鈕區
             paginationDiv.classList.remove("d-none");
         }
 
+        function changeTabPageSize(tab, val) {
+            const newSize = parseInt(val);
+            if ([5, 10, 20].includes(newSize)) {
+                tabState[tab].pageSize = newSize;
+                tabState[tab].page = 1;
+                fetchItineraries(tab);
+            }
+        }
+
+        function goToTabSelectedPage(tab, val) {
+            const newPage = parseInt(val);
+            if (newPage >= 1 && newPage <= tabState[tab].totalPages) {
+                tabState[tab].page = newPage;
+                fetchItineraries(tab);
+            }
+        }
+
         function changePage(tab, offset) {
-            if (tab === "upcoming") {
-                upcomingPage += offset;
-                if (upcomingPage < 1) upcomingPage = 1;
-                fetchItineraries("upcoming", upcomingPage);
-            } else if (tab === "unscheduled") {
-                unscheduledPage += offset;
-                if (unscheduledPage < 1) unscheduledPage = 1;
-                fetchItineraries("unscheduled", unscheduledPage);
-            } else {
-                historyPage += offset;
-                if (historyPage < 1) historyPage = 1;
-                fetchItineraries("history", historyPage);
+            const state = tabState[tab];
+            let newPage = state.page + offset;
+            if (newPage >= 1 && newPage <= state.totalPages) {
+                state.page = newPage;
+                fetchItineraries(tab);
             }
         }
 
@@ -337,18 +519,17 @@
 
             if (list.length === 0) {
                 container.innerHTML = `
-                    <div class="glass-card p-4 text-center text-muted">
-                        <i class="fa-solid fa-calendar-xmark fa-2x mb-2 text-secondary"></i>
-                        <p class="mb-0 small">目前沒有任何行程紀錄</p>
+                    <div class="glass-card p-4 text-center text-light">
+                        <i class="fa-solid fa-calendar-xmark fa-2x mb-2 text-muted"></i>
+                        <p class="mb-0 small text-light text-opacity-75">目前沒有任何行程紀錄</p>
                     </div>
                 `;
                 return;
             }
 
-            const currentTab = elementId.split("-")[0]; // "upcoming", "unscheduled", "history"
+            const currentTab = elementId.split("-")[0];
 
             list.forEach(item => {
-                // 決定 Badge 樣式
                 let badgeClass = "badge-other";
                 if (item.activity_type.includes("吃飯") || item.activity_type.includes("EAT")) badgeClass = "badge-eat";
                 else if (item.activity_type.includes("逛街") || item.activity_type.includes("EXHIBIT")) badgeClass = "badge-exhibit";
@@ -361,30 +542,29 @@
                 let hideBtn = "";
                 if (currentTab !== "history") {
                     editBtn = `
-                        <button class="btn btn-sm btn-outline-primary border-0 me-1" onclick="editItinerary(${item.id})">
+                        <button class="btn btn-sm btn-outline-info border-0 me-1" onclick="editItinerary(${item.id})" title="編輯行程">
                             <i class="fa-regular fa-pen-to-square"></i>
                         </button>
                     `;
                     deleteBtn = `
-                        <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteItinerary(${item.id})">
+                        <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteItinerary(${item.id})" title="刪除行程">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
                     `;
                 } else {
                     hideBtn = `
-                        <button class="btn btn-sm btn-outline-secondary border-0 me-1" onclick="hideItinerary(${item.id})" title="隱藏此歷史行程">
+                        <button class="btn btn-sm btn-outline-light border-0 me-1" onclick="hideItinerary(${item.id})" title="隱藏此歷史行程">
                             <i class="fa-regular fa-eye-slash"></i>
                         </button>
                     `;
                 }
 
-                // 渲染相關活動連結
                 let linksHtml = "";
                 if (item.related_links && item.related_links.length > 0) {
                     linksHtml = '<div class="d-flex flex-wrap gap-1 mt-2">';
                     item.related_links.forEach(link => {
                         linksHtml += `
-                            <a href="${link.url}" target="_blank" class="badge bg-white text-success border border-success text-decoration-none px-2 py-1 small" style="font-size: 0.7rem; border-radius: 5px;">
+                            <a href="${link.url}" target="_blank" class="badge bg-dark bg-opacity-75 text-success border border-success text-decoration-none px-2 py-1 small" style="font-size: 0.7rem; border-radius: 6px;">
                                 <i class="fa-solid fa-link me-1"></i>${link.title}
                             </a>
                         `;
@@ -392,7 +572,6 @@
                     linksHtml += '</div>';
                 }
 
-                // 辨識個人或群組來源 Badge
                 let sourceBadgeHtml = "";
                 if (item.is_group) {
                     const membersStr = item.group_members && item.group_members.length > 0 ? item.group_members.join("、") : "無其他成員";
@@ -401,15 +580,13 @@
                     sourceBadgeHtml = `<span class="badge bg-secondary text-white small" style="font-weight: 500;"><i class="fa-solid fa-user me-1"></i>個人行程</span>`;
                 }
 
-                // 時間顯示或待定提示
                 let timeHtml = "";
                 if (item.is_unscheduled) {
                     timeHtml = `<span class="badge bg-warning text-dark small"><i class="fa-regular fa-clock me-1"></i>時間待定</span>`;
                 } else {
-                    timeHtml = `<span class="text-muted" style="font-size: 0.75rem;"><i class="fa-regular fa-clock me-1"></i>${item.date_time}</span>`;
+                    timeHtml = `<span class="text-light text-opacity-75" style="font-size: 0.78rem;"><i class="fa-regular fa-clock me-1 text-success"></i>${item.date_time}</span>`;
                 }
 
-                // 針對已定時行程，添加「加入 Google 日曆」按鈕
                 let googleCalendarBtn = "";
                 if (!item.is_unscheduled && currentTab === "upcoming") {
                     const gcalUrl = makeGoogleCalendarUrl(item);
@@ -420,16 +597,15 @@
                     `;
                 }
 
-                // 針對時間未定行程，添加「我有興趣」、「決定時間」、「分享至群組」按鈕及有興趣人員名單
                 let unscheduledActionsHtml = "";
                 if (item.is_unscheduled) {
                     const interestedCount = item.interested_users ? item.interested_users.length : 0;
                     const interestedNames = item.interested_users && interestedCount > 0 ? item.interested_users.join("、") : "尚無";
                     
                     unscheduledActionsHtml = `
-                        <div class="mt-2 border-top pt-2">
-                            <div class="small mb-2 text-muted">
-                                <i class="fa-solid fa-thumbs-up text-primary me-1"></i>有興趣成員 (${interestedCount}人)：<span class="fw-bold text-dark">${interestedNames}</span>
+                        <div class="mt-2 border-top border-secondary pt-2">
+                            <div class="small mb-2 text-light text-opacity-75">
+                                <i class="fa-solid fa-thumbs-up text-info me-1"></i>有興趣成員 (${interestedCount}人)：<span class="fw-bold text-white">${interestedNames}</span>
                             </div>
                             <div class="d-flex gap-1 flex-wrap">
                                 <button class="btn btn-xs btn-primary rounded-pill fw-bold py-1 px-2" style="font-size: 0.7rem;" onclick="joinUnscheduled(${item.id})">
@@ -454,13 +630,13 @@
                                 ${sourceBadgeHtml}
                                 ${timeHtml}
                             </div>
-                            <h5 class="fw-bold mb-1" style="font-size: 1.05rem; color: #2c3e50; word-break: break-all;">${item.title}</h5>
-                            <div class="text-muted small mb-1"><i class="fa-solid fa-location-dot me-1 text-danger"></i>${item.location}</div>
-                            ${item.notes ? `<div class="bg-light p-2 rounded text-secondary" style="font-size: 0.8rem; border-left: 2px solid #ccc; word-break: break-all;">${item.notes}</div>` : ""}
+                            <h5 class="fw-bold mb-1 text-white" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
+                            <div class="text-light text-opacity-75 small mb-1"><i class="fa-solid fa-location-dot me-1 text-danger"></i>${item.location}</div>
+                            ${item.notes ? `<div class="p-2 rounded text-light text-opacity-90" style="font-size: 0.8rem; background: rgba(15,23,42,0.7); border-left: 3px solid #1DB446; word-break: break-all;">${item.notes}</div>` : ""}
                             
                             ${linksHtml}
                             
-                            <div class="text-muted" style="font-size: 0.7rem; margin-top: 5px;">
+                            <div class="text-light text-opacity-50" style="font-size: 0.7rem; margin-top: 5px;">
                                 <i class="fa-regular fa-user me-1"></i>發起人: ${item.creator}
                                 ${(!item.is_unscheduled && item.notify_text) ? ` | 🔔 ${item.notify_text}` : ""}
                             </div>
@@ -488,7 +664,9 @@
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: '確定刪除',
-                cancelButtonText: '取消'
+                cancelButtonText: '取消',
+                background: '#0f172a',
+                color: '#fff'
             }).then((result) => {
                 if (result.isConfirmed) {
                     fetch(`/line/api/itineraries/delete/${id}/`, {
@@ -508,19 +686,21 @@
                                 text: '行程已成功刪除！',
                                 icon: 'success',
                                 timer: 1500,
-                                showConfirmButton: false
+                                showConfirmButton: false,
+                                background: '#0f172a',
+                                color: '#fff'
                             }).then(() => {
-                                fetchItineraries("upcoming", 1);
-                                fetchItineraries("unscheduled", 1);
-                                fetchItineraries("history", 1);
+                                fetchItineraries("upcoming");
+                                fetchItineraries("unscheduled");
+                                fetchItineraries("history");
                             });
                         } else {
-                            Swal.fire('錯誤', "刪除失敗: " + data.error, 'error');
+                            Swal.fire({ title: '錯誤', text: "刪除失敗: " + data.error, icon: 'error', background: '#0f172a', color: '#fff' });
                         }
                     })
                     .catch(err => {
                         console.error("Delete error:", err);
-                        Swal.fire('錯誤', "伺服器連線失敗", 'error');
+                        Swal.fire({ title: '錯誤', text: "伺服器連線失敗", icon: 'error', background: '#0f172a', color: '#fff' });
                     });
                 }
             });
@@ -535,7 +715,9 @@
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#aaa',
                 confirmButtonText: '確定隱藏',
-                cancelButtonText: '取消'
+                cancelButtonText: '取消',
+                background: '#0f172a',
+                color: '#fff'
             }).then((result) => {
                 if (result.isConfirmed) {
                     fetch(`/line/api/itineraries/hide/${id}/`, {
@@ -555,19 +737,21 @@
                                 text: '該行程已成功隱藏！',
                                 icon: 'success',
                                 timer: 1500,
-                                showConfirmButton: false
+                                showConfirmButton: false,
+                                background: '#0f172a',
+                                color: '#fff'
                             }).then(() => {
-                                fetchItineraries("upcoming", 1);
-                                fetchItineraries("unscheduled", 1);
-                                fetchItineraries("history", 1);
+                                fetchItineraries("upcoming");
+                                fetchItineraries("unscheduled");
+                                fetchItineraries("history");
                             });
                         } else {
-                            Swal.fire('錯誤', "隱藏失敗: " + data.error, 'error');
+                            Swal.fire({ title: '錯誤', text: "隱藏失敗: " + data.error, icon: 'error', background: '#0f172a', color: '#fff' });
                         }
                     })
                     .catch(err => {
                         console.error("Hide error:", err);
-                        Swal.fire('錯誤', "伺服器連線失敗", 'error');
+                        Swal.fire({ title: '錯誤', text: "伺服器連線失敗", icon: 'error', background: '#0f172a', color: '#fff' });
                     });
                 }
             });
@@ -582,14 +766,13 @@
             window.location.href = editUrl;
         }
 
-        // Google 日曆連結生成器
         function makeGoogleCalendarUrl(item) {
             const base = "https://www.google.com/calendar/render?action=TEMPLATE";
             const text = encodeURIComponent(item.title);
             const location = encodeURIComponent(item.location || "待定");
             const details = encodeURIComponent(item.notes || "");
             
-            const dtStr = item.date_time.replace(/[^0-9]/g, ""); // 例如 202607141030
+            const dtStr = item.date_time.replace(/[^0-9]/g, "");
             if (dtStr.length >= 12) {
                 const year = dtStr.substring(0, 4);
                 const month = dtStr.substring(4, 6);
@@ -599,7 +782,6 @@
                 
                 const startDate = `${year}${month}${day}T${hour}${min}00`;
                 
-                // 預設長度：一小時
                 const end = new Date(year, month - 1, day, hour, min);
                 end.setHours(end.getHours() + 1);
                 
@@ -615,7 +797,6 @@
             return `${base}&text=${text}&location=${location}&details=${details}`;
         }
 
-        // 👍 我有興趣/加入
         function joinUnscheduled(id) {
             let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
             fetch(`/line/api/itineraries/join/${id}/`, {
@@ -636,21 +817,22 @@
                         text: '您已成功表達對此行程有興趣！',
                         icon: 'success',
                         timer: 1500,
-                        showConfirmButton: false
+                        showConfirmButton: false,
+                        background: '#0f172a',
+                        color: '#fff'
                     }).then(() => {
-                        fetchItineraries("unscheduled", unscheduledPage);
+                        fetchItineraries("unscheduled");
                     });
                 } else {
-                    Swal.fire('錯誤', "操作失敗: " + data.error, 'error');
+                    Swal.fire({ title: '錯誤', text: "操作失敗: " + data.error, icon: 'error', background: '#0f172a', color: '#fff' });
                 }
             })
             .catch(err => {
                 console.error("Join error:", err);
-                Swal.fire('錯誤', "伺服器連線失敗", 'error');
+                Swal.fire({ title: '錯誤', text: "伺服器連線失敗", icon: 'error', background: '#0f172a', color: '#fff' });
             });
         }
 
-        // ⏰ 決定時間並定案
         function setFinalTimeModal(id) {
             let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
             
@@ -669,15 +851,17 @@
             Swal.fire({
                 title: '⏰ 決定活動時間',
                 html: `
-                    <p class="small text-muted">決定此行程時間後，將會發送推播通知至聊天室！</p>
-                    <input type="datetime-local" id="swal-dt" class="form-control" value="${defaultTime}">
+                    <p class="small text-light text-opacity-75">決定此行程時間後，將會發送推播通知至聊天室！</p>
+                    <input type="datetime-local" id="swal-dt" class="form-control bg-dark text-white border-secondary" value="${defaultTime}">
                 `,
                 focusConfirm: false,
                 showCancelButton: true,
                 confirmButtonColor: '#1DB446',
-                cancelButtonColor: '#aaa',
+                cancelButtonColor: '#64748b',
                 confirmButtonText: '確定時間並定案',
                 cancelButtonText: '取消',
+                background: '#0f172a',
+                color: '#fff',
                 preConfirm: () => {
                     const dt = document.getElementById('swal-dt').value;
                     if (!dt) {
@@ -705,27 +889,28 @@
                                 title: '行程已定案！',
                                 text: '已更新行程時間並成功推送 LINE 訊息！',
                                 icon: 'success',
-                                confirmButtonColor: '#1DB446'
+                                confirmButtonColor: '#1DB446',
+                                background: '#0f172a',
+                                color: '#fff'
                             }).then(() => {
-                                fetchItineraries("upcoming", 1);
-                                fetchItineraries("unscheduled", 1);
+                                fetchItineraries("upcoming");
+                                fetchItineraries("unscheduled");
                             });
                         } else {
-                            Swal.fire('錯誤', "定案失敗: " + data.error, 'error');
+                            Swal.fire({ title: '錯誤', text: "定案失敗: " + data.error, icon: 'error', background: '#0f172a', color: '#fff' });
                         }
                     })
                     .catch(err => {
                         console.error("Set time error:", err);
-                        Swal.fire('錯誤', "伺服器連線失敗", 'error');
+                        Swal.fire({ title: '錯誤', text: "伺服器連線失敗", icon: 'error', background: '#0f172a', color: '#fff' });
                     });
                 }
             });
         }
 
-        // 📢 分享至群組 (shareTargetPicker)
         function shareToGroup(id, title, location, interestedCount) {
             if (!liff.isApiAvailable('shareTargetPicker')) {
-                Swal.fire('提示', '目前環境不支援群組分享功能，請在 LINE App 內使用！', 'warning');
+                Swal.fire({ title: '提示', text: '目前環境不支援群組分享功能，請在 LINE App 內使用！', icon: 'warning', background: '#0f172a', color: '#fff' });
                 return;
             }
 
@@ -835,7 +1020,7 @@
             liff.shareTargetPicker([flexMessage])
                 .then(res => {
                     if (res) {
-                        Swal.fire('分享成功', '行程邀請已成功發送至聊天室！', 'success');
+                        Swal.fire({ title: '分享成功', text: '行程邀請已成功發送至聊天室！', icon: 'success', background: '#0f172a', color: '#fff' });
                     }
                 })
                 .catch(err => {
@@ -843,16 +1028,13 @@
                 });
         }
 
-        // 檢查網址參數之快速動作 (例如從 Flex 點進來)
         function checkUrlActions() {
             const action = urlParams.get("action");
             const itineraryId = urlParams.get("itineraryId");
             
             if (action === "join" && itineraryId) {
-                // 清理 URL 參數以防重複彈出
                 window.history.replaceState({}, document.title, window.location.pathname);
                 
-                // 獲取該行程詳細資訊
                 fetch(`/line/api/itineraries/detail/${itineraryId}/`, {
                     method: "POST",
                     headers: {
@@ -871,10 +1053,10 @@
                         Swal.fire({
                             title: `🌟 行程邀約：${data.title}`,
                             html: `
-                                <div class="text-start small p-2 bg-light rounded" style="font-size: 0.85rem; line-height: 1.5;">
+                                <div class="text-start small p-3 bg-dark text-light rounded" style="font-size: 0.85rem; line-height: 1.5; border: 1px solid rgba(255,255,255,0.1);">
                                     <div><b>📍 地點：</b>${data.location}</div>
-                                    ${data.notes ? `<div><b>📝 備註：</b>${data.notes}</div>` : ""}
-                                    <div class="mt-2 border-top pt-2">
+                                    ${data.notes ? `<div class="mt-1"><b>📝 備註：</b>${data.notes}</div>` : ""}
+                                    <div class="mt-2 border-top border-secondary pt-2">
                                         <b>👍 有興趣成員 (${interestedCount}人)：</b><br>
                                         <span class="text-success fw-bold">${interestedNames}</span>
                                     </div>
@@ -883,11 +1065,13 @@
                             showCancelButton: true,
                             showDenyButton: true,
                             confirmButtonColor: '#1DB446',
-                            denyButtonColor: '#3085d6',
-                            cancelButtonColor: '#aaa',
+                            denyButtonColor: '#38bdf8',
+                            cancelButtonColor: '#64748b',
                             confirmButtonText: '👍 我有興趣',
                             denyButtonText: '⏰ 決定時間',
-                            cancelButtonText: '關閉'
+                            cancelButtonText: '關閉',
+                            background: '#0f172a',
+                            color: '#fff'
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 joinUnscheduled(itineraryId);
@@ -896,7 +1080,7 @@
                             }
                         });
                     } else {
-                        Swal.fire('錯誤', '載入邀請行程失敗: ' + data.error, 'error');
+                        Swal.fire({ title: '錯誤', text: '載入邀請行程失敗: ' + data.error, icon: 'error', background: '#0f172a', color: '#fff' });
                     }
                 });
             }

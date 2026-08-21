@@ -778,6 +778,13 @@ def api_get_itineraries(request):
     except ValueError:
         page = 1
 
+    try:
+        page_size = int(data.get("page_size", 5))
+        if page_size not in [5, 10, 20, 50]:
+            page_size = 5
+    except ValueError:
+        page_size = 5
+
     # 撈取行程：清單一律顯示自己的（包含個人行程以及該用戶所屬群組的所有行程）
     # 依用戶要求：日期新至舊排序 (date_time 降序)
     base_qs = Itinerary.objects.filter(
@@ -785,19 +792,31 @@ def api_get_itineraries(request):
         is_hidden=False
     ).distinct()
 
+    upcoming_qs = base_qs.filter(date_time__gte=current_time)
+    unscheduled_qs = base_qs.filter(date_time__isnull=True)
+    history_qs = base_qs.filter(date_time__lt=current_time, date_time__isnull=False)
+
+    upcoming_count = upcoming_qs.count()
+    unscheduled_count = unscheduled_qs.count()
+    history_count = history_qs.count()
+
     if tab == "upcoming":
-        itineraries_qs = base_qs.filter(date_time__gte=current_time).order_by("-date_time")
+        itineraries_qs = upcoming_qs.order_by("-date_time")
     elif tab == "unscheduled":
-        itineraries_qs = base_qs.filter(date_time__isnull=True).order_by("-id")
+        itineraries_qs = unscheduled_qs.order_by("-id")
     else:
-        itineraries_qs = base_qs.filter(date_time__lt=current_time, date_time__isnull=False).order_by("-date_time")
+        itineraries_qs = history_qs.order_by("-date_time")
 
     total_count = itineraries_qs.count()
-    page_size = 5
+    import math
+    total_pages = math.ceil(total_count / page_size) if total_count > 0 else 1
+    if page > total_pages:
+        page = total_pages
+
     start = (page - 1) * page_size
     end = start + page_size
 
-    # 資料庫層級分頁：只取出該頁面的 5 筆，節省效能
+    # 資料庫層級分頁：只取出該頁面的筆數，節省效能
     sliced_qs = itineraries_qs[start:end]
     has_more = total_count > end
 
@@ -902,7 +921,16 @@ def api_get_itineraries(request):
             "is_temporary": is_temporary,
             "username": line_profile.line_display_name,
             "list": list_data,
+            "page": page,
+            "page_size": page_size,
+            "total_count": total_count,
+            "total_pages": total_pages,
             "has_more": has_more,
+            "counts": {
+                "upcoming": upcoming_count,
+                "unscheduled": unscheduled_count,
+                "history": history_count,
+            }
         }
     )
 
