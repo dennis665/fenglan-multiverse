@@ -151,11 +151,20 @@ class UserDramaProgress(models.Model):
 
 class DramaRecommendation(models.Model):
     """追劇推薦清單"""
+    STATUS_CHOICES = (
+        ("pending", _("未讀/待處理")),
+        ("accepted", _("已加入清單")),
+        ("rejected", _("已拒絕")),
+        ("ignored", _("已忽略")),
+    )
+
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_recommendations", verbose_name=_("推薦人"))
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_recommendations", verbose_name=_("被推薦人"))
     drama = models.ForeignKey(Drama, on_delete=models.CASCADE, verbose_name=_("追劇項目"))
     recommend_notes = EncryptedTextField(blank=True, verbose_name=_("推薦心得語錄"))
     is_accepted = models.BooleanField(default=False, verbose_name=_("是否已接受"))
+    is_rejected = models.BooleanField(default=False, verbose_name=_("是否已拒絕"))
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending", verbose_name=_("推薦狀態"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
 
     class Meta:

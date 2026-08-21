@@ -2022,14 +2022,28 @@ def api_get_dramas(request):
                 }
             )
     else:
-        rec_qs = (
-            DramaRecommendation.objects.filter(to_user=user, is_accepted=False)
-            .select_related("drama__creator__line_profile", "from_user__line_profile")
-            .order_by("-created_at")
-        )
+        sub_tab = data.get("sub_tab", "pending")
+        pending_qs = DramaRecommendation.objects.filter(to_user=user, status="pending")
+        accepted_qs = DramaRecommendation.objects.filter(to_user=user, status="accepted")
+        rejected_qs = DramaRecommendation.objects.filter(to_user=user, status__in=["rejected", "ignored"])
+
+        pending_count = pending_qs.count()
+        accepted_count = accepted_qs.count()
+        rejected_count = rejected_qs.count()
+
+        if sub_tab == "accepted":
+            rec_qs = accepted_qs.select_related("drama__creator__line_profile", "from_user__line_profile").order_by("-created_at")
+        elif sub_tab == "rejected":
+            rec_qs = rejected_qs.select_related("drama__creator__line_profile", "from_user__line_profile").order_by("-created_at")
+        else:
+            rec_qs = pending_qs.select_related("drama__creator__line_profile", "from_user__line_profile").order_by("-created_at")
+
         total_count = rec_qs.count()
         sliced_qs = rec_qs[start:end]
         has_more = total_count > end
+
+        from .models import UserDramaProgress
+        my_tracked_ids = set(UserDramaProgress.objects.filter(user=user).values_list("drama_id", flat=True))
 
         for r in sliced_qs:
             d = r.drama
@@ -2045,6 +2059,8 @@ def api_get_dramas(request):
                 except Exception:
                     pass
 
+            is_already_in_my_list = d.pk in my_tracked_ids
+
             list_data.append(
                 {
                     "recommendation_id": r.pk,
@@ -2057,6 +2073,11 @@ def api_get_dramas(request):
                     "image_url": getattr(d, "image_url", "") or "",
                     "from_user": from_name,
                     "recommend_notes": r.recommend_notes,
+                    "is_accepted": r.is_accepted or r.status == "accepted",
+                    "is_rejected": r.is_rejected or r.status in ["rejected", "ignored"],
+                    "status": r.status,
+                    "is_already_in_my_list": is_already_in_my_list,
+                    "is_added": is_already_in_my_list,
                     "created_at": localtime(r.created_at).strftime("%Y-%m-%d %H:%M"),
                 }
             )
@@ -2064,17 +2085,23 @@ def api_get_dramas(request):
     from math import ceil
     total_pages = ceil(total_count / page_size) if total_count > 0 else 1
 
-    return JsonResponse(
-        {
-            "status": "success",
-            "list": list_data,
-            "has_more": has_more,
-            "total_count": total_count,
-            "total_pages": total_pages,
-            "current_page": page,
-            "page_size": page_size,
+    resp_dict = {
+        "status": "success",
+        "list": list_data,
+        "has_more": has_more,
+        "total_count": total_count,
+        "total_pages": total_pages,
+        "current_page": page,
+        "page_size": page_size,
+    }
+    if tab == "recommendations":
+        resp_dict["rec_counts"] = {
+            "pending": pending_count,
+            "accepted": accepted_count,
+            "rejected": rejected_count
         }
-    )
+
+    return JsonResponse(resp_dict)
 
 
 @csrf_exempt
@@ -2537,6 +2564,7 @@ def api_accept_recommendation(request, pk):
 
     # 標記已接受
     rec.is_accepted = True
+    rec.is_rejected = False
     rec.save()
 
     # 建立個人的追劇進度
@@ -2547,6 +2575,176 @@ def api_accept_recommendation(request, pk):
     )
 
     return JsonResponse({"status": "success"})
+
+
+@csrf_exempt
+def api_reject_recommendation(request, pk):
+    """API 端點：拒絕好友的推薦"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import DramaRecommendation
+
+    rec = DramaRecommendation.objects.filter(pk=pk, to_user=user).first()
+    if not rec:
+        return JsonResponse({"error": "Recommendation not found"}, status=404)
+
+    rec.status = "rejected"
+    rec.is_rejected = True
+    rec.is_accepted = False
+    rec.save()
+
+    return JsonResponse({"status": "success"})
+
+
+@csrf_exempt
+def api_ignore_recommendation(request, pk):
+    """API 端點：忽略/隱藏好友的推薦"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import DramaRecommendation
+
+    rec = DramaRecommendation.objects.filter(pk=pk, to_user=user).first()
+    if not rec:
+        return JsonResponse({"error": "Recommendation not found"}, status=404)
+
+    rec.status = "ignored"
+    rec.is_rejected = True
+    rec.is_accepted = False
+    rec.save()
+
+    return JsonResponse({"status": "success"})
+
+
+@csrf_exempt
+def api_batch_recommend_action(request):
+    """API 端點：一鍵批次接受或批次忽略全量未讀推薦"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        action = data.get("action")  # "accept_all" 或 "ignore_all"
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not action:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import DramaRecommendation, UserDramaProgress
+
+    pending_recs = DramaRecommendation.objects.filter(to_user=user, status="pending", is_accepted=False, is_rejected=False)
+    processed_count = 0
+
+    for rec in pending_recs:
+        if action == "accept_all":
+            rec.status = "accepted"
+            rec.is_accepted = True
+            rec.is_rejected = False
+            rec.save()
+            UserDramaProgress.objects.get_or_create(
+                user=user,
+                drama=rec.drama,
+                defaults={"current_season": 1, "current_episode": 1, "is_tracked": False},
+            )
+        elif action == "ignore_all":
+            rec.status = "ignored"
+            rec.is_rejected = True
+            rec.is_accepted = False
+            rec.save()
+        processed_count += 1
+
+    return JsonResponse({"status": "success", "count": processed_count})
+
+
+@csrf_exempt
+def api_check_friend_drama_status(request):
+    """API 端點：檢查特定劇集在好友們的追劇清單/推薦狀態中"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        drama_id = data.get("drama_id")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not drama_id:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import Drama, DramaRecommendation, UserDramaProgress, Friendship
+
+    drama = Drama.objects.filter(pk=drama_id).first()
+    if not drama:
+        return JsonResponse({"error": "Drama not found"}, status=404)
+
+    friendships = Friendship.objects.filter(user=user).select_related("friend__line_profile")
+    status_map = {}
+    for f in friendships:
+        friend_user = f.friend
+        is_in_watchlist = UserDramaProgress.objects.filter(user=friend_user, drama=drama).exists()
+        is_pending = DramaRecommendation.objects.filter(to_user=friend_user, drama=drama, is_accepted=False, is_rejected=False).exists()
+        is_accepted = DramaRecommendation.objects.filter(to_user=friend_user, drama=drama, is_accepted=True).exists()
+
+        status_label = ""
+        if is_in_watchlist or is_accepted:
+            status_label = "✅ 已在對方的追劇清單中"
+        elif is_pending:
+            status_label = "⏳ 已發送推薦，等待中"
+
+        status_map[friend_user.id] = {
+            "is_in_watchlist": is_in_watchlist,
+            "is_pending": is_pending,
+            "is_accepted": is_accepted,
+            "status_label": status_label
+        }
+
+    return JsonResponse({"status": "success", "friend_status": status_map})
 
 @csrf_exempt
 def api_search_existing_dramas(request):

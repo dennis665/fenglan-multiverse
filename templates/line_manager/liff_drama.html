@@ -89,6 +89,39 @@
             color: white !important;
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
+        /* 當前選取分類高亮與持續發光樣式 */
+        .active-cat-glow {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: #ffffff !important;
+            border: 2px solid #34d399 !important;
+            box-shadow: 0 0 14px rgba(52, 211, 153, 0.8), 0 0 4px #10b981 !important;
+            transform: scale(1.05);
+            font-weight: bold !important;
+        }
+        .decade-header {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .decade-header:hover {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+        .year-header {
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .year-header:hover {
+            background: rgba(30, 41, 59, 0.85);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
         .btn-outline-primary {
             color: #38bdf8 !important;
             border-color: rgba(56, 189, 248, 0.5) !important;
@@ -189,21 +222,11 @@
         <!-- 主要畫面 -->
         <div id="main-section" class="d-none">
             <!-- 頂部 Header -->
-            <div class="glass-card p-3 mb-4 d-flex justify-content-between align-items-center">
-                <div>
-                    <h3 class="fw-bold mb-0 text-success" id="group-title" style="font-size: 1.35rem;">
-                        <i class="fa-solid fa-clapperboard me-2"></i>追劇清單
-                    </h3>
-                    <span class="text-muted small">Hi, <span id="user-display-name" class="fw-bold text-success">LINE 用戶</span></span>
-                </div>
-                <div class="d-flex gap-1">
-                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="openDisplaySettingsModal()">
-                        <i class="fa-solid fa-sliders me-1"></i>顯示設定
-                    </button>
-                    <button class="btn btn-sm btn-line px-3" onclick="openAddDramaModal()">
-                        <i class="fa-solid fa-plus me-1"></i>新增劇集
-                    </button>
-                </div>
+            <div class="glass-card p-3 mb-4 text-center">
+                <h3 class="fw-bold mb-0 text-success" id="group-title" style="font-size: 1.35rem;">
+                    <i class="fa-solid fa-clapperboard me-2"></i>追劇清單
+                </h3>
+                <span class="text-muted small">Hi, <span id="user-display-name" class="fw-bold text-success">LINE 用戶</span></span>
             </div>
 
             <!-- 分頁 Tab -->
@@ -222,40 +245,52 @@
                 </li>
             </ul>
 
-            <!-- 可折疊分類導航視覺面板 (季番與動畫電影大類可折疊/展開，細項預設顯示前5項且可展開/折疊) -->
-            <div class="glass-card p-3 mb-3">
+            <!-- 可折疊分類導航視覺面板 (依十年、每一年層級折疊/展開細分) -->
+            <div class="glass-card p-3 mb-3" id="category-nav-card">
                 <div class="d-flex justify-content-between align-items-center mb-2 cursor-pointer" onclick="toggleMainCategorySection()">
                     <h6 class="fw-bold text-success mb-0">
-                        <i class="fa-solid fa-layer-group me-1"></i>快捷年度分類導航
+                        <i class="fa-solid fa-layer-group me-1"></i>快捷十年/年份分類導航
                     </h6>
                     <span class="badge bg-light text-secondary border small" id="main-cat-toggle-icon">
                         <i class="fa-solid fa-chevron-up me-1"></i>折疊面板
                     </span>
                 </div>
                 <div id="main-cat-container">
-                    <!-- 季番動畫區塊 (可折疊) -->
-                    <div class="border rounded p-2 mb-2 bg-white">
-                        <div class="d-flex justify-content-between align-items-center mb-1 cursor-pointer" onclick="toggleCategorySubItems('tv', true)">
+                    <!-- 當前選擇提示與重置全選按鈕 -->
+                    <div id="active-cat-bar" class="d-flex align-items-center justify-content-between mb-2 p-2 rounded" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.12);">
+                        <div class="small fw-bold text-light">
+                            當前篩選：
+                            <span id="current-selected-cat-badge" class="badge bg-secondary text-light ms-1" style="font-size: 0.85rem;">🌐 全部劇集</span>
+                        </div>
+                        <button id="clear-cat-btn" class="btn btn-xs btn-outline-light rounded-pill py-0 px-2 small d-none" onclick="clearCategoryFilter()">
+                            <i class="fa-solid fa-rotate-left me-1"></i>重置全選
+                        </button>
+                    </div>
+
+                    <!-- 季番動畫區塊 (依十年、每一年折疊) -->
+                    <div class="border rounded p-2 mb-2 bg-dark bg-opacity-40">
+                        <div class="d-flex justify-content-between align-items-center mb-2 cursor-pointer pb-1 border-bottom border-secondary" onclick="toggleSectionMain('tv')">
                             <span class="fw-bold small text-primary">
-                                <i class="fa-solid fa-tv me-1"></i>📺 季番動畫 (依年度由新至舊)
+                                <i class="fa-solid fa-tv me-1"></i>📺 季番動畫 (依十年與年份細分)
                             </span>
                             <button class="btn btn-sm btn-link text-decoration-none text-muted p-0 small" id="toggle-tv-btn" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-angle-down me-1"></i><span id="tv-toggle-label">展開更多細項</span>
+                                <i class="fa-solid fa-angle-up me-1"></i><span id="tv-toggle-label">折疊季番</span>
                             </button>
                         </div>
-                        <div id="tv-cat-chips" class="d-flex flex-wrap gap-1"></div>
+                        <div id="tv-decade-tree-container" class="d-flex flex-column gap-2"></div>
                     </div>
-                    <!-- 動畫電影區塊 (可折疊) -->
-                    <div class="border rounded p-2 bg-white">
-                        <div class="d-flex justify-content-between align-items-center mb-1 cursor-pointer" onclick="toggleCategorySubItems('movie', true)">
+
+                    <!-- 動畫電影區塊 (依十年、每一年折疊) -->
+                    <div class="border rounded p-2 bg-dark bg-opacity-40">
+                        <div class="d-flex justify-content-between align-items-center mb-2 cursor-pointer pb-1 border-bottom border-secondary" onclick="toggleSectionMain('movie')">
                             <span class="fw-bold small text-danger">
-                                <i class="fa-solid fa-film me-1"></i>🎬 動畫電影 / 劇場版 (依年度由新至舊)
+                                <i class="fa-solid fa-film me-1"></i>🎬 動畫電影 / 劇場版 (依十年與年份細分)
                             </span>
                             <button class="btn btn-sm btn-link text-decoration-none text-muted p-0 small" id="toggle-movie-btn" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-angle-down me-1"></i><span id="movie-toggle-label">展開更多細項</span>
+                                <i class="fa-solid fa-angle-up me-1"></i><span id="movie-toggle-label">折疊電影</span>
                             </button>
                         </div>
-                        <div id="movie-cat-chips" class="d-flex flex-wrap gap-1"></div>
+                        <div id="movie-decade-tree-container" class="d-flex flex-column gap-2"></div>
                     </div>
                 </div>
             </div>
@@ -348,6 +383,33 @@
 
                 <!-- 好友推薦 -->
                 <div class="tab-pane fade" id="recs-panel" role="tabpanel">
+                    <!-- 好友推薦狀態分類子頁籤 (未讀好友推薦、已加入清單、已拒絕/忽略) -->
+                    <div class="glass-card p-2 mb-2 d-flex justify-content-center gap-1 flex-wrap" id="rec-sub-tabs">
+                        <button class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-bold active" id="rec-tab-pending" onclick="switchRecSubTab('pending')">
+                            📩 未讀好友推薦 <span class="badge bg-danger rounded-pill ms-1" id="rec-pending-count">0</span>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-bold text-dark" id="rec-tab-accepted" onclick="switchRecSubTab('accepted')">
+                            ✅ 已加入清單 <span class="badge bg-success rounded-pill ms-1" id="rec-accepted-count">0</span>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-bold text-muted" id="rec-tab-rejected" onclick="switchRecSubTab('rejected')">
+                            ❌ 已拒絕/忽略 <span class="badge bg-secondary rounded-pill ms-1" id="rec-rejected-count">0</span>
+                        </button>
+                    </div>
+
+                    <!-- 一鍵全選批次操作列 -->
+                    <div id="rec-batch-actions-bar" class="glass-card p-2 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="small fw-bold text-success">
+                            <i class="fa-solid fa-bolt me-1"></i>快捷批次操作：
+                        </div>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-xs btn-success rounded-pill px-3 py-1 small fw-bold" onclick="batchRecommendAction('accept_all')">
+                                <i class="fa-solid fa-check-double me-1"></i>一鍵全部接受 (加入追劇)
+                            </button>
+                            <button class="btn btn-xs btn-outline-secondary rounded-pill px-3 py-1 small" onclick="batchRecommendAction('ignore_all')">
+                                <i class="fa-solid fa-eye-slash me-1"></i>一鍵全部忽略
+                            </button>
+                        </div>
+                    </div>
                     <div id="recs-list" class="d-flex flex-column gap-3"></div>
                     <div id="recs-pagination" class="glass-card p-3 mt-3 d-none flex-column gap-2">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -551,6 +613,15 @@
 
         // 分頁與狀態變數
         let currentTab = "my_dramas";
+        let recSubTab = "pending";
+        let activeCategoryFilter = "";
+        let tvMainExpanded = true;
+        let movieMainExpanded = true;
+        let mainCategoryExpanded = true;
+        let expandedDecades = { tv: new Set(), movie: new Set() };
+        let expandedYears = { tv: new Set(), movie: new Set() };
+        let defaultExpandedInitialized = false;
+
         let myDramasPage = 1;
         let myDramasPageSize = 10;
         let recsPage = 1;
@@ -558,7 +629,7 @@
         let allDramasPage = 1;
         let allDramasPageSize = 10;
 
-        // 全前前端資料庫 Master Lists
+        // 全區前端資料庫 Master Lists
         let myDramasMasterList = null;
         let allDramasMasterList = null;
         let recsMasterList = null;
@@ -660,40 +731,138 @@
             } catch(e) {}
         }
 
-        // 細項折疊/展開控制 (點擊大選項標題列即把當前所有 NEW 細項設為已讀，100% 消除 NEW 徽章)
-        function toggleCategorySubItems(type) {
-            if (cachedCategoriesData) {
-                const fullList = (cachedCategoriesData.categories || []).concat(cachedCategoriesData.my_categories || []);
-                if (type === 'tv') {
-                    tvSubExpanded = !tvSubExpanded;
-                    const newTvTags = fullList.filter(c => !c.includes("電影") && !c.includes("劇場版") && isNewCategory(c));
-                    markTagsAsRead(newTvTags);
-                } else if (type === 'movie') {
-                    movieSubExpanded = !movieSubExpanded;
-                    const newMovieTags = fullList.filter(c => (c.includes("電影") || c.includes("劇場版")) && isNewCategory(c));
-                    markTagsAsRead(newMovieTags);
-                }
-                renderVisualChips(cachedCategoriesData);
+
+        function toggleMainCategorySection() {
+            mainCategoryExpanded = !mainCategoryExpanded;
+            const container = document.getElementById("main-cat-container");
+            const icon = document.getElementById("main-cat-toggle-icon");
+            if (mainCategoryExpanded) {
+                container.classList.remove("d-none");
+                icon.innerHTML = '<i class="fa-solid fa-chevron-up me-1"></i>折疊面板';
+            } else {
+                container.classList.add("d-none");
+                icon.innerHTML = '<i class="fa-solid fa-chevron-down me-1"></i>展開面板';
             }
         }
 
-        // 渲染細項 Chips (預設前 5 項，按右側按鈕展開/折疊，顯示個人化 NEW 提醒徽章)
+        function toggleSectionMain(type) {
+            if (type === 'tv') {
+                tvMainExpanded = !tvMainExpanded;
+                const label = document.getElementById("tv-toggle-label");
+                const icon = document.querySelector("#toggle-tv-btn i");
+                if (label) label.innerText = tvMainExpanded ? "折疊季番" : "展開季番";
+                if (icon) icon.className = tvMainExpanded ? "fa-solid fa-angle-up me-1" : "fa-solid fa-angle-down me-1";
+            } else {
+                movieMainExpanded = !movieMainExpanded;
+                const label = document.getElementById("movie-toggle-label");
+                const icon = document.querySelector("#toggle-movie-btn i");
+                if (label) label.innerText = movieMainExpanded ? "折疊電影" : "展開電影";
+                if (icon) icon.className = movieMainExpanded ? "fa-solid fa-angle-up me-1" : "fa-solid fa-angle-down me-1";
+            }
+            renderVisualChips(cachedCategoriesData);
+        }
+
+        function toggleDecade(type, decade) {
+            decade = parseInt(decade);
+            if (expandedDecades[type].has(decade)) {
+                expandedDecades[type].delete(decade);
+            } else {
+                expandedDecades[type].add(decade);
+            }
+            renderVisualChips(cachedCategoriesData);
+        }
+
+        function toggleYear(type, year) {
+            year = parseInt(year);
+            if (expandedYears[type].has(year)) {
+                expandedYears[type].delete(year);
+            } else {
+                expandedYears[type].add(year);
+            }
+            renderVisualChips(cachedCategoriesData);
+        }
+
+        function clearCategoryFilter() {
+            activeCategoryFilter = "";
+            const mySelect = document.getElementById("my-dramas-cat-select");
+            const allSelect = document.getElementById("all-dramas-cat-select");
+            if (mySelect) mySelect.value = "";
+            if (allSelect) allSelect.value = "";
+            triggerMyDramasSearch();
+            triggerAllDramasSearch();
+            renderVisualChips(cachedCategoriesData);
+        }
+
+        function parseYearAndDecade(cat) {
+            const match = cat.match(/(\d{4})/);
+            if (match) {
+                const year = parseInt(match[1]);
+                const decade = Math.floor(year / 10) * 10;
+                return { hasYear: true, year: year, decade: decade };
+            }
+            return { hasYear: false, year: 0, decade: 0 };
+        }
+
+        function buildCategoryTree(catList, countsObj) {
+            const tree = { decades: {}, otherItems: [] };
+            catList.forEach(cat => {
+                const count = countsObj ? (countsObj[cat] || 0) : 0;
+                const info = parseYearAndDecade(cat);
+                if (!info.hasYear) {
+                    tree.otherItems.push({ cat, count });
+                } else {
+                    const d = info.decade;
+                    const y = info.year;
+                    if (!tree.decades[d]) {
+                        tree.decades[d] = { decade: d, totalCount: 0, years: {} };
+                    }
+                    tree.decades[d].totalCount += count;
+
+                    if (!tree.decades[d].years[y]) {
+                        tree.decades[d].years[y] = { year: y, totalCount: 0, items: [] };
+                    }
+                    tree.decades[d].years[y].totalCount += count;
+                    tree.decades[d].years[y].items.push({ cat, count });
+                }
+            });
+            return tree;
+        }
+
+        // 渲染依十年與每一年層級折疊/展開的細分 Chips
         function renderVisualChips(data) {
+            if (!data) return;
             cachedCategoriesData = data;
-            const tvContainer = document.getElementById("tv-cat-chips");
-            const movieContainer = document.getElementById("movie-cat-chips");
-            if (!tvContainer || !movieContainer) return;
 
-            tvContainer.innerHTML = "";
-            movieContainer.innerHTML = "";
+            const tvTreeContainer = document.getElementById("tv-decade-tree-container");
+            const movieTreeContainer = document.getElementById("movie-decade-tree-container");
+            const activeBadge = document.getElementById("current-selected-cat-badge");
+            const clearBtn = document.getElementById("clear-cat-btn");
 
-            const tvCats = [];
-            const movieCats = [];
-            const readTags = new Set(getReadTags());
+            // 同步當前選取分類提示與重置全選按鈕
+            if (activeCategoryFilter) {
+                if (activeBadge) {
+                    activeBadge.className = "badge bg-success text-white shadow fs-6 ms-1 active-cat-glow";
+                    activeBadge.innerHTML = `<i class="fa-solid fa-check me-1"></i>${activeCategoryFilter}`;
+                }
+                if (clearBtn) clearBtn.classList.remove("d-none");
+            } else {
+                if (activeBadge) {
+                    activeBadge.className = "badge bg-secondary text-light ms-1";
+                    activeBadge.innerText = "🌐 全部劇集";
+                }
+                if (clearBtn) clearBtn.classList.add("d-none");
+            }
+
+            if (!tvTreeContainer || !movieTreeContainer) return;
+            tvTreeContainer.innerHTML = "";
+            movieTreeContainer.innerHTML = "";
 
             const catList = (currentTab === 'my_dramas' && data.my_categories) ? data.my_categories : data.categories;
             const countsObj = (currentTab === 'my_dramas') ? data.my_counts : data.all_counts;
+            const readTags = new Set(getReadTags());
 
+            const tvCats = [];
+            const movieCats = [];
             catList.forEach(cat => {
                 if (cat.includes("電影") || cat.includes("劇場版")) {
                     movieCats.push(cat);
@@ -702,103 +871,189 @@
                 }
             });
 
-            // 將「動畫化決定」與「日本動畫電影製作決定」置頂放到最前面
-            const tvUnknownIdx = tvCats.indexOf("動畫化決定");
-            if (tvUnknownIdx > -1) {
-                tvCats.splice(tvUnknownIdx, 1);
-                tvCats.unshift("動畫化決定");
+            const tvTree = buildCategoryTree(tvCats, countsObj);
+            const movieTree = buildCategoryTree(movieCats, countsObj);
+
+            // 首次載入：預設展開最新年代與最新 2 個年份
+            if (!defaultExpandedInitialized) {
+                const tvDecades = Object.keys(tvTree.decades).map(Number).sort((a, b) => b - a);
+                if (tvDecades.length > 0) {
+                    expandedDecades.tv.add(tvDecades[0]);
+                    const latestYears = Object.keys(tvTree.decades[tvDecades[0]].years).map(Number).sort((a, b) => b - a);
+                    latestYears.slice(0, 2).forEach(y => expandedYears.tv.add(y));
+                }
+
+                const movieDecades = Object.keys(movieTree.decades).map(Number).sort((a, b) => b - a);
+                if (movieDecades.length > 0) {
+                    expandedDecades.movie.add(movieDecades[0]);
+                    const latestMovieYears = Object.keys(movieTree.decades[movieDecades[0]].years).map(Number).sort((a, b) => b - a);
+                    latestMovieYears.slice(0, 2).forEach(y => expandedYears.movie.add(y));
+                }
+                defaultExpandedInitialized = true;
             }
 
-            const movieUnknownIdx = movieCats.indexOf("日本動畫電影製作決定");
-            if (movieUnknownIdx > -1) {
-                movieCats.splice(movieUnknownIdx, 1);
-                movieCats.unshift("日本動畫電影製作決定");
-            }
-
-            // 1. 渲染季番動畫 Chips (預設前 5 項)
-            const tvVisible = tvSubExpanded ? tvCats : tvCats.slice(0, 5);
-            tvVisible.forEach(cat => {
-                const count = countsObj ? (countsObj[cat] || 0) : 0;
-                const isNew = isNewCategory(cat);
-                const isUnread = isNew && !readTags.has(cat);
-                const btn = document.createElement("button");
-                btn.className = "btn btn-sm btn-outline-primary rounded-pill py-0 px-2 small position-relative";
-                btn.style.fontSize = "0.75rem";
-                
-                let badgeHtml = isUnread ? `<span class="badge badge-new-pulse ms-1">NEW</span>` : `<span class="badge bg-primary text-white ms-1">${count}</span>`;
-                btn.innerHTML = `${cat} ${badgeHtml}`;
-                btn.onclick = function() {
-                    if (isNew) markTagsAsRead([cat]);
-                    selectCategoryFromChip(cat);
-                    renderVisualChips(cachedCategoriesData);
-                };
-                tvContainer.appendChild(btn);
-            });
-
-            const tvToggleBtn = document.getElementById("toggle-tv-btn");
-            const tvToggleLabel = document.getElementById("tv-toggle-label");
-            if (tvCats.length <= 5) {
-                tvToggleBtn.classList.add("d-none");
-            } else {
-                tvToggleBtn.classList.remove("d-none");
-                if (tvSubExpanded) {
-                    tvToggleLabel.innerText = "折疊收起 (全" + tvCats.length + "項)";
-                    tvToggleBtn.querySelector("i").className = "fa-solid fa-angle-up me-1";
-                } else {
-                    tvToggleLabel.innerText = "展開更多細項 (共" + tvCats.length + "項)";
-                    tvToggleBtn.querySelector("i").className = "fa-solid fa-angle-down me-1";
+            // 若目前有高亮選取的分類，自動展開其所屬的十年與年份，確保使用者始終看得到當前選項
+            if (activeCategoryFilter) {
+                const activeInfo = parseYearAndDecade(activeCategoryFilter);
+                if (activeInfo.hasYear) {
+                    expandedDecades.tv.add(activeInfo.decade);
+                    expandedYears.tv.add(activeInfo.year);
+                    expandedDecades.movie.add(activeInfo.decade);
+                    expandedYears.movie.add(activeInfo.year);
                 }
             }
 
-            // 2. 渲染動畫電影 Chips (預設前 5 項)
-            const movieVisible = movieSubExpanded ? movieCats : movieCats.slice(0, 5);
-            movieVisible.forEach(cat => {
-                const count = countsObj ? (countsObj[cat] || 0) : 0;
+            function renderTypeTree(tree, type, container, mainExpanded) {
+                if (!mainExpanded) {
+                    container.innerHTML = `<div class="small text-muted p-1">（已折疊，點擊上方標題列展開）</div>`;
+                    return;
+                }
+
+                if (tree.otherItems.length > 0) {
+                    const otherDiv = document.createElement("div");
+                    otherDiv.className = "d-flex flex-wrap gap-1 mb-2 p-1 rounded bg-secondary bg-opacity-10";
+                    tree.otherItems.forEach(item => {
+                        const btn = createChipButton(item.cat, item.count, type, readTags);
+                        otherDiv.appendChild(btn);
+                    });
+                    container.appendChild(otherDiv);
+                }
+
+                const sortedDecades = Object.keys(tree.decades).map(Number).sort((a, b) => b - a);
+                if (sortedDecades.length === 0 && tree.otherItems.length === 0) {
+                    container.innerHTML = `<div class="small text-muted p-1">目前沒有分類選項</div>`;
+                    return;
+                }
+
+                sortedDecades.forEach(dNum => {
+                    const decadeObj = tree.decades[dNum];
+                    const isDecadeExpanded = expandedDecades[type].has(dNum);
+
+                    const decadeCard = document.createElement("div");
+                    decadeCard.className = "decade-block d-flex flex-column gap-1";
+
+                    const decadeHeader = document.createElement("div");
+                    decadeHeader.className = "decade-header d-flex justify-content-between align-items-center";
+                    decadeHeader.onclick = () => toggleDecade(type, dNum);
+                    decadeHeader.innerHTML = `
+                        <span class="fw-bold small text-light">
+                            <i class="fa-solid fa-calendar-days text-primary me-1"></i>${dNum} 年代
+                            <span class="badge bg-primary text-white ms-1">${decadeObj.totalCount} 筆</span>
+                        </span>
+                        <span class="small text-muted">
+                            ${isDecadeExpanded ? '折疊 <i class="fa-solid fa-chevron-up ms-1"></i>' : '展開 <i class="fa-solid fa-chevron-down ms-1"></i>'}
+                        </span>
+                    `;
+                    decadeCard.appendChild(decadeHeader);
+
+                    if (isDecadeExpanded) {
+                        const yearsContainer = document.createElement("div");
+                        yearsContainer.className = "d-flex flex-column gap-1 ms-2 ps-1 border-start border-secondary border-opacity-50";
+
+                        const sortedYears = Object.keys(decadeObj.years).map(Number).sort((a, b) => b - a);
+                        sortedYears.forEach(yNum => {
+                            const yearObj = decadeObj.years[yNum];
+                            const isYearExpanded = expandedYears[type].has(yNum);
+
+                            const yearBlock = document.createElement("div");
+                            yearBlock.className = "year-block d-flex flex-column gap-1";
+
+                            const yearHeader = document.createElement("div");
+                            yearHeader.className = "year-header d-flex justify-content-between align-items-center";
+                            yearHeader.onclick = () => toggleYear(type, yNum);
+                            yearHeader.innerHTML = `
+                                <span class="fw-bold small text-light text-opacity-90">
+                                    <i class="fa-regular fa-calendar-check text-info me-1"></i>${yNum} 年
+                                    <span class="badge bg-info text-dark ms-1" style="font-size: 0.7rem;">${yearObj.totalCount} 筆</span>
+                                </span>
+                                <span class="small text-muted" style="font-size: 0.72rem;">
+                                    ${isYearExpanded ? '<i class="fa-solid fa-angle-up"></i>' : '<i class="fa-solid fa-angle-down"></i>'}
+                                </span>
+                            `;
+                            yearBlock.appendChild(yearHeader);
+
+                            if (isYearExpanded) {
+                                const chipsWrap = document.createElement("div");
+                                chipsWrap.className = "d-flex flex-wrap gap-1 ms-2 pt-1 pb-1";
+                                yearObj.items.forEach(item => {
+                                    const chipBtn = createChipButton(item.cat, item.count, type, readTags);
+                                    chipsWrap.appendChild(chipBtn);
+                                });
+                                yearBlock.appendChild(chipsWrap);
+                            }
+
+                            yearsContainer.appendChild(yearBlock);
+                        });
+
+                        decadeCard.appendChild(yearsContainer);
+                    }
+
+                    container.appendChild(decadeCard);
+                });
+            }
+
+            function createChipButton(cat, count, type, readTags) {
+                const isActive = (cat === activeCategoryFilter);
                 const isNew = isNewCategory(cat);
                 const isUnread = isNew && !readTags.has(cat);
                 const btn = document.createElement("button");
-                btn.className = "btn btn-sm btn-outline-danger rounded-pill py-0 px-2 small position-relative";
+
+                if (isActive) {
+                    btn.className = "btn btn-sm btn-success text-white fw-bold rounded-pill py-0 px-2 small position-relative shadow active-cat-glow";
+                } else if (type === 'tv') {
+                    btn.className = "btn btn-sm btn-outline-primary rounded-pill py-0 px-2 small position-relative";
+                } else {
+                    btn.className = "btn btn-sm btn-outline-danger rounded-pill py-0 px-2 small position-relative";
+                }
                 btn.style.fontSize = "0.75rem";
-                
-                let badgeHtml = isUnread ? `<span class="badge badge-new-pulse ms-1">NEW</span>` : `<span class="badge bg-danger text-white ms-1">${count}</span>`;
-                btn.innerHTML = `${cat} ${badgeHtml}`;
-                btn.onclick = function() {
+
+                let badgeHtml = "";
+                if (isUnread) {
+                    badgeHtml = `<span class="badge badge-new-pulse ms-1">NEW</span>`;
+                } else if (isActive) {
+                    badgeHtml = `<span class="badge bg-white text-success fw-bold ms-1">${count}</span>`;
+                } else {
+                    badgeHtml = `<span class="badge ${type === 'tv' ? 'bg-primary' : 'bg-danger'} text-white ms-1">${count}</span>`;
+                }
+
+                btn.innerHTML = `${isActive ? '<i class="fa-solid fa-check me-1"></i>' : ''}${cat} ${badgeHtml}`;
+                btn.onclick = function(e) {
+                    e.stopPropagation();
                     if (isNew) markTagsAsRead([cat]);
                     selectCategoryFromChip(cat);
-                    renderVisualChips(cachedCategoriesData);
                 };
-                movieContainer.appendChild(btn);
-            });
-
-            const movieToggleBtn = document.getElementById("toggle-movie-btn");
-            const movieToggleLabel = document.getElementById("movie-toggle-label");
-            if (movieCats.length <= 5) {
-                movieToggleBtn.classList.add("d-none");
-            } else {
-                movieToggleBtn.classList.remove("d-none");
-                if (movieSubExpanded) {
-                    movieToggleLabel.innerText = "折疊收起 (全" + movieCats.length + "項)";
-                    movieToggleBtn.querySelector("i").className = "fa-solid fa-angle-up me-1";
-                } else {
-                    movieToggleLabel.innerText = "展開更多細項 (共" + movieCats.length + "項)";
-                    movieToggleBtn.querySelector("i").className = "fa-solid fa-angle-down me-1";
-                }
+                return btn;
             }
+
+            renderTypeTree(tvTree, 'tv', tvTreeContainer, tvMainExpanded);
+            renderTypeTree(movieTree, 'movie', movieTreeContainer, movieMainExpanded);
         }
 
         function selectCategoryFromChip(cat) {
+            if (activeCategoryFilter === cat) {
+                activeCategoryFilter = "";
+            } else {
+                activeCategoryFilter = cat;
+            }
+
             let selectId = "all-dramas-cat-select";
             if (currentTab === "my_dramas") {
                 selectId = "my-dramas-cat-select";
             }
             const selectEl = document.getElementById(selectId);
             if (selectEl) {
-                selectEl.value = cat;
-                if (currentTab === "my_dramas") {
-                    triggerMyDramasSearch();
-                } else {
-                    triggerAllDramasSearch();
-                }
+                selectEl.value = activeCategoryFilter;
+            }
+
+            if (currentTab === "my_dramas") {
+                triggerMyDramasSearch();
+            } else {
+                triggerAllDramasSearch();
+            }
+
+            renderVisualChips(cachedCategoriesData);
+
+            if (activeCategoryFilter && selectEl) {
                 setTimeout(() => {
                     selectEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 50);
@@ -880,9 +1135,16 @@
             fetchDramas("my_dramas", myDramasPage);
         }
 
-        // 切換 Tab
+        // 切換 Tab (當切換至 好友推薦 或 好友管理 時，自動清掉/隱藏上方分類導航選項)
         function switchTab(tab) {
             currentTab = tab;
+            const navCard = document.getElementById("category-nav-card");
+            if (tab === "recommendations" || tab === "friends") {
+                if (navCard) navCard.classList.add("d-none");
+            } else {
+                if (navCard) navCard.classList.remove("d-none");
+            }
+
             if (tab === "my_dramas") {
                 fetchDramas("my_dramas", myDramasPage);
                 fetchCategories();
@@ -891,6 +1153,8 @@
             } else if (tab === "all_dramas") {
                 fetchDramas("all_dramas", allDramasPage);
                 fetchCategories();
+            } else if (tab === "friends") {
+                fetchFriends();
             }
         }
 
@@ -924,6 +1188,7 @@
             const reqBody = {
                 access_token: userAccessToken,
                 tab: tab,
+                sub_tab: recSubTab,
                 page: 1,
                 page_size: 10000
             };
@@ -942,7 +1207,17 @@
                 if (data.status === "success") {
                     if (tab === "my_dramas") myDramasMasterList = data.list || [];
                     else if (tab === "all_dramas") allDramasMasterList = data.list || [];
-                    else if (tab === "recommendations") recsMasterList = data.list || [];
+                    else if (tab === "recommendations") {
+                        recsMasterList = data.list || [];
+                        if (data.rec_counts) {
+                            const elP = document.getElementById("rec-pending-count");
+                            const elA = document.getElementById("rec-accepted-count");
+                            const elR = document.getElementById("rec-rejected-count");
+                            if (elP) elP.innerText = data.rec_counts.pending || 0;
+                            if (elA) elA.innerText = data.rec_counts.accepted || 0;
+                            if (elR) elR.innerText = data.rec_counts.rejected || 0;
+                        }
+                    }
                     
                     renderClientSideFilteredData(tab, page);
                 } else {
@@ -981,9 +1256,9 @@
             const catSelect = document.getElementById(catSelectId);
             const rawQ = searchInput ? searchInput.value.trim() : "";
             const normQ = normalizeSearchText(rawQ);
-            const catVal = catSelect ? catSelect.value.trim() : "";
+            const catVal = activeCategoryFilter || (catSelect ? catSelect.value.trim() : "");
 
-            // 前端 0ms 記憶體過濾
+            // 前端 0ms 記憶體過濾 (關鍵字搜尋與分類過濾雙重交集)
             const filteredList = masterList.filter(item => {
                 if (catVal && item.category !== catVal) return false;
                 if (normQ) {
@@ -1157,17 +1432,75 @@
                     `;
                     container.innerHTML += html;
                 } else {
-                    // 推薦清單
+                    // 好友推薦清單
                     let recImgHtml = renderPreviewImagesHtml(item.image_url);
 
+                    let actionHtml = "";
+                    let alreadyInListBadge = "";
+                    if (item.is_already_in_my_list) {
+                        alreadyInListBadge = `<span class="badge bg-success text-white small mb-1 shadow-sm"><i class="fa-solid fa-circle-check me-1"></i>已在您的追劇清單中</span>`;
+                    }
+
+                    if (recSubTab === "pending" || (!item.is_accepted && !item.is_rejected)) {
+                        if (item.is_already_in_my_list) {
+                            actionHtml = `
+                                <div class="d-flex flex-column gap-1 align-items-stretch align-items-sm-end w-100 w-sm-auto mt-2 mt-sm-0">
+                                    <button class="btn btn-sm btn-success py-1 px-2 text-nowrap shadow-sm" style="font-size: 0.75rem;" onclick="acceptRecommend(${item.recommendation_id})">
+                                        <i class="fa-solid fa-check me-1"></i>已在清單 (移至已加入)
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="ignoreRecommend(${item.recommendation_id})">
+                                        <i class="fa-solid fa-eye-slash me-1"></i>忽略 / 隱藏
+                                    </button>
+                                </div>
+                            `;
+                        } else {
+                            actionHtml = `
+                                <div class="d-flex flex-column gap-1 align-items-stretch align-items-sm-end w-100 w-sm-auto mt-2 mt-sm-0">
+                                    <button class="btn btn-sm btn-success py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="acceptRecommend(${item.recommendation_id})">
+                                        <i class="fa-solid fa-plus me-1"></i>接受 (加入追劇)
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="rejectRecommend(${item.recommendation_id})">
+                                        <i class="fa-solid fa-xmark me-1"></i>拒絕
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="ignoreRecommend(${item.recommendation_id})">
+                                        <i class="fa-solid fa-eye-slash me-1"></i>忽略 / 隱藏
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    } else if (recSubTab === "accepted" || item.is_accepted) {
+                        actionHtml = `
+                            <div class="d-flex flex-column gap-1 align-items-stretch align-items-sm-end w-100 w-sm-auto mt-2 mt-sm-0">
+                                <span class="badge bg-success py-1 px-2 text-nowrap shadow-sm mb-1 text-center" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-circle-check me-1"></i>已加入個人追劇清單
+                                </span>
+                                <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="ignoreRecommend(${item.recommendation_id})">
+                                    <i class="fa-solid fa-eye-slash me-1"></i>忽略 / 隱藏紀錄
+                                </button>
+                            </div>
+                        `;
+                    } else if (recSubTab === "rejected" || item.is_rejected) {
+                        actionHtml = `
+                            <div class="d-flex flex-column gap-1 align-items-stretch align-items-sm-end w-100 w-sm-auto mt-2 mt-sm-0">
+                                <span class="badge bg-secondary py-1 px-2 text-nowrap mb-1 text-center" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-ban me-1"></i>${item.status === 'ignored' ? '已忽略/隱藏' : '已拒絕'}
+                                </span>
+                                <button class="btn btn-sm btn-outline-success py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="acceptRecommend(${item.recommendation_id})">
+                                    <i class="fa-solid fa-rotate-left me-1"></i>重新接受
+                                </button>
+                            </div>
+                        `;
+                    }
+
                     const html = `
-                        <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center" style="border-left-color: #ff9f43;">
-                            <div class="d-flex align-items-center flex-grow-1 me-2" style="max-width: 80%;">
+                        <div class="glass-card p-3 drama-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2" style="border-left-color: ${recSubTab === 'accepted' ? '#10b981' : (recSubTab === 'rejected' ? '#6b7280' : '#ff9f43')};">
+                            <div class="d-flex align-items-center flex-grow-1 w-100 me-0 me-sm-2" style="min-width: 0;">
                                 ${recImgHtml}
                                 <div class="flex-grow-1" style="min-width: 0;">
                                     <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
-                                        <span class="badge bg-warning text-dark small">${item.category}</span>
-                                        <span class="small text-muted"><i class="fa-regular fa-user me-1"></i>推薦人: ${item.from_user}</span>
+                                        <span class="badge ${recSubTab === 'accepted' ? 'bg-success' : 'bg-warning text-dark'} small">${item.category}</span>
+                                        ${alreadyInListBadge}
+                                        <span class="small text-muted"><i class="fa-regular fa-user me-1"></i>推薦人: <strong>${item.from_user}</strong></span>
                                     </div>
                                     <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem;">${item.title}</h5>
                                     ${item.recommend_notes ? `<div class="bg-light p-2 rounded text-secondary mb-2 small" style="border-left: 2px solid #ff9f43;">推薦短評: ${item.recommend_notes}</div>` : ""}
@@ -1176,11 +1509,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <button class="btn btn-sm btn-line py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="acceptRecommend(${item.recommendation_id})">
-                                    <i class="fa-solid fa-check me-1"></i>接受
-                                </button>
-                            </div>
+                            ${actionHtml}
                         </div>
                     `;
                     container.innerHTML += html;
@@ -1287,14 +1616,20 @@
 
         // 探索新番即時搜尋與分類過濾 (前端0ms打字即時響應)
         function triggerAllDramasSearch() {
+            const selectEl = document.getElementById("all-dramas-cat-select");
+            if (selectEl) activeCategoryFilter = selectEl.value;
             allDramasPage = 1;
             renderClientSideFilteredData("all_dramas", 1);
+            if (cachedCategoriesData) renderVisualChips(cachedCategoriesData);
         }
 
         // 我的追劇即時搜尋與分類過濾 (前端0ms打字即時響應)
         function triggerMyDramasSearch() {
+            const selectEl = document.getElementById("my-dramas-cat-select");
+            if (selectEl) activeCategoryFilter = selectEl.value;
             myDramasPage = 1;
             renderClientSideFilteredData("my_dramas", 1);
+            if (cachedCategoriesData) renderVisualChips(cachedCategoriesData);
         }
 
         // 快捷：追劇+1集
@@ -1764,21 +2099,61 @@
             });
         }
 
-        // 推薦劇集 Modal 好友選擇器 (僅顯示 LINE 顯示名稱)
-        function renderRecommendFriendsSelector(friends) {
+
+        function switchRecSubTab(subTab) {
+            recSubTab = subTab;
+            const btnPending = document.getElementById("rec-tab-pending");
+            const btnAccepted = document.getElementById("rec-tab-accepted");
+            const btnRejected = document.getElementById("rec-tab-rejected");
+
+            [btnPending, btnAccepted, btnRejected].forEach(b => {
+                if (b) {
+                    b.classList.remove("active", "btn-success", "btn-secondary");
+                    b.classList.add("btn-outline-success", "text-dark");
+                }
+            });
+
+            const targetBtn = document.getElementById("rec-tab-" + subTab);
+            if (targetBtn) {
+                targetBtn.classList.remove("btn-outline-success", "btn-outline-secondary", "text-dark");
+                targetBtn.classList.add("active");
+            }
+
+            recsMasterList = null;
+            fetchDramas("recommendations", 1, true);
+        }
+
+        // 推薦劇集 Modal 好友選擇器 (顯示好友暱稱與該劇集是否已加入對方的追劇清單狀態)
+        function renderRecommendFriendsSelector(friends, statusMap = {}) {
             const container = document.getElementById("rec-friends-checkboxes");
+            if (!container) return;
             container.innerHTML = "";
-            if (friends.length === 0) {
+            if (!friends || friends.length === 0) {
                 container.innerHTML = `<p class="small text-muted py-1">請先至好友管理頁面加好友！</p>`;
                 return;
             }
             friends.forEach(f => {
+                const fStatus = statusMap[f.id] || {};
+                let statusBadge = "";
+                let isDisabled = false;
+
+                if (fStatus.is_in_watchlist || fStatus.is_accepted) {
+                    statusBadge = `<span class="badge bg-success ms-2 shadow-sm" style="font-size: 0.72rem;"><i class="fa-solid fa-check me-1"></i>已在對方的追劇清單中</span>`;
+                    isDisabled = true;
+                } else if (fStatus.is_pending) {
+                    statusBadge = `<span class="badge bg-warning text-dark ms-2" style="font-size: 0.72rem;"><i class="fa-solid fa-clock me-1"></i>已發送推薦，等待中</span>`;
+                    isDisabled = true;
+                }
+
                 container.innerHTML += `
-                    <div class="form-check">
-                        <input class="form-check-input rec-friend-chk" type="checkbox" value="${f.id}" id="rec-friend-${f.id}">
-                        <label class="form-check-label small" for="rec-friend-${f.id}">
-                            ${f.display_name}
-                        </label>
+                    <div class="form-check d-flex align-items-center justify-content-between py-1 border-bottom border-light">
+                        <div>
+                            <input class="form-check-input rec-friend-chk" type="checkbox" value="${f.id}" id="rec-friend-${f.id}" ${isDisabled ? 'disabled' : ''}>
+                            <label class="form-check-label small fw-bold ${isDisabled ? 'text-muted' : 'text-dark'}" for="rec-friend-${f.id}">
+                                ${f.display_name}
+                            </label>
+                        </div>
+                        <div>${statusBadge}</div>
                     </div>
                 `;
             });
@@ -1789,11 +2164,32 @@
             document.getElementById("rec-drama-title").value = dramaTitle;
             document.getElementById("rec-notes").value = "";
             
-            // 重新讀取好友
-            renderRecommendFriendsSelector(myFriendsList);
+            const container = document.getElementById("rec-friends-checkboxes");
+            if (container) {
+                container.innerHTML = `<div class="text-center py-2 text-muted small"><div class="spinner-border spinner-border-sm me-1 text-success"></div>檢查好友追劇清單狀態...</div>`;
+            }
 
             const modal = new bootstrap.Modal(document.getElementById("recommendModal"));
             modal.show();
+
+            // 檢查好友對此劇集的追劇清單與推薦狀態
+            fetch("/line/api/dramas/check_friend_status/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    drama_id: parseInt(dramaId)
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const statusMap = (data.status === "success") ? (data.friend_status || {}) : {};
+                renderRecommendFriendsSelector(myFriendsList, statusMap);
+            })
+            .catch(err => {
+                console.error(err);
+                renderRecommendFriendsSelector(myFriendsList, {});
+            });
         }
 
         // 推薦劇集送出
@@ -1835,7 +2231,7 @@
             });
         }
 
-        // 接受推薦
+        // 接受推薦：立刻移至已加入清單，並立刻更新「我的追劇清單」
         function acceptRecommend(id) {
             fetch(`/line/api/dramas/accept_recommend/${id}/`, {
                 method: "POST",
@@ -1845,11 +2241,91 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success") {
-                    Swal.fire({ title: '已加入您的追劇清單！', icon: 'success', timer: 1200, showConfirmButton: false });
-                    fetchDramas("my_dramas", 1);
-                    fetchDramas("recommendations", 1);
+                    Swal.fire({ title: '已成功接受並加入您的追劇清單！', icon: 'success', timer: 1500, showConfirmButton: false });
+                    myDramasMasterList = null;
+                    recsMasterList = null;
+                    fetchDramas("my_dramas", 1, true);
+                    fetchDramas("recommendations", 1, true);
+                    fetchCategories();
                 } else {
                     Swal.fire("錯誤", "接受失敗：" + data.error, "error");
+                }
+            });
+        }
+
+        // 拒絕推薦 (移至拒絕/歷史紀錄)
+        function rejectRecommend(id) {
+            fetch(`/line/api/dramas/reject_recommend/${id}/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ access_token: userAccessToken })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({ title: '已拒絕此推薦', icon: 'info', timer: 1200, showConfirmButton: false });
+                    recsMasterList = null;
+                    fetchDramas("recommendations", 1, true);
+                } else {
+                    Swal.fire("錯誤", "拒絕失敗：" + data.error, "error");
+                }
+            });
+        }
+
+        // 忽略 / 隱藏推薦 (直接從待處理中隱藏)
+        function ignoreRecommend(id) {
+            fetch(`/line/api/dramas/ignore_recommend/${id}/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ access_token: userAccessToken })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({ title: '已忽略/隱藏此推薦', icon: 'info', timer: 1200, showConfirmButton: false });
+                    recsMasterList = null;
+                    fetchDramas("recommendations", 1, true);
+                } else {
+                    Swal.fire("錯誤", "忽略失敗：" + data.error, "error");
+                }
+            });
+        }
+
+        // 一鍵全選批次操作 (一鍵全部接受 / 一鍵全部忽略)
+        function batchRecommendAction(action) {
+            const actionText = (action === "accept_all") ? "全部接受並加入追劇清單" : "全部忽略隱藏";
+            Swal.fire({
+                title: `確定要【${actionText}】嗎？`,
+                text: "此操作將批次處理所有未讀待處理的好友推薦項目！",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: action === 'accept_all' ? '#10b981' : '#6b7280',
+                confirmButtonText: "確定執行",
+                cancelButtonText: "取消"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    fetch("/line/api/dramas/batch_recommend_action/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ access_token: userAccessToken, action: action })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            Swal.fire("執行完成！", `成功批次處理 ${data.count} 筆推薦項目。`, "success");
+                            myDramasMasterList = null;
+                            recsMasterList = null;
+                            fetchDramas("my_dramas", 1, true);
+                            fetchDramas("recommendations", 1, true);
+                            fetchCategories();
+                        } else {
+                            Swal.fire("執行失敗", data.error, "error");
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        Swal.fire("連線錯誤", "無法連線至伺服器", "error");
+                    });
                 }
             });
         }
