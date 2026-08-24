@@ -25,6 +25,7 @@ def normalize_title(title):
     if not title:
         return ""
     t = str(title).strip()
+    t = re.sub(r'^[#＃\s]+', '', t).strip()
     t = t.replace("的主視覺圖", "").replace("《", "").replace("》", "").replace("『", "").replace("』", "").strip()
     t = re.sub(r'[~∼〜〰⁓]', '～', t)
     t = t.replace(':', '：')

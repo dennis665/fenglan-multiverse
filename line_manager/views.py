@@ -2699,7 +2699,12 @@ def _clean_franchise_title(title):
     """提取動畫主系列名稱 (Core Franchise Name)"""
     if not title:
         return ""
-    t = title.strip()
+    t = str(title).strip()
+
+    # 1. 移除前導 '#' / '＃' 與開頭連線/空格符號
+    t = re.sub(r"^[#＃\s]+", "", t).strip()
+
+    # 2. 移除前綴：劇場版、電影版、動畫電影、OVA、OAD、特別篇、SP、【新番】、[新番]
     t = re.sub(
         r"^(劇場版|電影版|動畫電影|OVA|OAD|特別篇|SP|【新番】|\[新番\]|\s)+",
         "",
@@ -2707,24 +2712,50 @@ def _clean_franchise_title(title):
         flags=re.IGNORECASE,
     ).strip()
 
-    patterns = [
-        r"\s*第[0-90-9一二三四五六七八九十]+\s*[季期].*",
-        r"\s*Season\s*[0-9]+.*",
-        r"\s*S[0-9]+.*",
-        r"\s*[0-9]+(?:st|nd|rd|th)\s*Season.*",
-        r"\s*Part\s*[0-9]+.*",
-        r"\s*The\s*Final\s*Season.*",
-        r"\s*【?總集篇】?.*",
-        r"\s*特别總集篇.*",
-        r"\s*特別篇.*",
-        r"\s*OVA.*",
-        r"\s*OAD.*",
-        r"\s*劇場版.*",
-        r"\s*電影版.*",
-    ]
-    for pat in patterns:
-        t = re.sub(pat, "", t, flags=re.IGNORECASE).strip()
-
+    # 3. 特殊熱門/知名 IP 保護對應
+    title_upper = title.upper()
+    if "魔法科高中" in title:
+        return "魔法科高中的劣等生"
+    if "魔法紀錄" in title or "魔法少女小圓" in title:
+        return "魔法少女小圓 系列"
+    if "魔法騎士" in title:
+        return "魔法騎士雷阿斯"
+    if "CENCOROLL" in title_upper:
+        return "CENCOROLL"
+    if "CHAOS;CHILD" in title_upper or "CHAOS;HEAD" in title_upper or "CHAOS CHILD" in title_upper:
+        return "CHAOS;CHILD 混沌之子"
+    if "CLEVATESS" in title_upper:
+        return "Clevatess"
+    if "BANG DREAM" in title_upper:
+        return "BanG Dream！"
+    if "LOVE LIVE" in title_upper or "LOVELIVE" in title_upper:
+        return "Love Live! 系列"
+    if "IDOLM@STER" in title_upper or "偶像大師" in title:
+        return "THE IDOLM@STER 偶像大師 系列"
+    if "光之美少女" in title or "PRETTY CURE" in title_upper or "PRECURE" in title_upper:
+        return "光之美少女 系列"
+    if "卡片戰鬥" in title or "VANGUARD" in title_upper:
+        return "卡片戰鬥!! 先導者"
+    if "閃電十一人" in title or "INAZUMA ELEVEN" in title_upper:
+        return "閃電十一人"
+    if "數碼寶貝" in title or "DIGIMON" in title_upper:
+        return "數碼寶貝 系列"
+    if "寶可夢" in title or "POKÉMON" in title_upper or "POKEMON" in title_upper or "神奇寶貝" in title:
+        return "寶可夢 Pokémon"
+    if "遊戲王" in title or "YU-GI-OH" in title_upper:
+        return "遊戲王 系列"
+    if "約會大作戰" in title or "DATE A LIVE" in title_upper:
+        return "約會大作戰 DATE A LIVE"
+    if "戰姬絕唱" in title or "SYMPHOGEAR" in title_upper:
+        return "戰姬絕唱 SYMPHOGEAR"
+    if "CODE GEASS" in title_upper or "反叛的魯路修" in title:
+        return "Code Geass 反叛的魯路修"
+    if "請問您今天要來點兔子嗎" in title:
+        return "請問您今天要來點兔子嗎？"
+    if "Infinite Dendrogram" in title or "無盡連鎖" in title:
+        return "Infinite Dendrogram -無盡連鎖-"
+    if "尋找殭屍中" in title:
+        return "尋找殭屍中"
     if "從零開始的異世界生活" in title:
         return "Re:從零開始的異世界生活"
     if "間諜家家酒" in title or "SPY×FAMILY" in title:
@@ -2782,9 +2813,47 @@ def _clean_franchise_title(title):
     if "銀魂" in title:
         return "銀魂"
 
-    split_match = re.split(r"[\s:：\-—–]+", t)
-    if len(split_match) > 1 and len(split_match[0]) >= 2:
-        return split_match[0].strip()
+    # 4. 移除季數、期數與章節尾綴
+    patterns = [
+        r"\s*第[0-90-9一二三四五六七八九十]+\s*[季期篇章].*",
+        r"\s*Season\s*[0-9]+.*",
+        r"\s*S[0-9]+.*",
+        r"\s*[0-9]+(?:st|nd|rd|th)\s*Season.*",
+        r"\s*Part\s*[0-9]+.*",
+        r"\s*The\s*Final\s*Season.*",
+        r"\s*Final\s*SEASON.*",
+        r"\s*【?總集篇】?.*",
+        r"\s*特别總集篇.*",
+        r"\s*特別篇.*",
+        r"\s*OVA.*",
+        r"\s*OAD.*",
+        r"\s*劇場版.*",
+        r"\s*電影版.*",
+        r"\s*第二章.*",
+        r"\s*第三章.*",
+        r"\s*第一章.*",
+        r"\s*\(\s*\d{4}\s*\).*",
+        r"\s+II.*",
+        r"\s+III.*",
+        r"\s+IV.*",
+        r"\s+2nd.*",
+        r"\s+3rd.*",
+        r"\s+2\s*$",
+    ]
+    for pat in patterns:
+        t = re.sub(pat, "", t, flags=re.IGNORECASE).strip()
+
+    # 5. 清理包覆在最外層的書名號 〈〉 《》 
+    if (t.startswith("〈") and "〉" in t) or (t.startswith("《") and "》" in t):
+        t = re.sub(r"^[〈《]|[\s:：\-—–]*[〉》].*", "", t).strip()
+
+    # 6. 分隔符號分割（注意：對冒號與連字號做切分，不對空格作切分，避免英文書名被斷開）
+    split_match = re.split(r"[:：\-—–]+", t)
+    if len(split_match) > 1 and len(split_match[0].strip()) >= 2:
+        t = split_match[0].strip()
+
+    # 7. 移除首尾殘留符號
+    t = re.sub(r"^[#＃\s〈《『「【\[]+|[#＃\s〉》』」】\]]+$", "", t).strip()
 
     return t if t else title.strip()
 

@@ -12,10 +12,12 @@ class Command(BaseCommand):
         """提取動畫主系列名稱 (Core Franchise Name)"""
         if not title:
             return ""
+        t = str(title).strip()
 
-        t = title.strip()
+        # 1. 移除前導 '#' / '＃' 與開頭連線/空格符號
+        t = re.sub(r"^[#＃\s]+", "", t).strip()
 
-        # 1. 移除前綴：劇場版、電影版、OVA、OAD、特別篇、動畫
+        # 2. 移除前綴：劇場版、電影版、動畫電影、OVA、OAD、特別篇、SP、【新番】、[新番]
         t = re.sub(
             r"^(劇場版|電影版|動畫電影|OVA|OAD|特別篇|SP|【新番】|\[新番\]|\s)+",
             "",
@@ -23,7 +25,69 @@ class Command(BaseCommand):
             flags=re.IGNORECASE,
         ).strip()
 
-        # 2. 移除季數、期數與章節尾綴
+        # 3. 特殊熱門/知名 IP 保護對應
+        if "Infinite Dendrogram" in title or "無盡連鎖" in title:
+            return "Infinite Dendrogram -無盡連鎖-"
+        if "尋找殭屍中" in title:
+            return "尋找殭屍中"
+        if "從零開始的異世界生活" in title:
+            return "Re:從零開始的異世界生活"
+        if "間諜家家酒" in title or "SPY×FAMILY" in title:
+            return "SPY×FAMILY 間諜家家酒"
+        if "名偵探柯南" in title:
+            return "名偵探柯南"
+        if "鬼滅之刃" in title:
+            return "鬼滅之刃"
+        if "進擊的巨人" in title:
+            return "進擊的巨人"
+        if "刀劍神域" in title:
+            return "刀劍神域"
+        if "無職轉生" in title:
+            return "無職轉生 ～到了異世界就拿出真本事～"
+        if "轉生成史萊姆" in title or "關於我轉生變成史萊姆這檔事" in title:
+            return "關於我轉生變成史萊姆這檔事"
+        if "五等分的新娘" in title:
+            return "五等分的新娘"
+        if "咒術迴戰" in title:
+            return "咒術迴戰"
+        if "鏈鋸人" in title:
+            return "鏈鋸人"
+        if "排球少年" in title:
+            return "排球少年"
+        if "我的英雄學院" in title:
+            return "我的英雄學院"
+        if "文豪Stray Dogs" in title or "文豪野犬" in title:
+            return "文豪Stray Dogs"
+        if "魔法禁書目錄" in title:
+            return "魔法禁書目錄"
+        if "科學超電磁砲" in title:
+            return "科學超電磁砲"
+        if "Overlord" in title or "不死者之王" in title:
+            return "Overlord 不死者之王"
+        if "賽馬娘" in title:
+            return "賽馬娘 Pretty Derby"
+        if "孤獨搖滾" in title:
+            return "BOCCHI THE ROCK! 孤獨搖滾!"
+        if "死神" in title or "BLEACH" in title:
+            return "BLEACH 死神"
+        if "Fate/" in title or "Fate／" in title:
+            return "Fate 系列"
+        if "蠟筆小新" in title:
+            return "蠟筆小新"
+        if "哆啦A夢" in title:
+            return "哆啦A夢"
+        if "海賊王" in title or "航海王" in title or "ONE PIECE" in title:
+            return "航海王 ONE PIECE"
+        if "火影忍者" in title or "BORUTO" in title:
+            return "火影忍者 / BORUTO"
+        if "龍珠" in title or "七龍珠" in title or "Dragon Ball" in title:
+            return "七龍珠 Dragon Ball"
+        if "機動戰士高達" in title or "機動戰士鋼彈" in title or "鋼彈" in title:
+            return "機動戰士鋼彈 系列"
+        if "銀魂" in title:
+            return "銀魂"
+
+        # 4. 移除季數、期數與章節尾綴
         patterns = [
             r"\s*第[0-90-9一二三四五六七八九十]+\s*[季期].*",
             r"\s*Season\s*[0-9]+.*",
@@ -39,25 +103,22 @@ class Command(BaseCommand):
             r"\s*劇場版.*",
             r"\s*電影版.*",
         ]
-
         for pat in patterns:
             t = re.sub(pat, "", t, flags=re.IGNORECASE).strip()
 
-        # 3. 處理常見熱門大作品的系列歸類保護
-        if "從零開始的異世界生活" in title:
-            return "Re:從零開始的異世界生活"
-        if "間諜家家酒" in title or "SPY×FAMILY" in title:
-            return "SPY×FAMILY 間諜家家酒"
-        if "名偵探柯南" in title:
-            return "名偵探柯南"
-        if "鬼滅之刃" in title:
-            return "鬼滅之刃"
-        if "進擊的巨人" in title:
-            return "進擊的巨人"
-        if "刀劍神域" in title:
-            return "刀劍神域"
-        if "無職轉生" in title:
-            return "無職轉生 ～到了異世界就拿出真本事～"
+        # 5. 清理包覆在最外層的書名號 〈〉 《》 
+        if (t.startswith("〈") and "〉" in t) or (t.startswith("《") and "》" in t):
+            t = re.sub(r"^[〈《]|[\s:：\-—–]*[〉》].*", "", t).strip()
+
+        # 6. 分隔符號分割（注意：對冒號與連字號做切分，不對空格作切分，避免英文書名被斷開）
+        split_match = re.split(r"[:：\-—–]+", t)
+        if len(split_match) > 1 and len(split_match[0].strip()) >= 2:
+            t = split_match[0].strip()
+
+        # 7. 移除首尾殘留符號
+        t = re.sub(r"^[#＃\s〈《『「【\[]+|[#＃\s〉》』」】\]]+$", "", t).strip()
+
+        return t if t else title.strip()
         if "轉生成史萊姆" in title or "關於我轉生變成史萊姆這檔事" in title:
             return "關於我轉生變成史萊姆這檔事"
         if "五等分的新娘" in title:
