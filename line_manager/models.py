@@ -111,10 +111,45 @@ class Friendship(models.Model):
         return f"{self.user.username} -> {self.friend.username}"
 
 
+class AnimeFranchise(models.Model):
+    """動漫作品 IP 系列主表（可在 Admin 後台自由建立、修改與設定關聯）"""
+    name = models.CharField(max_length=150, unique=True, verbose_name=_("作品系列名稱"))
+    description = models.TextField(blank=True, verbose_name=_("系列簡介/說明"))
+    cover_image_url = EncryptedTextField(blank=True, default="", verbose_name=_("系列封面圖"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))
+
+    class Meta:
+        verbose_name = _("動漫作品系列")
+        verbose_name_plural = _("動漫作品系列")
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} (關聯劇集: {self.dramas.count()} 部)"
+
+
 class Drama(models.Model):
     """追劇主表（共享資訊部分）"""
+    MEDIA_TYPE_CHOICES = [
+        ("TV", _("TV 正篇 / 季番")),
+        ("MOVIE", _("劇場版 / 電影")),
+        ("OVA", _("OVA / 特別篇")),
+        ("RECAP", _("總集篇")),
+    ]
+
     title = EncryptedCharField(max_length=255, verbose_name=_("劇名"))
     category = models.CharField(max_length=50, default="其他", verbose_name=_("分類"))
+    franchise = models.ForeignKey(
+        AnimeFranchise,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dramas",
+        verbose_name=_("所屬作品系列"),
+    )
+    media_type = models.CharField(
+        max_length=20, default="TV", choices=MEDIA_TYPE_CHOICES, verbose_name=_("媒體類型")
+    )
     total_seasons = models.IntegerField(default=1, verbose_name=_("總季數"))
     total_episodes = models.IntegerField(default=0, verbose_name=_("總集數"))
     info_links = EncryptedTextField(blank=True, default="[]", verbose_name=_("相關資訊連結"))

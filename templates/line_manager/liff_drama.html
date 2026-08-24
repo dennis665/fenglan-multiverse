@@ -238,6 +238,9 @@
                     <button class="nav-link" id="all-dramas-tab" data-bs-toggle="tab" data-bs-target="#all-dramas-panel" type="button" role="tab" onclick="switchTab('all_dramas')">🌐 探索新番/劇庫</button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="franchises-tab" data-bs-toggle="tab" data-bs-target="#franchises-panel" type="button" role="tab" onclick="switchTab('franchises')">📚 作品總覽</button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="recs-tab" data-bs-toggle="tab" data-bs-target="#recs-panel" type="button" role="tab" onclick="switchTab('recommendations')">📬 好友推薦</button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -377,6 +380,78 @@
                                 </select>
                             </div>
                             <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="all-next-btn" onclick="changePage(1)">下一頁</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 動漫作品總覽 (系列關聯) -->
+                <div class="tab-pane fade" id="franchises-panel" role="tabpanel">
+                    <!-- 統計資訊與搜尋列 -->
+                    <div class="glass-card p-3 mb-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                            <div class="small fw-bold text-success">
+                                <i class="fa-solid fa-layer-group me-1"></i>作品系列關聯總覽
+                            </div>
+                            <div class="small text-muted">
+                                共 <span id="franchise-total-count" class="fw-bold text-dark">0</span> 系列 IP
+                            </div>
+                        </div>
+                        <div class="p-2 rounded bg-dark bg-opacity-40 mb-2 small d-flex justify-content-around text-center border border-secondary border-opacity-50">
+                            <div>
+                                <div class="text-muted" style="font-size: 0.75rem;">包含追劇系列</div>
+                                <div id="franchise-tracked-count" class="fw-bold text-primary fs-6">0</div>
+                            </div>
+                            <div class="border-end border-secondary border-opacity-50"></div>
+                            <div>
+                                <div class="text-muted" style="font-size: 0.75rem;">已加入觀看部數</div>
+                                <div id="franchise-tracked-items-count" class="fw-bold text-success fs-6">0</div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <div class="flex-grow-1 position-relative" style="min-width: 150px;">
+                                <i class="fa-solid fa-magnifying-glass text-secondary position-absolute" style="left: 12px; top: 10px;"></i>
+                                <input type="text" id="franchise-search-input" class="form-control form-control-sm rounded-pill ps-4" placeholder="搜尋系列作品名稱（如：鬼滅、柯南、無職...）" oninput="triggerFranchiseSearch()">
+                            </div>
+                            <select id="franchise-filter-tracked-select" class="form-select form-select-sm rounded-pill w-auto" style="font-size: 0.8rem;" onchange="triggerFranchiseFilterTracked()">
+                                <option value="all" selected>🌐 全部作品 (包含已追蹤)</option>
+                                <option value="untracked">🙈 隱藏已追蹤 (只看未追蹤)</option>
+                                <option value="tracked">✅ 僅看已追蹤作品</option>
+                            </select>
+                            <select id="franchise-sort-select" class="form-select form-select-sm rounded-pill w-auto" style="font-size: 0.8rem;" onchange="triggerFranchiseSort()">
+                                <option value="newest" selected>🆕 最新 ➔ 最舊</option>
+                                <option value="oldest">⏳ 最舊 ➔ 最新</option>
+                                <option value="most_items">🔥 關聯多 ➔ 關聯少</option>
+                                <option value="fewest_items">🔹 關聯少 ➔ 關聯多</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="franchises-list" class="d-flex flex-column gap-3"></div>
+
+                    <!-- 底部分頁列：筆數選擇 (5, 10, 20) + 上/下一頁 + 總頁數顯示 + 指定頁數跳轉 -->
+                    <div id="franchise-pagination" class="glass-card p-3 mt-3 d-flex flex-column gap-2">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">每頁:</span>
+                                <select id="franchise-page-size-select" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="changeFranchisePageSize(this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10" selected>10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted fw-bold">
+                                第 <span id="franchise-page-num" class="text-success fw-bold">1</span> / 共 <span id="franchise-total-pages" class="text-dark fw-bold">1</span> 頁 (<span id="franchise-total-count-badge" class="text-primary">0</span>系列)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 pt-1 border-top">
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="franchise-prev-btn" onclick="changeFranchisePage(-1)">上一頁</button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">跳至:</span>
+                                <select id="franchise-jump-page-select" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="jumpFranchisePage(this.value)">
+                                    <!-- 動態填入頁碼 -->
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="franchise-next-btn" onclick="changeFranchisePage(1)">下一頁</button>
                         </div>
                     </div>
                 </div>
@@ -633,6 +708,7 @@
         let myDramasMasterList = null;
         let allDramasMasterList = null;
         let recsMasterList = null;
+        let franchiseMasterList = null;
 
         let displayPrefs = {
             category: true,
@@ -1135,11 +1211,11 @@
             fetchDramas("my_dramas", myDramasPage);
         }
 
-        // 切換 Tab (當切換至 好友推薦 或 好友管理 時，自動清掉/隱藏上方分類導航選項)
+        // 切換 Tab (當切換至 好友推薦, 好友管理, 或 作品總覽 時，自動清掉/隱藏上方分類導航選項)
         function switchTab(tab) {
             currentTab = tab;
             const navCard = document.getElementById("category-nav-card");
-            if (tab === "recommendations" || tab === "friends") {
+            if (tab === "recommendations" || tab === "friends" || tab === "franchises") {
                 if (navCard) navCard.classList.add("d-none");
             } else {
                 if (navCard) navCard.classList.remove("d-none");
@@ -1153,9 +1229,348 @@
             } else if (tab === "all_dramas") {
                 fetchDramas("all_dramas", allDramasPage);
                 fetchCategories();
+            } else if (tab === "franchises") {
+                fetchFranchises();
             } else if (tab === "friends") {
                 fetchFriends();
             }
+        }
+
+        // 讀取動漫作品總覽 (系列關聯) 資料 (前端實施 0 毫秒極速精準搜尋與過濾)
+        let franchisePage = 1;
+        let franchisePageSize = 10;
+        let franchiseTotalPages = 1;
+
+        function fetchFranchises(forceReload = false) {
+            if (franchiseMasterList && !forceReload) {
+                applyFranchiseLocalFilterAndPaginate(1);
+                return;
+            }
+
+            const listContainer = document.getElementById("franchises-list");
+            listContainer.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
+
+            fetch(apiBaseUrl + "/line/api/dramas/franchises/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ access_token: userAccessToken })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    franchiseMasterList = data.franchises || [];
+                    document.getElementById("franchise-tracked-count").innerText = data.user_tracked_franchises || 0;
+                    document.getElementById("franchise-tracked-items-count").innerText = data.user_tracked_items_count || 0;
+                    applyFranchiseLocalFilterAndPaginate(1);
+                } else {
+                    listContainer.innerHTML = `<div class="alert alert-danger text-center small py-2">載入失敗：${data.error}</div>`;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                listContainer.innerHTML = `<div class="alert alert-danger text-center small py-2">伺服器連線失敗</div>`;
+            });
+        }
+
+        function applyFranchiseLocalFilterAndPaginate(page = 1) {
+            if (!franchiseMasterList) return;
+            franchisePage = page;
+
+            const kwInput = document.getElementById("franchise-search-input");
+            const rawKw = kwInput ? kwInput.value : "";
+            const searchKw = normalizeSearchText(rawKw);
+
+            const filterTrackedSelect = document.getElementById("franchise-filter-tracked-select");
+            const filterTrackedVal = filterTrackedSelect ? filterTrackedSelect.value : "all";
+
+            const sortSelect = document.getElementById("franchise-sort-select");
+            const sortVal = sortSelect ? sortSelect.value : "newest";
+
+            // 1. 0ms 記憶體即時精準過濾
+            let filtered = franchiseMasterList.filter(f => {
+                if (filterTrackedVal === "untracked" && f.tracked_count > 0) return false;
+                if (filterTrackedVal === "tracked" && f.tracked_count === 0) return false;
+
+                if (!searchKw) return true;
+                
+                const normName = normalizeSearchText(f.franchise_name);
+                if (normName.includes(searchKw)) return true;
+
+                return f.items.some(item => normalizeSearchText(item.title).includes(searchKw));
+            });
+
+            // 2. 0ms 記憶體即時排序
+            filtered.sort((a, b) => {
+                const aTracked = a.tracked_count > 0 ? 1 : 0;
+                const bTracked = b.tracked_count > 0 ? 1 : 0;
+
+                if (sortVal === "oldest") {
+                    if (aTracked !== bTracked) return bTracked - aTracked;
+                    return a.latest_date_key - b.latest_date_key;
+                } else if (sortVal === "most_items") {
+                    if (aTracked !== bTracked) return bTracked - aTracked;
+                    return b.total_items - a.total_items;
+                } else if (sortVal === "fewest_items") {
+                    if (aTracked !== bTracked) return bTracked - aTracked;
+                    return a.total_items - b.total_items;
+                } else { // "newest"
+                    if (aTracked !== bTracked) return bTracked - aTracked;
+                    return b.latest_date_key - a.latest_date_key;
+                }
+            });
+
+            // 3. 本地分頁裁切
+            const totalCount = filtered.length;
+            franchiseTotalPages = Math.max(1, Math.ceil(totalCount / franchisePageSize));
+            if (franchisePage > franchiseTotalPages) franchisePage = franchiseTotalPages;
+
+            const startIdx = (franchisePage - 1) * franchisePageSize;
+            const pageItems = filtered.slice(startIdx, startIdx + franchisePageSize);
+
+            // 4. 即時更新 UI
+            document.getElementById("franchise-total-count").innerText = totalCount;
+            document.getElementById("franchise-total-count-badge").innerText = totalCount;
+            updateFranchisePaginationControls(franchisePage, franchiseTotalPages, totalCount);
+            renderFranchisesList(pageItems);
+        }
+
+        function triggerFranchiseSearch() {
+            applyFranchiseLocalFilterAndPaginate(1);
+        }
+
+        function triggerFranchiseSort() {
+            applyFranchiseLocalFilterAndPaginate(1);
+        }
+
+        function triggerFranchiseFilterTracked() {
+            applyFranchiseLocalFilterAndPaginate(1);
+        }
+
+        function changeFranchisePageSize(size) {
+            franchisePageSize = parseInt(size) || 10;
+            applyFranchiseLocalFilterAndPaginate(1);
+        }
+
+        function changeFranchisePage(delta) {
+            const nextP = franchisePage + delta;
+            if (nextP >= 1 && nextP <= franchiseTotalPages) {
+                applyFranchiseLocalFilterAndPaginate(nextP);
+            }
+        }
+
+        function jumpFranchisePage(pageVal) {
+            const p = parseInt(pageVal);
+            if (p >= 1 && p <= franchiseTotalPages) {
+                applyFranchiseLocalFilterAndPaginate(p);
+            }
+        }
+
+        function updateFranchisePaginationControls(page, totalPages, totalCount) {
+            const pageNumEl = document.getElementById("franchise-page-num");
+            const totalPagesEl = document.getElementById("franchise-total-pages");
+            const prevBtn = document.getElementById("franchise-prev-btn");
+            const nextBtn = document.getElementById("franchise-next-btn");
+            const jumpSelect = document.getElementById("franchise-jump-page-select");
+
+            if (pageNumEl) pageNumEl.innerText = page;
+            if (totalPagesEl) totalPagesEl.innerText = totalPages;
+
+            if (prevBtn) prevBtn.disabled = (page <= 1);
+            if (nextBtn) nextBtn.disabled = (page >= totalPages);
+
+            if (jumpSelect) {
+                jumpSelect.innerHTML = "";
+                for (let i = 1; i <= totalPages; i++) {
+                    jumpSelect.innerHTML += `<option value="${i}" ${i === page ? 'selected' : ''}>第 ${i} 頁</option>`;
+                }
+            }
+        }
+
+        function renderFranchisesList(list) {
+            const listContainer = document.getElementById("franchises-list");
+            listContainer.innerHTML = "";
+
+            if (!list || list.length === 0) {
+                listContainer.innerHTML = `<div class="text-center text-muted py-4 small">查無符合的作品系列關聯</div>`;
+                return;
+            }
+
+            list.forEach((f, idx) => {
+                const accordionId = `franchise-acc-${idx}`;
+                const hasTracked = f.tracked_count > 0;
+                
+                let trackedBadgeHtml = "";
+                if (hasTracked) {
+                    trackedBadgeHtml = `<span class="badge bg-success text-white shadow-sm small"><i class="fa-solid fa-circle-check me-1"></i>已有 ${f.tracked_count} 部加入觀看清單</span>`;
+                } else {
+                    trackedBadgeHtml = `<span class="badge bg-secondary text-light small opacity-75">未加入觀看清單</span>`;
+                }
+
+                let batchTrackBtnsHtml = "";
+                if (f.tracked_count < f.total_items) {
+                    batchTrackBtnsHtml += `
+                        <button class="btn btn-xs btn-success rounded-pill px-2 py-1 small fw-bold" onclick="batchTrackFranchise(${f.id}, 'track_all', '${f.franchise_name.replace(/'/g, "\\'")}')">
+                            <i class="fa-solid fa-plus-circle me-1"></i>一鍵全部追蹤 (${f.total_items}部)
+                        </button>
+                    `;
+                }
+                if (f.tracked_count > 0) {
+                    batchTrackBtnsHtml += `
+                        <button class="btn btn-xs btn-outline-danger rounded-pill px-2 py-1 small fw-bold" onclick="batchTrackFranchise(${f.id}, 'untrack_all', '${f.franchise_name.replace(/'/g, "\\'")}')">
+                            <i class="fa-solid fa-trash-can me-1"></i>一鍵取消追蹤
+                        </button>
+                    `;
+                }
+
+                // 預覽多圖示 (Multi-image cover thumbnails preview)
+                let previewImagesHtml = "";
+                if (f.preview_images && f.preview_images.length > 0) {
+                    previewImagesHtml = `<div class="d-flex align-items-center gap-1 my-2 overflow-x-auto py-1">`;
+                    f.preview_images.forEach(imgUrl => {
+                        previewImagesHtml += `<img src="${imgUrl}" class="rounded border shadow-sm cursor-pointer" style="width: 48px; height: 64px; object-fit: cover;" onclick="openImageLightbox(['${imgUrl.replace(/'/g, "\\'")}'])" onerror="this.style.display='none'">`;
+                    });
+                    previewImagesHtml += `</div>`;
+                }
+
+                // 子類別 (TV/電影/OVA/總集篇) 項目區塊渲染
+                const renderSubCategoryItems = (items, label, icon) => {
+                    if (!items || items.length === 0) return "";
+                    let html = `<div class="mb-3">
+                        <div class="fw-bold small mb-2 text-dark border-bottom pb-1">
+                            <i class="${icon} me-1 text-success"></i>${label} (${items.length} 部)
+                        </div>
+                        <div class="d-flex flex-column gap-2">`;
+                    
+                    items.forEach(item => {
+                        let joinBtn = "";
+                        if (item.is_tracked) {
+                            joinBtn = `<span class="badge bg-success text-white py-1 px-2 small shadow-sm"><i class="fa-solid fa-check me-1"></i>已在清單中</span>`;
+                        } else {
+                            joinBtn = `<button class="btn btn-xs btn-outline-success rounded-pill px-2 py-1 small fw-bold text-nowrap" onclick="joinDramaFromFranchise(${item.id}, '${f.franchise_name.replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-plus me-1"></i>加入追劇
+                            </button>`;
+                        }
+
+                        let itemImgHtml = "";
+                        if (item.image_url) {
+                            itemImgHtml = `<img src="${item.image_url}" class="rounded border me-2" style="width: 36px; height: 48px; object-fit: cover;" onerror="this.style.display='none'">`;
+                        }
+
+                        html += `
+                            <div class="p-2 rounded bg-light d-flex justify-content-between align-items-center border border-secondary border-opacity-25 gap-2">
+                                <div class="d-flex align-items-center" style="min-width: 0;">
+                                    ${itemImgHtml}
+                                    <div style="min-width: 0;">
+                                        <div class="fw-bold small text-dark">${item.title}</div>
+                                        <div class="small text-muted" style="font-size: 0.75rem;">${item.category} | 共 ${item.total_seasons} 季 ${item.total_episodes} 集</div>
+                                    </div>
+                                </div>
+                                <div>${joinBtn}</div>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div></div>`;
+                    return html;
+                };
+
+                const tvItemsHtml = renderSubCategoryItems(f.tv_seasons, "📺 TV 正篇 / 季番", "fa-solid fa-tv");
+                const movieItemsHtml = renderSubCategoryItems(f.movies, "🎬 劇場版 / 電影", "fa-solid fa-film");
+                const ovaItemsHtml = renderSubCategoryItems(f.ovas, "📼 OVA / 特別篇", "fa-solid fa-video");
+                const recapItemsHtml = renderSubCategoryItems(f.recaps, "🎞️ 總集篇", "fa-solid fa-clapperboard");
+
+                const cardHtml = `
+                    <div class="glass-card p-3 drama-item" style="border-left-color: ${hasTracked ? '#10b981' : '#6b7280'};">
+                        <div class="d-flex justify-content-between align-items-start mb-1 flex-wrap gap-1">
+                            <div>
+                                <h5 class="fw-bold mb-1 text-dark">${f.franchise_name}</h5>
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    <span class="badge bg-secondary text-light small">共 ${f.total_items} 部關聯作品</span>
+                                    ${trackedBadgeHtml}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 flex-wrap align-items-center mt-1">
+                                ${batchTrackBtnsHtml}
+                                <button class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 small fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${accordionId}">
+                                    <i class="fa-solid fa-folder-open me-1"></i>展開篇章 (${f.total_items})
+                                </button>
+                            </div>
+                        </div>
+                        ${previewImagesHtml}
+                        <div class="collapse mt-2 pt-2 border-top" id="${accordionId}">
+                            ${tvItemsHtml}
+                            ${movieItemsHtml}
+                            ${ovaItemsHtml}
+                            ${recapItemsHtml}
+                        </div>
+                    </div>
+                `;
+                listContainer.innerHTML += cardHtml;
+            });
+        }
+
+        function batchTrackFranchise(franchiseId, action, franchiseName) {
+            const isTrack = (action === "track_all");
+            const actionTitle = isTrack ? `一鍵全部追蹤【${franchiseName}】` : `一鍵取消追蹤【${franchiseName}】`;
+            const actionMsg = isTrack ? "確定要把該系列底下的所有篇章與劇場版通通加入您的追劇清單嗎？" : "確定要將該系列底下的所有作品從您的追劇清單中移除嗎？";
+            
+            Swal.fire({
+                title: actionTitle,
+                text: actionMsg,
+                icon: isTrack ? "question" : "warning",
+                showCancelButton: true,
+                confirmButtonColor: isTrack ? "#10b981" : "#ef4444",
+                confirmButtonText: isTrack ? "確定全部追蹤" : "確定取消追蹤",
+                cancelButtonText: "取消"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    fetch(apiBaseUrl + "/line/api/dramas/franchise_batch_track/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            access_token: userAccessToken,
+                            franchise_id: franchiseId,
+                            action: action
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            Swal.fire({ title: isTrack ? "已成功追蹤全部作品！" : "已成功取消追蹤！", icon: "success", timer: 1200, showConfirmButton: false });
+                            myDramasMasterList = null;
+                            fetchDramas("my_dramas", 1, true);
+                            fetchFranchises(true);
+                        } else {
+                            Swal.fire("錯誤", "操作失敗：" + data.error, "error");
+                        }
+                    });
+                }
+            });
+        }
+
+        function joinDramaFromFranchise(dramaId, franchiseName) {
+            fetch(apiBaseUrl + `/line/api/dramas/join/${dramaId}/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ access_token: userAccessToken })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({ title: '已成功加入您的追劇清單！', icon: 'success', timer: 1500, showConfirmButton: false });
+                    myDramasMasterList = null;
+                    fetchDramas("my_dramas", 1, true);
+                    fetchFranchises(true);
+                } else {
+                    Swal.fire("錯誤", "加入失敗：" + data.error, "error");
+                }
+            });
         }
 
         // 讀取追劇列表或推薦 (一次性載入全量 MasterList，隨後於前端實施 0 毫秒極速搜尋與分頁)

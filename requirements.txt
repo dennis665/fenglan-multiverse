@@ -2,7 +2,7 @@
 #* Web 應用程式核心框架
 django==6.1
 #* 生產環境用的 Python WSGI HTTP 伺服器
-gunicorn==26.0.0
+gunicorn==26.1.0
 #* 協助 Django 在生產環境中高效伺服靜態檔案
 whitenoise==6.12.0
 #* 管理環境變數與機密資訊
@@ -18,7 +18,7 @@ pyodbc==5.3.0
 
 #! 認證與安全性
 #* 處理會員註冊與 OAuth 2.0 (Google) 登入
-django-allauth==65.19.0
+django-allauth==65.19.1
 #* 處理 JSON Web Tokens 的編碼與解碼
 PyJWT==2.13.0
 #* 提供加密演算法支援
@@ -33,11 +33,11 @@ safety==3.8.1
 
 #! AI 與機器學習 (雲端 API 與邊緣運算)
 #* 串接 Google Gemini 模型
-google-genai==2.17.0
+google-genai==2.19.0
 #* 本地端語音轉文字模型
 openai-whisper==20250625
 #* 執行 YOLO 模型進行物件偵測
-ultralytics==8.4.117
+ultralytics==8.4.127
 #* 執行 PaddleOCR 進行光學字元辨識
 paddlepaddle==3.3.1
 paddleocr==3.7.0
@@ -72,9 +72,9 @@ python-docx==1.2.0
 
 #! 外部資料抓取與處理
 #* 獲取 Yahoo Finance 金融數據
-yfinance==1.5.2
+yfinance==1.6.0
 #* 下載 YouTube 影片與音訊
-yt-dlp==2026.7.4
+yt-dlp==2026.8.19
 #* 擷取 YouTube 影片字幕
 youtube-transcript-api==1.2.4
 #* 整合多種翻譯引擎的文字翻譯工具

@@ -6,6 +6,36 @@
 * **Minor (Y)**：新增功能。
 * **Patch (Z)**：Bug 修復或效能優化。
 
+## [1.17.11] - 2026-08-24
+### Added (新增)
+* **LIFF 追劇小幫手「📚 作品總覽」全功能升級與資料庫實體化 (`liff_drama.html`, `views.py`, `models.py`)**：
+  * **`AnimeFranchise` 作品系列資料庫表實體化**：在 DB 中建立 `AnimeFranchise`（動漫作品 IP 系列主檔）與 `Drama.franchise` / `Drama.media_type`（季番/劇場版/OVA/總集篇）實體關聯模型與 Migration 遷移檔 (`0011`)。
+  * **0 毫秒前端極速即時搜尋 (Pure Client-Side Instant Filtering)**：全量 Master List 快取於記憶體 `franchiseMasterList`，搜尋框結合 `normalizeSearchText` 規範化字串比對，打字隨搜隨顯、0 毫秒極速響應。
+  * **多重排序與顯示範圍選單**：
+    * 排序選單：`🆕 最新 ➔ 最舊` (預設發行日期排序)、`⏳ 最舊 ➔ 最新`、`🔥 關聯多 ➔ 關聯少`、`🔹 關聯少 ➔ 關聯多`。
+    * 顯示範圍過濾選單：`🌐 全部作品` (預設)、`🙈 隱藏已追蹤 (只看未追蹤)`、`✅ 僅看已追蹤作品`。
+  * **動態多圖預覽與一鍵全追蹤 / 全取消追蹤**：
+    * 每個作品系列卡片自動呈現旗下劇集多圖封面微縮圖 (Multi-image cover thumbnails)，點擊可放大觀看。
+    * 個人已追蹤系列顯示醒目 `✅ 已有 X 部加入觀看清單` 徽章與折疊細項。
+    * 提供 `[ ➕ 一鍵全部追蹤 (X部) ]` 與 `[ ❌ 一鍵取消追蹤 ]` 按鈕，點擊彈窗確定後批次收錄或移除該系列底下所有劇集。
+* **Django Admin 後台作品關聯管理與合併清理 (`line_manager/admin.py`)**：
+  * **內頁剔除與轉移 (`DramaInline`)**：在 `動漫作品系列` 編輯內頁啟用 `can_delete = True` 與 `show_change_link = True`，可直接勾選剔除誤歸類的劇集或點擊連結一鍵轉移系列。
+  * **🔀 批次一鍵合併作品系列 (Merge Action)**：新增 Admin Action `merge_selected_franchises`，可勾選多個重複系列，一鍵將所有劇集轉移併入第一個系列並自動刪除舊系列。
+  * **🧹 空系列自動清理 (Auto Cleanup)**：刪除/轉移劇集或刪除系列時，自動檢查並清除無任何關聯劇集的空 `AnimeFranchise` 舊記錄。
+* **每日自動排程整合 (`start_scheduler.py`)**：
+  * 每日 16:00 執行劇集更新完畢後，自動觸發 `call_command("sync_anime_franchises")` 對齊最新關聯與 `cleanup_empty_franchises()` 清理空系列。
+
+### Changed & Refactored (變更與重構)
+* **廢棄舊 JSON 資源檔清理**：
+  * 刪除過時的 `line_manager/data/anime_franchise_relations.json` 檔案，全面轉由 `AnimeFranchise` 資料庫模型管理。
+
+### Fixed & Optimized (修復與優化)
+* **LIFF 跨域路徑前綴修復**：為所有 `/line/api/dramas/` 請求統一加上 `apiBaseUrl` 域名前綴，解決 LINE LIFF WebView 內連線失敗問題。
+* **後端安全解析與防護**：修復 `api_get_franchises` 中 `search` 參數為 `null` 時引發的 `AttributeError`。
+* **搜尋函數命名修復**：修復前端 `normalizeSearchText` 函數名錯位導致的 `ReferenceError` 錯誤。
+
+---
+
 ## [1.17.10] - 2026-08-11
 ### Added (新增)
 * **每日下午 4:00 (16:00) 自動爬取更新與資源檔放置排程 (`start_scheduler.py`)**：

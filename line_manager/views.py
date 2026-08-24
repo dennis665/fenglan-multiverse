@@ -2695,6 +2695,315 @@ def api_batch_recommend_action(request):
     return JsonResponse({"status": "success", "count": processed_count})
 
 
+def _clean_franchise_title(title):
+    """提取動畫主系列名稱 (Core Franchise Name)"""
+    if not title:
+        return ""
+    t = title.strip()
+    t = re.sub(
+        r"^(劇場版|電影版|動畫電影|OVA|OAD|特別篇|SP|【新番】|\[新番\]|\s)+",
+        "",
+        t,
+        flags=re.IGNORECASE,
+    ).strip()
+
+    patterns = [
+        r"\s*第[0-90-9一二三四五六七八九十]+\s*[季期].*",
+        r"\s*Season\s*[0-9]+.*",
+        r"\s*S[0-9]+.*",
+        r"\s*[0-9]+(?:st|nd|rd|th)\s*Season.*",
+        r"\s*Part\s*[0-9]+.*",
+        r"\s*The\s*Final\s*Season.*",
+        r"\s*【?總集篇】?.*",
+        r"\s*特别總集篇.*",
+        r"\s*特別篇.*",
+        r"\s*OVA.*",
+        r"\s*OAD.*",
+        r"\s*劇場版.*",
+        r"\s*電影版.*",
+    ]
+    for pat in patterns:
+        t = re.sub(pat, "", t, flags=re.IGNORECASE).strip()
+
+    if "從零開始的異世界生活" in title:
+        return "Re:從零開始的異世界生活"
+    if "間諜家家酒" in title or "SPY×FAMILY" in title:
+        return "SPY×FAMILY 間諜家家酒"
+    if "名偵探柯南" in title:
+        return "名偵探柯南"
+    if "鬼滅之刃" in title:
+        return "鬼滅之刃"
+    if "進擊的巨人" in title:
+        return "進擊的巨人"
+    if "刀劍神域" in title:
+        return "刀劍神域"
+    if "無職轉生" in title:
+        return "無職轉生 ～到了異世界就拿出真本事～"
+    if "轉生成史萊姆" in title or "關於我轉生變成史萊姆這檔事" in title:
+        return "關於我轉生變成史萊姆這檔事"
+    if "五等分的新娘" in title:
+        return "五等分的新娘"
+    if "咒術迴戰" in title:
+        return "咒術迴戰"
+    if "鏈鋸人" in title:
+        return "鏈鋸人"
+    if "排球少年" in title:
+        return "排球少年"
+    if "我的英雄學院" in title:
+        return "我的英雄學院"
+    if "文豪Stray Dogs" in title or "文豪野犬" in title:
+        return "文豪Stray Dogs"
+    if "魔法禁書目錄" in title:
+        return "魔法禁書目錄"
+    if "科學超電磁砲" in title:
+        return "科學超電磁砲"
+    if "Overlord" in title or "不死者之王" in title:
+        return "Overlord 不死者之王"
+    if "賽馬娘" in title:
+        return "賽馬娘 Pretty Derby"
+    if "孤獨搖滾" in title:
+        return "BOCCHI THE ROCK! 孤獨搖滾!"
+    if "死神" in title or "BLEACH" in title:
+        return "BLEACH 死神"
+    if "Fate/" in title or "Fate／" in title:
+        return "Fate 系列"
+    if "蠟筆小新" in title:
+        return "蠟筆小新"
+    if "哆啦A夢" in title:
+        return "哆啦A夢"
+    if "海賊王" in title or "航海王" in title or "ONE PIECE" in title:
+        return "航海王 ONE PIECE"
+    if "火影忍者" in title or "BORUTO" in title:
+        return "火影忍者 / BORUTO"
+    if "龍珠" in title or "七龍珠" in title or "Dragon Ball" in title:
+        return "七龍珠 Dragon Ball"
+    if "機動戰士高達" in title or "機動戰士鋼彈" in title or "鋼彈" in title:
+        return "機動戰士鋼彈 系列"
+    if "銀魂" in title:
+        return "銀魂"
+
+    split_match = re.split(r"[\s:：\-—–]+", t)
+    if len(split_match) > 1 and len(split_match[0]) >= 2:
+        return split_match[0].strip()
+
+    return t if t else title.strip()
+
+
+def _classify_media_type(title, category):
+    """精準判定媒體類型：TV正篇、劇場版/電影、OVA/特別篇、總集篇"""
+    title_upper = title.upper()
+    if "總集篇" in title or "總集" in title or "RECAP" in title_upper:
+        return "RECAP", "🎞️ 總集篇"
+    elif (
+        "劇場版" in title
+        or "電影" in title
+        or "MOVIE" in title_upper
+        or "劇場版" in category
+        or "電影" in category
+    ):
+        return "MOVIE", "🎬 劇場版 / 電影"
+    elif (
+        "OVA" in title_upper
+        or "OAD" in title_upper
+        or "特別篇" in title
+        or "SPECIAL" in title_upper
+        or "SP" in title_upper
+    ):
+        return "OVA", "📼 OVA / 特別篇"
+    else:
+        return "TV", "📺 季番 / 正篇"
+
+
+def _extract_release_sort_key(category, created_at):
+    """提取劇集分類或建立時間的年代/年份排序 Key (例：2026年7月新番 -> 202607)"""
+    if category:
+        m = re.search(r'(\d{4})年(?:(\d{1,2})月)?', category)
+        if m:
+            year = int(m.group(1))
+            month = int(m.group(2)) if m.group(2) else 1
+            return year * 100 + month
+    if created_at:
+        return created_at.year * 100 + created_at.month
+    return 200001
+
+
+@csrf_exempt
+def api_get_franchises(request):
+    """API 端點：取得動漫作品總覽關聯資料 (實體化 DB 快速查詢、支援分頁、多圖預覽、多種排序與關鍵字搜尋)"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body) if request.body else {}
+        access_token = data.get("access_token")
+        search_keyword = (data.get("search") or "").strip().lower()
+        sort_by = data.get("sort_by") or "newest"
+        filter_tracked = data.get("filter_tracked") or "all"
+    except Exception as e:
+        return JsonResponse({"error": f"Invalid request body: {e}"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import AnimeFranchise, UserDramaProgress
+
+    tracked_drama_ids = set(
+        UserDramaProgress.objects.filter(user=user).values_list("drama_id", flat=True)
+    )
+
+    franchises_qs = AnimeFranchise.objects.prefetch_related("dramas").all()
+
+    franchise_list = []
+    user_tracked_franchises_count = 0
+    user_tracked_items_count = 0
+
+    for af in franchises_qs:
+        dramas = list(af.dramas.all())
+        if not dramas:
+            continue
+
+        if search_keyword:
+            match_name = search_keyword in af.name.lower()
+            match_dramas = any(search_keyword in d.title.lower() for d in dramas)
+            if not match_name and not match_dramas:
+                continue
+
+        tracked_count = 0
+        preview_images = []
+        tv_seasons = []
+        movies = []
+        ovas = []
+        recaps = []
+        items = []
+        latest_date_key = 0
+
+        for d in dramas:
+            is_tracked = d.id in tracked_drama_ids
+            if is_tracked:
+                tracked_count += 1
+                user_tracked_items_count += 1
+
+            img_url = getattr(d, "image_url", "") or ""
+            if img_url and len(preview_images) < 4 and img_url not in preview_images:
+                preview_images.append(img_url)
+
+            d_sort_key = _extract_release_sort_key(d.category, d.created_at)
+            if d_sort_key > latest_date_key:
+                latest_date_key = d_sort_key
+
+            m_type_code = d.media_type or "TV"
+            if m_type_code == "MOVIE":
+                m_type_label = "🎬 劇場版 / 電影"
+            elif m_type_code == "OVA":
+                m_type_label = "📼 OVA / 特別篇"
+            elif m_type_code == "RECAP":
+                m_type_label = "🎞️ 總集篇"
+            else:
+                m_type_label = "📺 季番 / 正篇"
+
+            item_info = {
+                "id": d.id,
+                "title": d.title,
+                "category": d.category,
+                "total_seasons": d.total_seasons,
+                "total_episodes": d.total_episodes,
+                "media_type_code": m_type_code,
+                "media_type_label": m_type_label,
+                "image_url": img_url,
+                "is_tracked": is_tracked,
+            }
+
+            items.append(item_info)
+            if m_type_code == "TV":
+                tv_seasons.append(item_info)
+            elif m_type_code == "MOVIE":
+                movies.append(item_info)
+            elif m_type_code == "OVA":
+                ovas.append(item_info)
+            elif m_type_code == "RECAP":
+                recaps.append(item_info)
+
+        if tracked_count > 0:
+            user_tracked_franchises_count += 1
+
+        franchise_list.append({
+            "id": af.id,
+            "franchise_name": af.name,
+            "description": af.description,
+            "cover_image_url": af.cover_image_url or (preview_images[0] if preview_images else ""),
+            "preview_images": preview_images,
+            "total_items": len(items),
+            "tracked_count": tracked_count,
+            "latest_date_key": latest_date_key,
+            "items": items,
+            "tv_seasons": tv_seasons,
+            "movies": movies,
+            "ovas": ovas,
+            "recaps": recaps,
+        })
+
+    return JsonResponse({
+        "status": "success",
+        "total_franchises": len(franchise_list),
+        "user_tracked_franchises": user_tracked_franchises_count,
+        "user_tracked_items_count": user_tracked_items_count,
+        "franchises": franchise_list,
+    })
+
+
+@csrf_exempt
+def api_franchise_batch_track(request):
+    """API 端點：一鍵全追蹤或一鍵全取消追蹤該作品系列旗下所有關聯劇集"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        franchise_id = data.get("franchise_id")
+        action = data.get("action")  # "track_all" 或 "untrack_all"
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token or not franchise_id or not action:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+    from .models import AnimeFranchise, UserDramaProgress
+
+    franchise = AnimeFranchise.objects.filter(pk=franchise_id).first()
+    if not franchise:
+        return JsonResponse({"error": "Franchise not found"}, status=404)
+
+    dramas = list(franchise.dramas.all())
+    processed_count = 0
+
+    if action == "track_all":
+        for d in dramas:
+            UserDramaProgress.objects.get_or_create(
+                user=user,
+                drama=d,
+                defaults={"current_season": 1, "current_episode": 1, "is_tracked": False},
+            )
+            processed_count += 1
+    elif action == "untrack_all":
+        deleted, _ = UserDramaProgress.objects.filter(user=user, drama__in=dramas).delete()
+        processed_count = deleted
+
+    return JsonResponse({"status": "success", "count": processed_count, "action": action})
+
+
 @csrf_exempt
 def api_check_friend_drama_status(request):
     """API 端點：檢查特定劇集在好友們的追劇清單/推薦狀態中"""

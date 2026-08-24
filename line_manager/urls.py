@@ -42,6 +42,8 @@ urlpatterns = [
     path("api/dramas/join/<int:pk>/", views.api_join_drama, name="api_join_drama"),
     path("api/dramas/remove/<int:pk>/", views.api_remove_drama, name="api_remove_drama"),
     path("api/dramas/categories/", views.api_get_categories, name="api_get_categories"),
+    path("api/dramas/franchises/", views.api_get_franchises, name="api_get_franchises"),
+    path("api/dramas/franchise_batch_track/", views.api_franchise_batch_track, name="api_franchise_batch_track"),
     path("api/friends/", views.api_get_friends, name="api_get_friends"),
     path("api/friends/add/", views.api_add_friend, name="api_add_friend"),
 

@@ -327,8 +327,28 @@ def run_daily_drama_update():
             )
             created_count += 1
 
+    # ----------------------------------------------------
+    # Part 4. 作品系列關聯自動同步與空系列清理
+    # ----------------------------------------------------
+    print("\n[FRANCHISE SYNC] 正在執行作品系列自動關聯與清理空系列...")
+    from django.core.management import call_command
+    from line_manager.models import AnimeFranchise
+    from line_manager.admin import cleanup_empty_franchises
+
+    # 1. 自動同步新增作品至 AnimeFranchise
+    try:
+        call_command("sync_anime_franchises")
+    except Exception as e:
+        print(f"  -> [WARN] 系列同步異常: {e}")
+
+    # 2. 自動清理移除作品後留下的空系列
+    cleaned_empty_count = cleanup_empty_franchises()
+    if cleaned_empty_count > 0:
+        print(f"  -> [CLEANUP] 已自動清理 {cleaned_empty_count} 個空的舊作品系列")
+
     final_db_count = Drama.objects.count()
-    print(f"[SYNC SUCCESS] DB 自動同步完畢！保留: {retained_count} | 移除: {deleted_count} | 新增: {created_count} | 最終 DB 筆數: {final_db_count}")
+    final_franchise_count = AnimeFranchise.objects.count()
+    print(f"[SYNC SUCCESS] DB 與作品關聯自動同步完畢！保留: {retained_count} | 移除: {deleted_count} | 新增: {created_count} | 最終 DB 筆數: {final_db_count} | 最終系列數: {final_franchise_count}")
     print(f"==================================================\n")
 
 
