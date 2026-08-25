@@ -1829,8 +1829,13 @@ def api_get_friends(request):
             display_name = "未知 LINE 用戶"
         friends_list.append({"id": f.friend.id, "display_name": display_name})
 
-    # 其他已加入 LINE 的所有會員 (排除自己與現有好友，支援模糊搜尋)
-    others_qs = LineProfile.objects.exclude(user=user).exclude(user__id__in=friend_ids)
+    # 其他已加入 LINE 的所有會員 (排除自己、現有好友與系統匯入機器人，支援模糊搜尋)
+    EXCLUDED_SYSTEM_USERNAMES = ["system_importer", "system"]
+    others_qs = (
+        LineProfile.objects.exclude(user=user)
+        .exclude(user__id__in=friend_ids)
+        .exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
+    )
     if query:
         others_qs = others_qs.filter(line_display_name__icontains=query)
 
@@ -1942,8 +1947,12 @@ def api_get_dramas(request):
         has_more = total_count > end
 
         from django.db.models import Count
+        EXCLUDED_SYSTEM_USERNAMES = ["system_importer", "test_helper_user", "system"]
         tracked_counts = dict(
-            UserDramaProgress.objects.values("drama_id")
+            UserDramaProgress.objects.exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
+            .exclude(user__is_staff=True)
+            .exclude(user__is_superuser=True)
+            .values("drama_id")
             .annotate(cnt=Count("id"))
             .values_list("drama_id", "cnt")
         )
@@ -1968,6 +1977,7 @@ def api_get_dramas(request):
                     "drama_id": d.pk,
                     "title": d.title,
                     "category": d.category,
+                    "media_type": getattr(d, "media_type", "TV"),
                     "total_seasons": d.total_seasons,
                     "total_episodes": d.total_episodes,
                     "info_links": links,
@@ -2002,8 +2012,12 @@ def api_get_dramas(request):
         has_more = total_count > end
 
         tracked_drama_ids = set(UserDramaProgress.objects.filter(user=user).values_list("drama_id", flat=True))
+        EXCLUDED_SYSTEM_USERNAMES = ["system_importer", "test_helper_user", "system"]
         tracked_counts = dict(
-            UserDramaProgress.objects.values("drama_id")
+            UserDramaProgress.objects.exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
+            .exclude(user__is_staff=True)
+            .exclude(user__is_superuser=True)
+            .values("drama_id")
             .annotate(cnt=Count("id"))
             .values_list("drama_id", "cnt")
         )
@@ -2026,6 +2040,7 @@ def api_get_dramas(request):
                     "drama_id": d.pk,
                     "title": d.title,
                     "category": d.category,
+                    "media_type": getattr(d, "media_type", "TV"),
                     "total_seasons": d.total_seasons,
                     "total_episodes": d.total_episodes,
                     "info_links": links,
@@ -3163,9 +3178,13 @@ def api_compare_friends(request):
     my_only_ids = list(my_set - friend_set)
     friend_only_ids = list(friend_set - my_set)
 
-    # 預先計算全庫追蹤數索引
+    # 預先計算全庫追蹤數索引 (排除系統匯入小幫手與管理員測試帳號)
+    EXCLUDED_SYSTEM_USERNAMES = ["system_importer", "test_helper_user", "system"]
     tracked_counts = dict(
-        UserDramaProgress.objects.values("drama_id")
+        UserDramaProgress.objects.exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
+        .exclude(user__is_staff=True)
+        .exclude(user__is_superuser=True)
+        .values("drama_id")
         .annotate(cnt=Count("id"))
         .values_list("drama_id", "cnt")
     )
@@ -3187,6 +3206,7 @@ def api_compare_friends(request):
             "drama_id": d.pk,
             "title": d.title,
             "category": d.category,
+            "media_type": getattr(d, "media_type", "TV"),
             "total_episodes": d.total_episodes,
             "info_links": links,
             "image_url": getattr(d, "image_url", "") or "",
