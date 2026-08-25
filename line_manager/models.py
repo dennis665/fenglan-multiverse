@@ -179,6 +179,10 @@ class UserDramaProgress(models.Model):
         verbose_name = _("個人追劇進度")
         verbose_name_plural = _("個人追劇進度")
         unique_together = ("user", "drama")
+        indexes = [
+            models.Index(fields=["drama"]),
+            models.Index(fields=["user"]),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.drama.title} (S{self.current_season}E{self.current_episode})"

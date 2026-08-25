@@ -1941,6 +1941,13 @@ def api_get_dramas(request):
         sliced_qs = filtered_progress[start:end]
         has_more = total_count > end
 
+        from django.db.models import Count
+        tracked_counts = dict(
+            UserDramaProgress.objects.values("drama_id")
+            .annotate(cnt=Count("id"))
+            .values_list("drama_id", "cnt")
+        )
+
         for p in sliced_qs:
             d = p.drama
             try:
@@ -1969,11 +1976,13 @@ def api_get_dramas(request):
                     "current_episode": p.current_episode,
                     "is_tracked": p.is_tracked,
                     "creator": creator_name,
+                    "tracked_users_count": tracked_counts.get(d.pk, 0),
                     "updated_at": localtime(d.updated_at).strftime("%Y-%m-%d %H:%M"),
                 }
             )
     elif tab == "all_dramas":
         from .models import Drama
+        from django.db.models import Count
         dramas_qs = Drama.objects.all().select_related("creator__line_profile").order_by("-updated_at")
 
         q = data.get("q", "").strip().lower()
@@ -1993,6 +2002,11 @@ def api_get_dramas(request):
         has_more = total_count > end
 
         tracked_drama_ids = set(UserDramaProgress.objects.filter(user=user).values_list("drama_id", flat=True))
+        tracked_counts = dict(
+            UserDramaProgress.objects.values("drama_id")
+            .annotate(cnt=Count("id"))
+            .values_list("drama_id", "cnt")
+        )
 
         for d in sliced_dramas:
             try:
@@ -2017,6 +2031,7 @@ def api_get_dramas(request):
                     "info_links": links,
                     "image_url": getattr(d, "image_url", "") or "",
                     "creator": creator_name,
+                    "tracked_users_count": tracked_counts.get(d.pk, 0),
                     "is_added": d.pk in tracked_drama_ids,
                     "updated_at": localtime(d.updated_at).strftime("%Y-%m-%d %H:%M"),
                 }
@@ -3071,6 +3086,140 @@ def api_franchise_batch_track(request):
         processed_count = deleted
 
     return JsonResponse({"status": "success", "count": processed_count, "action": action})
+
+
+@csrf_exempt
+def api_compare_friends(request):
+    """API 端點：與好友比對互相有收藏 (Both) 與沒收藏 (My only / Friend only) 的追劇清單"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        access_token = data.get("access_token")
+        friend_user_id = data.get("friend_user_id")
+    except Exception:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    if not access_token:
+        return JsonResponse({"error": "Access token required"}, status=400)
+
+    line_user_id, display_name = _verify_token_with_cache(access_token)
+    if not line_user_id:
+        return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
+
+    line_profile = _get_or_create_profile(line_user_id, display_name)
+    user = line_profile.user
+
+    from django.db.models import Count
+    from .models import UserDramaProgress, LineProfile, Drama, Friendship
+
+    # 1. 嚴格限定：僅抓取目前使用者已建立好友關係 (Friendship) 的 LINE 好友清單
+    friend_ids = list(Friendship.objects.filter(user=user).values_list("friend_id", flat=True))
+    friend_profiles = LineProfile.objects.filter(user_id__in=friend_ids).select_related("user")
+
+    friends_list = []
+    for fp in friend_profiles:
+        cnt = UserDramaProgress.objects.filter(user=fp.user).count()
+        friends_list.append({
+            "user_id": fp.user.id,
+            "name": fp.line_display_name or fp.user.username,
+            "avatar_url": getattr(fp, "picture_url", "") or "",
+            "tracked_count": cnt
+        })
+
+    # 2. 決定比對目標好友
+    target_friend_user = None
+    if friend_user_id and int(friend_user_id) in friend_ids:
+        target_friend_user = User.objects.filter(id=friend_user_id).first()
+    elif friend_profiles.exists():
+        target_friend_user = friend_profiles.first().user
+
+    if not target_friend_user:
+        return JsonResponse({
+            "status": "success",
+            "friends_list": friends_list,
+            "selected_friend": None,
+            "both_tracked": [],
+            "my_only": [],
+            "friend_only": [],
+            "stats": {"both_count": 0, "my_only_count": 0, "friend_only_count": 0, "overlap_percentage": 0}
+        })
+
+    target_friend_name = ""
+    try:
+        target_friend_name = target_friend_user.line_profile.line_display_name or target_friend_user.username
+    except Exception:
+        target_friend_name = target_friend_user.username
+
+    # 3. 獲取自己與好友的追劇進度字典
+    my_progresses = dict(UserDramaProgress.objects.filter(user=user).values_list("drama_id", "current_episode"))
+    friend_progresses = dict(UserDramaProgress.objects.filter(user=target_friend_user).values_list("drama_id", "current_episode"))
+
+    my_set = set(my_progresses.keys())
+    friend_set = set(friend_progresses.keys())
+
+    both_ids = list(my_set & friend_set)
+    my_only_ids = list(my_set - friend_set)
+    friend_only_ids = list(friend_set - my_set)
+
+    # 預先計算全庫追蹤數索引
+    tracked_counts = dict(
+        UserDramaProgress.objects.values("drama_id")
+        .annotate(cnt=Count("id"))
+        .values_list("drama_id", "cnt")
+    )
+
+    all_target_ids = list(set(both_ids + my_only_ids + friend_only_ids))
+    dramas_map = {d.id: d for d in Drama.objects.filter(id__in=all_target_ids)}
+
+    def _serialize_item(d_id, is_friend_only=False):
+        d = dramas_map.get(d_id)
+        if not d:
+            return None
+        links = []
+        if d.info_links:
+            try:
+                links = json.loads(d.info_links)
+            except Exception:
+                pass
+        return {
+            "drama_id": d.pk,
+            "title": d.title,
+            "category": d.category,
+            "total_episodes": d.total_episodes,
+            "info_links": links,
+            "image_url": getattr(d, "image_url", "") or "",
+            "my_episode": my_progresses.get(d_id, 0),
+            "friend_episode": friend_progresses.get(d_id, 0),
+            "tracked_users_count": tracked_counts.get(d.pk, 0),
+            "is_friend_only": is_friend_only,
+        }
+
+    both_tracked = [x for x in [_serialize_item(i) for i in both_ids] if x]
+    my_only = [x for x in [_serialize_item(i) for i in my_only_ids] if x]
+    friend_only = [x for x in [_serialize_item(i, True) for i in friend_only_ids] if x]
+
+    total_union = len(both_ids) + len(my_only_ids) + len(friend_only_ids)
+    overlap_percentage = round((len(both_ids) / total_union * 100), 1) if total_union > 0 else 0
+
+    return JsonResponse({
+        "status": "success",
+        "friends_list": friends_list,
+        "selected_friend": {
+            "user_id": target_friend_user.id,
+            "name": target_friend_name,
+        },
+        "both_tracked": both_tracked,
+        "my_only": my_only,
+        "friend_only": friend_only,
+        "stats": {
+            "both_count": len(both_tracked),
+            "my_only_count": len(my_only),
+            "friend_only_count": len(friend_only),
+            "overlap_percentage": overlap_percentage
+        }
+    })
 
 
 @csrf_exempt

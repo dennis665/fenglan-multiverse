@@ -246,6 +246,9 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="friends-tab" data-bs-toggle="tab" data-bs-target="#friends-panel" type="button" role="tab" onclick="switchTab('friends')">👥 好友管理</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="friend-compare-tab" data-bs-toggle="tab" data-bs-target="#friend-compare-panel" type="button" role="tab" onclick="switchTab('friend_compare')">🤝 好友比對</button>
+                </li>
             </ul>
 
             <!-- 可折疊分類導航視覺面板 (依十年、每一年層級折疊/展開細分) -->
@@ -312,6 +315,34 @@
                             <option value="">所有分類</option>
                         </select>
                     </div>
+
+                    <!-- 頂部分頁列：筆數選擇 + 上/下一頁 + 總頁數顯示 + 指定頁數跳轉 -->
+                    <div id="my-pagination-top" class="glass-card p-3 mb-3 d-none flex-column gap-2">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">每頁:</span>
+                                <select id="my-page-size-select-top" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="changePageSize(this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10" selected>10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted fw-bold">
+                                第 <span id="my-page-num-top" class="text-success fw-bold">1</span> / 共 <span id="my-total-pages-top" class="text-dark fw-bold">1</span> 頁 (<span id="my-total-count-top" class="text-primary">0</span>筆)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 pt-1 border-top">
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="my-prev-btn-top" onclick="changePage(-1)">上一頁</button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">跳至:</span>
+                                <select id="my-jump-page-select-top" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="jumpToPage(this.value)">
+                                    <!-- 動態填入頁碼 -->
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="my-next-btn-top" onclick="changePage(1)">下一頁</button>
+                        </div>
+                    </div>
+
                     <div id="my-dramas-list" class="d-flex flex-column gap-3"></div>
                     
                     <!-- 底部分頁列：筆數選擇 + 上/下一頁 + 總頁數顯示 + 指定頁數跳轉 -->
@@ -353,6 +384,33 @@
                         <select id="all-dramas-cat-select" class="form-select form-select-sm rounded-pill w-auto" onchange="triggerAllDramasSearch()">
                             <option value="">所有分類</option>
                         </select>
+                    </div>
+
+                    <!-- 頂部分頁列：筆數選擇 + 上/下一頁 + 總頁數顯示 + 指定頁數跳轉 -->
+                    <div id="all-pagination-top" class="glass-card p-3 mb-3 d-none flex-column gap-2">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">每頁:</span>
+                                <select id="all-page-size-select-top" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="changePageSize(this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10" selected>10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted fw-bold">
+                                第 <span id="all-page-num-top" class="text-success fw-bold">1</span> / 共 <span id="all-total-pages-top" class="text-dark fw-bold">1</span> 頁 (<span id="all-total-count-top" class="text-primary">0</span>筆)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 pt-1 border-top">
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="all-prev-btn-top" onclick="changePage(-1)">上一頁</button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">跳至:</span>
+                                <select id="all-jump-page-select-top" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="jumpToPage(this.value)">
+                                    <!-- 動態填入頁碼 -->
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="all-next-btn-top" onclick="changePage(1)">下一頁</button>
+                        </div>
                     </div>
                     <div id="all-dramas-list" class="d-flex flex-column gap-3"></div>
                     
@@ -426,6 +484,33 @@
                         </div>
                     </div>
 
+                    <!-- 頂部分頁列：筆數選擇 (5, 10, 20) + 上/下一頁 + 總頁數顯示 + 指定頁數跳轉 -->
+                    <div id="franchise-pagination-top" class="glass-card p-3 mb-3 d-none flex-column gap-2">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">每頁:</span>
+                                <select id="franchise-page-size-select-top" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="changeFranchisePageSize(this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10" selected>10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted fw-bold">
+                                第 <span id="franchise-page-num-top" class="text-success fw-bold">1</span> / 共 <span id="franchise-total-pages-top" class="text-dark fw-bold">1</span> 頁 (<span id="franchise-total-count-badge-top" class="text-primary">0</span>系列)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 pt-1 border-top">
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="franchise-prev-btn-top" onclick="changeFranchisePage(-1)">上一頁</button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">跳至:</span>
+                                <select id="franchise-jump-page-select-top" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="jumpFranchisePage(this.value)">
+                                    <!-- 動態填入頁碼 -->
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="franchise-next-btn-top" onclick="changeFranchisePage(1)">下一頁</button>
+                        </div>
+                    </div>
+
                     <div id="franchises-list" class="d-flex flex-column gap-3"></div>
 
                     <!-- 底部分頁列：筆數選擇 (5, 10, 20) + 上/下一頁 + 總頁數顯示 + 指定頁數跳轉 -->
@@ -483,8 +568,35 @@
                             <button class="btn btn-xs btn-outline-secondary rounded-pill px-3 py-1 small" onclick="batchRecommendAction('ignore_all')">
                                 <i class="fa-solid fa-eye-slash me-1"></i>一鍵全部忽略
                             </button>
+                    </div>
+
+                    <!-- 頂部分頁列：筆數選擇 + 上/下一頁 + 總頁數顯示 + 指定頁數跳轉 -->
+                    <div id="recs-pagination-top" class="glass-card p-3 mb-3 d-none flex-column gap-2">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">每頁:</span>
+                                <select id="recs-page-size-select-top" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="changePageSize(this.value)">
+                                    <option value="5">5 筆</option>
+                                    <option value="10" selected>10 筆</option>
+                                    <option value="20">20 筆</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted fw-bold">
+                                第 <span id="recs-page-num-top" class="text-success fw-bold">1</span> / 共 <span id="recs-total-pages-top" class="text-dark fw-bold">1</span> 頁 (<span id="recs-total-count-top" class="text-primary">0</span>筆)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 pt-1 border-top">
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="recs-prev-btn-top" onclick="changePage(-1)">上一頁</button>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="small text-muted text-nowrap">跳至:</span>
+                                <select id="recs-jump-page-select-top" class="form-select form-select-sm rounded-pill py-0 ps-2 pe-4" style="width: auto; font-size: 0.8rem;" onchange="jumpToPage(this.value)">
+                                    <!-- 動態填入頁碼 -->
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success px-3 rounded-pill" id="recs-next-btn-top" onclick="changePage(1)">下一頁</button>
                         </div>
                     </div>
+
                     <div id="recs-list" class="d-flex flex-column gap-3"></div>
                     <div id="recs-pagination" class="glass-card p-3 mt-3 d-none flex-column gap-2">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -529,6 +641,65 @@
                     <div class="glass-card p-3">
                         <h6 class="fw-bold mb-2"><i class="fa-solid fa-users text-primary me-1"></i>我的追劇好友</h6>
                         <div id="friends-list" class="d-flex flex-column gap-2"></div>
+                    </div>
+                </div>
+
+                <!-- 🤝 好友追劇比對 -->
+                <div class="tab-pane fade" id="friend-compare-panel" role="tabpanel">
+                    <div class="glass-card p-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold text-success mb-0">
+                                <i class="fa-solid fa-handshake me-1"></i>與好友追劇品味比對
+                            </h6>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="small text-muted text-nowrap">選擇好友:</span>
+                                <select id="compare-friend-select" class="form-select form-select-sm rounded-pill" style="min-width: 140px; font-size: 0.85rem;" onchange="triggerFriendCompareChange(this.value)">
+                                    <option value="">載入中...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 比對數據 Chip 總覽 -->
+                        <div class="row g-2 mb-3 text-center" id="compare-stats-container">
+                            <div class="col-4">
+                                <div class="p-2 rounded bg-success bg-opacity-10 border border-success border-opacity-25">
+                                    <div class="small text-success fw-bold">🤝 兩人皆有追</div>
+                                    <div class="h5 fw-bold text-success mb-0" id="stat-both-count">0</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 rounded bg-primary bg-opacity-10 border border-primary border-opacity-25">
+                                    <div class="small text-primary fw-bold">🙋‍♂️ 我有、好友無</div>
+                                    <div class="h5 fw-bold text-primary mb-0" id="stat-my-count">0</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 rounded bg-warning bg-opacity-10 border border-warning border-opacity-25">
+                                    <div class="small text-warning fw-bold">👥 好友有、我無</div>
+                                    <div class="h5 fw-bold text-warning mb-0" id="stat-friend-count">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 契合度發光 Badge -->
+                        <div class="text-center py-2 mb-3 bg-dark bg-opacity-25 rounded border">
+                            <div>
+                                <span class="small text-white-50">追劇品味契合度：</span>
+                                <span class="fw-bold text-warning fs-5" id="stat-overlap-percentage">0%</span>
+                            </div>
+                            <div class="small text-muted mt-1" id="stat-overlap-detail" style="font-size: 0.75rem;"></div>
+                        </div>
+
+                        <!-- 比對細項 3 大分頁 / 清單按鈕 -->
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-outline-success active flex-fill" id="btn-compare-both" onclick="switchCompareSubTab('both')">🤝 兩人皆追</button>
+                            <button class="btn btn-sm btn-outline-primary flex-fill" id="btn-compare-my" onclick="switchCompareSubTab('my')">🙋‍♂️ 我獨有</button>
+                            <button class="btn btn-sm btn-outline-warning flex-fill" id="btn-compare-friend" onclick="switchCompareSubTab('friend')">👥 好友獨有</button>
+                        </div>
+                    </div>
+
+                    <div id="compare-list-container" class="d-flex flex-column gap-2 mb-4">
+                        <!-- 動態渲染比對結果卡片 -->
                     </div>
                 </div>
             </div>
@@ -1215,7 +1386,7 @@
         function switchTab(tab) {
             currentTab = tab;
             const navCard = document.getElementById("category-nav-card");
-            if (tab === "recommendations" || tab === "friends" || tab === "franchises") {
+            if (tab === "recommendations" || tab === "friends" || tab === "franchises" || tab === "friend_compare") {
                 if (navCard) navCard.classList.add("d-none");
             } else {
                 if (navCard) navCard.classList.remove("d-none");
@@ -1233,6 +1404,8 @@
                 fetchFranchises();
             } else if (tab === "friends") {
                 fetchFriends();
+            } else if (tab === "friend_compare") {
+                fetchFriendComparison();
             }
         }
 
@@ -1372,24 +1545,42 @@
         }
 
         function updateFranchisePaginationControls(page, totalPages, totalCount) {
-            const pageNumEl = document.getElementById("franchise-page-num");
-            const totalPagesEl = document.getElementById("franchise-total-pages");
-            const prevBtn = document.getElementById("franchise-prev-btn");
-            const nextBtn = document.getElementById("franchise-next-btn");
-            const jumpSelect = document.getElementById("franchise-jump-page-select");
+            ["", "-top"].forEach(suffix => {
+                const paginationDiv = document.getElementById(`franchise-pagination${suffix}`);
+                const pageNumEl = document.getElementById(`franchise-page-num${suffix}`);
+                const totalPagesEl = document.getElementById(`franchise-total-pages${suffix}`);
+                const totalCountEl = document.getElementById(`franchise-total-count-badge${suffix}`);
+                const prevBtn = document.getElementById(`franchise-prev-btn${suffix}`);
+                const nextBtn = document.getElementById(`franchise-next-btn${suffix}`);
+                const jumpSelect = document.getElementById(`franchise-jump-page-select${suffix}`);
+                const pageSizeSelect = document.getElementById(`franchise-page-size-select${suffix}`);
 
-            if (pageNumEl) pageNumEl.innerText = page;
-            if (totalPagesEl) totalPagesEl.innerText = totalPages;
+                if (pageNumEl) pageNumEl.innerText = page;
+                if (totalPagesEl) totalPagesEl.innerText = totalPages;
+                if (totalCountEl) totalCountEl.innerText = totalCount;
 
-            if (prevBtn) prevBtn.disabled = (page <= 1);
-            if (nextBtn) nextBtn.disabled = (page >= totalPages);
+                if (prevBtn) prevBtn.disabled = (page <= 1);
+                if (nextBtn) nextBtn.disabled = (page >= totalPages);
 
-            if (jumpSelect) {
-                jumpSelect.innerHTML = "";
-                for (let i = 1; i <= totalPages; i++) {
-                    jumpSelect.innerHTML += `<option value="${i}" ${i === page ? 'selected' : ''}>第 ${i} 頁</option>`;
+                if (pageSizeSelect) pageSizeSelect.value = franchisePageSize;
+
+                if (jumpSelect) {
+                    jumpSelect.innerHTML = "";
+                    for (let i = 1; i <= totalPages; i++) {
+                        jumpSelect.innerHTML += `<option value="${i}" ${i === page ? 'selected' : ''}>第 ${i} 頁</option>`;
+                    }
                 }
-            }
+
+                if (paginationDiv) {
+                    if (totalPages >= 1 || totalCount > 0) {
+                        paginationDiv.classList.remove("d-none");
+                        paginationDiv.classList.add("d-flex");
+                    } else {
+                        paginationDiv.classList.add("d-none");
+                        paginationDiv.classList.remove("d-flex");
+                    }
+                }
+            });
         }
 
         function renderFranchisesList(list) {
@@ -1753,14 +1944,14 @@
                                     </div>
                                     <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
                                     <div class="text-success small fw-bold mb-1">
-                                        目前看至：第 ${item.current_season} 季 第 ${item.current_episode} 集
+                                        目前看至：第 ${item.current_episode} 集
                                     </div>
                                     <div class="text-muted small pref-total ${displayPrefs.total ? '' : 'd-none'}" style="font-size: 0.8rem;">
-                                        總集數：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
+                                        總集數：共 ${item.total_episodes} 集
                                     </div>
                                     ${linksHtml}
                                     <div class="text-muted pref-creator ${displayPrefs.creator ? '' : 'd-none'}" style="font-size: 0.7rem; margin-top: 5px;">
-                                        發起人: ${item.creator} | 更新: ${item.updated_at}
+                                        👥 ${item.tracked_users_count || 1} 人收藏 | 更新: ${item.updated_at}
                                     </div>
                                 </div>
                             </div>
@@ -1770,9 +1961,6 @@
                                 </button>
                                 <button class="btn btn-sm btn-outline-primary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaProgressModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', ${item.current_season}, ${item.current_episode})">
                                     <i class="fa-regular fa-pen-to-square me-1"></i>進度
-                                </button>
-                                <button class="btn btn-sm btn-outline-info py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaDetailsModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', '${item.category.replace(/'/g, "\\'")}', ${item.total_seasons}, ${item.total_episodes}, ${JSON.stringify(item.info_links).replace(/"/g, '&quot;')}, '${(item.image_url || '').replace(/'/g, "\\'")}')">
-                                    <i class="fa-solid fa-gear me-1"></i>編輯
                                 </button>
                                 <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="openRecommendModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}')">
                                     <i class="fa-solid fa-share-nodes me-1"></i>推薦
@@ -1826,19 +2014,16 @@
                                     </div>
                                     <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
                                     <div class="text-muted small" style="font-size: 0.8rem;">
-                                        總集數：共 ${item.total_seasons} 季 | 總共 ${item.total_episodes} 集
+                                        總集數：共 ${item.total_episodes} 集
                                     </div>
                                     ${linksHtml}
                                     <div class="text-muted" style="font-size: 0.7rem; margin-top: 5px;">
-                                        發起人: ${item.creator} | 更新: ${item.updated_at}
+                                        👥 ${item.tracked_users_count || 1} 人收藏 | 更新: ${item.updated_at}
                                     </div>
                                 </div>
                             </div>
                             <div class="d-flex flex-column gap-1">
                                 ${joinBtnHtml}
-                                <button class="btn btn-sm btn-outline-info py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="editDramaDetailsModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}', '${item.category.replace(/'/g, "\\'")}', ${item.total_seasons}, ${item.total_episodes}, ${JSON.stringify(item.info_links).replace(/"/g, '&quot;')}, '${(item.image_url || '').replace(/'/g, "\\'")}')">
-                                    <i class="fa-solid fa-gear me-1"></i>編輯
-                                </button>
                                 <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="openRecommendModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}')">
                                     <i class="fa-solid fa-share-nodes me-1"></i>推薦
                                 </button>
@@ -1932,7 +2117,7 @@
             });
         }
 
-        // 分頁控制 (動態頁數、每頁筆數與跳頁選單)
+        // 分頁控制 (動態頁數、每頁筆數與跳頁選單，同時同步頂部與底部分頁列)
         function updatePaginationControls(tab, page, totalPages, totalCount, hasMore) {
             let prefix = "my";
             if (tab === "recommendations") {
@@ -1940,42 +2125,53 @@
             } else if (tab === "all_dramas") {
                 prefix = "all";
             }
-            const paginationDiv = document.getElementById(`${prefix}-pagination`);
-            const pageNumSpan = document.getElementById(`${prefix}-page-num`);
-            const totalPagesSpan = document.getElementById(`${prefix}-total-pages`);
-            const totalCountSpan = document.getElementById(`${prefix}-total-count`);
-            const prevBtn = document.getElementById(`${prefix}-prev-btn`);
-            const nextBtn = document.getElementById(`${prefix}-next-btn`);
-            const jumpSelect = document.getElementById(`${prefix}-jump-page-select`);
 
-            if (pageNumSpan) pageNumSpan.innerText = page;
-            if (totalPagesSpan) totalPagesSpan.innerText = totalPages;
-            if (totalCountSpan) totalCountSpan.innerText = totalCount;
+            ["", "-top"].forEach(suffix => {
+                const paginationDiv = document.getElementById(`${prefix}-pagination${suffix}`);
+                const pageNumSpan = document.getElementById(`${prefix}-page-num${suffix}`);
+                const totalPagesSpan = document.getElementById(`${prefix}-total-pages${suffix}`);
+                const totalCountSpan = document.getElementById(`${prefix}-total-count${suffix}`);
+                const prevBtn = document.getElementById(`${prefix}-prev-btn${suffix}`);
+                const nextBtn = document.getElementById(`${prefix}-next-btn${suffix}`);
+                const jumpSelect = document.getElementById(`${prefix}-jump-page-select${suffix}`);
+                const pageSizeSelect = document.getElementById(`${prefix}-page-size-select${suffix}`);
 
-            if (prevBtn) prevBtn.disabled = (page <= 1);
-            if (nextBtn) nextBtn.disabled = !hasMore && (page >= totalPages);
+                if (pageNumSpan) pageNumSpan.innerText = page;
+                if (totalPagesSpan) totalPagesSpan.innerText = totalPages;
+                if (totalCountSpan) totalCountSpan.innerText = totalCount;
 
-            // 填補跳頁 Dropdown <option>
-            if (jumpSelect) {
-                jumpSelect.innerHTML = "";
-                for (let i = 1; i <= totalPages; i++) {
-                    const opt = document.createElement("option");
-                    opt.value = i;
-                    opt.innerText = `第 ${i} 頁`;
-                    if (i === page) opt.selected = true;
-                    jumpSelect.appendChild(opt);
+                if (prevBtn) prevBtn.disabled = (page <= 1);
+                if (nextBtn) nextBtn.disabled = !hasMore && (page >= totalPages);
+
+                if (pageSizeSelect) {
+                    let curSize = 10;
+                    if (prefix === "my") curSize = myDramasPageSize;
+                    else if (prefix === "all") curSize = allDramasPageSize;
+                    else if (prefix === "recs") curSize = recsPageSize;
+                    pageSizeSelect.value = curSize;
                 }
-            }
 
-            if (paginationDiv) {
-                if (totalPages >= 1 || totalCount > 0) {
-                    paginationDiv.classList.remove("d-none");
-                    paginationDiv.classList.add("d-flex");
-                } else {
-                    paginationDiv.classList.add("d-none");
-                    paginationDiv.classList.remove("d-flex");
+                if (jumpSelect) {
+                    jumpSelect.innerHTML = "";
+                    for (let i = 1; i <= totalPages; i++) {
+                        const opt = document.createElement("option");
+                        opt.value = i;
+                        opt.innerText = `第 ${i} 頁`;
+                        if (i === page) opt.selected = true;
+                        jumpSelect.appendChild(opt);
+                    }
                 }
-            }
+
+                if (paginationDiv) {
+                    if (totalPages >= 1 || totalCount > 0) {
+                        paginationDiv.classList.remove("d-none");
+                        paginationDiv.classList.add("d-flex");
+                    } else {
+                        paginationDiv.classList.add("d-none");
+                        paginationDiv.classList.remove("d-flex");
+                    }
+                }
+            });
         }
 
         // 修改每頁顯示筆數 (前端0ms即時分頁)
@@ -2047,76 +2243,278 @@
             if (cachedCategoriesData) renderVisualChips(cachedCategoriesData);
         }
 
-        // 快捷：追劇+1集
+        // 快捷：追劇+1集 (0毫秒前端即時響應)
         function addOneEpisode(id, curS, curE) {
-            fetch(`/line/api/dramas/update_progress/${id}/`, {
+            const nextEp = curE + 1;
+            // 樂觀更新內存
+            if (myDramasMasterList) {
+                const item = myDramasMasterList.find(d => d.drama_id === id);
+                if (item) item.current_episode = nextEp;
+            }
+            renderClientSideFilteredData("my_dramas", myDramasPage);
+
+            fetch(apiBaseUrl + `/line/api/dramas/update_progress/${id}/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     access_token: userAccessToken,
-                    current_season: curS,
-                    current_episode: curE + 1
+                    current_season: curS || 1,
+                    current_episode: nextEp
                 })
             })
             .then(res => res.json())
             .then(data => {
-                if (data.status === "success") {
-                    fetchDramas("my_dramas", myDramasPage);
-                } else {
+                if (data.status !== "success") {
                     Swal.fire("錯誤", "更新進度失敗：" + data.error, "error");
+                    myDramasMasterList = null;
+                    fetchDramas("my_dramas", myDramasPage, true);
                 }
             });
         }
 
-        // 彈出修改個人進度彈窗
+        // 彈出修改個人進度彈窗 (移除季度設定，專注於記錄看至第幾集)
         function editDramaProgressModal(id, title, curS, curE) {
             Swal.fire({
                 title: `修改《${title}》觀看進度`,
                 html: `
-                    <div class="row text-start p-1 small">
-                        <div class="col-6 mb-2">
-                            <label class="form-label fw-bold">第幾季</label>
-                            <input type="number" id="swal-season" class="form-control" value="${curS}" min="1">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label fw-bold">第幾集</label>
-                            <input type="number" id="swal-episode" class="form-control" value="${curE}" min="1">
+                    <div class="p-1 small text-start">
+                        <label class="form-label fw-bold mb-1">目前看至第幾集：</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark text-white border-secondary">第</span>
+                            <input type="number" id="swal-episode" class="form-control" value="${curE}" min="0">
+                            <span class="input-group-text bg-dark text-white border-secondary">集</span>
                         </div>
                     </div>
                 `,
                 showCancelButton: true,
                 confirmButtonColor: '#1DB446',
-                confirmButtonText: '更新進度',
+                confirmButtonText: '確定更新進度',
                 cancelButtonText: '取消',
+                background: '#1a1a2e',
+                color: '#e0e0e0',
                 preConfirm: () => {
-                    const season = document.getElementById("swal-season").value;
                     const episode = document.getElementById("swal-episode").value;
-                    if (!season || !episode) {
-                        Swal.showValidationMessage("欄位不可留空！");
+                    if (!episode || isNaN(episode)) {
+                        Swal.showValidationMessage("請輸入有效的集數數字！");
                     }
-                    return { season: parseInt(season), episode: parseInt(episode) };
+                    return { season: 1, episode: parseInt(episode) };
                 }
             }).then(res => {
                 if (res.isConfirmed && res.value) {
-                    fetch(`/line/api/dramas/update_progress/${id}/`, {
+                    const newEp = res.value.episode;
+                    if (myDramasMasterList) {
+                        const item = myDramasMasterList.find(d => d.drama_id === id);
+                        if (item) item.current_episode = newEp;
+                    }
+                    renderClientSideFilteredData("my_dramas", myDramasPage);
+
+                    fetch(apiBaseUrl + `/line/api/dramas/update_progress/${id}/`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             access_token: userAccessToken,
-                            current_season: res.value.season,
-                            current_episode: res.value.episode
+                            current_season: 1,
+                            current_episode: newEp
                         })
                     })
                     .then(res => res.json())
                     .then(data => {
                         if (data.status === "success") {
-                            Swal.fire({ title: '更新成功！', icon: 'success', timer: 1000, showConfirmButton: false });
-                            fetchDramas("my_dramas", myDramasPage);
+                            Swal.fire({ title: '已成功更新進度！', icon: 'success', timer: 1000, showConfirmButton: false, background: '#1a1a2e', color: '#e0e0e0' });
                         } else {
                             Swal.fire("錯誤", "更新進度失敗：" + data.error, "error");
+                            myDramasMasterList = null;
+                            fetchDramas("my_dramas", myDramasPage, true);
                         }
                     });
                 }
+            });
+        }
+
+        // -------------------------------------------------------------------
+        // 🤝 好友追劇比對頁籤與比對功能
+        // -------------------------------------------------------------------
+        let friendCompareData = null;
+        let activeCompareSubTab = "both"; // "both", "my", "friend"
+
+        function fetchFriendComparison(friendUserId = null) {
+            const container = document.getElementById("compare-list-container");
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="glass-card p-4 text-center">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="small text-muted mt-2">正在比對您與好友的追劇清單...</div>
+                </div>
+            `;
+
+            fetch(apiBaseUrl + "/line/api/dramas/compare_friends/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    friend_user_id: friendUserId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    friendCompareData = data;
+                    renderFriendCompareSelect(data.friends_list, data.selected_friend);
+                    renderFriendCompareStats(data.stats);
+                    renderFriendCompareList();
+                } else {
+                    container.innerHTML = `<div class="alert alert-danger text-center small py-2">比對失敗：${data.error}</div>`;
+                }
+            })
+            .catch(err => {
+                console.error("fetchFriendComparison error:", err);
+                container.innerHTML = `<div class="alert alert-danger text-center small py-2">連線失敗，請稍後再試。</div>`;
+            });
+        }
+
+        function renderFriendCompareSelect(friendsList, selectedFriend) {
+            const selectEl = document.getElementById("compare-friend-select");
+            if (!selectEl) return;
+            selectEl.innerHTML = "";
+
+            if (!friendsList || friendsList.length === 0) {
+                selectEl.innerHTML = `<option value="">尚未加入好友</option>`;
+                return;
+            }
+
+            friendsList.forEach(f => {
+                const isSel = selectedFriend && selectedFriend.user_id === f.user_id;
+                selectEl.innerHTML += `<option value="${f.user_id}" ${isSel ? 'selected' : ''}>${f.name} (${f.tracked_count}部)</option>`;
+            });
+        }
+
+        function triggerFriendCompareChange(val) {
+            if (!val) return;
+            fetchFriendComparison(parseInt(val));
+        }
+
+        function renderFriendCompareStats(stats) {
+            if (!stats) return;
+            const elBoth = document.getElementById("stat-both-count");
+            const elMy = document.getElementById("stat-my-count");
+            const elFriend = document.getElementById("stat-friend-count");
+            const elOverlap = document.getElementById("stat-overlap-percentage");
+            const elDetail = document.getElementById("stat-overlap-detail");
+
+            const both = stats.both_count || 0;
+            const my = stats.my_only_count || 0;
+            const friend = stats.friend_only_count || 0;
+            const totalUnion = both + my + friend;
+
+            if (elBoth) elBoth.innerText = both;
+            if (elMy) elMy.innerText = my;
+            if (elFriend) elFriend.innerText = friend;
+            if (elOverlap) elOverlap.innerText = (stats.overlap_percentage || 0) + "%";
+            if (elDetail) {
+                elDetail.innerText = `(兩人共涵蓋 ${totalUnion} 部不重複劇集，共同追蹤 ${both} 部)`;
+            }
+        }
+
+        function switchCompareSubTab(subTab) {
+            activeCompareSubTab = subTab;
+            const btnBoth = document.getElementById("btn-compare-both");
+            const btnMy = document.getElementById("btn-compare-my");
+            const btnFriend = document.getElementById("btn-compare-friend");
+
+            if (btnBoth) btnBoth.className = subTab === "both" ? "btn btn-sm btn-outline-success active flex-fill" : "btn btn-sm btn-outline-success flex-fill";
+            if (btnMy) btnMy.className = subTab === "my" ? "btn btn-sm btn-outline-primary active flex-fill" : "btn btn-sm btn-outline-primary flex-fill";
+            if (btnFriend) btnFriend.className = subTab === "friend" ? "btn btn-sm btn-outline-warning active flex-fill" : "btn btn-sm btn-outline-warning flex-fill";
+
+            renderFriendCompareList();
+        }
+
+        function renderFriendCompareList() {
+            const container = document.getElementById("compare-list-container");
+            if (!container || !friendCompareData) return;
+
+            let targetList = [];
+            if (activeCompareSubTab === "both") targetList = friendCompareData.both_tracked || [];
+            else if (activeCompareSubTab === "my") targetList = friendCompareData.my_only || [];
+            else if (activeCompareSubTab === "friend") targetList = friendCompareData.friend_only || [];
+
+            container.innerHTML = "";
+
+            if (targetList.length === 0) {
+                let emptyMsg = "此分類下暫無劇集比對資料";
+                if (activeCompareSubTab === "both") emptyMsg = "兩人目前尚無共同收藏的劇集";
+                else if (activeCompareSubTab === "my") emptyMsg = "您收藏的劇集好友也全都有收藏喔！";
+                else if (activeCompareSubTab === "friend") emptyMsg = "好友收藏的劇集您也都已經收藏囉！";
+
+                container.innerHTML = `
+                    <div class="glass-card p-4 text-center text-muted">
+                        <i class="fa-solid fa-handshake-simple fa-2x mb-2 text-secondary"></i>
+                        <p class="mb-0 small">${emptyMsg}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            targetList.forEach(item => {
+                let imgHtml = renderPreviewImagesHtml(item.image_url);
+                let progressBadge = "";
+
+                if (activeCompareSubTab === "both") {
+                    progressBadge = `
+                        <div class="small fw-bold text-success mb-1">
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success me-1">我：看至第 ${item.my_episode} 集</span>
+                            <span class="badge bg-info bg-opacity-25 text-info border border-info">好友：看至第 ${item.friend_episode} 集</span>
+                        </div>
+                    `;
+                } else if (activeCompareSubTab === "my") {
+                    progressBadge = `
+                        <div class="small fw-bold text-primary mb-1">
+                            <span class="badge bg-primary bg-opacity-25 text-primary border border-primary">我已看至第 ${item.my_episode} 集</span>
+                        </div>
+                    `;
+                } else if (activeCompareSubTab === "friend") {
+                    progressBadge = `
+                        <div class="small fw-bold text-warning mb-1">
+                            <span class="badge bg-warning bg-opacity-25 text-warning border border-warning">好友已看至第 ${item.friend_episode} 集</span>
+                        </div>
+                    `;
+                }
+
+                let actionBtnHtml = "";
+                if (activeCompareSubTab === "friend") {
+                    actionBtnHtml = `
+                        <button class="btn btn-sm btn-success py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="joinDrama(${item.drama_id}, this)">
+                            <i class="fa-solid fa-plus me-1"></i>加入我的追劇
+                        </button>
+                    `;
+                }
+
+                const html = `
+                    <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center flex-grow-1 me-2" style="max-width: 80%;">
+                            ${imgHtml}
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
+                                    <span class="badge bg-primary small">${item.category}</span>
+                                </div>
+                                <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
+                                ${progressBadge}
+                                <div class="text-muted" style="font-size: 0.7rem; margin-top: 3px;">
+                                    👥 ${item.tracked_users_count || 1} 人收藏 | 總集數：共 ${item.total_episodes} 集
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column gap-1">
+                            ${actionBtnHtml}
+                            <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 0.75rem;" onclick="openRecommendModal(${item.drama_id}, '${item.title.replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-share-nodes me-1"></i>推薦
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
             });
         }
 
@@ -2825,8 +3223,10 @@
                 const item = allDramasMasterList.find(d => d.drama_id === id);
                 if (item) item.is_added = true;
             }
+            // 清空 myDramasMasterList 快取，確保使用者切換至「我的追劇」頁籤時能重新加載新資料
+            myDramasMasterList = null;
 
-            fetch(`/line/api/dramas/join/${id}/`, {
+            fetch(apiBaseUrl + `/line/api/dramas/join/${id}/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ access_token: userAccessToken })
@@ -2835,9 +3235,6 @@
             .then(data => {
                 if (data.status === "success") {
                     Swal.fire({ title: '成功加入個人清單！', icon: 'success', timer: 1000, showConfirmButton: false });
-                    // 強制從伺服器重載「我的清單」以反映最新資料
-                    myDramasMasterList = null;
-                    fetchDramas("my_dramas", 1, true);
                 } else {
                     Swal.fire("錯誤", "加入失敗：" + data.error, "error");
                     // 失敗時還原按鈕
@@ -2869,7 +3266,7 @@
             });
         }
 
-        // 我的清單：移除個人收藏
+        // 我的清單：移除個人收藏 (極速無縫更新，無需全頁重載)
         function removeDrama(id, title, btnEl) {
             Swal.fire({
                 title: '確定移除收藏？',
@@ -2885,24 +3282,33 @@
             }).then(result => {
                 if (!result.isConfirmed) return;
 
-                // 樂觀更新：立即隱藏該卡片
-                const card = btnEl ? btnEl.closest('.drama-item') : null;
-                if (card) {
-                    card.style.transition = 'opacity 0.3s';
-                    card.style.opacity = '0';
-                    setTimeout(() => card.remove(), 300);
-                }
-                // 同步更新內存 masterList
+                // 1. 樂觀即時刪除：從記憶體 myDramasMasterList 中除名
                 if (myDramasMasterList) {
                     myDramasMasterList = myDramasMasterList.filter(d => d.drama_id !== id);
                 }
-                // 同步還原 allDramasMasterList 的 is_added 狀態
+                // 同步更新 allDramasMasterList 狀態
                 if (allDramasMasterList) {
                     const item = allDramasMasterList.find(d => d.drama_id === id);
                     if (item) item.is_added = false;
                 }
 
-                fetch(`/line/api/dramas/remove/${id}/`, {
+                // 2. 樂觀 UI 動畫：將對應的卡片元素縮小淡出並從 DOM 移除
+                const card = btnEl ? btnEl.closest('.drama-item') : null;
+                if (card) {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.92)';
+                    setTimeout(() => {
+                        card.remove();
+                        // 重新繪製目前頁面的分頁與選單計數 (完全不發起網路重載與 Loading Spinner)
+                        renderClientSideFilteredData('my_dramas', myDramasPage);
+                    }, 300);
+                } else {
+                    renderClientSideFilteredData('my_dramas', myDramasPage);
+                }
+
+                // 3. 背景非同步發起 API 移除請求
+                fetch(apiBaseUrl + `/line/api/dramas/remove/${id}/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ access_token: userAccessToken })
@@ -2910,24 +3316,27 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        Swal.fire({ title: '已移除收藏', icon: 'success', timer: 1000, showConfirmButton: false,
-                            background: '#1a1a2e', color: '#e0e0e0' });
-                        // 強制重載確保計數正確
-                        myDramasMasterList = null;
-                        fetchDramas('my_dramas', 1, true);
-                        // 若目前也在 all_dramas tab，強制重載以同步按鈕狀態
-                        allDramasMasterList = null;
+                        // 成功時彈出輕量提示，不觸發任何全頁重載
+                        Swal.fire({ 
+                            title: '已移除收藏', 
+                            icon: 'success', 
+                            timer: 1000, 
+                            showConfirmButton: false,
+                            background: '#1a1a2e', 
+                            color: '#e0e0e0' 
+                        });
                     } else {
                         Swal.fire('錯誤', '移除失敗：' + data.error, 'error');
-                        // 失敗時重新載入還原畫面
+                        // 失敗時重新讀取還原畫面
                         myDramasMasterList = null;
-                        fetchDramas('my_dramas', 1, true);
+                        fetchDramas('my_dramas', myDramasPage, true);
                     }
                 })
                 .catch(err => {
                     console.error('removeDrama error:', err);
+                    Swal.fire('錯誤', '網路連線失敗', 'error');
                     myDramasMasterList = null;
-                    fetchDramas('my_dramas', 1, true);
+                    fetchDramas('my_dramas', myDramasPage, true);
                 });
             });
         }
