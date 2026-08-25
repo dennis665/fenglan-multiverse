@@ -493,6 +493,7 @@
                     console.error("LIFF initialization failed", err);
                     // 外部瀏覽器降級支援
                     fetchCategories();
+                    fetchFriends();
                     fetchDramas("my_dramas", 1);
                     fetchDramas("all_dramas", 1);
                 });
@@ -529,7 +530,7 @@
             fetchDramas("my_dramas", myDramasPage);
         }
 
-        // 切換 Tab (當切換至 好友推薦, 好友管理, 或 作品總覽 時，自動清掉/隱藏上方分類導航選項)
+        // 切換 Tab (包含手動切換 Tab Pane 可見度與動態 API 讀取)
         function switchTab(tab) {
             currentTab = tab;
             const navCard = document.getElementById("category-nav-card");
@@ -538,6 +539,35 @@
             } else {
                 if (navCard) navCard.classList.remove("d-none");
             }
+
+            // 強制切換所有 Tab 按鈕與對應內容面板 (Panel) 的顯示與隱藏
+            const tabMap = {
+                "my_dramas": { btnId: "my-dramas-tab", panelId: "my-dramas-panel" },
+                "all_dramas": { btnId: "all-dramas-tab", panelId: "all-dramas-panel" },
+                "franchises": { btnId: "franchises-tab", panelId: "franchises-panel" },
+                "recommendations": { btnId: "recs-tab", panelId: "recs-panel" },
+                "friends": { btnId: "friends-tab", panelId: "friends-panel" },
+                "friend_compare": { btnId: "friend-compare-tab", panelId: "friend-compare-panel" }
+            };
+
+            Object.keys(tabMap).forEach(key => {
+                const info = tabMap[key];
+                const btnEl = document.getElementById(info.btnId);
+                const panelEl = document.getElementById(info.panelId);
+                if (key === tab) {
+                    if (btnEl) btnEl.classList.add("active");
+                    if (panelEl) {
+                        panelEl.classList.add("show", "active");
+                        panelEl.style.display = "block";
+                    }
+                } else {
+                    if (btnEl) btnEl.classList.remove("active");
+                    if (panelEl) {
+                        panelEl.classList.remove("show", "active");
+                        panelEl.style.display = "none";
+                    }
+                }
+            });
 
             if (tab === "my_dramas") {
                 fetchDramas("my_dramas", myDramasPage);
@@ -1522,6 +1552,9 @@
         // -------------------------------------------------------------------
         let friendCompareData = null;
         let activeCompareSubTab = "both"; // "both", "my", "friend"
+        let comparePage = 1;
+        let comparePageSize = 10;
+        let compareTotalPages = 1;
 
         function fetchFriendComparison(friendUserId = null) {
             const container = document.getElementById("compare-list-container");
@@ -1550,7 +1583,7 @@
                     friendCompareData = data;
                     renderFriendCompareSelect(data.friends_list, data.selected_friend);
                     renderFriendCompareStats(data.stats);
-                    renderFriendCompareList();
+                    renderFriendCompareList(1);
                 } else {
                     container.innerHTML = `<div class="alert alert-danger text-center small py-2">比對失敗：${data.error}</div>`;
                 }
@@ -1606,6 +1639,7 @@
 
         function switchCompareSubTab(subTab) {
             activeCompareSubTab = subTab;
+            comparePage = 1;
             const btnBoth = document.getElementById("btn-compare-both");
             const btnMy = document.getElementById("btn-compare-my");
             const btnFriend = document.getElementById("btn-compare-friend");
@@ -1614,14 +1648,19 @@
             if (btnMy) btnMy.className = subTab === "my" ? "btn btn-sm btn-outline-primary active flex-fill" : "btn btn-sm btn-outline-primary flex-fill";
             if (btnFriend) btnFriend.className = subTab === "friend" ? "btn btn-sm btn-outline-warning active flex-fill" : "btn btn-sm btn-outline-warning flex-fill";
 
-            renderFriendCompareList();
+            renderFriendCompareList(1);
         }
 
-        function renderFriendCompareList() {
+        function renderFriendCompareList(page = 1) {
+            comparePage = page;
             const container = document.getElementById("compare-list-container");
+            const topPagination = document.getElementById("compare-pagination-top");
+            const bottomPagination = document.getElementById("compare-pagination");
             if (!container || !friendCompareData) return;
 
             if (!friendCompareData.selected_friend) {
+                if (topPagination) topPagination.classList.add("d-none");
+                if (bottomPagination) bottomPagination.classList.add("d-none");
                 container.innerHTML = `
                     <div class="glass-card p-4 text-center">
                         <i class="fa-solid fa-user-plus fa-2x mb-2 text-success"></i>
@@ -1640,9 +1679,9 @@
             else if (activeCompareSubTab === "my") targetList = friendCompareData.my_only || [];
             else if (activeCompareSubTab === "friend") targetList = friendCompareData.friend_only || [];
 
-            container.innerHTML = "";
-
             if (targetList.length === 0) {
+                if (topPagination) topPagination.classList.add("d-none");
+                if (bottomPagination) bottomPagination.classList.add("d-none");
                 let emptyMsg = "此分類下暫無劇集比對資料";
                 if (activeCompareSubTab === "both") emptyMsg = "兩人目前尚無共同收藏的劇集";
                 else if (activeCompareSubTab === "my") emptyMsg = "您收藏的劇集好友也全都有收藏喔！";
@@ -1657,7 +1696,18 @@
                 return;
             }
 
-            targetList.forEach(item => {
+            compareTotalPages = Math.ceil(targetList.length / comparePageSize) || 1;
+            if (comparePage > compareTotalPages) comparePage = compareTotalPages;
+            if (comparePage < 1) comparePage = 1;
+
+            updateComparePaginationControls(targetList.length);
+
+            const start = (comparePage - 1) * comparePageSize;
+            const end = start + comparePageSize;
+            const slicedList = targetList.slice(start, end);
+
+            let htmlParts = [];
+            slicedList.forEach(item => {
                 let imgHtml = renderPreviewImagesHtml(item.image_url);
                 let isMovie = isMovieItem(item);
                 let progressBadge = "";
@@ -1703,8 +1753,8 @@
                     `;
                 }
 
-                const html = `
-                    <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center">
+                htmlParts.push(`
+                    <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center mb-2">
                         <div class="d-flex align-items-center flex-grow-1 me-2" style="max-width: 80%;">
                             ${imgHtml}
                             <div class="flex-grow-1" style="min-width: 0;">
@@ -1725,9 +1775,84 @@
                             </button>
                         </div>
                     </div>
-                `;
-                container.innerHTML += html;
+                `);
             });
+
+            container.innerHTML = htmlParts.join("");
+        }
+
+        function updateComparePaginationControls(totalCount) {
+            const topBar = document.getElementById("compare-pagination-top");
+            const bottomBar = document.getElementById("compare-pagination");
+            if (!topBar || !bottomBar) return;
+
+            if (totalCount <= comparePageSize) {
+                topBar.classList.add("d-none");
+                topBar.classList.remove("d-flex");
+                bottomBar.classList.add("d-none");
+                bottomBar.classList.remove("d-flex");
+                return;
+            }
+
+            topBar.classList.remove("d-none");
+            topBar.classList.add("d-flex");
+            bottomBar.classList.remove("d-none");
+            bottomBar.classList.add("d-flex");
+
+            document.getElementById("compare-page-num-top").innerText = comparePage;
+            document.getElementById("compare-total-pages-top").innerText = compareTotalPages;
+            document.getElementById("compare-total-count-top").innerText = totalCount;
+
+            document.getElementById("compare-page-num").innerText = comparePage;
+            document.getElementById("compare-total-pages").innerText = compareTotalPages;
+            document.getElementById("compare-total-count").innerText = totalCount;
+
+            document.getElementById("compare-prev-btn-top").disabled = (comparePage <= 1);
+            document.getElementById("compare-next-btn-top").disabled = (comparePage >= compareTotalPages);
+            document.getElementById("compare-prev-btn").disabled = (comparePage <= 1);
+            document.getElementById("compare-next-btn").disabled = (comparePage >= compareTotalPages);
+
+            ["compare-jump-page-select-top", "compare-jump-page-select"].forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    select.innerHTML = "";
+                    for (let i = 1; i <= compareTotalPages; i++) {
+                        const opt = document.createElement("option");
+                        opt.value = i;
+                        opt.innerText = `第 ${i} 頁`;
+                        if (i === comparePage) opt.selected = true;
+                        select.appendChild(opt);
+                    }
+                }
+            });
+
+            ["compare-page-size-select-top", "compare-page-size-select"].forEach(id => {
+                const select = document.getElementById(id);
+                if (select) select.value = comparePageSize;
+            });
+        }
+
+        function changeComparePage(delta) {
+            const newPage = comparePage + delta;
+            if (newPage >= 1 && newPage <= compareTotalPages) {
+                renderFriendCompareList(newPage);
+                const container = document.getElementById("compare-list-container");
+                if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function changeComparePageSize(size) {
+            comparePageSize = parseInt(size) || 10;
+            renderFriendCompareList(1);
+        }
+
+        function jumpComparePage(page) {
+            const p = parseInt(page) || 1;
+            if (p >= 1 && p <= compareTotalPages) {
+                renderFriendCompareList(p);
+                const container = document.getElementById("compare-list-container");
+                if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         // 點擊切換追蹤狀態
