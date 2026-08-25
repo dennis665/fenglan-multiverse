@@ -2053,9 +2053,10 @@ def api_get_dramas(request):
             )
     else:
         sub_tab = data.get("sub_tab", "pending")
-        pending_qs = DramaRecommendation.objects.filter(to_user=user, status="pending")
-        accepted_qs = DramaRecommendation.objects.filter(to_user=user, status="accepted")
-        rejected_qs = DramaRecommendation.objects.filter(to_user=user, status__in=["rejected", "ignored"])
+        from django.db.models import Q
+        pending_qs = DramaRecommendation.objects.filter(to_user=user, is_accepted=False, is_rejected=False).filter(status="pending")
+        accepted_qs = DramaRecommendation.objects.filter(to_user=user).filter(Q(status="accepted") | Q(is_accepted=True))
+        rejected_qs = DramaRecommendation.objects.filter(to_user=user).filter(Q(status__in=["rejected", "ignored"]) | Q(is_rejected=True))
 
         pending_count = pending_qs.count()
         accepted_count = accepted_qs.count()
@@ -2593,16 +2594,20 @@ def api_accept_recommendation(request, pk):
         return JsonResponse({"error": "Recommendation not found"}, status=404)
 
     # 標記已接受
+    rec.status = "accepted"
     rec.is_accepted = True
     rec.is_rejected = False
     rec.save()
 
-    # 建立個人的追劇進度
-    UserDramaProgress.objects.get_or_create(
+    # 建立/更新個人的追劇進度 (確保標記為已收藏)
+    progress, _ = UserDramaProgress.objects.get_or_create(
         user=user,
         drama=rec.drama,
-        defaults={"current_season": 1, "current_episode": 1, "is_tracked": False},
+        defaults={"current_season": 1, "current_episode": 1, "is_tracked": True},
     )
+    if not progress.is_tracked:
+        progress.is_tracked = True
+        progress.save()
 
     return JsonResponse({"status": "success"})
 
