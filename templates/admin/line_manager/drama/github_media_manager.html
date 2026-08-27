@@ -1,0 +1,509 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .gh-dash-card {
+        background: #1e1e2d;
+        color: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        margin-bottom: 20px;
+    }
+    .stat-badge {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+    .gh-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background: #151521;
+        color: #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .gh-table th, .gh-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #2b2b3d;
+        text-align: left;
+    }
+    .gh-table th {
+        background: #1b1b28;
+        color: #00f2fe;
+        font-weight: bold;
+    }
+    .gh-table tr:hover {
+        background: #252538;
+    }
+    .status-badge-bound {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid #28a745;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        font-weight: bold;
+    }
+    .status-badge-unbound {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid #ffc107;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        font-weight: bold;
+    }
+    .btn-action {
+        background: #4facfe;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-action:hover {
+        background: #00f2fe;
+        color: #000;
+    }
+    .btn-save {
+        background: #28a745;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+    .btn-save:hover {
+        background: #218838;
+    }
+    .suggest-btn {
+        background: rgba(0, 242, 254, 0.15);
+        color: #00f2fe;
+        border: 1px dashed #00f2fe;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.78rem;
+        cursor: pointer;
+        margin-left: 6px;
+    }
+    .suggest-btn:hover {
+        background: #00f2fe;
+        color: #000;
+    }
+    /* 搜尋彈窗樣式 */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.75);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    .modal-box {
+        background: #1e1e2d;
+        color: #fff;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        border: 1px solid #333;
+    }
+    .search-results-list {
+        overflow-y: auto;
+        flex-grow: 1;
+        margin-top: 15px;
+        max-height: 50vh;
+    }
+    .search-item {
+        padding: 10px 14px;
+        border-bottom: 1px solid #2b2b3d;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 6px;
+        margin-bottom: 4px;
+    }
+    .search-item:hover {
+        background: #2b2b3d;
+        color: #00f2fe;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" style="padding: 10px;">
+    <!-- 頂部卡片區 -->
+    <div class="gh-dash-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="margin: 0 0 5px 0; color: #00f2fe;">🎬 GitHub 影音反向批次指定與對應綁定儀表板</h2>
+                <p style="margin: 0; color: #aaa; font-size: 0.9rem;">
+                    讀取 GitHub <code>fenglan-media-assets/video</code> 清單，支援關鍵字快搜指定、智慧建議配對與一鍵全自動對應！
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'admin:line_manager_drama_changelist' %}" class="button" style="background: #6c757d; color: #fff;">
+                    ⬅️ 返回劇集列表
+                </a>
+            </div>
+        </div>
+
+        <hr style="border-color: #333; margin: 20px 0;">
+
+        <!-- 數據統計區 -->
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 180px; background: #2b2b3d; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="color: #aaa; font-size: 0.85rem;">📦 GitHub 總影音數</div>
+                <div class="stat-badge" style="color: #00f2fe;" id="stat-total">0</div>
+            </div>
+            <div style="flex: 1; min-width: 180px; background: #2b2b3d; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="color: #aaa; font-size: 0.85rem;">🟢 已關聯檔案數</div>
+                <div class="stat-badge" style="color: #28a745;" id="stat-bound">0</div>
+            </div>
+            <div style="flex: 1; min-width: 180px; background: #2b2b3d; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="color: #aaa; font-size: 0.85rem;">⚠️ 未關聯檔案數</div>
+                <div class="stat-badge" style="color: #ffc107;" id="stat-unbound">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 控制與工具列 -->
+    <div class="gh-dash-card" style="padding: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="button" class="btn-action" onclick="autoMatchTitles()">
+                    ⚡ 一鍵全自動劇名比對與關聯
+                </button>
+                <button type="button" class="btn-save" onclick="saveBatchAllocations()">
+                    💾 儲存所有影音關聯變更
+                </button>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="search-input" placeholder="過濾 GitHub 檔名..." onkeyup="renderTable()" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #444; background: #2b2b3d; color: #fff; width: 220px;">
+                <select id="status-filter" onchange="renderTable()" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #444; background: #2b2b3d; color: #fff;">
+                    <option value="all">顯示全部檔案</option>
+                    <option value="unbound">⚠️ 只看未關聯</option>
+                    <option value="bound">🟢 只看已關聯</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 影音與劇集反向對照表 -->
+    <div style="overflow-x: auto;">
+        <table class="gh-table">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th style="width: 90px;">類型</th>
+                    <th>GitHub 影音檔名</th>
+                    <th style="width: 140px;">對應狀態</th>
+                    <th style="width: 420px;">反向指定關聯劇集 (關鍵字快搜)</th>
+                </tr>
+            </thead>
+            <tbody id="gh-table-body">
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 30px; color: #aaa;">
+                        🚀 載入中，請稍候...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 快速搜尋劇集彈窗 Modal -->
+<div class="modal-overlay" id="searchModal">
+    <div class="modal-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="margin: 0; color: #00f2fe;">🔍 關鍵字快速搜尋指定劇集</h3>
+            <button type="button" onclick="closeSearchModal()" style="background: none; border: none; color: #aaa; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <div style="color: #aaa; font-size: 0.85rem; margin-bottom: 10px;" id="modal-file-target-info">
+            目標影音：<span style="color: #fff; font-weight: bold;" id="modal-target-filename"></span>
+        </div>
+        <input type="text" id="modal-search-input" placeholder="輸入關鍵字 (如：芙莉蓮、零開始)..." onkeyup="filterModalDramas()" style="width: 100%; padding: 10px 14px; border-radius: 6px; border: 1px solid #4facfe; background: #151521; color: #fff; font-size: 1rem;">
+
+        <div class="search-results-list" id="modal-dramas-list">
+            <!-- 動態渲染搜尋結果 -->
+        </div>
+
+        <div style="margin-top: 15px; text-align: right; border-top: 1px solid #333; padding-top: 10px;">
+            <button type="button" class="button" onclick="selectDramaForActiveFile(null, '')" style="background: #dc3545; color: #fff; padding: 6px 14px; border-radius: 4px;">
+                ❌ 清除關聯 (標示為未綁定)
+            </button>
+            <button type="button" class="button" onclick="closeSearchModal()" style="background: #6c757d; color: #fff; padding: 6px 14px; border-radius: 4px; margin-left: 8px;">
+                取消
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dramas = {{ dramas_json|safe|default:"[]" }};
+    let githubFiles = [];
+    let activeFileIdx = null;
+
+    // 初始化讀取 GitHub 檔案清單
+    function initDashboard() {
+        fetch('/line/api/dramas/github_media_list/')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    githubFiles = data.files || [];
+                    analyzeBindings();
+                    renderTable();
+                } else {
+                    alert('讀取 GitHub 影音失敗：' + data.error);
+                }
+            })
+            .catch(err => alert('連線失敗: ' + err));
+    }
+
+    // 比對目前劇集與 GitHub 檔案的綁定關係
+    function analyzeBindings() {
+        githubFiles.forEach(file => {
+            file.assignedDramaId = null;
+            file.assignedDramaTitle = '';
+
+            for (const d of dramas) {
+                const list = file.type === 'mp3' ? d.mp3_links : d.mp4_links;
+                if (Array.isArray(list)) {
+                    const matched = list.some(item => item.url === file.url || item.title === file.title);
+                    if (matched) {
+                        file.assignedDramaId = d.id;
+                        file.assignedDramaTitle = d.title;
+                        break;
+                    }
+                }
+            }
+        });
+        updateStats();
+    }
+
+    function updateStats() {
+        let boundCount = 0;
+        githubFiles.forEach(f => {
+            if (f.assignedDramaId) boundCount++;
+        });
+        document.getElementById('stat-total').textContent = githubFiles.length;
+        document.getElementById('stat-bound').textContent = boundCount;
+        document.getElementById('stat-unbound').textContent = githubFiles.length - boundCount;
+    }
+
+    // 尋找最佳建議配對劇集
+    function findSuggestedDrama(file) {
+        if (file.assignedDramaId) return null;
+        const ft = file.title.trim().toLowerCase();
+        return dramas.find(d => {
+            const dt = d.title.trim().toLowerCase();
+            return ft.includes(dt) || dt.includes(ft);
+        });
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('gh-table-body');
+        tbody.innerHTML = '';
+
+        const filterQuery = document.getElementById('search-input').value.trim().toLowerCase();
+        const statusFilter = document.getElementById('status-filter').value;
+
+        let visibleIndex = 1;
+        githubFiles.forEach((file, idx) => {
+            if (filterQuery && !file.name.toLowerCase().includes(filterQuery)) return;
+            if (statusFilter === 'bound' && !file.assignedDramaId) return;
+            if (statusFilter === 'unbound' && file.assignedDramaId) return;
+
+            const isBound = !!file.assignedDramaId;
+            const statusBadge = isBound ?
+                `<span class="status-badge-bound">🟢 已關聯</span>` :
+                `<span class="status-badge-unbound">⚠️ 尚未關聯</span>`;
+
+            const typeBadge = file.type === 'mp3' ?
+                `<span style="color: #00f2fe; font-weight: bold;">🎵 MP3</span>` :
+                `<span style="color: #ffb703; font-weight: bold;">🎬 MP4</span>`;
+
+            // 建立輕量高效率的快搜顯示區塊 (替代幾千個 option 的 HTML select)
+            let selectorHtml = '';
+            if (isBound) {
+                selectorHtml = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: #28a745; font-weight: bold; font-size: 0.9rem;">《${file.assignedDramaTitle}》</span>
+                        <button type="button" class="btn-action" style="padding: 3px 8px; font-size: 0.75rem;" onclick="openSearchModal(${idx})">🔍 變更</button>
+                        <button type="button" style="background: none; border: 1px solid #dc3545; color: #dc3545; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;" onclick="clearFileBinding(${idx})">❌</button>
+                    </div>
+                `;
+            } else {
+                const suggested = findSuggestedDrama(file);
+                let suggestHtml = '';
+                if (suggested) {
+                    suggestHtml = `
+                        <button type="button" class="suggest-btn" onclick="selectDramaForFile(${idx}, ${suggested.id}, '${suggested.title.replace(/'/g, "\\'")}')" title="點擊直接套用同名建議劇集">
+                            💡 建議配對: 《${suggested.title}》
+                        </button>
+                    `;
+                }
+
+                selectorHtml = `
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                        <button type="button" class="btn-action" style="padding: 4px 10px; font-size: 0.82rem;" onclick="openSearchModal(${idx})">
+                            🔍 關鍵字搜尋關聯劇集
+                        </button>
+                        ${suggestHtml}
+                    </div>
+                `;
+            }
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${visibleIndex++}</td>
+                <td>${typeBadge}</td>
+                <td style="font-weight: 500; word-break: break-all;">${file.name}</td>
+                <td id="status-cell-${idx}">${statusBadge}</td>
+                <td>${selectorHtml}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        if (visibleIndex === 1) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: #aaa;">無符合條件的影音檔案</td></tr>`;
+        }
+    }
+
+    // 開啟關鍵字快搜 Modal
+    function openSearchModal(fileIdx) {
+        activeFileIdx = fileIdx;
+        const file = githubFiles[fileIdx];
+        document.getElementById('modal-target-filename').textContent = file.name;
+
+        // 預設將檔名的關鍵字填入搜尋列
+        const defaultSearch = file.title.split(' ')[0] || '';
+        const searchInput = document.getElementById('modal-search-input');
+        searchInput.value = defaultSearch;
+
+        document.getElementById('searchModal').style.display = 'flex';
+        searchInput.focus();
+        filterModalDramas();
+    }
+
+    function closeSearchModal() {
+        document.getElementById('searchModal').style.display = 'none';
+        activeFileIdx = null;
+    }
+
+    // 記憶體極速過濾劇集清單 (毫秒級反應)
+    function filterModalDramas() {
+        const query = document.getElementById('modal-search-input').value.trim().toLowerCase();
+        const container = document.getElementById('modal-dramas-list');
+        container.innerHTML = '';
+
+        let count = 0;
+        for (const d of dramas) {
+            if (query && !d.title.toLowerCase().includes(query) && !d.category.toLowerCase().includes(query)) {
+                continue;
+            }
+
+            const item = document.createElement('div');
+            item.className = 'search-item';
+            item.innerHTML = `
+                <div>
+                    <span style="background: #4facfe; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-right: 6px;">${d.category}</span>
+                    <span style="font-weight: bold;">${d.title}</span>
+                </div>
+                <button type="button" class="btn-action" style="padding: 3px 10px; font-size: 0.78rem;">選擇套用</button>
+            `;
+            const safeTitle = d.title.replace(/'/g, "\\'");
+            item.onclick = () => selectDramaForActiveFile(d.id, safeTitle);
+            container.appendChild(item);
+
+            count++;
+            if (count >= 50) break; // 最多呈現 50 筆符合結果，確保超流暢
+        }
+
+        if (count === 0) {
+            container.innerHTML = `<div style="text-align: center; padding: 20px; color: #aaa;">查無符合關鍵字「${query}」的劇集</div>`;
+        }
+    }
+
+    function selectDramaForActiveFile(dramaId, dramaTitle) {
+        if (activeFileIdx !== null) {
+            selectDramaForFile(activeFileIdx, dramaId, dramaTitle);
+            closeSearchModal();
+        }
+    }
+
+    function selectDramaForFile(fileIdx, dramaId, dramaTitle) {
+        const file = githubFiles[fileIdx];
+        file.assignedDramaId = dramaId ? parseInt(dramaId) : null;
+        file.assignedDramaTitle = dramaTitle || '';
+
+        updateStats();
+        renderTable();
+    }
+
+    function clearFileBinding(fileIdx) {
+        selectDramaForFile(fileIdx, null, '');
+    }
+
+    // ⚡ 一鍵全自動劇名比對與關聯
+    function autoMatchTitles() {
+        let matchedCount = 0;
+        githubFiles.forEach((file, idx) => {
+            if (!file.assignedDramaId) {
+                const matchedDrama = findSuggestedDrama(file);
+                if (matchedDrama) {
+                    file.assignedDramaId = matchedDrama.id;
+                    file.assignedDramaTitle = matchedDrama.title;
+                    matchedCount++;
+                }
+            }
+        });
+
+        updateStats();
+        renderTable();
+        alert(`⚡ 自動對應完成！共為 ${matchedCount} 個原本未關聯的檔案匹配到了同名劇集！請記得點擊「💾 儲存所有影音關聯變更」。`);
+    }
+
+    // 💾 一鍵批次儲存至資料庫
+    function saveBatchAllocations() {
+        const allocations = githubFiles.map(file => ({
+            file_name: file.name,
+            title: file.title,
+            url: file.url,
+            type: file.type,
+            drama_id: file.assignedDramaId
+        }));
+
+        fetch('/line/api/dramas/batch_save_github_links/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ allocations: allocations })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert('儲存失敗: ' + data.error);
+            }
+        })
+        .catch(err => alert('系統錯誤: ' + err));
+    }
+
+    document.addEventListener('DOMContentLoaded', initDashboard);
+</script>
+{% endblock %}

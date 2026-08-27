@@ -5296,3 +5296,60 @@ def api_download_media(request):
             return response
     except Exception as e:
         return HttpResponse(f"Download failed: {str(e)}", status=500)
+
+
+@csrf_exempt
+def api_batch_save_github_links(request):
+    """API 端點：反向批次儲存 GitHub 影音與劇集之關聯」"""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        allocations = data.get("allocations", [])
+
+        # 1. 建立以 drama_id 為 Key 的影音集合 mapping
+        drama_media_map = {}  # drama_id -> {'mp3': [], 'mp4': []}
+
+        for item in allocations:
+            drama_id = item.get("drama_id")
+            if not drama_id:
+                continue
+            drama_id = int(drama_id)
+            if drama_id not in drama_media_map:
+                drama_media_map[drama_id] = {"mp3": [], "mp4": []}
+
+            media_type = item.get("type", "mp3").lower()
+            media_obj = {
+                "title": item.get("title", ""),
+                "url": item.get("url", "")
+            }
+
+            if media_type in drama_media_map[drama_id]:
+                existing_urls = [x["url"] for x in drama_media_map[drama_id][media_type]]
+                if media_obj["url"] not in existing_urls:
+                    drama_media_map[drama_id][media_type].append(media_obj)
+
+        from .models import Drama
+        from django.db import transaction
+
+        updated_count = 0
+        with transaction.atomic():
+            all_dramas = Drama.objects.all()
+            for d in all_dramas:
+                if d.pk in drama_media_map:
+                    new_mp3 = drama_media_map[d.pk]["mp3"]
+                    new_mp4 = drama_media_map[d.pk]["mp4"]
+                    d.mp3_links = json.dumps(new_mp3, ensure_ascii=False)
+                    d.mp4_links = json.dumps(new_mp4, ensure_ascii=False)
+                    d.save()
+                    updated_count += 1
+
+        return JsonResponse({
+            "status": "success",
+            "message": f"✅ 成功反向批次更新 {updated_count} 部劇集的 MP3 與 MP4 影音連結！",
+            "updated_count": updated_count
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": f"儲存失敗: {str(e)}"}, status=500)

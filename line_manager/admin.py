@@ -157,8 +157,11 @@ class DramaAdmin(admin.ModelAdmin):
                 <h4 style="margin-top: 0; color: #00f2fe;">🔍 GitHub (fenglan-media-assets/video) 影音速查與自動帶入工具</h4>
                 <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 10px;">點擊下方按鈕讀取 GitHub video 目錄檔案，可搜尋、選擇 MP3 或 MP4，點擊按鈕自動寫入下方欄位。</p>
                 <button type="button" class="button" onclick="openGitHubMediaPicker()" style="background: #4facfe; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                    🚀 載入 GitHub 影音清單
+                    🚀 載入當前劇集影音
                 </button>
+                <a href="/admin/line_manager/drama/github_media_manager/" class="button" style="background: #00f2fe; color: #000; font-weight: bold; margin-left: 10px; padding: 8px 16px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                    🎬 開啟全影音反向批次指定與對應儀表板
+                </a>
                 <div id="gh-picker-results" style="display: none; margin-top: 15px; max-height: 380px; overflow-y: auto; background: #151521; padding: 12px; border-radius: 6px; border: 1px solid #333;">
                     <input type="text" id="gh-picker-search" placeholder="輸入關鍵字搜尋檔名 (如：芙莉蓮)..." onkeyup="filterGitHubFiles()" style="width: 100%; padding: 8px 12px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #444; background: #222; color: #fff; font-size: 0.9rem;">
                     <div style="display: flex; gap: 20px;">
@@ -251,6 +254,54 @@ class DramaAdmin(admin.ModelAdmin):
         """)
 
     github_media_picker.short_description = "GitHub 媒體連線工具"
+
+    def get_urls(self):
+        from django.urls import path
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "github_media_manager/",
+                self.admin_site.admin_view(self.github_media_manager_view),
+                name="drama_github_media_manager",
+            ),
+        ]
+        return custom_urls + urls
+
+    def github_media_manager_view(self, request):
+        from django.shortcuts import render
+        import json
+        from .models import Drama
+
+        dramas_qs = Drama.objects.all().order_by("title")
+        dramas_list = []
+        for d in dramas_qs:
+            mp3_list = []
+            if d.mp3_links:
+                try:
+                    mp3_list = json.loads(d.mp3_links)
+                except Exception:
+                    pass
+            mp4_list = []
+            if d.mp4_links:
+                try:
+                    mp4_list = json.loads(d.mp4_links)
+                except Exception:
+                    pass
+
+            dramas_list.append({
+                "id": d.pk,
+                "title": d.title,
+                "category": d.category,
+                "mp3_links": mp3_list,
+                "mp4_links": mp4_list
+            })
+
+        context = {
+            "title": "GitHub 影音反向批次指定與綁定檢查儀表板",
+            "dramas_json": json.dumps(dramas_list, ensure_ascii=False),
+            "opts": self.model._meta,
+        }
+        return render(request, "admin/line_manager/drama/github_media_manager.html", context)
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
