@@ -3896,6 +3896,32 @@
             bsModal.show();
         }
 
+        let currentTrackDownloadUrl = '';
+        let currentTrackFileName = '';
+
+        function downloadCurrentMediaTrack() {
+            if (!currentTrackDownloadUrl) {
+                alert('請先選擇要下載的曲目');
+                return;
+            }
+
+            const proxyUrl = window.location.origin + `/line/api/dramas/download_media/?url=${encodeURIComponent(currentTrackDownloadUrl)}&filename=${encodeURIComponent(currentTrackFileName)}`;
+
+            if (typeof liff !== 'undefined' && liff.isLoggedIn && liff.openWindow) {
+                try {
+                    liff.openWindow({
+                        url: proxyUrl,
+                        external: true
+                    });
+                    return;
+                } catch(e) {
+                    console.warn('liff.openWindow failed:', e);
+                }
+            }
+
+            window.location.href = proxyUrl;
+        }
+
         function onDramaMediaTrackChange(indexStr) {
             const idx = parseInt(indexStr);
             if (isNaN(idx) || idx < 0 || idx >= currentDramaPlaylist.length) return;
@@ -3908,6 +3934,18 @@
             let targetUrl = track.url || '';
             if (targetUrl.startsWith('/video/')) {
                 targetUrl = 'https://raw.githubusercontent.com/dennis665/fenglan-media-assets/main' + targetUrl;
+            }
+
+            currentTrackDownloadUrl = targetUrl;
+            currentTrackFileName = (track.title || 'music') + (currentDramaMediaType === 'mp3' ? '.mp3' : '.mp4');
+
+            const dlBtn = document.getElementById('drama-modal-download-btn');
+            if (dlBtn) {
+                if (currentDramaMediaType === 'mp3') {
+                    dlBtn.innerHTML = `<i class="fa-solid fa-download me-1"></i>下載 MP3 到手機`;
+                } else {
+                    dlBtn.innerHTML = `<i class="fa-solid fa-download me-1"></i>下載 MP4 影片`;
+                }
             }
 
             if (currentDramaMediaType === 'mp3') {
@@ -3971,7 +4009,12 @@
                 </div>
                 <div class="modal-footer border-secondary justify-content-between">
                     <span class="small text-muted" id="drama-modal-track-info">準備播放中...</span>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" onclick="closeDramaMediaModal()">關閉播放視窗</button>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-outline-info btn-sm rounded-pill px-3" id="drama-modal-download-btn" onclick="downloadCurrentMediaTrack()">
+                            <i class="fa-solid fa-download me-1"></i>下載 MP3 到手機
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" onclick="closeDramaMediaModal()">關閉播放視窗</button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -5260,3 +5260,39 @@ def api_github_media_list(request):
             return JsonResponse({"status": "success", "files": result_files})
     except Exception as e:
         return JsonResponse({"error": f"連線 GitHub API 失敗: {str(e)}"}, status=500)
+
+
+@csrf_exempt
+def api_download_media(request):
+    """強迫瀏覽器/手機下載媒體檔案 (附帶 Content-Disposition: attachment 標頭)"""
+    import urllib.request
+    import urllib.parse
+    from django.http import HttpResponse
+
+    file_url = request.GET.get("url", "").strip()
+    filename = request.GET.get("filename", "").strip()
+
+    if not file_url:
+        return HttpResponse("Missing url parameter", status=400)
+
+    if file_url.startswith("/video/"):
+        file_url = f"https://raw.githubusercontent.com/dennis665/fenglan-media-assets/main{file_url}"
+
+    # 非 ASCII 字元 URL 安全轉碼 (防範 urllib.request UnicodeEncodeError)
+    quoted_url = urllib.parse.quote(file_url, safe=":/%#?=&")
+
+    try:
+        req = urllib.request.Request(quoted_url, headers={"User-Agent": "CSI-Server/1.0"})
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            content = resp.read()
+            content_type = resp.headers.get("Content-Type", "audio/mpeg")
+
+            if not filename:
+                filename = urllib.parse.unquote(file_url.split("/")[-1]) or "music.mp3"
+
+            encoded_filename = urllib.parse.quote(filename)
+            response = HttpResponse(content, content_type=content_type)
+            response["Content-Disposition"] = f"attachment; filename*=UTF-8''{encoded_filename}"
+            return response
+    except Exception as e:
+        return HttpResponse(f"Download failed: {str(e)}", status=500)

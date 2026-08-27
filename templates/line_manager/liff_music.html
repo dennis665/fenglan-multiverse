@@ -225,6 +225,9 @@
                         <button class="btn btn-outline-warning mode-btn" onclick="toggleLoopMode()" id="loop-mode-btn" title="點擊切換循環模式">
                             <i class="fa-solid fa-repeat me-1" id="loop-mode-icon"></i><span id="loop-mode-text">全曲循環</span>
                         </button>
+                        <button class="btn btn-outline-info rounded-circle p-2" onclick="downloadCurrentSong()" id="audio-download-btn" title="下載當前 MP3 到手機" style="width: 44px; height: 44px;">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
                     </div>
 
                     <!-- 音樂音量控制列 -->
@@ -431,6 +434,30 @@
             } else {
                 changeAudioVolume(lastAudioVolume || 0.8, true);
             }
+        }
+
+        function downloadCurrentSong() {
+            if (!playlistData || playlistData.length === 0) return;
+            const song = playlistData[currentIndex];
+            if (!song || !song.mp3) return;
+
+            let url = fixUrl(song.mp3);
+            let fileName = (song.title || 'music') + '.mp3';
+            const proxyUrl = window.location.origin + `/line/api/dramas/download_media/?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(fileName)}`;
+
+            if (typeof liff !== 'undefined' && liff.isLoggedIn && liff.openWindow) {
+                try {
+                    liff.openWindow({
+                        url: proxyUrl,
+                        external: true
+                    });
+                    return;
+                } catch(e) {
+                    console.warn('liff.openWindow failed:', e);
+                }
+            }
+
+            window.location.href = proxyUrl;
         }
 
         function changeVideoVolume(vol, isUserAction = true) {
