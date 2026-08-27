@@ -160,6 +160,9 @@ def portfolio_dashboard(request):
     low_price_labels = [f"{p.stock.symbol} {p.stock.name}" for p in lowest_prices]
     low_price_data = [float(p.current_price) for p in lowest_prices]
 
+    #! 所有啟用狀態的股票標的（供雙股比對選單使用）
+    active_stocks = Stock.objects.filter(is_active=True).values("symbol", "name", "category", "exchange")
+
     context = {
         "portfolio": portfolio,  # * 把 portfolio 傳到前端，這樣才知道目前的目標設定值
         "form": form,
@@ -174,6 +177,7 @@ def portfolio_dashboard(request):
         "total_dividends": total_dividends,
         "is_newbie": is_newbie,  # * 傳遞新手標記
         "robo_form": robo_form,  # * 傳遞 AI 問卷表單
+        "active_stocks": active_stocks,  # * 傳遞可比對的股票列表
     }
 
     #! 統計圖表
@@ -335,3 +339,111 @@ def stock_history_api(request, symbol):
         return JsonResponse({"error": "系統中無此股票"}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+def stock_compare_api(request):
+    """提供給前端進行雙股走勢與績效比對的 API"""
+    symbol1 = request.GET.get("symbol1", "").strip() or request.POST.get("symbol1", "").strip()
+    symbol2 = request.GET.get("symbol2", "").strip() or request.POST.get("symbol2", "").strip()
+    period = request.GET.get("period", "6mo").strip() or request.POST.get("period", "6mo").strip()
+
+    valid_periods = ["1mo", "3mo", "6mo", "1y", "3y", "5y", "ytd", "max"]
+    if period not in valid_periods:
+        period = "6mo"
+
+    if not symbol1 or not symbol2:
+        return JsonResponse({"error": "請提供兩檔股票代碼"}, status=400)
+
+    try:
+        import pandas as pd
+        import yfinance as yf
+
+        def get_ticker_symbol(sym):
+            s_obj = Stock.objects.filter(symbol__iexact=sym).first()
+            if s_obj:
+                if s_obj.exchange == "TWSE":
+                    return f"{s_obj.symbol}.TW", s_obj.name
+                elif s_obj.exchange in ["OTC", "TWO"]:
+                    return f"{s_obj.symbol}.TWO", s_obj.name
+                return s_obj.symbol, s_obj.name
+
+            if sym.isdigit():
+                return f"{sym}.TW", sym
+            return sym.upper(), sym.upper()
+
+        ticker1_sym, name1 = get_ticker_symbol(symbol1)
+        ticker2_sym, name2 = get_ticker_symbol(symbol2)
+
+        t1 = yf.Ticker(ticker1_sym)
+        t2 = yf.Ticker(ticker2_sym)
+
+        hist1 = t1.history(period=period)
+        hist2 = t2.history(period=period)
+
+        if hist1.empty:
+            return JsonResponse({"error": f"找不到股票代碼 {symbol1} 的歷史資料"}, status=404)
+        if hist2.empty:
+            return JsonResponse({"error": f"找不到股票代碼 {symbol2} 的歷史資料"}, status=404)
+
+        df1 = hist1[["Close"]].rename(columns={"Close": "price1"})
+        df2 = hist2[["Close"]].rename(columns={"Close": "price2"})
+
+        df1.index = df1.index.tz_localize(None)
+        df2.index = df2.index.tz_localize(None)
+
+        merged = pd.merge(df1, df2, left_index=True, right_index=True, how="inner")
+        if merged.empty:
+            return JsonResponse({"error": "兩檔股票在該時間區間內無共同交易日資料"}, status=400)
+
+        merged["date"] = merged.index.strftime("%Y-%m-%d")
+
+        base1 = float(merged["price1"].iloc[0])
+        base2 = float(merged["price2"].iloc[0])
+
+        merged["pct1"] = ((merged["price1"] - base1) / base1) * 100
+        merged["pct2"] = ((merged["price2"] - base2) / base2) * 100
+
+        dates = merged["date"].tolist()
+        prices1 = [round(float(p), 2) for p in merged["price1"].tolist()]
+        prices2 = [round(float(p), 2) for p in merged["price2"].tolist()]
+        pct1 = [round(float(p), 2) for p in merged["pct1"].tolist()]
+        pct2 = [round(float(p), 2) for p in merged["pct2"].tolist()]
+
+        total_return1 = round(pct1[-1], 2)
+        total_return2 = round(pct2[-1], 2)
+        high1 = round(float(merged["price1"].max()), 2)
+        low1 = round(float(merged["price1"].min()), 2)
+        high2 = round(float(merged["price2"].max()), 2)
+        low2 = round(float(merged["price2"].min()), 2)
+
+        return JsonResponse(
+            {
+                "status": "success",
+                "period": period,
+                "stock1": {
+                    "symbol": symbol1.upper(),
+                    "name": name1,
+                    "latest_price": prices1[-1],
+                    "total_return": total_return1,
+                    "high_price": high1,
+                    "low_price": low1,
+                },
+                "stock2": {
+                    "symbol": symbol2.upper(),
+                    "name": name2,
+                    "latest_price": prices2[-1],
+                    "total_return": total_return2,
+                    "high_price": high2,
+                    "low_price": low2,
+                },
+                "dates": dates,
+                "prices1": prices1,
+                "prices2": prices2,
+                "pct1": pct1,
+                "pct2": pct2,
+            }
+        )
+
+    except Exception as e:
+        return JsonResponse({"error": f"資料處理失敗: {str(e)}"}, status=500)

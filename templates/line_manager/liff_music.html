@@ -227,8 +227,17 @@
                         </button>
                     </div>
 
+                    <!-- 音樂音量控制列 -->
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3 px-3 py-2 rounded-pill" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);">
+                        <button class="btn btn-sm btn-link text-info p-0 text-decoration-none" id="audio-mute-btn" onclick="toggleAudioMute()" title="靜音 / 取消靜音">
+                            <i class="fa-solid fa-volume-high" id="audio-mute-icon"></i>
+                        </button>
+                        <input type="range" class="form-range flex-grow-1 mx-2" id="audio-volume-slider" min="0" max="1" step="0.01" value="1" oninput="changeAudioVolume(this.value)" style="cursor: pointer; max-width: 260px;">
+                        <span class="small fw-bold text-info" id="audio-volume-text" style="min-width: 42px; font-size: 0.82rem;">100%</span>
+                    </div>
+
                     <!-- 原生 HTML5 音訊控制項 -->
-                    <audio id="audio-player" class="w-100" controls style="filter: invert(0.9) hue-rotate(180deg);">
+                    <audio id="audio-player" class="w-100" controls crossorigin="anonymous" style="filter: invert(0.9) hue-rotate(180deg);">
                         您的瀏覽器不支援 HTML5 音訊播放
                     </audio>
                 </div>
@@ -252,9 +261,18 @@
                     <p class="small text-white-50 mb-3" id="video-current-subtitle">索引 #1 / 21 • H.264 高畫質視訊</p>
 
                     <div class="w-100 mb-3">
-                        <video id="video-player" class="w-100" controls playsinline>
+                        <video id="video-player" class="w-100" controls crossorigin="anonymous" playsinline>
                             您的瀏覽器不支援 HTML5 影片播放
                         </video>
+                    </div>
+
+                    <!-- 影片音量控制列 -->
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3 px-3 py-2 rounded-pill" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);">
+                        <button class="btn btn-sm btn-link text-warning p-0 text-decoration-none" id="video-mute-btn" onclick="toggleVideoMute()" title="靜音 / 取消靜音">
+                            <i class="fa-solid fa-volume-high" id="video-mute-icon"></i>
+                        </button>
+                        <input type="range" class="form-range flex-grow-1 mx-2" id="video-volume-slider" min="0" max="1" step="0.01" value="1" oninput="changeVideoVolume(this.value)" style="cursor: pointer; max-width: 260px;">
+                        <span class="small fw-bold text-warning" id="video-volume-text" style="min-width: 42px; font-size: 0.82rem;">100%</span>
                     </div>
 
                     <div class="d-flex align-items-center justify-content-center gap-3">
@@ -307,10 +325,168 @@
         let currentIndex = 0;
         let currentVideoIndex = 0;
 
+        let lastAudioVolume = 1.0;
+        let lastVideoVolume = 1.0;
+
+        // Web Audio API Gain Node 音量控制器 (解決 iOS / Mobile LINE LIFF 原生音量屬性限制)
+        let audioCtx = null;
+        let audioGainNode = null;
+        let videoGainNode = null;
+        let audioSourceNode = null;
+        let videoSourceNode = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtxClass) {
+                    audioCtx = new AudioCtxClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function setupWebAudioNodes() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const audio = document.getElementById('audio-player');
+                const video = document.getElementById('video-player');
+
+                if (audio && !audioSourceNode) {
+                    audioSourceNode = ctx.createMediaElementSource(audio);
+                    audioGainNode = ctx.createGain();
+                    audioSourceNode.connect(audioGainNode);
+                    audioGainNode.connect(ctx.destination);
+                }
+
+                if (video && !videoSourceNode) {
+                    videoSourceNode = ctx.createMediaElementSource(video);
+                    videoGainNode = ctx.createGain();
+                    videoSourceNode.connect(videoGainNode);
+                    videoGainNode.connect(ctx.destination);
+                }
+            } catch (e) {
+                console.warn("WebAudio setup info:", e);
+            }
+        }
+
+        function initVolumeSettings() {
+            const savedAudioVol = localStorage.getItem('cyber_audio_volume');
+            const savedVideoVol = localStorage.getItem('cyber_video_volume');
+
+            const audioVol = savedAudioVol !== null ? parseFloat(savedAudioVol) : 1.0;
+            const videoVol = savedVideoVol !== null ? parseFloat(savedVideoVol) : 1.0;
+
+            changeAudioVolume(audioVol, false);
+            changeVideoVolume(videoVol, false);
+        }
+
+        function changeAudioVolume(vol, isUserAction = true) {
+            const audio = document.getElementById('audio-player');
+            const slider = document.getElementById('audio-volume-slider');
+            const text = document.getElementById('audio-volume-text');
+            const icon = document.getElementById('audio-mute-icon');
+
+            const volumeVal = Math.max(0, Math.min(1, parseFloat(vol)));
+
+            if (audio) {
+                try { audio.volume = volumeVal; } catch(e) {}
+            }
+
+            setupWebAudioNodes();
+            if (audioGainNode && audioGainNode.gain) {
+                audioGainNode.gain.setValueAtTime(volumeVal, audioCtx ? audioCtx.currentTime : 0);
+            }
+
+            if (slider) slider.value = volumeVal;
+
+            const pct = Math.round(volumeVal * 100);
+            if (text) text.textContent = `${pct}%`;
+
+            if (icon) {
+                if (volumeVal === 0) icon.className = 'fa-solid fa-volume-xmark text-danger';
+                else if (volumeVal < 0.3) icon.className = 'fa-solid fa-volume-off text-info';
+                else if (volumeVal < 0.7) icon.className = 'fa-solid fa-volume-low text-info';
+                else icon.className = 'fa-solid fa-volume-high text-info';
+            }
+
+            if (volumeVal > 0) lastAudioVolume = volumeVal;
+            if (isUserAction) {
+                localStorage.setItem('cyber_audio_volume', volumeVal);
+            }
+        }
+
+        function toggleAudioMute() {
+            const audio = document.getElementById('audio-player');
+            if (!audio) return;
+
+            const curVol = (audioGainNode && audioGainNode.gain) ? audioGainNode.gain.value : audio.volume;
+            if (curVol > 0) {
+                lastAudioVolume = curVol;
+                changeAudioVolume(0, true);
+            } else {
+                changeAudioVolume(lastAudioVolume || 0.8, true);
+            }
+        }
+
+        function changeVideoVolume(vol, isUserAction = true) {
+            const video = document.getElementById('video-player');
+            const slider = document.getElementById('video-volume-slider');
+            const text = document.getElementById('video-volume-text');
+            const icon = document.getElementById('video-mute-icon');
+
+            const volumeVal = Math.max(0, Math.min(1, parseFloat(vol)));
+
+            if (video) {
+                try { video.volume = volumeVal; } catch(e) {}
+            }
+
+            setupWebAudioNodes();
+            if (videoGainNode && videoGainNode.gain) {
+                videoGainNode.gain.setValueAtTime(volumeVal, audioCtx ? audioCtx.currentTime : 0);
+            }
+
+            if (slider) slider.value = volumeVal;
+
+            const pct = Math.round(volumeVal * 100);
+            if (text) text.textContent = `${pct}%`;
+
+            if (icon) {
+                if (volumeVal === 0) icon.className = 'fa-solid fa-volume-xmark text-danger';
+                else if (volumeVal < 0.3) icon.className = 'fa-solid fa-volume-off text-warning';
+                else if (volumeVal < 0.7) icon.className = 'fa-solid fa-volume-low text-warning';
+                else icon.className = 'fa-solid fa-volume-high text-warning';
+            }
+
+            if (volumeVal > 0) lastVideoVolume = volumeVal;
+            if (isUserAction) {
+                localStorage.setItem('cyber_video_volume', volumeVal);
+            }
+        }
+
+        function toggleVideoMute() {
+            const video = document.getElementById('video-player');
+            if (!video) return;
+
+            const curVol = (videoGainNode && videoGainNode.gain) ? videoGainNode.gain.value : video.volume;
+            if (curVol > 0) {
+                lastVideoVolume = curVol;
+                changeVideoVolume(0, true);
+            } else {
+                changeVideoVolume(lastVideoVolume || 0.8, true);
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             if (typeof liff !== 'undefined' && MY_LIFF_ID) {
                 liff.init({ liffId: MY_LIFF_ID }).catch(err => console.error("LIFF Init Error:", err));
             }
+
+            initVolumeSettings();
 
             
             // 動態從 GitHub video API 取得最新歌單清單

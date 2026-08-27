@@ -8,6 +8,11 @@ const speedSlider = document.getElementById('speedSlider');
 const speedValue = document.getElementById('speedValue');
 const pitchSlider = document.getElementById('pitchSlider');
 const pitchValue = document.getElementById('pitchValue');
+const volumeSlider = document.getElementById('volumeSlider');
+const volumeValue = document.getElementById('volumeValue');
+const btnVolumeMute = document.getElementById('btnVolumeMute');
+const volumeMuteIcon = document.getElementById('volumeMuteIcon');
+let lastTubeVolume = 1.0;
 
 // A-B Loop 相關變數
 let loopA = null;
@@ -181,6 +186,64 @@ if (pitchSlider) {
     });
 }
 
+// 音量控制與 UI 更新邏輯
+function updateVolumeUI(vol) {
+    const val = Math.max(0, Math.min(1, parseFloat(vol)));
+    const pct = Math.round(val * 100);
+
+    if (volumeSlider) volumeSlider.value = val;
+    if (volumeValue) volumeValue.textContent = pct;
+
+    if (volumeMuteIcon) {
+        if (val === 0) volumeMuteIcon.className = 'fas fa-volume-mute text-danger';
+        else if (val < 0.3) volumeMuteIcon.className = 'fas fa-volume-off text-success';
+        else if (val < 0.7) volumeMuteIcon.className = 'fas fa-volume-down text-success';
+        else volumeMuteIcon.className = 'fas fa-volume-up text-success';
+    }
+}
+
+function setPlayerVolume(vol, isUserAction = true) {
+    const val = Math.max(0, Math.min(1, parseFloat(vol)));
+    if (videoPlayer) { try { videoPlayer.volume = val; } catch(e) {} }
+    if (audioPlayer) { try { audioPlayer.volume = val; } catch(e) {} }
+
+    if (typeof Tone !== 'undefined' && Tone.Destination) {
+        try {
+            if (val === 0) {
+                Tone.Destination.mute = true;
+            } else {
+                Tone.Destination.mute = false;
+                Tone.Destination.volume.value = Tone.gainToDb ? Tone.gainToDb(val) : (20 * Math.log10(val));
+            }
+        } catch(e) {}
+    }
+
+    updateVolumeUI(val);
+
+    if (val > 0) lastTubeVolume = val;
+    if (isUserAction) {
+        localStorage.setItem('tubeHubVolume', val);
+    }
+}
+
+if (volumeSlider) {
+    volumeSlider.addEventListener('input', (e) => {
+        setPlayerVolume(e.target.value, true);
+    });
+}
+
+if (btnVolumeMute) {
+    btnVolumeMute.addEventListener('click', () => {
+        const player = getActivePlayer();
+        if (player.volume > 0) {
+            lastTubeVolume = player.volume;
+            setPlayerVolume(0, true);
+        } else {
+            setPlayerVolume(lastTubeVolume || 0.8, true);
+        }
+    });
+}
+
 // 取得當前作用中的播放器
 function getActivePlayer() {
     if (modeSwitch && modeSwitch.checked) return videoPlayer;
@@ -193,12 +256,12 @@ function initPlayerState() {
 
     // 從瀏覽器本地儲存讀取並設定音量
     const savedVolume = localStorage.getItem('tubeHubVolume');
-    if (savedVolume !== null) {
-        player.volume = parseFloat(savedVolume);
-    }
+    const initVol = savedVolume !== null ? parseFloat(savedVolume) : 1.0;
+    setPlayerVolume(initVol, false);
 
     // 監聽音量變化並儲存，確保下一首維持一樣的音量
     player.addEventListener('volumechange', (e) => {
+        updateVolumeUI(e.target.volume);
         localStorage.setItem('tubeHubVolume', e.target.volume);
     });
 

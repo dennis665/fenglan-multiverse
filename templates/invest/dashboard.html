@@ -99,6 +99,143 @@
         </div>
     </div>
 
+    {# 雙股走勢與績效比對工具 #}
+    <div class="card border-0 shadow-sm mb-4 bg-white">
+        <div class="card-header bg-gradient text-white py-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-balance-scale me-2"></i>{% trans "雙股走勢比較與績效對比" %}</h5>
+            <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill"><i class="fas fa-chart-line me-1"></i>動態績效圖表</span>
+        </div>
+        <div class="card-body p-4">
+            <!-- 雙股輸入與時間區間選取區 -->
+            <div class="row g-3 align-items-end mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-secondary mb-1">
+                        <i class="fas fa-cube text-primary me-1"></i>股票 / ETF A (主標的)
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="compareStock1" class="form-control fw-bold" placeholder="代碼如 2330" value="2330" list="activeStockList">
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-secondary mb-1">
+                        <i class="fas fa-cube text-danger me-1"></i>股票 / ETF B (對比標的)
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="compareStock2" class="form-control fw-bold" placeholder="代碼如 0050" value="0050" list="activeStockList">
+                    </div>
+                </div>
+
+                <!-- datalist 供搜尋提示 -->
+                <datalist id="activeStockList">
+                    {% for st in active_stocks %}
+                        <option value="{{ st.symbol }}">{{ st.name }} ({{ st.category }})</option>
+                    {% endfor %}
+                </datalist>
+
+                <div class="col-lg-4 col-md-8">
+                    <label class="form-label small fw-bold text-secondary mb-1">
+                        <i class="fas fa-calendar-alt me-1"></i>時間區間
+                    </label>
+                    <div class="btn-group w-100" role="group" id="comparePeriodGroup">
+                        <button type="button" class="btn btn-outline-primary btn-sm compare-period-btn" data-period="1mo">1個月</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm compare-period-btn" data-period="3mo">3個月</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm compare-period-btn active" data-period="6mo">6個月</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm compare-period-btn" data-period="1y">1年</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm compare-period-btn" data-period="3y">3年</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm compare-period-btn" data-period="5y">5年</button>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <button class="btn btn-primary w-100 fw-bold shadow-sm rounded-3 py-2" type="button" id="btnStartCompare" onclick="executeStockComparison()">
+                        <i class="fas fa-play me-1"></i>開始比對
+                    </button>
+                </div>
+            </div>
+
+            <!-- 圖表類型切換與比對結果視圖 -->
+            <div id="compareResultContainer" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <h6 class="fw-bold mb-0 text-dark" id="compareChartTitle">
+                            <i class="fas fa-chart-area text-success me-1"></i>走勢對比
+                        </h6>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="compareMode" id="modePct" value="pct" checked onclick="switchCompareChartMode('pct')">
+                        <label class="btn btn-outline-secondary" for="modePct"><i class="fas fa-percentage me-1"></i>累積報酬率 (%)</label>
+
+                        <input type="radio" class="btn-check" name="compareMode" id="modePrice" value="price" onclick="switchCompareChartMode('price')">
+                        <label class="btn btn-outline-secondary" for="modePrice"><i class="fas fa-dollar-sign me-1"></i>收盤價格 ($)</label>
+                    </div>
+                </div>
+
+                <!-- 折線圖 Canvas -->
+                <div class="position-relative mb-4" style="min-height: 320px;">
+                    <canvas id="compareLineChart" style="max-height: 380px;"></canvas>
+                </div>
+
+                <!-- 兩檔股票績效數據卡片對比 -->
+                <div class="row g-3" id="compareStatsCards">
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-primary bg-opacity-10 border-start border-4 border-primary p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold fs-6 text-primary" id="statStock1Name">股票 A</span>
+                                <span class="badge bg-primary px-2 py-1" id="statStock1Symbol">2330</span>
+                            </div>
+                            <div class="row g-2 text-center">
+                                <div class="col-4">
+                                    <div class="small text-muted">最新股價</div>
+                                    <div class="fw-bold text-dark" id="statStock1Price">-$</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="small text-muted">期間累積報酬率</div>
+                                    <div class="fw-bold fs-6" id="statStock1Return">-%</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="small text-muted">期間高/低價</div>
+                                    <div class="small fw-bold text-secondary" id="statStock1Range">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-danger bg-opacity-10 border-start border-4 border-danger p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold fs-6 text-danger" id="statStock2Name">股票 B</span>
+                                <span class="badge bg-danger px-2 py-1" id="statStock2Symbol">0050</span>
+                            </div>
+                            <div class="row g-2 text-center">
+                                <div class="col-4">
+                                    <div class="small text-muted">最新股價</div>
+                                    <div class="fw-bold text-dark" id="statStock2Price">-$</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="small text-muted">期間累積報酬率</div>
+                                    <div class="fw-bold fs-6" id="statStock2Return">-%</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="small text-muted">期間高/低價</div>
+                                    <div class="small fw-bold text-secondary" id="statStock2Range">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner & Placeholder -->
+            <div id="compareLoading" class="text-center py-4 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="small text-muted mt-2">正在透過 yfinance 擷取兩檔股票數據並運算對比圖表...</div>
+            </div>
+        </div>
+    </div>
+
     {# 市場搜尋與展開工具列 #}
     <div class="card border-0 shadow-sm mb-4 bg-white">
         <div class="card-body p-3 d-flex flex-wrap justify-content-between align-items-center">
