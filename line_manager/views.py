@@ -1971,6 +1971,20 @@ def api_get_dramas(request):
                 except Exception:
                     pass
 
+            mp3_links = []
+            if getattr(d, "mp3_links", None):
+                try:
+                    mp3_links = json.loads(d.mp3_links)
+                except Exception:
+                    pass
+
+            mp4_links = []
+            if getattr(d, "mp4_links", None):
+                try:
+                    mp4_links = json.loads(d.mp4_links)
+                except Exception:
+                    pass
+
             list_data.append(
                 {
                     "progress_id": p.pk,
@@ -1981,6 +1995,8 @@ def api_get_dramas(request):
                     "total_seasons": d.total_seasons,
                     "total_episodes": d.total_episodes,
                     "info_links": links,
+                    "mp3_links": mp3_links,
+                    "mp4_links": mp4_links,
                     "image_url": getattr(d, "image_url", "") or "",
                     "current_season": p.current_season,
                     "current_episode": p.current_episode,
@@ -2035,6 +2051,20 @@ def api_get_dramas(request):
                 except Exception:
                     pass
 
+            mp3_links = []
+            if getattr(d, "mp3_links", None):
+                try:
+                    mp3_links = json.loads(d.mp3_links)
+                except Exception:
+                    pass
+
+            mp4_links = []
+            if getattr(d, "mp4_links", None):
+                try:
+                    mp4_links = json.loads(d.mp4_links)
+                except Exception:
+                    pass
+
             list_data.append(
                 {
                     "drama_id": d.pk,
@@ -2044,6 +2074,8 @@ def api_get_dramas(request):
                     "total_seasons": d.total_seasons,
                     "total_episodes": d.total_episodes,
                     "info_links": links,
+                    "mp3_links": mp3_links,
+                    "mp4_links": mp4_links,
                     "image_url": getattr(d, "image_url", "") or "",
                     "creator": creator_name,
                     "tracked_users_count": tracked_counts.get(d.pk, 0),
@@ -5192,3 +5224,39 @@ def api_line_pet_claim_broadcast_gift(request):
         "claimed_coins": coins,
         "coins": profile.pet_gold_coins
     })
+
+
+@csrf_exempt
+def api_github_media_list(request):
+    """API 端點：讀取 GitHub https://github.com/dennis665/fenglan-media-assets/tree/main/video 裡的影音清單"""
+    import urllib.request
+    from django.core.cache import cache
+
+    cache_key = "github_media_video_list_v2"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return JsonResponse({"status": "success", "files": cached_data})
+
+    github_api_url = "https://api.github.com/repos/dennis665/fenglan-media-assets/contents/video"
+    try:
+        req = urllib.request.Request(github_api_url, headers={"User-Agent": "CSI-Server/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            result_files = []
+            if isinstance(data, list):
+                for item in data:
+                    name = item.get("name", "")
+                    if name.endswith(".mp3") or name.endswith(".mp4"):
+                        title = name[:-4]
+                        ext = name[-3:].lower()
+                        download_url = item.get("download_url", "") or f"https://raw.githubusercontent.com/dennis665/fenglan-media-assets/main/video/{urllib.parse.quote(name)}"
+                        result_files.append({
+                            "name": name,
+                            "title": title,
+                            "type": ext,
+                            "url": download_url
+                        })
+            cache.set(cache_key, result_files, timeout=600)  # 快取 10 分鐘
+            return JsonResponse({"status": "success", "files": result_files})
+    except Exception as e:
+        return JsonResponse({"error": f"連線 GitHub API 失敗: {str(e)}"}, status=500)

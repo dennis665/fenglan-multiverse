@@ -45,6 +45,7 @@ urlpatterns = [
     path("api/dramas/franchises/", views.api_get_franchises, name="api_get_franchises"),
     path("api/dramas/franchise_batch_track/", views.api_franchise_batch_track, name="api_franchise_batch_track"),
     path("api/dramas/compare_friends/", views.api_compare_friends, name="api_compare_friends"),
+    path("api/dramas/github_media_list/", views.api_github_media_list, name="api_github_media_list"),
     path("api/friends/", views.api_get_friends, name="api_get_friends"),
     path("api/friends/add/", views.api_add_friend, name="api_add_friend"),
 

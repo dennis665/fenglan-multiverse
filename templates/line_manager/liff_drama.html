@@ -2078,6 +2078,8 @@
                         `;
                     }
 
+                    const mediaBtnsHtml = renderMediaLinksHtml(item);
+
                     const html = `
                         <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center flex-grow-1 me-2" style="max-width: 80%;">
@@ -2091,6 +2093,7 @@
                                     </div>
                                     <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
                                     ${progressInfoHtml}
+                                    ${mediaBtnsHtml}
                                     ${linksHtml}
                                     <div class="text-muted pref-creator ${displayPrefs.creator ? '' : 'd-none'}" style="font-size: 0.7rem; margin-top: 5px;">
                                         👥 ${item.tracked_users_count || 0} 人收藏 | 更新: ${item.updated_at}
@@ -2135,6 +2138,7 @@
 
                     let allImgHtml = renderPreviewImagesHtml(item.image_url);
                     let movieBadgeHtml = isMovie ? `<div class="small fw-bold mb-1"><span class="badge bg-danger bg-opacity-25 text-danger border border-danger"><i class="fa-solid fa-film me-1"></i>🎬 劇場版 / 電影</span></div>` : "";
+                    const mediaBtnsHtml = renderMediaLinksHtml(item);
 
                     const html = `
                         <div class="glass-card p-3 drama-item d-flex justify-content-between align-items-center">
@@ -2146,6 +2150,7 @@
                                     </div>
                                     <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; word-break: break-all;">${item.title}</h5>
                                     ${movieBadgeHtml}
+                                    ${mediaBtnsHtml}
                                     ${linksHtml}
                                     <div class="text-muted" style="font-size: 0.7rem; margin-top: 5px;">
                                         👥 ${item.tracked_users_count || 0} 人收藏 | 更新: ${item.updated_at}
@@ -3735,7 +3740,242 @@
                 fetchDramas("my_dramas", 1);
             }, 300);
         }
+
+        // ==================== 劇集影音彈窗播放器 (Popup Player & Volume Control) ====================
+        function renderMediaLinksHtml(item) {
+            let mediaHtml = "";
+            if (item.mp3_links && item.mp3_links.length > 0) {
+                const mp3Json = JSON.stringify(item.mp3_links).replace(/"/g, '&quot;');
+                const safeTitle = (item.title || '').replace(/'/g, "\\'");
+                mediaHtml += `
+                    <button type="button" class="btn btn-sm btn-info text-white me-1 mb-1 px-2 py-0" style="font-size: 0.75rem; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,188,212,0.3);" onclick="openDramaMediaModal('${safeTitle}', 'mp3', ${mp3Json})">
+                        <i class="fa-solid fa-music me-1"></i>🎵 MP3 (${item.mp3_links.length})
+                    </button>
+                `;
+            }
+            if (item.mp4_links && item.mp4_links.length > 0) {
+                const mp4Json = JSON.stringify(item.mp4_links).replace(/"/g, '&quot;');
+                const safeTitle = (item.title || '').replace(/'/g, "\\'");
+                mediaHtml += `
+                    <button type="button" class="btn btn-sm btn-warning text-dark me-1 mb-1 px-2 py-0" style="font-size: 0.75rem; border-radius: 20px; box-shadow: 0 2px 4px rgba(255,193,7,0.3);" onclick="openDramaMediaModal('${safeTitle}', 'mp4', ${mp4Json})">
+                        <i class="fa-solid fa-film me-1"></i>🎬 MP4 (${item.mp4_links.length})
+                    </button>
+                `;
+            }
+            if (mediaHtml) {
+                mediaHtml = `<div class="d-flex flex-wrap align-items-center mt-1 me-1">${mediaHtml}</div>`;
+            }
+            return mediaHtml;
+        }
+
+        let dramaAudioCtx = null;
+        let dramaGainNode = null;
+        let dramaAudioSource = null;
+        let dramaVideoSource = null;
+        let dramaLastVolume = 1.0;
+        let currentDramaPlaylist = [];
+        let currentDramaMediaType = 'mp3';
+
+        function getDramaAudioContext() {
+            if (!dramaAudioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) dramaAudioCtx = new Ctx();
+            }
+            if (dramaAudioCtx && dramaAudioCtx.state === 'suspended') {
+                dramaAudioCtx.resume();
+            }
+            return dramaAudioCtx;
+        }
+
+        function setupDramaWebAudio() {
+            try {
+                const ctx = getDramaAudioContext();
+                if (!ctx) return;
+                const audio = document.getElementById('drama-modal-audio');
+                const video = document.getElementById('drama-modal-video');
+
+                if (audio && !dramaAudioSource) {
+                    dramaAudioSource = ctx.createMediaElementSource(audio);
+                    dramaGainNode = ctx.createGain();
+                    dramaAudioSource.connect(dramaGainNode);
+                    dramaGainNode.connect(ctx.destination);
+                }
+                if (video && !dramaVideoSource) {
+                    dramaVideoSource = ctx.createMediaElementSource(video);
+                    if (!dramaGainNode) dramaGainNode = ctx.createGain();
+                    dramaVideoSource.connect(dramaGainNode);
+                    dramaGainNode.connect(ctx.destination);
+                }
+            } catch(e) {
+                console.warn("Drama WebAudio setup:", e);
+            }
+        }
+
+        function changeDramaModalVolume(vol, isUserAction = true) {
+            const val = Math.max(0, Math.min(1, parseFloat(vol)));
+            const audio = document.getElementById('drama-modal-audio');
+            const video = document.getElementById('drama-modal-video');
+            const slider = document.getElementById('drama-modal-volume-slider');
+            const text = document.getElementById('drama-modal-volume-text');
+            const icon = document.getElementById('drama-modal-mute-icon');
+
+            if (audio) { try { audio.volume = val; } catch(e) {} }
+            if (video) { try { video.volume = val; } catch(e) {} }
+
+            setupDramaWebAudio();
+            if (dramaGainNode && dramaGainNode.gain) {
+                dramaGainNode.gain.setValueAtTime(val, dramaAudioCtx ? dramaAudioCtx.currentTime : 0);
+            }
+
+            if (slider) slider.value = val;
+            if (text) text.textContent = `${Math.round(val * 100)}%`;
+
+            if (icon) {
+                if (val === 0) icon.className = 'fa-solid fa-volume-xmark text-danger';
+                else if (val < 0.3) icon.className = 'fa-solid fa-volume-off text-info';
+                else if (val < 0.7) icon.className = 'fa-solid fa-volume-low text-info';
+                else icon.className = 'fa-solid fa-volume-high text-info';
+            }
+
+            if (val > 0) dramaLastVolume = val;
+            if (isUserAction) localStorage.setItem('drama_modal_volume', val);
+        }
+
+        function toggleDramaModalMute() {
+            const audio = document.getElementById('drama-modal-audio');
+            const video = document.getElementById('drama-modal-video');
+            const activeEl = currentDramaMediaType === 'mp3' ? audio : video;
+            const curVol = (dramaGainNode && dramaGainNode.gain) ? dramaGainNode.gain.value : (activeEl ? activeEl.volume : 1);
+
+            if (curVol > 0) {
+                dramaLastVolume = curVol;
+                changeDramaModalVolume(0, true);
+            } else {
+                changeDramaModalVolume(dramaLastVolume || 0.8, true);
+            }
+        }
+
+        function openDramaMediaModal(title, type, links) {
+            currentDramaMediaType = type;
+            currentDramaPlaylist = links || [];
+
+            document.getElementById('drama-modal-title').textContent = `${title} (${type.toUpperCase()} 影音)`;
+            const select = document.getElementById('drama-media-select');
+            select.innerHTML = '';
+
+            currentDramaPlaylist.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = `${idx + 1}. ${item.title || 'Track ' + (idx + 1)}`;
+                select.appendChild(opt);
+            });
+
+            const audioBox = document.getElementById('drama-media-audio-container');
+            const videoBox = document.getElementById('drama-media-video-container');
+            const audio = document.getElementById('drama-modal-audio');
+            const video = document.getElementById('drama-modal-video');
+
+            audio.pause();
+            video.pause();
+
+            if (type === 'mp3') {
+                audioBox.classList.remove('d-none');
+                videoBox.classList.add('d-none');
+            } else {
+                videoBox.classList.remove('d-none');
+                audioBox.classList.add('d-none');
+            }
+
+            onDramaMediaTrackChange(0);
+
+            const savedVol = localStorage.getItem('drama_modal_volume');
+            changeDramaModalVolume(savedVol !== null ? parseFloat(savedVol) : 0.8, false);
+
+            const modalEl = document.getElementById('dramaMediaModal');
+            const bsModal = new bootstrap.Modal(modalEl);
+            bsModal.show();
+        }
+
+        function onDramaMediaTrackChange(indexStr) {
+            const idx = parseInt(indexStr);
+            if (isNaN(idx) || idx < 0 || idx >= currentDramaPlaylist.length) return;
+
+            const track = currentDramaPlaylist[idx];
+            const audio = document.getElementById('drama-modal-audio');
+            const video = document.getElementById('drama-modal-video');
+            const infoSpan = document.getElementById('drama-modal-track-info');
+
+            let targetUrl = track.url || '';
+            if (targetUrl.startsWith('/video/')) {
+                targetUrl = 'https://raw.githubusercontent.com/dennis665/fenglan-media-assets/main' + targetUrl;
+            }
+
+            if (currentDramaMediaType === 'mp3') {
+                video.pause();
+                audio.src = targetUrl;
+                audio.play().catch(e => console.log('Autoplay prevented:', e));
+            } else {
+                audio.pause();
+                video.src = targetUrl;
+                video.play().catch(e => console.log('Autoplay prevented:', e));
+            }
+
+            infoSpan.textContent = `播放中: ${track.title || 'Track ' + (idx + 1)}`;
+        }
+
+        function closeDramaMediaModal() {
+            const audio = document.getElementById('drama-modal-audio');
+            const video = document.getElementById('drama-modal-video');
+            if (audio) audio.pause();
+            if (video) video.pause();
+        }
     </script>
+
+    <!-- 劇集影音彈窗播放器 Modal -->
+    <div class="modal fade" id="dramaMediaModal" tabindex="-1" aria-labelledby="dramaMediaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-light border-secondary shadow-lg">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-header-title mb-0 text-info fw-bold" id="dramaMediaModalLabel">
+                        <i class="fa-solid fa-circle-play me-2"></i><span id="drama-modal-title">劇集影音播放器</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="closeDramaMediaModal()"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <!-- 曲目/集數切換下拉選單 -->
+                    <div class="mb-3 text-start" id="drama-media-select-wrapper">
+                        <label class="small text-muted mb-1 d-block"><i class="fa-solid fa-list-ul me-1"></i>選擇曲目 / 影片集數：</label>
+                        <select class="form-select bg-black text-info border-secondary small" id="drama-media-select" onchange="onDramaMediaTrackChange(this.value)">
+                        </select>
+                    </div>
+
+                    <!-- 媒體播放區域 -->
+                    <div class="media-box bg-black p-3 rounded border border-secondary mb-3">
+                        <div id="drama-media-audio-container" class="d-none">
+                            <div class="mb-3 text-info"><i class="fa-solid fa-music fa-3x animate-bounce"></i></div>
+                            <audio id="drama-modal-audio" class="w-100" controls crossorigin="anonymous"></audio>
+                        </div>
+                        <div id="drama-media-video-container" class="d-none">
+                            <video id="drama-modal-video" class="w-100 rounded" controls crossorigin="anonymous" playsinline style="max-height: 400px;"></video>
+                        </div>
+                    </div>
+
+                    <!-- 音量控制條 (支援 Mobile LINE LIFF & iOS Web Audio API) -->
+                    <div class="d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-pill bg-black border border-secondary" style="max-width: 400px; margin: 0 auto;">
+                        <button class="btn btn-sm btn-link text-info p-0 text-decoration-none" id="drama-modal-mute-btn" onclick="toggleDramaModalMute()">
+                            <i class="fa-solid fa-volume-high" id="drama-modal-mute-icon"></i>
+                        </button>
+                        <input type="range" class="form-range flex-grow-1 mx-2" id="drama-modal-volume-slider" min="0" max="1" step="0.01" value="1" oninput="changeDramaModalVolume(this.value)" style="cursor: pointer;">
+                        <span class="small fw-bold text-info" id="drama-modal-volume-text" style="min-width: 42px;">100%</span>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary justify-content-between">
+                    <span class="small text-muted" id="drama-modal-track-info">準備播放中...</span>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" onclick="closeDramaMediaModal()">關閉播放視窗</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 
