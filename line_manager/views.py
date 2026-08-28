@@ -5300,7 +5300,7 @@ def api_download_media(request):
 
 @csrf_exempt
 def api_batch_save_github_links(request):
-    """API 端點：反向批次儲存 GitHub 影音與劇集之關聯」"""
+    """API 端點：反向批次儲存 GitHub 影音與多劇集之關聯」"""
     if request.method != "POST":
         return JsonResponse({"error": "POST required"}, status=405)
 
@@ -5312,12 +5312,14 @@ def api_batch_save_github_links(request):
         drama_media_map = {}  # drama_id -> {'mp3': [], 'mp4': []}
 
         for item in allocations:
-            drama_id = item.get("drama_id")
-            if not drama_id:
+            drama_ids = item.get("drama_ids", [])
+            # 相容單一 drama_id 參數
+            single_id = item.get("drama_id")
+            if single_id and single_id not in drama_ids:
+                drama_ids.append(single_id)
+
+            if not drama_ids:
                 continue
-            drama_id = int(drama_id)
-            if drama_id not in drama_media_map:
-                drama_media_map[drama_id] = {"mp3": [], "mp4": []}
 
             media_type = item.get("type", "mp3").lower()
             media_obj = {
@@ -5325,10 +5327,19 @@ def api_batch_save_github_links(request):
                 "url": item.get("url", "")
             }
 
-            if media_type in drama_media_map[drama_id]:
-                existing_urls = [x["url"] for x in drama_media_map[drama_id][media_type]]
-                if media_obj["url"] not in existing_urls:
-                    drama_media_map[drama_id][media_type].append(media_obj)
+            for did in drama_ids:
+                try:
+                    did_int = int(did)
+                except (ValueError, TypeError):
+                    continue
+
+                if did_int not in drama_media_map:
+                    drama_media_map[did_int] = {"mp3": [], "mp4": []}
+
+                if media_type in drama_media_map[did_int]:
+                    existing_urls = [x["url"] for x in drama_media_map[did_int][media_type]]
+                    if media_obj["url"] not in existing_urls:
+                        drama_media_map[did_int][media_type].append(media_obj)
 
         from .models import Drama
         from django.db import transaction
@@ -5344,6 +5355,12 @@ def api_batch_save_github_links(request):
                     d.mp4_links = json.dumps(new_mp4, ensure_ascii=False)
                     d.save()
                     updated_count += 1
+                else:
+                    # 若此劇集的影音關聯已全部在儀表板中清空
+                    if d.mp3_links or d.mp4_links:
+                        d.mp3_links = "[]"
+                        d.mp4_links = "[]"
+                        d.save()
 
         return JsonResponse({
             "status": "success",

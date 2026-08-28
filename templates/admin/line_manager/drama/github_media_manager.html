@@ -60,7 +60,7 @@
         background: #4facfe;
         color: #fff;
         border: none;
-        padding: 8px 16px;
+        padding: 6px 12px;
         border-radius: 6px;
         font-weight: bold;
         cursor: pointer;
@@ -91,7 +91,8 @@
         border-radius: 4px;
         font-size: 0.78rem;
         cursor: pointer;
-        margin-left: 6px;
+        margin-left: 4px;
+        margin-bottom: 4px;
     }
     .suggest-btn:hover {
         background: #00f2fe;
@@ -149,9 +150,9 @@
     <div class="gh-dash-card">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div>
-                <h2 style="margin: 0 0 5px 0; color: #00f2fe;">🎬 GitHub 影音反向批次指定與對應綁定儀表板</h2>
+                <h2 style="margin: 0 0 5px 0; color: #00f2fe;">🎬 GitHub 影音多劇集反向批次指定與綁定儀表板</h2>
                 <p style="margin: 0; color: #aaa; font-size: 0.9rem;">
-                    讀取 GitHub <code>fenglan-media-assets/video</code> 清單，支援關鍵字快搜指定、智慧建議配對與一鍵全自動對應！
+                    支援<strong>單一影音檔案同時間關聯多部劇集</strong>！可為同一首 MP3/MP4 自由勾選多部相關劇集。
                 </p>
             </div>
             <div>
@@ -185,7 +186,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <button type="button" class="btn-action" onclick="autoMatchTitles()">
-                    ⚡ 一鍵全自動劇名比對與關聯
+                    ⚡ 一鍵全自動劇名比對與關聯 (支援多部)
                 </button>
                 <button type="button" class="btn-save" onclick="saveBatchAllocations()">
                     💾 儲存所有影音關聯變更
@@ -209,9 +210,9 @@
                 <tr>
                     <th style="width: 50px;">#</th>
                     <th style="width: 90px;">類型</th>
-                    <th>GitHub 影音檔名</th>
+                    <th style="width: 280px;">GitHub 影音檔名</th>
                     <th style="width: 140px;">對應狀態</th>
-                    <th style="width: 420px;">反向指定關聯劇集 (關鍵字快搜)</th>
+                    <th>反向指定關聯劇集 (支援多部關聯)</th>
                 </tr>
             </thead>
             <tbody id="gh-table-body">
@@ -229,7 +230,7 @@
 <div class="modal-overlay" id="searchModal">
     <div class="modal-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="margin: 0; color: #00f2fe;">🔍 關鍵字快速搜尋指定劇集</h3>
+            <h3 style="margin: 0; color: #00f2fe;">🔍 搜尋並關聯劇集 (可複選多部)</h3>
             <button type="button" onclick="closeSearchModal()" style="background: none; border: none; color: #aaa; font-size: 1.5rem; cursor: pointer;">&times;</button>
         </div>
         <div style="color: #aaa; font-size: 0.85rem; margin-bottom: 10px;" id="modal-file-target-info">
@@ -242,11 +243,11 @@
         </div>
 
         <div style="margin-top: 15px; text-align: right; border-top: 1px solid #333; padding-top: 10px;">
-            <button type="button" class="button" onclick="selectDramaForActiveFile(null, '')" style="background: #dc3545; color: #fff; padding: 6px 14px; border-radius: 4px;">
-                ❌ 清除關聯 (標示為未綁定)
+            <button type="button" class="button" onclick="clearAllDramaForActiveFile()" style="background: #dc3545; color: #fff; padding: 6px 14px; border-radius: 4px;">
+                ❌ 清空此檔案的所有劇集關聯
             </button>
             <button type="button" class="button" onclick="closeSearchModal()" style="background: #6c757d; color: #fff; padding: 6px 14px; border-radius: 4px; margin-left: 8px;">
-                取消
+                完成
             </button>
         </div>
     </div>
@@ -273,20 +274,21 @@
             .catch(err => alert('連線失敗: ' + err));
     }
 
-    // 比對目前劇集與 GitHub 檔案的綁定關係
+    // 比對目前劇集與 GitHub 檔案的多對多綁定關係
     function analyzeBindings() {
         githubFiles.forEach(file => {
-            file.assignedDramaId = null;
-            file.assignedDramaTitle = '';
+            file.assignedDramaIds = [];
+            file.assignedDramaTitles = [];
 
             for (const d of dramas) {
                 const list = file.type === 'mp3' ? d.mp3_links : d.mp4_links;
                 if (Array.isArray(list)) {
                     const matched = list.some(item => item.url === file.url || item.title === file.title);
                     if (matched) {
-                        file.assignedDramaId = d.id;
-                        file.assignedDramaTitle = d.title;
-                        break;
+                        if (!file.assignedDramaIds.includes(d.id)) {
+                            file.assignedDramaIds.push(d.id);
+                            file.assignedDramaTitles.push(d.title);
+                        }
                     }
                 }
             }
@@ -297,18 +299,18 @@
     function updateStats() {
         let boundCount = 0;
         githubFiles.forEach(f => {
-            if (f.assignedDramaId) boundCount++;
+            if (f.assignedDramaIds && f.assignedDramaIds.length > 0) boundCount++;
         });
         document.getElementById('stat-total').textContent = githubFiles.length;
         document.getElementById('stat-bound').textContent = boundCount;
         document.getElementById('stat-unbound').textContent = githubFiles.length - boundCount;
     }
 
-    // 尋找最佳建議配對劇集
-    function findSuggestedDrama(file) {
-        if (file.assignedDramaId) return null;
+    // 尋找所有匹配建議的劇集
+    function findSuggestedDramas(file) {
         const ft = file.title.trim().toLowerCase();
-        return dramas.find(d => {
+        return dramas.filter(d => {
+            if (file.assignedDramaIds.includes(d.id)) return false;
             const dt = d.title.trim().toLowerCase();
             return ft.includes(dt) || dt.includes(ft);
         });
@@ -324,48 +326,51 @@
         let visibleIndex = 1;
         githubFiles.forEach((file, idx) => {
             if (filterQuery && !file.name.toLowerCase().includes(filterQuery)) return;
-            if (statusFilter === 'bound' && !file.assignedDramaId) return;
-            if (statusFilter === 'unbound' && file.assignedDramaId) return;
+            const isBound = file.assignedDramaIds && file.assignedDramaIds.length > 0;
+            if (statusFilter === 'bound' && !isBound) return;
+            if (statusFilter === 'unbound' && isBound) return;
 
-            const isBound = !!file.assignedDramaId;
             const statusBadge = isBound ?
-                `<span class="status-badge-bound">🟢 已關聯</span>` :
+                `<span class="status-badge-bound">🟢 已關聯 (${file.assignedDramaIds.length}部)</span>` :
                 `<span class="status-badge-unbound">⚠️ 尚未關聯</span>`;
 
             const typeBadge = file.type === 'mp3' ?
                 `<span style="color: #00f2fe; font-weight: bold;">🎵 MP3</span>` :
                 `<span style="color: #ffb703; font-weight: bold;">🎬 MP4</span>`;
 
-            // 建立輕量高效率的快搜顯示區塊 (替代幾千個 option 的 HTML select)
-            let selectorHtml = '';
-            if (isBound) {
-                selectorHtml = `
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="color: #28a745; font-weight: bold; font-size: 0.9rem;">《${file.assignedDramaTitle}》</span>
-                        <button type="button" class="btn-action" style="padding: 3px 8px; font-size: 0.75rem;" onclick="openSearchModal(${idx})">🔍 變更</button>
-                        <button type="button" style="background: none; border: 1px solid #dc3545; color: #dc3545; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;" onclick="clearFileBinding(${idx})">❌</button>
-                    </div>
+            // 渲染多劇集 Badge 標籤
+            let dramaBadgesHtml = '';
+            file.assignedDramaIds.forEach((did, dIdx) => {
+                const title = file.assignedDramaTitles[dIdx] || '劇集';
+                dramaBadgesHtml += `
+                    <span style="background: rgba(40, 167, 69, 0.15); color: #28a745; border: 1px solid #28a745; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; margin-right: 4px; margin-bottom: 4px;">
+                        《${title}》
+                        <button type="button" style="background: none; border: none; color: #dc3545; font-weight: bold; cursor: pointer; padding: 0 2px;" onclick="removeDramaFromFile(${idx}, ${did})" title="解除這部劇集的關聯">&times;</button>
+                    </span>
                 `;
-            } else {
-                const suggested = findSuggestedDrama(file);
-                let suggestHtml = '';
-                if (suggested) {
-                    suggestHtml = `
-                        <button type="button" class="suggest-btn" onclick="selectDramaForFile(${idx}, ${suggested.id}, '${suggested.title.replace(/'/g, "\\'")}')" title="點擊直接套用同名建議劇集">
-                            💡 建議配對: 《${suggested.title}》
-                        </button>
-                    `;
-                }
+            });
 
-                selectorHtml = `
-                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                        <button type="button" class="btn-action" style="padding: 4px 10px; font-size: 0.82rem;" onclick="openSearchModal(${idx})">
-                            🔍 關鍵字搜尋關聯劇集
-                        </button>
-                        ${suggestHtml}
-                    </div>
+            // 建議選單標籤
+            const suggestions = findSuggestedDramas(file);
+            let suggestHtml = '';
+            suggestions.forEach(suggested => {
+                const safeTitle = suggested.title.replace(/'/g, "\\'");
+                suggestHtml += `
+                    <button type="button" class="suggest-btn" onclick="addDramaToFile(${idx}, ${suggested.id}, '${safeTitle}')" title="點擊新增關聯此建議劇集">
+                        💡 建議: 《${suggested.title}》
+                    </button>
                 `;
-            }
+            });
+
+            const selectorHtml = `
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    ${dramaBadgesHtml}
+                    <button type="button" class="btn-action" onclick="openSearchModal(${idx})">
+                        ➕ 新增關聯劇集
+                    </button>
+                    ${suggestHtml}
+                </div>
+            `;
 
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -389,7 +394,6 @@
         const file = githubFiles[fileIdx];
         document.getElementById('modal-target-filename').textContent = file.name;
 
-        // 預設將檔名的關鍵字填入搜尋列
         const defaultSearch = file.title.split(' ')[0] || '';
         const searchInput = document.getElementById('modal-search-input');
         searchInput.value = defaultSearch;
@@ -404,8 +408,10 @@
         activeFileIdx = null;
     }
 
-    // 記憶體極速過濾劇集清單 (毫秒級反應)
+    // 記憶體極速過濾劇集清單
     function filterModalDramas() {
+        if (activeFileIdx === null) return;
+        const file = githubFiles[activeFileIdx];
         const query = document.getElementById('modal-search-input').value.trim().toLowerCase();
         const container = document.getElementById('modal-dramas-list');
         container.innerHTML = '';
@@ -416,21 +422,33 @@
                 continue;
             }
 
+            const isAlreadyAssigned = file.assignedDramaIds.includes(d.id);
             const item = document.createElement('div');
             item.className = 'search-item';
+            
+            const actionBtn = isAlreadyAssigned ?
+                `<span style="color: #28a745; font-size: 0.8rem; font-weight: bold;">🟢 已加入</span>` :
+                `<button type="button" class="btn-action" style="padding: 3px 10px; font-size: 0.78rem;">＋ 關聯此劇</button>`;
+
             item.innerHTML = `
                 <div>
                     <span style="background: #4facfe; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-right: 6px;">${d.category}</span>
                     <span style="font-weight: bold;">${d.title}</span>
                 </div>
-                <button type="button" class="btn-action" style="padding: 3px 10px; font-size: 0.78rem;">選擇套用</button>
+                <div>${actionBtn}</div>
             `;
-            const safeTitle = d.title.replace(/'/g, "\\'");
-            item.onclick = () => selectDramaForActiveFile(d.id, safeTitle);
+
+            if (!isAlreadyAssigned) {
+                const safeTitle = d.title.replace(/'/g, "\\'");
+                item.onclick = () => {
+                    addDramaToFile(activeFileIdx, d.id, safeTitle);
+                    filterModalDramas();
+                };
+            }
             container.appendChild(item);
 
             count++;
-            if (count >= 50) break; // 最多呈現 50 筆符合結果，確保超流暢
+            if (count >= 50) break;
         }
 
         if (count === 0) {
@@ -438,43 +456,55 @@
         }
     }
 
-    function selectDramaForActiveFile(dramaId, dramaTitle) {
+    function addDramaToFile(fileIdx, dramaId, dramaTitle) {
+        const file = githubFiles[fileIdx];
+        if (!file.assignedDramaIds.includes(dramaId)) {
+            file.assignedDramaIds.push(dramaId);
+            file.assignedDramaTitles.push(dramaTitle);
+            updateStats();
+            renderTable();
+        }
+    }
+
+    function removeDramaFromFile(fileIdx, dramaId) {
+        const file = githubFiles[fileIdx];
+        const idx = file.assignedDramaIds.indexOf(dramaId);
+        if (idx !== -1) {
+            file.assignedDramaIds.splice(idx, 1);
+            file.assignedDramaTitles.splice(idx, 1);
+            updateStats();
+            renderTable();
+        }
+    }
+
+    function clearAllDramaForActiveFile() {
         if (activeFileIdx !== null) {
-            selectDramaForFile(activeFileIdx, dramaId, dramaTitle);
+            const file = githubFiles[activeFileIdx];
+            file.assignedDramaIds = [];
+            file.assignedDramaTitles = [];
+            updateStats();
+            renderTable();
             closeSearchModal();
         }
     }
 
-    function selectDramaForFile(fileIdx, dramaId, dramaTitle) {
-        const file = githubFiles[fileIdx];
-        file.assignedDramaId = dramaId ? parseInt(dramaId) : null;
-        file.assignedDramaTitle = dramaTitle || '';
-
-        updateStats();
-        renderTable();
-    }
-
-    function clearFileBinding(fileIdx) {
-        selectDramaForFile(fileIdx, null, '');
-    }
-
-    // ⚡ 一鍵全自動劇名比對與關聯
+    // ⚡ 一鍵全自動劇名比對與關聯 (支援多部關聯)
     function autoMatchTitles() {
         let matchedCount = 0;
         githubFiles.forEach((file, idx) => {
-            if (!file.assignedDramaId) {
-                const matchedDrama = findSuggestedDrama(file);
-                if (matchedDrama) {
-                    file.assignedDramaId = matchedDrama.id;
-                    file.assignedDramaTitle = matchedDrama.title;
+            const suggestions = findSuggestedDramas(file);
+            suggestions.forEach(suggested => {
+                if (!file.assignedDramaIds.includes(suggested.id)) {
+                    file.assignedDramaIds.push(suggested.id);
+                    file.assignedDramaTitles.push(suggested.title);
                     matchedCount++;
                 }
-            }
+            });
         });
 
         updateStats();
         renderTable();
-        alert(`⚡ 自動對應完成！共為 ${matchedCount} 個原本未關聯的檔案匹配到了同名劇集！請記得點擊「💾 儲存所有影音關聯變更」。`);
+        alert(`⚡ 自動多部關聯完成！共新增了 ${matchedCount} 個劇集關聯對應！請記得點擊「💾 儲存所有影音關聯變更」。`);
     }
 
     // 💾 一鍵批次儲存至資料庫
@@ -484,7 +514,7 @@
             title: file.title,
             url: file.url,
             type: file.type,
-            drama_id: file.assignedDramaId
+            drama_ids: file.assignedDramaIds
         }));
 
         fetch('/line/api/dramas/batch_save_github_links/', {
