@@ -4,7 +4,7 @@
 
 這是一個基於 **Django 6.1** 與 **MySQL 8.x** 建立的多功能整合入口網站系統（CSI Portal），具備豐富的商業管理與 AI 應用模組。專案支援 **Google OAuth 2.0** 登入、**WebSocket (Daphne)** 即時通訊與 **Docker** 容器化部署，並結合了多種先進的機器學習與雲端 AI 引擎。
 
-*   **最新版本**：`v1.17.12`
+*   **最新版本**：`v1.18.1`
 *   **更新摘要**：[點此查看完整變更歷程 (CHANGELOG.md)](CHANGELOG.md)
 
 ---
@@ -73,7 +73,10 @@ graph TD
 *   **[bionic_chat](file:///d:/SI1403/dennis/csi_server/bionic_chat/)**：虛擬人物語音對話系統。以 `llama-cpp-python` 載入本地 LLM 模型，透過 SSE (Server-Sent Events) 串流輸出文字，並於斷句時自動將繁體中文回覆翻譯並生成 `edge-tts` 語音音檔串流播放。
 *   **[games](file:///d:/SI1403/dennis/csi_server/games/)**：綜合網頁遊戲中心與 Godot API 接口。提供「倖存者生存」（Vampire Survivor 網頁版/ Godot Token 驗證存檔）、「虛擬人生」（大富翁地圖事件）以及「魔塔 RPG」（五層地圖、存檔資料序列化與局外金幣升級）三款遊戲。
 *   **[pet_system](file:///d:/SI1403/dennis/csi_server/pet_system/)**：休閒小站 (Leisure Station) 二次元 Q 版角色冒險系統。首波登場人氣角色 **芙莉蓮 (Frieren)** 與 **利姆路 (Rimuru)**。資料庫 Schema 完成極致精簡重構，移除廢棄舊養成欄位並實體刪除 `LinePetInventory` 資料表。出戰角色支援全網頁 Shimeji 漫遊，配備 2 秒長按懸掛 (`hanging.webp`) 與放開後自動重力自由墜落彈回至拖拉前原始位置的彈跳物理反饋。能力值公式動態計算：`HP = 100 + (Lv - 1) * 25`，`ATK = 15 + (Lv - 1) * 5`。
-*   **[line_manager](file:///d:/SI1403/dennis/csi_server/line_manager/)**：LINE 官方帳號與休閒小站 (LIFF) 整合服務。
+*   **[line_manager](file:///d:/SI1403/dennis/csi_server/line_manager/)**：LINE 官方帳號、休閒小站與情報分析整合服務。
+    * **巴哈姆特 GNN 新聞即時情報庫 (`liff_gnn.html`)**：每日 23:59 自動定時爬取當日所有動漫遊戲報導 (`fetch_gnn_news.py`)，支援多項 Tag（平台類別、標題分類、內文 Hashtags）交叉檢索、出刊日期查詢與 0 毫秒極速搜尋。
+    * **衛福部 FDA 食品營養與添加物危害分析平台 (`liff_nutrition.html`)**：整合衛福部 2,213 筆完整食品營養數據、111 項成分微量元素細節、17 大類 810 項添加劑健康危害大百科，並提供每日飲食紀錄與一鍵智慧健康分析報告。
+    * **食品資料庫一鍵部署與離線封裝 (`setup_food_data.py`)**：提供 0.97 MB 極致壓縮封裝檔 `food_data_package.json.gz`，支援伺服器端數秒內一鍵自動套用 Migration 並完整匯入 2200+ 筆食品與 950 筆添加物百科。
     * **休閒小站 (`liff_pet.html`)**：徹底移除硬寫死預設角色，進入頁面 100% 由後端 API 動態載入真實出戰角色（Single Source of Truth），實現 0 閃跳無縫渲染。實裝全頁面 Modal 通用離焦觸發器徹底解決 `Blocked aria-hidden` 警告，並結合動態時間戳突破 DOM 圖片快取死鎖。
     * **酷炫音樂影音平台 (`liff_music.html`)**：全曲 21 首動漫原聲音樂（含《不才惡女》）與影片支援專屬二進制串流端點 (`audio_raw`) 與 `fixUrl` 轉譯機制，突破手機 LINE App LIFF 內嵌 WebView 與 iOS/Android 跨域播放阻擋。
     * **行程管理與加密防護**：支援 Google 帳戶合併綁定、行程分享投票與隱私欄位資料庫對稱加密防護。
@@ -183,19 +186,36 @@ docker compose exec web python manage.py shell_plus
 
 ## 管理工具與排程任務
 
-*   **股價初始化**（匯入台股清單）：
-    ```bash
-    python manage.py init_twse
-    ```
-*   **更新股價資訊**（手動執行爬蟲）：
-    ```bash
-    python manage.py update_prices
-    ```
-*   **啟動排程更新服務**（需開獨立終端機常駐執行，自動於週一至週五 14:30 爬取股價、每日 16:00 爬取最新季番/電影至 `line_manager/resources/*.csv` 並同步 DB）：
+*   **啟動自動排程守護服務**（需開獨立終端機常駐執行，自動於每日 16:00 更新最新動漫季番/電影，每日 23:59 爬取當日 GNN 所有動漫遊戲情報）：
     ```bash
     python manage.py start_scheduler
-    # 手動即時觸發一次劇集與電影更新任務
+    # 手動即時觸發一次劇集與 GNN 新聞更新任務
     python manage.py start_scheduler --now
+    ```
+*   **巴哈姆特 GNN 新聞爬蟲**（手動執行）：
+    ```bash
+    # 爬取當天所有動漫遊戲新聞 (預設)
+    python manage.py fetch_gnn_news
+    # 爬取 GNN 首頁目前所有報導 (約 90 筆)
+    python manage.py fetch_gnn_news --all
+    # 指定出刊日期爬取 (格式: YYYY-MM-DD)
+    python manage.py fetch_gnn_news --date 2026-09-07
+    ```
+*   **食品資料庫一鍵部署與管理**（伺服器一鍵極速匯入與離線封裝）：
+    ```bash
+    # 【推薦】一鍵設置所有食品資料 (優先讀取離線包，無包則自動連線官方建置)
+    python manage.py setup_food_data
+    # 強制重新連線官方爬取最新資料 (不使用離線包)
+    python manage.py setup_food_data --force-fetch
+    # 將本機食品資料重新導出壓縮包 (food_data_package.json.gz)
+    python manage.py export_food_data
+    ```
+*   **股價初始化與盤後更新**：
+    ```bash
+    # 匯入台股清單
+    python manage.py init_twse
+    # 更新股價資訊 (手動爬蟲)
+    python manage.py update_prices
     ```
 *   **語系翻譯與編譯**（支援繁中、英文、日文多國語系）：
     ```bash

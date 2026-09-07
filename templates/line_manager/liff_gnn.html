@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎮 巴哈姆特 GNN 新聞即時情報庫</title>
+    <!-- Bootstrap 5 & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #090d16 0%, #111827 50%, #090d16 100%);
+            color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+        .news-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .news-card:hover {
+            transform: translateY(-3px);
+            border-color: #38bdf8;
+            box-shadow: 0 8px 24px rgba(56, 189, 248, 0.2);
+        }
+        .tag-pill {
+            background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .tag-pill:hover, .tag-pill.active {
+            background: #38bdf8;
+            color: #0f172a;
+            font-weight: bold;
+            border-color: #38bdf8;
+        }
+        .tag-badge {
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .tag-badge:hover {
+            background: rgba(56, 189, 248, 0.25);
+            color: #38bdf8;
+        }
+        .tag-badge.platform-badge {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+            border-color: rgba(168, 85, 247, 0.35);
+        }
+        .thumb-box {
+            width: 110px;
+            min-width: 110px;
+            height: 95px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #1f2937;
+            position: relative;
+        }
+        .thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .news-card:hover .thumb-img {
+            transform: scale(1.05);
+        }
+        .news-title {
+            color: #f8fafc;
+            text-decoration: none;
+            font-size: 0.96rem;
+            font-weight: 600;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: color 0.2s;
+        }
+        .news-title:hover {
+            color: #38bdf8;
+        }
+        .news-desc {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        /* LIFF 精緻下拉導覽選單樣式 */
+        .liff-nav-card,
+        .glass-card:has(.liff-nav-dropdown) {
+            position: relative;
+            z-index: 1050;
+        }
+        .liff-nav-dropdown {
+            position: relative;
+            z-index: 1060;
+        }
+        .liff-nav-dropdown .dropdown-toggle {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: #f8fafc;
+            border-radius: 50px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-toggle:hover,
+        .liff-nav-dropdown .dropdown-toggle:focus,
+        .liff-nav-dropdown .dropdown-toggle[aria-expanded="true"] {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(56, 189, 248, 0.6);
+            color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        .liff-nav-dropdown .dropdown-menu {
+            background: rgba(15, 23, 42, 0.98) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75) !important;
+            padding: 6px !important;
+            min-width: 230px !important;
+            width: max-content !important;
+            max-width: min(340px, 90vw) !important;
+            max-height: calc(100vh - 120px) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            z-index: 99999 !important;
+            animation: liffDropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .liff-nav-dropdown .dropdown-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+        .liff-nav-dropdown .dropdown-menu::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.35);
+            border-radius: 4px;
+        }
+        @keyframes liffDropdownFadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .liff-nav-dropdown .dropdown-item {
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: background 0.15s ease, color 0.15s ease;
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-item span:first-child {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-item:hover,
+        .liff-nav-dropdown .dropdown-item:focus {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+        .liff-nav-dropdown .dropdown-item.active-nav-item {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(99, 102, 241, 0.25));
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            color: #38bdf8;
+            font-weight: 600;
+        }
+        .liff-nav-dropdown .dropdown-item.active-nav-item:hover,
+        .liff-nav-dropdown .dropdown-item.active-nav-item:focus {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.32), rgba(99, 102, 241, 0.32));
+            color: #38bdf8;
+        }
+        .liff-nav-dropdown .dropdown-item .badge {
+            flex-shrink: 0;
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            background: rgba(14, 165, 233, 0.35) !important;
+            color: #38bdf8 !important;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+        }
+        .liff-nav-dropdown .dropdown-header {
+            color: #94a3b8;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 3px 8px 4px;
+        }
+        .liff-nav-dropdown .dropdown-divider {
+            border-color: rgba(255, 255, 255, 0.12);
+            margin: 4px 2px;
+        }
+
+        /* 分類搜尋自動完成下拉選單 */
+        .category-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1055;
+            max-height: 260px;
+            overflow-y: auto;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 14px;
+            margin-top: 6px;
+            padding: 6px 0;
+            list-style: none;
+            box-shadow: 0 16px 32px -4px rgba(0, 0, 0, 0.6), 0 6px 16px -4px rgba(56, 189, 248, 0.15);
+        }
+        .category-dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+        .category-dropdown-menu::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.3);
+            border-radius: 4px;
+        }
+        .category-dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 16px;
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .category-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        .category-dropdown-item:hover, .category-dropdown-item.active {
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.22), rgba(99, 102, 241, 0.18));
+            color: #38bdf8;
+            padding-left: 20px;
+        }
+        .category-dropdown-item .badge {
+            font-size: 0.72rem;
+            background: rgba(148, 163, 184, 0.15);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .category-dropdown-item.active .badge {
+            background: rgba(56, 189, 248, 0.25);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-3" style="max-width: 720px;">
+        <!-- 頂部 Navigation Bar -->
+        <div class="glass-card p-3 mb-3 text-center liff-nav-card" style="position: relative; z-index: 1050;">
+            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                <a href="/line/liff/" class="btn btn-sm btn-outline-light rounded-pill px-3 shadow-sm" style="font-size: 0.82rem;">
+                    <i class="fa-regular fa-calendar-check me-1"></i>行程看板
+                </a>
+                <!-- LIFF 服務導覽下拉選單 -->
+                <div class="dropdown liff-nav-dropdown">
+                    <button class="btn dropdown-toggle" type="button" id="liffNavDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-compass text-info"></i>
+                        <span>服務導覽</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="liffNavDropdown">
+                        <li><h6 class="dropdown-header"><i class="fa-solid fa-layer-group me-1"></i>快捷服務導覽</h6></li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/">
+                                <span><i class="fa-regular fa-calendar-check me-2 text-success"></i>行程小幫手</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/?page=drama">
+                                <span><i class="fa-solid fa-tv me-2 text-info"></i>追劇小幫手</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/?page=nutrition">
+                                <span><i class="fa-solid fa-seedling me-2 text-success"></i>食品營養百科</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item active-nav-item" href="/line/liff/?page=gnn">
+                                <span><i class="fa-solid fa-gamepad me-2 text-warning"></i>GNN 動漫情報</span>
+                                <span class="badge bg-primary bg-opacity-75" style="font-size: 0.65rem;">目前</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/?page=music">
+                                <span><i class="fa-solid fa-compact-disc me-2 text-danger"></i>酷炫音樂平台</span>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/?page=pet">
+                                <span><i class="fa-solid fa-paw me-2 text-primary"></i>休閒小站桌寵</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="fw-bold mb-1" style="background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <i class="fa-solid fa-gamepad me-2 text-info"></i>巴哈姆特 GNN 新聞即時情報庫
+            </h3>
+            <p class="small text-white-50 mb-2">每日 23:59 自動定時爬取 • 多項分類 Tag 交叉檢索 • 動漫遊戲一手掌握</p>
+
+            <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm" id="btn-refresh" onclick="triggerManualCrawl()">
+                <i class="fa-solid fa-rotate me-1" id="refresh-icon"></i>🔄 立即更新最新報導
+            </button>
+        </div>
+
+        <!-- 搜尋與過濾區塊 -->
+        <div class="glass-card p-3 mb-3">
+            <!-- 關鍵字搜尋欄 -->
+            <div class="position-relative mb-2">
+                <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left: 14px; top: 12px;"></i>
+                <input type="text" id="search-input" class="form-control bg-dark text-light border-secondary ps-5 rounded-pill" placeholder="🔍 搜尋新聞標題、摘要或標籤 (如：原神、Steam、模型、Switch、動畫)..." oninput="onSearchInput()">
+            </div>
+
+            <!-- 日期篩選與重設 -->
+            <div class="d-flex gap-2 mb-2 align-items-center">
+                <div class="input-group input-group-sm flex-grow-1">
+                    <span class="input-group-text bg-dark text-white-50 border-secondary rounded-start-pill px-2" style="font-size: 0.8rem;">
+                        <i class="fa-regular fa-calendar me-1"></i>出刊日期
+                    </span>
+                    <select id="date-select" class="form-select form-select-sm bg-dark text-info border-secondary rounded-end-pill" style="padding-right: 1.8rem; font-size: 0.82rem;" onchange="onDateSelectChange(this.value)">
+                        <option value="">全部日期</option>
+                    </select>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 flex-shrink-0" onclick="resetFilters()" style="font-size: 0.8rem; white-space: nowrap;">
+                    <i class="fa-solid fa-arrow-rotate-left me-1"></i>清除條件
+                </button>
+            </div>
+
+            <!-- 分類搜尋欄與動態下拉選單 -->
+            <div class="position-relative mb-2" id="category-search-wrapper">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-dark text-info border-secondary rounded-start-pill px-3">
+                        <i class="fa-solid fa-tags me-1"></i>分類搜尋
+                    </span>
+                    <input type="text" id="category-search-input" class="form-control bg-dark text-light border-secondary" placeholder="輸入關鍵字篩選分類 (如: 模型、手機、動漫畫、Steam...)" autocomplete="off" onfocus="onCategorySearchFocus()" oninput="onCategorySearchInput(this.value)">
+                    <button class="btn btn-outline-secondary border-secondary rounded-end-pill px-3" type="button" id="btn-clear-category" onclick="clearSelectedTag()" style="display:none;" title="清除分類">✕</button>
+                </div>
+                <!-- 動態下拉選單 (依輸入關鍵字即時比對) -->
+                <ul id="category-dropdown-menu" class="category-dropdown-menu shadow-lg" style="display: none;"></ul>
+            </div>
+
+            <!-- 目前選定分類提示條 -->
+            <div id="active-tag-banner" class="align-items-center justify-content-between p-2 mb-2 rounded-3" style="display: none; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3);">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="badge bg-info text-dark fw-bold px-2 py-1 flex-shrink-0"><i class="fa-solid fa-filter me-1"></i>目前分類</span>
+                    <span id="active-tag-name" class="fw-bold text-light"></span>
+                </div>
+                <button type="button" class="btn btn-sm btn-link text-info text-decoration-none p-0 ms-2 flex-shrink-0" onclick="clearSelectedTag()">
+                    <i class="fa-solid fa-xmark me-1"></i>清除分類
+                </button>
+            </div>
+
+            <!-- 分類標籤 (多項 Tag) 快速點選膠囊 Bar -->
+            <div class="d-flex gap-2 overflow-x-auto py-1" id="tags-pills-container">
+                <span class="tag-pill active" onclick="selectTag('')">全部分類</span>
+                <span class="tag-pill" onclick="selectTag('手機')">📱 手機</span>
+                <span class="tag-pill" onclick="selectTag('PC')">💻 PC</span>
+                <span class="tag-pill" onclick="selectTag('TV掌機')">🎮 TV掌機</span>
+                <span class="tag-pill" onclick="selectTag('動漫畫')">🎨 動漫畫</span>
+                <span class="tag-pill" onclick="selectTag('電競')">🏆 電競</span>
+                <span class="tag-pill" onclick="selectTag('模型')">🧸 模型</span>
+                <span class="tag-pill" onclick="selectTag('活動展覽')">🎪 活動展覽</span>
+                <span class="tag-pill" onclick="selectTag('科技硬體')">⚡ 科技硬體</span>
+            </div>
+        </div>
+
+        <!-- 筆數與分頁控制列 -->
+        <div class="d-flex justify-content-between align-items-center px-2 mb-2 text-white-50 small">
+            <div>
+                找到情報：<span class="text-info fw-bold" id="stat-count">0</span> 篇
+                <span class="text-white-50 ms-2" id="current-filter-badge" style="display: none;"></span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-light py-0 px-2" onclick="changePage(-1)" id="btn-prev">&laquo; 上頁</button>
+                <span id="page-info">1 / 1</span>
+                <button class="btn btn-sm btn-outline-light py-0 px-2" onclick="changePage(1)" id="btn-next">下頁 &raquo;</button>
+            </div>
+        </div>
+
+        <!-- 新聞列表容器 -->
+        <div id="news-list-container" class="d-flex flex-column gap-2">
+            <div class="glass-card p-4 text-center text-white-50">
+                <i class="fa-solid fa-spinner fa-spin fa-2x mb-2 text-info"></i>
+                <p class="mb-0">正在載入巴哈姆特 GNN 新聞資料庫...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let apiBaseUrl = "{{ request.scheme }}://{{ request.get_host }}";
+        if (!apiBaseUrl || apiBaseUrl.includes("liff.line.me")) {
+            apiBaseUrl = window.location.origin;
+        }
+
+        function safeFetchJson(url, options = {}) {
+            if (!options.headers) options.headers = {};
+            options.headers["ngrok-skip-browser-warning"] = "69420";
+            options.headers["Accept"] = "application/json";
+
+            return fetch(url, options).then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP 狀態碼 ${res.status}`);
+                }
+                return res.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error("Non-JSON response text:", text.slice(0, 150));
+                        throw new Error("伺服器回應非 JSON 格式資料");
+                    }
+                });
+            });
+        }
+
+        let currentSearchQuery = "";
+        let currentTag = "";
+        let currentDate = "";
+        let currentPage = 1;
+        let searchDebounceTimer = null;
+        let allAvailableTags = [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadGNNNews(1);
+        });
+
+        function loadGNNNews(page = 1) {
+            currentPage = page;
+            const container = document.getElementById("news-list-container");
+            container.innerHTML = `
+                <div class="glass-card p-4 text-center text-white-50">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x mb-2 text-info"></i>
+                    <p class="mb-0">正在檢索新聞情報...</p>
+                </div>
+            `;
+
+            let url = `${apiBaseUrl}/line/api/gnn/list/?page=${currentPage}&page_size=20`;
+            if (currentSearchQuery) url += `&q=${encodeURIComponent(currentSearchQuery)}`;
+            if (currentTag) url += `&tag=${encodeURIComponent(currentTag)}`;
+            if (currentDate) url += `&date=${encodeURIComponent(currentDate)}`;
+
+            safeFetchJson(url)
+                .then(data => {
+                    if (data.status === "success") {
+                        renderNewsList(data);
+                        updateAvailableTags(data.available_tags || []);
+                        updateRecentDates(data.recent_dates || []);
+                    } else {
+                        container.innerHTML = `<div class="glass-card p-4 text-center text-danger">載入失敗：${data.error || '不明錯誤'}</div>`;
+                    }
+                })
+                .catch(err => {
+                    container.innerHTML = `<div class="glass-card p-4 text-center text-danger">連線失敗：${err.message || err}</div>`;
+                });
+        }
+
+        function renderNewsList(data) {
+            const total = data.total || 0;
+            const totalPages = data.total_pages || 1;
+            const items = data.items || [];
+
+            document.getElementById("stat-count").textContent = total;
+            document.getElementById("page-info").textContent = `${currentPage} / ${totalPages}`;
+            document.getElementById("btn-prev").disabled = currentPage <= 1;
+            document.getElementById("btn-next").disabled = currentPage >= totalPages;
+
+            const container = document.getElementById("news-list-container");
+            if (!container) return;
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card p-5 text-center text-white-50">
+                        <i class="fa-solid fa-gamepad fa-3x mb-3 text-muted"></i>
+                        <h5>查無符合條件的新聞報導</h5>
+                        <p class="small text-white-50 mb-3">試試搜尋其他關鍵字、切換分類標籤，或點擊下方立即同步爬取！</p>
+                        <button class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="triggerManualCrawl()">
+                            🔄 立即爬取巴哈姆特首頁
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = "";
+            items.forEach(it => {
+                let tagsHtml = "";
+                if (it.tags && it.tags.length > 0) {
+                    it.tags.forEach(t => {
+                        const isPlatform = ["手機", "PC", "TV掌機", "動漫畫", "電競", "活動展覽", "科技硬體", "跨平台"].includes(t);
+                        const badgeClass = isPlatform ? "tag-badge platform-badge" : "tag-badge";
+                        tagsHtml += `<span class="${badgeClass}" onclick="selectTag('${t.replace(/'/g, "\\'")}')">#${t}</span> `;
+                    });
+                }
+
+                const defaultThumb = "https://i2.bahamut.com.tw/baha_logo.png";
+                const thumbSrc = it.thumbnail || defaultThumb;
+
+                html += `
+                    <div class="news-card p-3">
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="thumb-box shadow-sm">
+                                <img src="${thumbSrc}" class="thumb-img" alt="縮圖" loading="lazy" onerror="this.src='${defaultThumb}'">
+                            </div>
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <div class="d-flex flex-wrap gap-1 mb-1">
+                                    ${tagsHtml}
+                                </div>
+                                <a href="${it.link}" target="_blank" class="news-title mb-1" title="${it.title}">
+                                    ${it.title}
+                                </a>
+                                ${it.summary ? `<p class="news-desc mb-2">${it.summary}</p>` : ''}
+                                <div class="d-flex justify-content-between align-items-center small text-white-50 mt-1">
+                                    <div>
+                                        <i class="fa-regular fa-clock me-1 text-info"></i>
+                                        <span>${it.published_at || it.crawl_date}</span>
+                                    </div>
+                                    <a href="${it.link}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill py-0 px-2" style="font-size: 0.75rem;">
+                                        閱讀原文 <i class="fa-solid fa-arrow-up-right-from-square ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateAvailableTags(tags) {
+            allAvailableTags = tags || [];
+            const container = document.getElementById("tags-pills-container");
+            if (!container) return;
+
+            const popularPills = [
+                { tag: "", label: "全部分類" },
+                { tag: "手機", label: "📱 手機" },
+                { tag: "PC", label: "💻 PC" },
+                { tag: "TV掌機", label: "🎮 TV掌機" },
+                { tag: "動漫畫", label: "🎨 動漫畫" },
+                { tag: "電競", label: "🏆 電競" },
+                { tag: "模型", label: "🧸 模型" },
+                { tag: "活動展覽", label: "🎪 活動展覽" },
+                { tag: "科技硬體", label: "⚡ 科技硬體" },
+            ];
+
+            let html = "";
+            popularPills.forEach(p => {
+                const active = (currentTag === p.tag) ? "active" : "";
+                html += `<span class="tag-pill ${active}" onclick="selectTag('${p.tag}')">${p.label}</span>`;
+            });
+
+            // 附加資料庫中其他高頻 Hashtags
+            if (tags && tags.length > 0) {
+                tags.forEach(t => {
+                    if (!popularPills.some(p => p.tag === t.tag) && t.count >= 1) {
+                        const active = (currentTag === t.tag) ? "active" : "";
+                        html += `<span class="tag-pill ${active}" onclick="selectTag('${escapeForJs(t.tag)}')">#${escapeHtml(t.tag)} (${t.count})</span>`;
+                    }
+                });
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ==================== 分類搜尋與動態下拉選單 ====================
+        function onCategorySearchFocus() {
+            const inputVal = document.getElementById("category-search-input").value;
+            updateCategoryDropdownList(inputVal);
+            showCategoryDropdown();
+        }
+
+        function onCategorySearchInput(val) {
+            updateCategoryDropdownList(val);
+            showCategoryDropdown();
+        }
+
+        function showCategoryDropdown() {
+            const menu = document.getElementById("category-dropdown-menu");
+            if (menu) menu.style.display = "block";
+        }
+
+        function hideCategoryDropdown() {
+            const menu = document.getElementById("category-dropdown-menu");
+            if (menu) menu.style.display = "none";
+        }
+
+        function updateCategoryDropdownList(keyword = "") {
+            const menu = document.getElementById("category-dropdown-menu");
+            if (!menu) return;
+
+            const kw = keyword.trim().toLowerCase();
+
+            // 預設常見主要分類
+            const baseList = [
+                { tag: "手機", icon: "📱" },
+                { tag: "PC", icon: "💻" },
+                { tag: "TV掌機", icon: "🎮" },
+                { tag: "動漫畫", icon: "🎨" },
+                { tag: "電競", icon: "🏆" },
+                { tag: "模型", icon: "🧸" },
+                { tag: "活動展覽", icon: "🎪" },
+                { tag: "科技硬體", icon: "⚡" },
+            ];
+
+            const tagMap = new Map();
+            baseList.forEach(b => tagMap.set(b.tag, { tag: b.tag, count: 0, icon: b.icon }));
+            allAvailableTags.forEach(t => {
+                if (tagMap.has(t.tag)) {
+                    tagMap.get(t.tag).count = t.count;
+                } else {
+                    tagMap.set(t.tag, { tag: t.tag, count: t.count, icon: "#" });
+                }
+            });
+
+            let items = Array.from(tagMap.values());
+            if (kw) {
+                items = items.filter(item => item.tag.toLowerCase().includes(kw));
+            }
+
+            if (items.length === 0) {
+                menu.innerHTML = `
+                    <li class="p-3 text-center text-white-50 small">
+                        <i class="fa-solid fa-circle-question me-1 text-secondary"></i>
+                        找不到符合「<span class="text-info">${escapeHtml(keyword)}</span>」的分類
+                    </li>
+                `;
+                return;
+            }
+
+            let html = `
+                <li class="category-dropdown-item ${currentTag === '' ? 'active' : ''}" onclick="selectTagFromDropdown('')">
+                    <span class="d-flex align-items-center">
+                        <i class="fa-solid fa-list-ul me-2 text-info"></i>
+                        <span>全部分類 (不限)</span>
+                    </span>
+                    <span class="badge rounded-pill">全部</span>
+                </li>
+            `;
+
+            items.forEach(item => {
+                const isSelected = currentTag.toLowerCase() === item.tag.toLowerCase();
+                let displayLabel = escapeHtml(item.tag);
+                if (kw) {
+                    const regex = new RegExp(`(${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    displayLabel = displayLabel.replace(regex, '<mark class="bg-transparent text-info fw-bold p-0 text-decoration-underline">$1</mark>');
+                }
+
+                const iconHtml = item.icon.startsWith("fa-") 
+                    ? `<i class="${item.icon} me-2 text-info"></i>` 
+                    : `<span class="me-2">${item.icon}</span>`;
+
+                html += `
+                    <li class="category-dropdown-item ${isSelected ? 'active' : ''}" onclick="selectTagFromDropdown('${escapeForJs(item.tag)}')">
+                        <span class="d-flex align-items-center me-2">
+                            ${iconHtml}
+                            <span>${displayLabel}</span>
+                        </span>
+                        <span class="badge rounded-pill flex-shrink-0">${item.count > 0 ? item.count + ' 篇' : ''}</span>
+                    </li>
+                `;
+            });
+
+            menu.innerHTML = html;
+        }
+
+        function selectTagFromDropdown(tag) {
+            hideCategoryDropdown();
+            selectTag(tag);
+        }
+
+        function selectTag(tag) {
+            currentTag = tag;
+            const catInput = document.getElementById("category-search-input");
+            const clearBtn = document.getElementById("btn-clear-category");
+            const activeBanner = document.getElementById("active-tag-banner");
+            const activeTagName = document.getElementById("active-tag-name");
+
+            if (catInput) {
+                catInput.value = tag;
+            }
+            if (clearBtn) {
+                clearBtn.style.display = tag ? "block" : "none";
+            }
+            if (activeBanner && activeTagName) {
+                if (tag) {
+                    activeBanner.style.display = "flex";
+                    activeTagName.textContent = tag;
+                } else {
+                    activeBanner.style.display = "none";
+                    activeTagName.textContent = "";
+                }
+            }
+
+            // 同步快速 Tag 膠囊的 active 狀態
+            document.querySelectorAll("#tags-pills-container .tag-pill").forEach(el => {
+                if ((tag === "" && el.textContent.includes("全部")) || (tag !== "" && el.textContent.includes(tag))) {
+                    el.classList.add("active");
+                } else {
+                    el.classList.remove("active");
+                }
+            });
+
+            loadGNNNews(1);
+        }
+
+        function clearSelectedTag() {
+            const catInput = document.getElementById("category-search-input");
+            if (catInput) catInput.value = "";
+            selectTag("");
+        }
+
+        // 點擊選單外部自動收合
+        document.addEventListener("click", (e) => {
+            const wrapper = document.getElementById("category-search-wrapper");
+            if (wrapper && !wrapper.contains(e.target)) {
+                hideCategoryDropdown();
+            }
+        });
+
+        // 按 ESC 鍵收合下拉選單
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                hideCategoryDropdown();
+            }
+        });
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        function escapeForJs(str) {
+            if (!str) return "";
+            return str.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+        }
+
+        function updateRecentDates(dates) {
+            const selectEl = document.getElementById("date-select");
+            if (!selectEl || selectEl.children.length > 1) return;
+
+            dates.forEach(d => {
+                const opt = document.createElement("option");
+                opt.value = d;
+                opt.textContent = d;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function onSearchInput() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                const q = document.getElementById("search-input").value.trim();
+                currentSearchQuery = q;
+                loadGNNNews(1);
+            }, 300);
+        }
+
+        function selectTag(tag) {
+            currentTag = tag;
+            document.querySelectorAll("#tags-pills-container .tag-pill").forEach(el => {
+                if ((tag === "" && el.textContent.includes("全部")) || el.textContent.includes(tag)) {
+                    el.classList.add("active");
+                } else {
+                    el.classList.remove("active");
+                }
+            });
+            loadGNNNews(1);
+        }
+
+        function onDateSelectChange(val) {
+            currentDate = val;
+            loadGNNNews(1);
+        }
+
+        function resetFilters() {
+            currentSearchQuery = "";
+            currentTag = "";
+            currentDate = "";
+            document.getElementById("search-input").value = "";
+            document.getElementById("date-select").value = "";
+            selectTag("");
+        }
+
+        function changePage(delta) {
+            loadGNNNews(currentPage + delta);
+            window.scrollTo({ top: 150, behavior: "smooth" });
+        }
+
+        function triggerManualCrawl() {
+            const btn = document.getElementById("btn-refresh");
+            const icon = document.getElementById("refresh-icon");
+            btn.disabled = true;
+            icon.classList.add("fa-spin");
+
+            Swal.fire({
+                title: "正在連線爬取巴哈姆特 GNN...",
+                text: "正在即時掃描首頁最新動漫與遊戲情報",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                background: "#111827",
+                color: "#fff"
+            });
+
+            safeFetchJson(`${apiBaseUrl}/line/api/gnn/crawl/?all=1`)
+                .then(data => {
+                    btn.disabled = false;
+                    icon.classList.remove("fa-spin");
+                    if (data.status === "success") {
+                        Swal.fire({
+                            title: "更新完成！",
+                            text: data.message,
+                            icon: "success",
+                            timer: 2000,
+                            showConfirmButton: false,
+                            background: "#111827",
+                            color: "#fff"
+                        });
+                        loadGNNNews(1);
+                    } else {
+                        Swal.fire("爬取失敗", data.error || "發生不明錯誤", "error");
+                    }
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    icon.classList.remove("fa-spin");
+                    Swal.fire("連線錯誤", err.message || err, "error");
+                });
+        }
+    </script>
+</body>
+</html>

@@ -353,8 +353,22 @@ def run_daily_drama_update():
     print(f"==================================================\n")
 
 
+def run_daily_gnn_crawler():
+    """ 每日 23:59 執行：爬取當天巴哈姆特 GNN 所有新聞報導並更新 DB """
+    print("\n==================================================")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [Daily Scheduler] Crawling today's GNN news (23:59)...")
+    print("==================================================")
+    try:
+        from line_manager.management.commands.fetch_gnn_news import crawl_gnn_articles
+        res = crawl_gnn_articles(crawl_all=False)
+        print(f"[GNN SUCCESS] 成功收錄 {res['scanned']} 則新聞 (新增: {res['created']}, 更新: {res['updated']})")
+    except Exception as e:
+        print(f"[GNN ERROR] GNN 新聞爬蟲執行失敗: {e}")
+    print("==================================================\n")
+
+
 class Command(BaseCommand):
-    help = "每日下午 4:00 (16:00) 自動啟動 TV 季番與動畫電影爬取更新排程"
+    help = "自動啟動 CSI Server 排程服務 (每日 16:00 動畫更新、23:59 GNN 新聞爬取)"
 
     def add_arguments(self, parser):
         parser.add_argument('--now', action='store_true', help='立即觸發一次更新任務')
@@ -363,12 +377,13 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("🚀 正在啟動 CSI Server 自動排程服務 (start_scheduler)..."))
         
         if options['now']:
-            self.stdout.write(self.style.WARNING("⚡ 偵測到 --now 旗標，立即執行一次劇集與電影更新任務..."))
+            self.stdout.write(self.style.WARNING("⚡ 偵測到 --now 旗標，立即執行劇集與 GNN 新聞更新任務..."))
             run_daily_drama_update()
+            run_daily_gnn_crawler()
 
         scheduler = BlockingScheduler(timezone="Asia/Taipei")
 
-        # 每日 16:00 執行更新任務
+        # 每日 16:00 執行 TV 季番與動畫電影更新任務
         scheduler.add_job(
             run_daily_drama_update,
             trigger=CronTrigger(hour=16, minute=0),
@@ -376,7 +391,17 @@ class Command(BaseCommand):
             replace_existing=True
         )
 
-        self.stdout.write(self.style.SUCCESS("✅ 排程服務已就緒！每日 16:00 (下午4點) 將自動更新 resources/*.csv 與 DB 資料庫。"))
+        # 每日 23:59 執行巴哈姆特 GNN 當天新聞爬取任務
+        scheduler.add_job(
+            run_daily_gnn_crawler,
+            trigger=CronTrigger(hour=23, minute=59),
+            id="daily_gnn_news_crawler_job",
+            replace_existing=True
+        )
+
+        self.stdout.write(self.style.SUCCESS("✅ 排程服務已就緒！"))
+        self.stdout.write(self.style.SUCCESS("  • 每日 16:00 (下午4點): 自動更新 resources/*.csv 與 DB 動畫資料庫"))
+        self.stdout.write(self.style.SUCCESS("  • 每日 23:59 (晚間11點59分): 自動爬取當天 GNN 所有動漫遊戲情報"))
         self.stdout.write(self.style.NOTICE("按 Ctrl+C 可停止排程服務。"))
 
         try:

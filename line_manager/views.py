@@ -680,6 +680,10 @@ def liff_itinerary_list(request):
             page = "drama"
         elif "page=pet" in liff_state:
             page = "pet"
+        elif "page=nutrition" in liff_state:
+            page = "nutrition"
+        elif "page=gnn" in liff_state:
+            page = "gnn"
 
     if page == "music":
         response = render(request, "line_manager/liff_music.html", {"liff_id": settings.LINE_LIFF_ID, "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False)})
@@ -689,6 +693,10 @@ def liff_itinerary_list(request):
         return liff_drama(request)
     elif page == "pet":
         return liff_pet(request)
+    elif page == "nutrition":
+        return liff_nutrition(request)
+    elif page == "gnn":
+        return liff_gnn(request)
 
     context = {
         "liff_id": settings.LINE_LIFF_ID,
@@ -5370,3 +5378,552 @@ def api_batch_save_github_links(request):
 
     except Exception as e:
         return JsonResponse({"error": f"儲存失敗: {str(e)}"}, status=500)
+
+
+def liff_nutrition(request):
+    """LIFF 衛生福利部 FDA 食品營養成分查詢頁面"""
+    context = {
+        "liff_id": settings.LINE_LIFF_ID,
+        "title": "🥗 衛福部 FDA 食品營養成分資料庫"
+    }
+    response = render(request, "line_manager/liff_nutrition.html", context)
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return response
+
+
+def api_get_fda_nutrition_list(request):
+    """API 端點：取得衛福部 FDA 2500+ 全數食品營養成分摘要清單 (極速 .values() + 快取)"""
+    from django.core.cache import cache
+    from .models import FDANutrition
+
+    cache_key = "fda_nutrition_all_summary_v2"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return JsonResponse({"status": "success", "count": len(cached_data), "items": cached_data})
+
+    items = list(FDANutrition.objects.values(
+        "id", "code", "category", "name", "common_name",
+        "calories", "protein", "fat", "carbs", "fiber", "sodium", "sugar"
+    ).order_by("category", "name"))
+
+    cache.set(cache_key, items, timeout=86400 * 7)
+    return JsonResponse({"status": "success", "count": len(items), "items": items})
+
+
+def api_get_fda_nutrition_detail(request, pk):
+    """API 端點：取得單一食品的 111 項全成分微量元素詳細 JSON"""
+    from django.shortcuts import get_object_or_404
+    from .models import FDANutrition
+
+    item = get_object_or_404(FDANutrition, pk=pk)
+    raw_dict = {}
+    if item.raw_details:
+        try:
+            raw_dict = json.loads(item.raw_details)
+        except Exception:
+            pass
+
+    return JsonResponse({
+        "status": "success",
+        "id": item.id,
+        "code": item.code,
+        "category": item.category,
+        "name": item.name,
+        "common_name": item.common_name,
+        "calories": item.calories,
+        "protein": item.protein,
+        "fat": item.fat,
+        "carbs": item.carbs,
+        "fiber": item.fiber,
+        "sodium": item.sodium,
+        "sugar": item.sugar,
+        "raw_details": raw_dict,
+        "updated_at": item.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+    })
+
+
+@csrf_exempt
+def api_update_fda_nutrition(request):
+    """API 端點：手動觸發衛福部 FDA 爬蟲與更新排程"""
+    from django.core.management import call_command
+    from django.core.cache import cache
+
+    try:
+        call_command("fetch_fda_nutrition")
+        cache.delete("fda_nutrition_all_summary_v1")
+        return JsonResponse({
+            "status": "success",
+            "message": "✅ 已成功手動完成衛福部 FDA 食品營養資料庫爬取與更新！"
+        })
+    except Exception as e:
+        return JsonResponse({"error": f"更新失敗: {str(e)}"}, status=500)
+
+
+def api_get_nutrient_references(request):
+    """API 端點：取得人體每日營養成分建議攝取量、過多/過少危害與優缺點健康知識庫"""
+    from django.core.cache import cache
+    from .models import NutrientReference
+
+    cache_key = "nutrient_references_all_v1"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return JsonResponse({"status": "success", "count": len(cached_data), "references": cached_data})
+
+    refs_qs = NutrientReference.objects.all().order_by("category", "name")
+    result = {}
+    for ref in refs_qs:
+        result[ref.name] = {
+            "name": ref.name,
+            "unit": ref.unit,
+            "category": ref.category,
+            "daily_recommended": ref.daily_recommended,
+            "daily_upper_limit": ref.daily_upper_limit,
+            "benefits": ref.benefits,
+            "concerns": ref.concerns,
+            "excess_hazards": ref.excess_hazards,
+            "deficiency_hazards": ref.deficiency_hazards,
+        }
+
+    cache.set(cache_key, result, timeout=86400)
+    return JsonResponse({"status": "success", "count": len(result), "references": result})
+
+
+@csrf_exempt
+def api_add_intake_log(request):
+    """API 端點：新增今日/指定日期飲食紀錄 (支援資料庫食品與自訂輸入成分)"""
+    if request.method != "POST":
+        return JsonResponse({"error": "必須使用 POST 請求"}, status=405)
+
+    from .models import FDANutrition, DailyIntakeLog
+    from django.shortcuts import get_object_or_404
+    import datetime
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        date_str = data.get("date", datetime.date.today().strftime("%Y-%m-%d"))
+        meal_type = data.get("meal_type", "點心/其他")
+        amount_g = float(data.get("amount_g", 100.0))
+        user = request.user if request.user.is_authenticated else None
+
+        custom_name = data.get("custom_name", "").strip()
+        custom_nutrients = data.get("custom_nutrients", {})
+
+        if custom_name:
+            # 使用者手動自訂輸入成分與餐別
+            log_obj = DailyIntakeLog.objects.create(
+                user=user,
+                date=date_str,
+                food=None,
+                custom_name=custom_name,
+                custom_nutrients=json.dumps(custom_nutrients, ensure_ascii=False),
+                amount_g=amount_g,
+                meal_type=meal_type
+            )
+            return JsonResponse({
+                "status": "success",
+                "message": f"✅ 已成功紀錄自訂餐點 [{custom_name}] 到 {date_str} ({meal_type})！",
+                "log_id": log_obj.id
+            })
+        else:
+            # 從食品庫選擇
+            food_id = data.get("food_id")
+            food = get_object_or_404(FDANutrition, pk=food_id)
+            log_obj = DailyIntakeLog.objects.create(
+                user=user,
+                date=date_str,
+                food=food,
+                amount_g=amount_g,
+                meal_type=meal_type
+            )
+            return JsonResponse({
+                "status": "success",
+                "message": f"✅ 已成功記錄 [{food.name}] {amount_g}g 到 {date_str} ({meal_type})！",
+                "log_id": log_obj.id
+            })
+
+    except Exception as e:
+        return JsonResponse({"error": f"記錄失敗: {str(e)}"}, status=500)
+
+
+def api_get_intake_logs(request):
+    """API 端點：依日期查詢飲食紀錄清單 (支援資料庫與自訂成分)"""
+    from .models import DailyIntakeLog
+    import datetime
+
+    date_str = request.GET.get("date", datetime.date.today().strftime("%Y-%m-%d"))
+    user = request.user if request.user.is_authenticated else None
+
+    qs = DailyIntakeLog.objects.filter(date=date_str)
+    if user:
+        qs = qs.filter(user=user)
+
+    logs = []
+    total_calories = 0.0
+    total_protein = 0.0
+    total_fat = 0.0
+    total_carbs = 0.0
+    total_fiber = 0.0
+    total_sodium = 0.0
+
+    for item in qs.select_related("food"):
+        if item.food:
+            ratio = item.amount_g / 100.0
+            cal = round(item.food.calories * ratio, 1)
+            prot = round(item.food.protein * ratio, 1)
+            fat = round(item.food.fat * ratio, 1)
+            carbs = round(item.food.carbs * ratio, 1)
+            fiber = round(item.food.fiber * ratio, 1)
+            sod = round(item.food.sodium * ratio, 1)
+            food_name = item.food.name
+            category = item.food.category
+            food_id = item.food.id
+        else:
+            c_nut = {}
+            if item.custom_nutrients:
+                try:
+                    c_nut = json.loads(item.custom_nutrients)
+                except Exception:
+                    pass
+            cal = round(float(c_nut.get("熱量", 0.0)), 1)
+            prot = round(float(c_nut.get("粗蛋白", c_nut.get("蛋白質", 0.0))), 1)
+            fat = round(float(c_nut.get("粗脂肪", c_nut.get("脂肪", 0.0))), 1)
+            carbs = round(float(c_nut.get("總碳水化合物", c_nut.get("碳水", 0.0))), 1)
+            fiber = round(float(c_nut.get("膳食纖維", c_nut.get("纖維", 0.0))), 1)
+            sod = round(float(c_nut.get("鈉", 0.0)), 1)
+            food_name = item.custom_name or "自訂餐點/保健品"
+            category = "自訂成分輸入"
+            food_id = None
+
+        total_calories += cal
+        total_protein += prot
+        total_fat += fat
+        total_carbs += carbs
+        total_fiber += fiber
+        total_sodium += sod
+
+        logs.append({
+            "id": item.id,
+            "food_id": food_id,
+            "food_name": food_name,
+            "category": category,
+            "amount_g": item.amount_g,
+            "meal_type": item.meal_type,
+            "calories": cal,
+            "protein": prot,
+            "fat": fat,
+            "carbs": carbs,
+            "fiber": fiber,
+            "sodium": sod,
+            "created_at": item.created_at.strftime("%H:%M")
+        })
+
+    return JsonResponse({
+        "status": "success",
+        "date": date_str,
+        "count": len(logs),
+        "totals": {
+            "calories": round(total_calories, 1),
+            "protein": round(total_protein, 1),
+            "fat": round(total_fat, 1),
+            "carbs": round(total_carbs, 1),
+            "fiber": round(total_fiber, 1),
+            "sodium": round(total_sodium, 1)
+        },
+        "logs": logs
+    })
+
+
+@csrf_exempt
+def api_delete_intake_log(request, log_id):
+    """API 端點：刪除飲食紀錄"""
+    from .models import DailyIntakeLog
+    from django.shortcuts import get_object_or_404
+    try:
+        log_obj = get_object_or_404(DailyIntakeLog, pk=log_id)
+        food_name = log_obj.food.name if log_obj.food else log_obj.custom_name
+        log_obj.delete()
+        return JsonResponse({
+            "status": "success",
+            "message": f"已成功刪除 [{food_name}] 的飲食紀錄！"
+        })
+    except Exception as e:
+        return JsonResponse({"error": f"刪除失敗: {str(e)}"}, status=500)
+
+
+def api_analyze_daily_intake(request):
+    """API 端點：一鍵全自動分析指定日期攝取成分量與衛福部 DRIs / UL 比較報告"""
+    from .models import DailyIntakeLog, NutrientReference
+    import datetime
+
+    date_str = request.GET.get("date", datetime.date.today().strftime("%Y-%m-%d"))
+    user = request.user if request.user.is_authenticated else None
+
+    qs = DailyIntakeLog.objects.filter(date=date_str)
+    if user:
+        qs = qs.filter(user=user)
+
+    if not qs.exists():
+        return JsonResponse({
+            "status": "warning",
+            "message": f"{date_str} 尚無任何飲食紀錄，請先新增食物或自訂成分紀錄！"
+        })
+
+    totals = {}
+    total_calories = 0.0
+
+    for item in qs.select_related("food"):
+        if item.food:
+            ratio = item.amount_g / 100.0
+            total_calories += item.food.calories * ratio
+
+            raw = {}
+            if item.food.raw_details:
+                try:
+                    raw = json.loads(item.food.raw_details)
+                except Exception:
+                    pass
+
+            for k, v in raw.items():
+                if not k:
+                    continue
+                try:
+                    val = float(v) if v is not None else 0.0
+                    totals[k] = totals.get(k, 0.0) + (val * ratio)
+                except Exception:
+                    pass
+        else:
+            c_nut = {}
+            if item.custom_nutrients:
+                try:
+                    c_nut = json.loads(item.custom_nutrients)
+                except Exception:
+                    pass
+
+            for k, v in c_nut.items():
+                if not k:
+                    continue
+                try:
+                    val = float(v) if v is not None else 0.0
+                    totals[k] = totals.get(k, 0.0) + val
+                    if "熱量" in k:
+                        total_calories += val
+                except Exception:
+                    pass
+
+    refs = {r.name: r for r in NutrientReference.objects.all()}
+
+    optimal_list = []
+    low_list = []
+    excess_list = []
+    advice_list = []
+
+    standards = {
+        "熱量": {"target": 2000, "unit": "kcal", "ul": 2500},
+        "粗蛋白": {"target": 60, "unit": "g", "ul": 120},
+        "粗脂肪": {"target": 55, "unit": "g", "ul": 70},
+        "總碳水化合物": {"target": 275, "unit": "g", "ul": 350},
+        "膳食纖維": {"target": 30, "unit": "g", "ul": 50},
+        "鈉": {"target": 2000, "unit": "mg", "ul": 2400},
+        "鉀": {"target": 2700, "unit": "mg", "ul": 4000},
+        "鈣": {"target": 1000, "unit": "mg", "ul": 2500},
+        "鐵": {"target": 15, "unit": "mg", "ul": 45},
+        "鋅": {"target": 15, "unit": "mg", "ul": 35},
+        "維生素C": {"target": 100, "unit": "mg", "ul": 2000},
+        "維生素A": {"target": 700, "unit": "ug RE", "ul": 3000},
+        "維生素D": {"target": 10, "unit": "ug", "ul": 50},
+        "維生素E": {"target": 13, "unit": "mg", "ul": 1000},
+        "維生素B1": {"target": 1.2, "unit": "mg", "ul": 999},
+        "維生素B2": {"target": 1.3, "unit": "mg", "ul": 999},
+        "維生素B6": {"target": 1.5, "unit": "mg", "ul": 80},
+        "維生素B12": {"target": 2.4, "unit": "ug", "ul": 999},
+        "葉酸": {"target": 400, "unit": "ug", "ul": 1000},
+    }
+
+    for name, std in standards.items():
+        val = 0.0
+        for k in totals.keys():
+            if name in k:
+                val += totals[k]
+                break
+
+        val = round(val, 1)
+        target = std["target"]
+        ul = std["ul"]
+        unit = std["unit"]
+        pct = round((val / target) * 100) if target > 0 else 0
+
+        ref_obj = refs.get(name)
+        benefits = ref_obj.benefits if ref_obj else ""
+        excess_h = ref_obj.excess_hazards if ref_obj else ""
+        defic_h = ref_obj.deficiency_hazards if ref_obj else ""
+
+        if val > ul and ul < 900:
+            excess_list.append({
+                "name": name,
+                "val": val,
+                "target": target,
+                "ul": ul,
+                "unit": unit,
+                "pct": pct,
+                "hazard": excess_h
+            })
+            advice_list.append(f"⚠️ 【{name}】今日攝取量 ({val} {unit}) 已超過每日建議上限 ({ul} {unit})！危害風險：{excess_h}")
+        elif pct < 60:
+            low_list.append({
+                "name": name,
+                "val": val,
+                "target": target,
+                "unit": unit,
+                "pct": pct,
+                "hazard": defic_h
+            })
+            advice_list.append(f"💡 【{name}】今日攝取量偏低 ({val} / {target} {unit}，達標率僅 {pct}%)。欠缺危害：{defic_h}")
+        else:
+            optimal_list.append({
+                "name": name,
+                "val": val,
+                "target": target,
+                "unit": unit,
+                "pct": pct,
+                "benefit": benefits
+            })
+
+    return JsonResponse({
+        "status": "success",
+        "date": date_str,
+        "food_count": qs.count(),
+        "total_calories": round(total_calories, 1),
+        "optimal": optimal_list,
+        "low": low_list,
+        "excess": excess_list,
+        "advices": advice_list
+    })
+
+
+def api_get_food_additives(request):
+    """API 端點：取得台灣食品添加物與危害知識庫全資料"""
+    from .models import FoodAdditive
+    qs = FoodAdditive.objects.all().values("id", "name", "e_number", "category", "purpose", "common_foods", "health_hazards", "safe_advice")
+    items = list(qs)
+    return JsonResponse({"status": "success", "count": len(items), "items": items})
+
+
+def liff_gnn(request):
+    """LIFF 頁面：巴哈姆特 GNN 新聞即時情報庫與多標籤檢索"""
+    context = {
+        "liff_id": settings.LINE_LIFF_ID,
+    }
+    response = render(request, "line_manager/liff_gnn.html", context)
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return response
+
+
+def api_get_gnn_news(request):
+    """API 端點：檢索 GNN 新聞 (支援多標籤、關鍵字搜尋、日期篩選與分頁)"""
+    from django.db.models import Q
+    from .models import GNNNews
+    q = request.GET.get("q", "").strip()
+    tag = request.GET.get("tag", "").strip()
+    date_str = request.GET.get("date", "").strip()
+    try:
+        page = int(request.GET.get("page", 1))
+    except (ValueError, TypeError):
+        page = 1
+    try:
+        page_size = int(request.GET.get("page_size", 25))
+    except (ValueError, TypeError):
+        page_size = 25
+
+    try:
+        qs = GNNNews.objects.all()
+
+        if date_str:
+            qs = qs.filter(crawl_date=date_str)
+
+        if tag:
+            clean_tag = tag.lstrip("#").strip()
+            # 支援多種標籤比對 (精準陣列匹配、去除 # 模糊匹配或原始字串模糊匹配)
+            qs = qs.filter(
+                Q(tags__contains=[clean_tag]) |
+                Q(tags__contains=[tag]) |
+                Q(tags__icontains=clean_tag) |
+                Q(tags__icontains=tag)
+            )
+
+        if q:
+            clean_q = q.lstrip("#").strip()
+            qs = qs.filter(
+                Q(title__icontains=q) |
+                Q(summary__icontains=q) |
+                Q(tags__icontains=q) |
+                Q(tags__icontains=clean_q)
+            )
+
+        total = qs.count()
+        total_pages = max(1, (total + page_size - 1) // page_size)
+        if page < 1:
+            page = 1
+        elif page > total_pages:
+            page = total_pages
+
+        start = (page - 1) * page_size
+        items_qs = qs.order_by("-published_at", "-created_at")[start:start + page_size]
+
+        items = []
+        for it in items_qs:
+            items.append({
+                "id": it.id,
+                "sn": it.sn,
+                "title": it.title,
+                "link": it.link,
+                "tags": it.tags or [],
+                "thumbnail": it.thumbnail,
+                "summary": it.summary,
+                "published_at": it.published_at.strftime("%Y-%m-%d %H:%M:%S") if it.published_at else "",
+                "crawl_date": it.crawl_date.strftime("%Y-%m-%d") if it.crawl_date else "",
+            })
+
+        # 計算統計各熱門標籤
+        tag_counter = {}
+        for tags_list in GNNNews.objects.values_list("tags", flat=True)[:500]:
+            if tags_list and isinstance(tags_list, list):
+                for t in tags_list:
+                    tag_counter[t] = tag_counter.get(t, 0) + 1
+
+        sorted_tags = sorted(tag_counter.items(), key=lambda x: x[1], reverse=True)[:100]
+        available_tags = [{"tag": k, "count": v} for k, v in sorted_tags]
+
+        # 日期列表 (最近有新聞的日期)
+        recent_dates = list(GNNNews.objects.values_list("crawl_date", flat=True).distinct().order_by("-crawl_date")[:14])
+        recent_dates_str = [d.strftime("%Y-%m-%d") for d in recent_dates if d]
+
+        return JsonResponse({
+            "status": "success",
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+            "items": items,
+            "available_tags": available_tags,
+            "recent_dates": recent_dates_str,
+        })
+    except Exception as e:
+        import traceback
+        logger.error(f"[GNN] api_get_gnn_news error: {e}\n{traceback.format_exc()}")
+        return JsonResponse({"status": "error", "error": str(e)}, status=500)
+
+
+@csrf_exempt
+def api_trigger_gnn_crawl(request):
+    """API 端點：手動立即觸發爬取 GNN 新聞"""
+    from .management.commands.fetch_gnn_news import crawl_gnn_articles
+    crawl_all = request.GET.get("all", "0") in ("1", "true")
+    try:
+        res = crawl_gnn_articles(crawl_all=crawl_all, limit=50)
+        return JsonResponse({
+            "status": "success",
+            "message": f"成功收錄 {res['scanned']} 則新聞 (新增: {res['created']}, 更新: {res['updated']})",
+            "data": res
+        })
+    except Exception as e:
+        return JsonResponse({"status": "error", "error": str(e)}, status=500)

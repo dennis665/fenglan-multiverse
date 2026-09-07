@@ -6,6 +6,57 @@
 * **Minor (Y)**：新增功能。
 * **Patch (Z)**：Bug 修復或效能優化。
 
+## [1.18.1] - 2026-09-07
+### Added (新增)
+* **🎮 巴哈姆特 GNN 新聞每日 23:59 定時排程爬蟲與 LIFF 搜尋情報庫 (`GNNNews`, `liff_gnn.html`, `fetch_gnn_news.py`, `start_scheduler.py`)**：
+  * **`GNNNews` 動漫遊戲情報模型實裝**：建立專屬資料庫模型，完整記錄文章編號 (`sn`)、標題、原文 URL 直連、分類多項 tag (`JSONField`)、高清縮圖、新聞摘要、精準發布時間 (`published_at`) 及出刊/爬取日期 (`crawl_date`)。
+  * **每日 23:59 定時自動爬蟲排程**：整合至系統核心排程 `start_scheduler.py`，配置 APScheduler 每晚 23:59 定時爬取並更新當日發布之所有 GNN 新聞，支援自動去重與增量更新。
+  * **多項分類 Tag 智慧提取引擎**：自動統整平台類別（手機/PC/TV掌機/動漫畫/電競/活動展覽/科技硬體）、標題分類（如 `【模型】`、`【試玩】`、`【快訊】`）與文章內文 Hashtags（如 `#Steam`、`#Switch`、`#原神`）。
+  * **專屬 GNN LIFF 搜尋頁面 (`liff_gnn.html`)**：
+    * 整合至 `/line/liff/?page=gnn` 及 `/line/gnn/`，採用電競深色玻璃擬態（Glassmorphism）響應式 UI。
+    * **0 毫秒極速搜尋**：輸入即時過濾標題、摘要與多項標籤。
+    * **分類標籤膠囊 Bar**：支援快速切換手機、PC、TV掌機、動漫畫、模型、電競等分類，卡片標籤點擊亦可一鍵過濾。
+    * **出刊日期下拉選單**：自由按日期查看歷日出刊新聞清單。
+    * **即時同步按鈕**：提供「🔄 立即更新最新報導」按鈕，支援前端連線官方即時爬取與載入動畫。
+  * **後端 RESTful API 服務**：
+    * `GET /line/api/gnn/list/`：多標籤過濾、全文搜尋、日期範圍與分頁查詢。
+    * `GET/POST /line/api/gnn/crawl/`：手動立即觸發爬取端點。
+
+* **✨ LIFF 全站精緻服務導覽下拉選單系統（Unified Dropdown Menu）**：
+  * **跨頁面快捷導航**：全面重構所有 LIFF 頁面頂部導航按鈕，統一替換為暗黑毛玻璃質感之「服務導覽 ▾」精緻下拉選單，包含行程看板、追劇小幫手、食品營養百科、GNN 動漫情報、酷炫音樂平台與休閒小站桌寵。
+  * **手機行動端極致優化**：徹底消滅在行動裝置 LINE 內嵌瀏覽器 (WebView) 下多按鈕折行、擁擠的版面問題，提供當前頁籤高亮標示與自適應陰影反饋。
+  * **涵蓋全站 8 大 LIFF 模板**：`liff_list.html`、`liff_drama.html`、`liff_nutrition.html`、`liff_gnn.html`、`liff_music.html`、`liff_pet.html`、`liff_create.html`、`liff_bind.html`。
+
+
+* **🥗 衛福部 FDA 台灣食品營養成分庫與每日飲食智慧健康分析平台 (`FDANutrition`, `DailyIntakeLog`, `liff_nutrition.html`)**：
+  * **FDA 2,213 筆全品項食品成分庫**：包含樣品名稱、俗名、六大營養素、熱量、鈉、總糖及 111 項全成分微量元素。
+  * **衛福部 DRIs 第八版營養素標準知識庫 (`NutrientReference`)**：涵蓋人體每日建議量 (RDA)、攝取上限 (UL)、生理功效與缺乏/過量危害分析。
+  * **每日飲食紀錄系統 (`DailyIntakeLog`)**：提供日曆選擇器、早/午/晚/點心餐別記錄、自訂餐點與保健品成分輸入彈窗，記錄持久化保存於 DB。
+  * **一鍵智慧健康分析報告**：自動統計當日全成分攝取總量，智慧比對衛福部 DRIs 標準，輸出「🟢 達標優良」、「🟡 偏低提醒」與「🔴 超量警戒」，並由系統自動生成營養師個人化調整建議。
+
+* **⚠️ 衛福部 17 大類 810 項人工食品添加物與健康危害大百科 (`FoodAdditive`)**：
+  * 對照衛福部食藥署官方正面表列規範，完整收錄 17 大法定類別（防腐劑、殺菌劑、抗氧化劑、漂白劑、保色劑、膨脹劑、品質改良劑、著色劑、甜味劑、粘稠劑等）。
+  * 獨立建置全部 **810 個官方細項編號**（如 `[(一)001] 己二烯酸`、`[(五)001] 亞硝酸鈉`、`[(六)001] 硫酸鋁鉀 (明礬)`、`[(九)001] 食用黃色四號`、`[(十一之一)001] 阿斯巴甜` 等）。
+  * 詳細標註各添加物用途、常見食品、吃了的健康風險（致癌物亞硝胺/苯生成、兒童過動症 ADHD、氣喘過敏、重金屬鋁神經退化失智、心血管鈣化等）與營養師安全建議。
+  * LIFF 介面新增第 3 頁籤「⚠️ 添加劑危害」，支援 0 毫秒極速搜尋與危害解析彈窗。
+
+* **📦 食品資料庫伺服器一鍵極速部署與離線封裝工具 (`setup_food_data`, `export_food_data`, `import_food_data`)**：
+  * **極致壓縮封裝檔**：提供 `food_data_package.json.gz` (僅 0.97 MB)，完整打包 2,213 筆食品、950 筆添加物與 19 筆標準。
+  * **伺服器一鍵設置**：Server 終端機執行 `python manage.py setup_food_data` 即可在 5 秒內完成資料庫遷移與全量資料匯入；無離線檔時亦支援 `--force-fetch` 純線上全自動抓取建置。
+
+* **📝 專案操作手冊排程全面整合 (`操作筆記.txt`)**：
+  * 在 `操作筆記.txt` 中完整補全專案 6 大類手動排程與資料庫維護指令（排程守護服務、GNN 爬蟲、動漫作品同步、食品庫一鍵建置、台股股價更新與 LINE Bot 金幣廣播）。
+
+### Fixed & Optimized (修復與優化)
+* **🛡️ LINE LIFF WebKit 跨域連線與 ngrok 免警告穿透**：
+  * 在 `safeFetchJson()` 中注入 `ngrok-skip-browser-warning: 69420` 與 `Accept: application/json` 請求標頭，徹底根治手機 LINE App 內 WebKit 解析 ngrok 警告頁所導致的 `SyntaxError: The string did not match the expected pattern` 錯誤。
+* **🛡️ Bootstrap JS 延遲載入防護與 Modal 降級處理**：
+  * 實裝 `showModalSafely()` 與 `hideModalSafely()`，在 CDN 腳本載入延遲或阻塞時自動降級為原生 CSS/DOM 操作，徹底解決行動端 `ReferenceError: bootstrap is not defined` 與 `applyFilter is not defined` 報錯。
+* **⚡ Windows 終端機控制台字元編碼相容性**：
+  * 移除所有自訂 Management Commands 終端機日誌輸出中的特殊 Emoji 字元，避免繁體中文 Windows (CP950) 環境下引發 `UnicodeEncodeError` 異常。
+
+---
+
 ## [1.17.12] - 2026-08-25
 ### Added (新增)
 * **🤝 LIFF 追劇小幫手「好友比對」頁籤與好友品味比對功能 (`liff_drama.html`, `views.py`, `urls.py`)**：

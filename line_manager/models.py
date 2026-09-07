@@ -214,3 +214,116 @@ class DramaRecommendation(models.Model):
 
     def __str__(self):
         return f"{self.from_user.username} recommend {self.drama.title} to {self.to_user.username}"
+
+
+class FDANutrition(models.Model):
+    """衛生福利部 FDA 台灣食品營養成分資料庫"""
+    code = models.CharField(max_length=50, unique=True, verbose_name=_("整合編號"))
+    category = models.CharField(max_length=100, verbose_name=_("分類"), db_index=True)
+    name = models.CharField(max_length=200, verbose_name=_("樣品名稱"), db_index=True)
+    common_name = models.TextField(blank=True, default="", verbose_name=_("俗名"))
+    calories = models.FloatField(default=0.0, verbose_name=_("熱量(kcal)"))
+    protein = models.FloatField(default=0.0, verbose_name=_("粗蛋白(g)"))
+    fat = models.FloatField(default=0.0, verbose_name=_("粗脂肪(g)"))
+    carbs = models.FloatField(default=0.0, verbose_name=_("總碳水化合物(g)"))
+    fiber = models.FloatField(default=0.0, verbose_name=_("膳食纖維(g)"))
+    sodium = models.FloatField(default=0.0, verbose_name=_("鈉(mg)"))
+    sugar = models.FloatField(default=0.0, verbose_name=_("總糖(g)"))
+    raw_details = EncryptedTextField(blank=True, default="{}", verbose_name=_("全欄位JSON資料"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))
+
+    class Meta:
+        verbose_name = _("FDA食品營養成分")
+        verbose_name_plural = _("FDA食品營養成分")
+
+    def __str__(self):
+        return f"[{self.category}] {self.name}"
+
+
+class NutrientReference(models.Model):
+    """人體每日營養成分建議、攝取過多/過少危害與優缺點知識庫"""
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("成分名稱"), db_index=True)
+    unit = models.CharField(max_length=30, blank=True, default="", verbose_name=_("單位"))
+    category = models.CharField(max_length=50, blank=True, default="微量元素", verbose_name=_("成分類別"))
+    daily_recommended = models.CharField(max_length=150, blank=True, default="", verbose_name=_("每日建議攝取量 (RDA/DRI)"))
+    daily_upper_limit = models.CharField(max_length=150, blank=True, default="", verbose_name=_("每日攝取上限 (UL)"))
+    benefits = models.TextField(blank=True, default="", verbose_name=_("生理功能與主要優點"))
+    concerns = models.TextField(blank=True, default="", verbose_name=_("注意事項"))
+    excess_hazards = models.TextField(blank=True, default="", verbose_name=_("攝取過多危害"))
+    deficiency_hazards = models.TextField(blank=True, default="", verbose_name=_("攝取過少危害"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))
+
+    class Meta:
+        verbose_name = _("營養成分對照與健康知識庫")
+        verbose_name_plural = _("營養成分對照與健康知識庫")
+
+    def __str__(self):
+        return f"{self.name} ({self.daily_recommended})"
+
+
+class DailyIntakeLog(models.Model):
+    """每日飲食紀錄表"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intake_logs", verbose_name=_("使用者"), null=True, blank=True)
+    date = models.DateField(db_index=True, verbose_name=_("記錄日期"))
+    food = models.ForeignKey(FDANutrition, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("食品"))
+    custom_name = models.CharField(max_length=200, blank=True, default="", verbose_name=_("自訂名稱(保健品/餐點)"))
+    custom_nutrients = EncryptedTextField(blank=True, default="{}", verbose_name=_("自訂成分JSON"))
+    amount_g = models.FloatField(default=100.0, verbose_name=_("食用份量(公克)"))
+    meal_type = models.CharField(max_length=50, blank=True, default="點心/其他", verbose_name=_("餐別 (早餐/午餐/晚餐/點心)"))
+    notes = models.CharField(max_length=200, blank=True, default="", verbose_name=_("備註"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
+
+    class Meta:
+        verbose_name = _("每日飲食紀錄")
+        verbose_name_plural = _("每日飲食紀錄")
+        ordering = ["-date", "-created_at"]
+
+    def __str__(self):
+        name = self.food.name if self.food else self.custom_name
+        return f"{self.date} [{self.meal_type}] - {name} ({self.amount_g}g)"
+
+
+class FoodAdditive(models.Model):
+    """台灣人工食品添加物與健康危害知識庫"""
+    name = models.CharField(max_length=150, unique=True, verbose_name=_("添加物名稱/俗名"), db_index=True)
+    e_number = models.CharField(max_length=50, blank=True, default="", verbose_name=_("E編號/代碼"), db_index=True)
+    category = models.CharField(max_length=100, verbose_name=_("法定類別 (如: 防腐劑, 人工色素)"), db_index=True)
+    purpose = models.CharField(max_length=200, blank=True, default="", verbose_name=_("主要用途"))
+    common_foods = models.TextField(blank=True, default="", verbose_name=_("常見於哪些食品"))
+    health_hazards = models.TextField(blank=True, default="", verbose_name=_("吃了的健康危害與風險"))
+    safe_advice = models.TextField(blank=True, default="", verbose_name=_("營養師安全建議"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))
+
+    class Meta:
+        verbose_name = _("食品添加物與健康危害")
+        verbose_name_plural = _("食品添加物與健康危害")
+        ordering = ["category", "name"]
+
+    def __str__(self):
+        return f"[{self.category}] {self.name} ({self.e_number})"
+
+
+class GNNNews(models.Model):
+    """巴哈姆特 GNN 即時新聞與動漫遊戲情報"""
+    sn = models.CharField(max_length=50, unique=True, db_index=True, verbose_name=_("文章編號"))
+    title = models.CharField(max_length=300, db_index=True, verbose_name=_("新聞標題"))
+    link = models.URLField(max_length=500, verbose_name=_("原文連結"))
+    tags = models.JSONField(default=list, blank=True, verbose_name=_("分類標籤(多項tag)"))
+    thumbnail = models.URLField(max_length=500, blank=True, default="", verbose_name=_("縮圖網址"))
+    summary = models.TextField(blank=True, default="", verbose_name=_("新聞摘要"))
+    published_at = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name=_("發布時間"))
+    crawl_date = models.DateField(db_index=True, verbose_name=_("出刊/爬取日期"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
+
+    class Meta:
+        verbose_name = _("GNN動漫遊戲新聞")
+        verbose_name_plural = _("GNN動漫遊戲新聞")
+        ordering = ["-published_at", "-created_at"]
+
+    def __str__(self):
+        return f"[{self.crawl_date}] {self.title}"
+
+
+
+
+

@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🥗 衛福部 FDA 食品營養成分與添加物危害分析平台</title>
+    <!-- Bootstrap 5 & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #0b132b 100%);
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .food-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            transition: all 0.25s ease;
+        }
+        .food-card:hover {
+            transform: translateY(-3px);
+            border-color: #38bdf8;
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.15);
+        }
+        .cat-pill {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .cat-pill.active, .cat-pill:hover {
+            background: #38bdf8;
+            color: #0f172a;
+            font-weight: bold;
+        }
+        .nutri-badge {
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .nav-pills .nav-link {
+            color: #94a3b8;
+            font-size: 0.88rem;
+            padding: 6px 12px;
+        }
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #0ea5e9, #10b981);
+            color: #ffffff;
+        }
+
+        /* LIFF 精緻下拉導覽選單樣式 */
+        .liff-nav-card,
+        .glass-card:has(.liff-nav-dropdown) {
+            position: relative;
+            z-index: 1050;
+        }
+        .liff-nav-dropdown {
+            position: relative;
+            z-index: 1060;
+        }
+        .liff-nav-dropdown .dropdown-toggle {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: #f8fafc;
+            border-radius: 50px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-toggle:hover,
+        .liff-nav-dropdown .dropdown-toggle:focus,
+        .liff-nav-dropdown .dropdown-toggle[aria-expanded="true"] {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(56, 189, 248, 0.6);
+            color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        .liff-nav-dropdown .dropdown-menu {
+            background: rgba(15, 23, 42, 0.98) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75) !important;
+            padding: 6px !important;
+            min-width: 230px !important;
+            width: max-content !important;
+            max-width: min(340px, 90vw) !important;
+            max-height: calc(100vh - 120px) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            z-index: 99999 !important;
+            animation: liffDropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .liff-nav-dropdown .dropdown-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+        .liff-nav-dropdown .dropdown-menu::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.35);
+            border-radius: 4px;
+        }
+        @keyframes liffDropdownFadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .liff-nav-dropdown .dropdown-item {
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: background 0.15s ease, color 0.15s ease;
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-item span:first-child {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-item:hover,
+        .liff-nav-dropdown .dropdown-item:focus {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+        .liff-nav-dropdown .dropdown-item.active-nav-item {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(99, 102, 241, 0.25));
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            color: #38bdf8;
+            font-weight: 600;
+        }
+        .liff-nav-dropdown .dropdown-item.active-nav-item:hover,
+        .liff-nav-dropdown .dropdown-item.active-nav-item:focus {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.32), rgba(99, 102, 241, 0.32));
+            color: #38bdf8;
+        }
+        .liff-nav-dropdown .dropdown-item .badge {
+            flex-shrink: 0;
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            background: rgba(14, 165, 233, 0.35) !important;
+            color: #38bdf8 !important;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+        }
+        .liff-nav-dropdown .dropdown-header {
+            color: #94a3b8;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 3px 8px 4px;
+        }
+        .liff-nav-dropdown .dropdown-divider {
+            border-color: rgba(255, 255, 255, 0.12);
+            margin: 4px 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-3" style="max-width: 680px;">
+        <!-- 頂部 Header -->
+        <div class="glass-card p-3 mb-3 text-center liff-nav-card" style="position: relative; z-index: 1050;">
+            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                <a href="/line/liff/" class="btn btn-sm btn-outline-light rounded-pill px-3 shadow-sm" style="font-size: 0.82rem;">
+                    <i class="fa-regular fa-calendar-check me-1"></i>行程看板
+                </a>
+                    <!-- LIFF 服務導覽下拉選單 -->
+                    <div class="dropdown liff-nav-dropdown">
+                        <button class="btn dropdown-toggle" type="button" id="liffNavDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-compass text-info"></i>
+                            <span>服務導覽</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="liffNavDropdown">
+                            <li><h6 class="dropdown-header"><i class="fa-solid fa-layer-group me-1"></i>快捷服務導覽</h6></li>
+                            <li>
+                                <a class="dropdown-item" href="/line/liff/">
+                                    <span><i class="fa-regular fa-calendar-check me-2 text-success"></i>行程小幫手</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/line/liff/?page=drama">
+                                    <span><i class="fa-solid fa-tv me-2 text-info"></i>追劇小幫手</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item active-nav-item" href="/line/liff/?page=nutrition">
+                                    <span><i class="fa-solid fa-seedling me-2 text-success"></i>食品營養百科</span>
+                                    <span class="badge bg-primary bg-opacity-75" style="font-size: 0.65rem;">目前</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/line/liff/?page=gnn">
+                                    <span><i class="fa-solid fa-gamepad me-2 text-warning"></i>GNN 動漫情報</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/line/liff/?page=music">
+                                    <span><i class="fa-solid fa-compact-disc me-2 text-danger"></i>酷炫音樂平台</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/line/liff/?page=pet">
+                                    <span><i class="fa-solid fa-paw me-2 text-primary"></i>休閒小站桌寵</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+            </div>
+            <h3 class="fw-bold mb-1" style="background: linear-gradient(135deg, #38bdf8, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <i class="fa-solid fa-seedling me-2 text-success"></i>台灣 FDA 食品營養與添加物分析
+            </h3>
+            <p class="small text-white-50 mb-2">衛福部 2,200+ 食品資料 • 人工添加劑危害百科 • 一鍵智慧健康分析</p>
+
+            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="triggerFdaUpdate()">
+                <i class="fa-solid fa-rotate me-1" id="update-icon"></i>手動更新衛福部 FDA 資料庫
+            </button>
+        </div>
+
+        <!-- 功能頁籤切換 Bar (三大頁籤) -->
+        <ul class="nav nav-pills nav-fill mb-3 glass-card p-1" id="nutritionSubTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill fw-bold" id="tab-search-btn" onclick="switchSubTab('search')">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i>🔍 食品庫
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill fw-bold" id="tab-log-btn" onclick="switchSubTab('log')">
+                    <i class="fa-solid fa-clipboard-list me-1"></i>📝 飲食紀錄
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill fw-bold text-danger" id="tab-additive-btn" onclick="switchSubTab('additive')">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>⚠️ 添加劑危害
+                </button>
+            </li>
+        </ul>
+
+        <!-- 面板 1：食品營養庫搜尋與列表 -->
+        <div id="panel-search" class="tab-panel">
+            <div class="glass-card p-3 mb-3">
+                <div class="position-relative mb-2">
+                    <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left: 14px; top: 12px;"></i>
+                    <input type="text" id="search-input" class="form-control bg-dark text-light border-secondary ps-5 rounded-pill" placeholder="🔍 搜尋食品名稱、俗名 (如：蘋果、牛肉、燕麥)..." oninput="onSearchInput()">
+                </div>
+
+                <div class="row g-2 mb-2 align-items-center">
+                    <div class="col-6">
+                        <select id="category-select" class="form-select form-select-sm bg-dark text-info border-secondary rounded-pill" onchange="onCategorySelectChange(this.value)">
+                            <option value="">📂 全部食品分類 (載入中...)</option>
+                        </select>
+                    </div>
+                    <div class="col-6 position-relative">
+                        <i class="fa-solid fa-filter position-absolute text-muted" style="left: 12px; top: 9px; font-size: 0.8rem;"></i>
+                        <input type="text" id="category-search-input" class="form-control form-control-sm bg-dark text-light border-secondary ps-4 rounded-pill" placeholder="搜尋分類 (如: 肉、魚)..." oninput="onCategorySearchInput()">
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 overflow-x-auto py-1" id="category-pills">
+                    <span class="cat-pill active" data-cat="" onclick="selectCategory('')">全部食品</span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center px-2 mb-2 text-white-50 small">
+                <div>符合條件：<span class="text-info fw-bold" id="stat-count">0</span> 筆</div>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-light py-0 px-2" onclick="changePage(-1)" id="btn-prev">&laquo; 上頁</button>
+                    <span id="page-info">1 / 1</span>
+                    <button class="btn-sm btn btn-outline-light py-0 px-2" onclick="changePage(1)" id="btn-next">下頁 &raquo;</button>
+                </div>
+            </div>
+
+            <div id="food-list-container" class="d-flex flex-column gap-2">
+                <div class="glass-card p-4 text-center text-white-50">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x mb-2 text-info"></i>
+                    <p class="mb-0">正在載入衛福部 FDA 食品成分庫...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面板 2：每日飲食紀錄與一鍵健康分析 -->
+        <div id="panel-log" class="tab-panel d-none">
+            <div class="glass-card p-3 mb-3">
+                <div class="row g-2 align-items-center mb-3">
+                    <div class="col-12 col-sm-4">
+                        <label for="intake-date-picker" class="form-label small text-white-50 mb-1"><i class="fa-regular fa-calendar me-1"></i>記錄日期：</label>
+                        <input type="date" id="intake-date-picker" class="form-control bg-dark text-light border-secondary rounded-pill" onchange="onIntakeDateChange(this.value)">
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <button class="btn btn-outline-info w-100 rounded-pill fw-bold shadow-sm" onclick="openCustomNutrientModal()">
+                            <i class="fa-solid fa-pen-to-square me-1"></i>✏️ 自訂輸入成分
+                        </button>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <button class="btn btn-warning w-100 rounded-pill fw-bold text-dark shadow-sm" onclick="analyzeDailyIntake()">
+                            <i class="fa-solid fa-chart-line me-1"></i>📊 一鍵分析飲食
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row g-2 text-center small" id="intake-summary-cards">
+                    <div class="col-4"><div class="p-2 rounded bg-dark border border-warning"><div class="text-white-50">熱量</div><div class="fw-bold text-warning" id="sum-cal">0 kcal</div></div></div>
+                    <div class="col-4"><div class="p-2 rounded bg-dark border border-danger"><div class="text-white-50">蛋白質</div><div class="fw-bold text-danger" id="sum-prot">0 g</div></div></div>
+                    <div class="col-4"><div class="p-2 rounded bg-dark border border-info"><div class="text-white-50">脂肪</div><div class="fw-bold text-info" id="sum-fat">0 g</div></div></div>
+                    <div class="col-4"><div class="p-2 rounded bg-dark border border-success"><div class="text-white-50">碳水</div><div class="fw-bold text-success" id="sum-carbs">0 g</div></div></div>
+                    <div class="col-4"><div class="p-2 rounded bg-dark border border-secondary"><div class="text-white-50">纖維</div><div class="fw-bold text-light" id="sum-fiber">0 g</div></div></div>
+                    <div class="col-4"><div class="p-2 rounded bg-dark border border-light"><div class="text-white-50">鈉</div><div class="fw-bold text-light" id="sum-sodium">0 mg</div></div></div>
+                </div>
+            </div>
+
+            <div id="intake-log-container" class="d-flex flex-column gap-2">
+                <div class="glass-card p-4 text-center text-white-50">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x mb-2 text-info"></i>
+                    <p class="mb-0">載入飲食紀錄中...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面板 3：⚠️ 人工食品添加劑危害大百科 -->
+        <div id="panel-additive" class="tab-panel d-none">
+            <div class="glass-card p-3 mb-3">
+                <div class="position-relative mb-2">
+                    <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left: 14px; top: 12px;"></i>
+                    <input type="text" id="additive-search-input" class="form-control bg-dark text-light border-secondary ps-5 rounded-pill" placeholder="🔍 搜尋添加物名稱、E編號或危害 (如：防腐劑、亞硝酸、致癌、過動)..." oninput="onAdditiveSearchInput()">
+                </div>
+
+                <!-- 添加劑類別過濾膠囊 (涵蓋衛福部 17 大類) -->
+                <div class="d-flex gap-2 overflow-x-auto py-1" id="additive-pills">
+                    <span class="cat-pill active" onclick="selectAdditiveCategory('')">全部 17 大類</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('防腐劑')">防腐劑</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('殺菌劑')">殺菌劑</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('抗氧化劑')">抗氧化劑</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('漂白劑')">漂白劑</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('保色劑')">保色劑/硝酸鹽</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('膨脹劑')">膨脹劑</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('品質改良劑')">品質改良劑/磷酸鹽</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('營養添加劑')">營養添加劑</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('著色劑')">人工色素</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('香料')">香料</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('調味劑')">調味劑/味精</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('甜味劑')">人工甜味劑/代糖</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('粘稠劑')">粘稠劑/糊料</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('結著劑')">結著劑</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('乳化劑')">乳化劑</span>
+                    <span class="cat-pill" onclick="selectAdditiveCategory('其他')">消泡劑/其他</span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center px-2 mb-2 text-white-50 small">
+                <div>收錄權威添加物：<span class="text-danger fw-bold" id="additive-count">0</span> 項</div>
+            </div>
+
+            <div id="additive-list-container" class="d-flex flex-column gap-2">
+                <div class="glass-card p-4 text-center text-white-50">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x mb-2 text-warning"></i>
+                    <p class="mb-0">正在載入食品添加物與健康危害百科...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 食品營養全成分詳細 Modal -->
+    <div class="modal fade" id="nutritionDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-light border-secondary shadow-lg">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-header-title mb-0 text-info fw-bold" id="detailModalTitle">
+                        <i class="fa-solid fa-vial me-2"></i>食品成分詳細數據
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="hideModalSafely(document.getElementById('nutritionDetailModal'))" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3" style="max-height: 70vh; overflow-y: auto;">
+                    <div id="detail-summary-box" class="p-3 mb-3 rounded bg-black border border-secondary"></div>
+                    <h6 class="fw-bold text-success mb-2"><i class="fa-solid fa-list-check me-1"></i>111 項全成分與微量元素</h6>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped table-hover table-bordered small mb-0">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th>分析項目</th>
+                                    <th>含量 (每 100g 可食部分)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detail-table-body">
+                                <tr><td colspan="2" class="text-center">載入中...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" onclick="hideModalSafely(document.getElementById('nutritionDetailModal'))">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 智慧健康分析報告 Modal -->
+    <div class="modal fade" id="healthAnalysisModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-light border-secondary shadow-lg">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-warning fw-bold" id="analysisModalTitle">
+                        <i class="fa-solid fa-heart-pulse me-2"></i>每日智慧飲食健康分析報告
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="hideModalSafely(document.getElementById('healthAnalysisModal'))" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3" id="analysis-modal-body" style="max-height: 75vh; overflow-y: auto;">
+                    <div class="text-center p-4 text-white-50">
+                        <i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i>
+                        <p class="mb-0">正在計算全成分並比對衛福部 DRIs 基準...</p>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" onclick="hideModalSafely(document.getElementById('healthAnalysisModal'))">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自訂手動輸入成分與餐別 Modal -->
+    <div class="modal fade" id="customNutrientModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-light border-secondary shadow-lg">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-info fw-bold">
+                        <i class="fa-solid fa-pen-to-square me-2"></i>手動自訂輸入成分與餐別
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="hideModalSafely(document.getElementById('customNutrientModal'))" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3" style="max-height: 75vh; overflow-y: auto;">
+                    <form id="custom-nutrient-form">
+                        <div class="row g-2 mb-3">
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label small text-info fw-bold mb-1">餐點/保健品名稱 *：</label>
+                                <input type="text" id="custom-name-input" class="form-control bg-dark text-light border-secondary rounded-pill" placeholder="例如：高蛋白粉、綜合維他命、健身便當..." required>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <label class="form-label small text-info fw-bold mb-1">攝取餐別 *：</label>
+                                <select id="custom-meal-select" class="form-select bg-dark text-light border-secondary rounded-pill">
+                                    <option value="早餐">早餐</option>
+                                    <option value="午餐" selected>午餐</option>
+                                    <option value="晚餐">晚餐</option>
+                                    <option value="點心/保健品">點心/保健品</option>
+                                </select>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <label class="form-label small text-info fw-bold mb-1">攝取日期 *：</label>
+                                <input type="date" id="custom-date-input" class="form-control bg-dark text-light border-secondary rounded-pill">
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-success border-bottom border-secondary pb-1 mb-2">
+                            <i class="fa-solid fa-vial me-1"></i>請輸入本餐所攝取的成分數值 (可僅填有攝取的項目)
+                        </h6>
+
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-warning mb-1">🔥 熱量 (kcal)：</label>
+                                <input type="number" id="c-nut-cal" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-danger mb-1">🍖 蛋白質 (g)：</label>
+                                <input type="number" id="c-nut-prot" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-info mb-1">🥑 脂肪 (g)：</label>
+                                <input type="number" id="c-nut-fat" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-success mb-1">🍞 碳水化合物 (g)：</label>
+                                <input type="number" id="c-nut-carbs" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-secondary mb-1">🌿 膳食纖維 (g)：</label>
+                                <input type="number" id="c-nut-fiber" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-light mb-1">🧂 鈉 (mg)：</label>
+                                <input type="number" id="c-nut-sod" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-info mb-1">🦴 鈣 (mg)：</label>
+                                <input type="number" id="c-nut-calcium" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-danger mb-1">🩸 鐵 (mg)：</label>
+                                <input type="number" id="c-nut-iron" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-warning mb-1">🍋 維生素C (mg)：</label>
+                                <input type="number" id="c-nut-vitc" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-success mb-1">⚡ 鉀 (mg)：</label>
+                                <input type="number" id="c-nut-potassium" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-info mb-1">⚙️ 鋅 (mg)：</label>
+                                <input type="number" id="c-nut-zinc" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="form-label small text-secondary mb-1">☀️ 維生素D (ug)：</label>
+                                <input type="number" id="c-nut-vitd" class="form-control form-control-sm bg-dark text-light border-secondary rounded-pill" placeholder="0" min="0" step="0.1">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" onclick="hideModalSafely(document.getElementById('customNutrientModal'))">取消</button>
+                    <button type="button" class="btn btn-info btn-sm fw-bold text-dark px-4" onclick="submitCustomNutrientLog()">💾 儲存自訂飲食紀錄</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let apiBaseUrl = "{{ request.scheme }}://{{ request.get_host }}";
+        if (!apiBaseUrl || apiBaseUrl.includes("liff.line.me")) {
+            apiBaseUrl = window.location.origin;
+        }
+
+        function safeFetchJson(url, options = {}) {
+            if (!options.headers) options.headers = {};
+            options.headers["ngrok-skip-browser-warning"] = "69420";
+            options.headers["Accept"] = "application/json";
+
+            return fetch(url, options).then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP 狀態碼 ${res.status}`);
+                }
+                return res.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error("Non-JSON response text:", text.slice(0, 150));
+                        throw new Error("伺服器回應非 JSON 格式資料 (請檢視網路與 ngrok 狀態)");
+                    }
+                });
+            });
+        }
+
+        let allFoodItems = [];
+        let filteredItems = [];
+        let categoryCounts = {};
+        let selectedCategory = '';
+        let currentPage = 1;
+        const pageSize = 25;
+        let activeSubTab = 'search';
+        let selectedDate = new Date().toISOString().split('T')[0];
+
+        let nutrientReferences = {};
+
+        // 添加劑資料
+        let allAdditives = [];
+        let filteredAdditives = [];
+        let selectedAdditiveCat = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('intake-date-picker').value = selectedDate;
+
+            try {
+                const localCached = localStorage.getItem('fda_food_items_cache_v2');
+                if (localCached) {
+                    allFoodItems = JSON.parse(localCached);
+                    buildCategoryPills();
+                    applyFilter();
+                }
+            } catch (e) {}
+
+            loadFoodDatabase();
+            loadNutrientReferences();
+            loadFoodAdditives();
+        });
+
+        function switchSubTab(tab) {
+            activeSubTab = tab;
+            const btnSearch = document.getElementById('tab-search-btn');
+            const btnLog = document.getElementById('tab-log-btn');
+            const btnAdditive = document.getElementById('tab-additive-btn');
+            const panelSearch = document.getElementById('panel-search');
+            const panelLog = document.getElementById('panel-log');
+            const panelAdditive = document.getElementById('panel-additive');
+
+            btnSearch.classList.remove('active');
+            btnLog.classList.remove('active');
+            btnAdditive.classList.remove('active');
+            panelSearch.classList.add('d-none');
+            panelLog.classList.add('d-none');
+            panelAdditive.classList.add('d-none');
+
+            if (tab === 'search') {
+                btnSearch.classList.add('active');
+                panelSearch.classList.remove('d-none');
+            } else if (tab === 'log') {
+                btnLog.classList.add('active');
+                panelLog.classList.remove('d-none');
+                loadIntakeLogs(selectedDate);
+            } else if (tab === 'additive') {
+                btnAdditive.classList.add('active');
+                panelAdditive.classList.remove('d-none');
+                if (allAdditives.length === 0) {
+                    loadFoodAdditives();
+                } else {
+                    applyAdditiveFilter();
+                }
+            }
+        }
+
+        function loadFoodDatabase() {
+            safeFetchJson(apiBaseUrl + '/line/api/nutrition/all/')
+                .then(data => {
+                    if (data.status === 'success') {
+                        allFoodItems = data.items || [];
+                        try {
+                            localStorage.setItem('fda_food_items_cache_v2', JSON.stringify(allFoodItems));
+                        } catch (e) {}
+                        buildCategoryPills();
+                        applyFilter();
+                    }
+                })
+                .catch(err => console.log('食品庫載入失敗:', err));
+        }
+
+        function loadFoodAdditives() {
+            safeFetchJson(apiBaseUrl + '/line/api/nutrition/additives/all/')
+                .then(data => {
+                    if (data.status === 'success') {
+                        allAdditives = data.items || [];
+                        applyAdditiveFilter();
+                    } else {
+                        document.getElementById('additive-list-container').innerHTML = `
+                            <div class="glass-card p-4 text-center text-danger">
+                                💥 載入失敗：${data.error || '存取添加物資料庫失敗'}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(err => {
+                    console.log('添加物載入失敗:', err);
+                    document.getElementById('additive-list-container').innerHTML = `
+                        <div class="glass-card p-4 text-center text-danger">
+                            💥 載入失敗：${err.message || err}
+                        </div>
+                    `;
+                });
+        }
+
+        function selectAdditiveCategory(cat) {
+            selectedAdditiveCat = cat;
+            document.querySelectorAll('#additive-pills .cat-pill').forEach(el => {
+                if (el.textContent.includes(cat) || (cat === '' && el.textContent.includes('全部'))) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+            applyAdditiveFilter();
+        }
+
+        function onAdditiveSearchInput() {
+            applyAdditiveFilter();
+        }
+
+        function applyAdditiveFilter() {
+            const inputEl = document.getElementById('additive-search-input');
+            const q = inputEl ? inputEl.value.trim().toLowerCase() : '';
+
+            filteredAdditives = allAdditives.filter(item => {
+                if (selectedAdditiveCat && !item.category.includes(selectedAdditiveCat)) return false;
+                if (q) {
+                    const name = (item.name || '').toLowerCase();
+                    const eNum = (item.e_number || '').toLowerCase();
+                    const pur = (item.purpose || '').toLowerCase();
+                    const foods = (item.common_foods || '').toLowerCase();
+                    const hazards = (item.health_hazards || '').toLowerCase();
+                    if (!name.includes(q) && !eNum.includes(q) && !pur.includes(q) && !foods.includes(q) && !hazards.includes(q)) return false;
+                }
+                return true;
+            });
+
+            renderAdditivePage();
+        }
+
+        function renderAdditivePage() {
+            const countEl = document.getElementById('additive-count');
+            if (countEl) countEl.textContent = filteredAdditives.length;
+
+            const container = document.getElementById('additive-list-container');
+            if (!container) return;
+
+            if (filteredAdditives.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card p-4 text-center text-white-50">
+                        <i class="fa-solid fa-triangle-exclamation fa-2x mb-2 text-warning"></i>
+                        <p class="mb-0">查無符合關鍵字的食品添加物</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filteredAdditives.forEach(item => {
+                html += `
+                    <div class="food-card p-3" style="border-left: 4px solid #ef4444;">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <span class="badge bg-danger text-white me-1" style="font-size: 0.75rem;">${item.category}</span>
+                                <span class="text-white-50 small">${item.e_number}</span>
+                                <h5 class="fw-bold text-warning mb-0 mt-1">${item.name}</h5>
+                            </div>
+                            <button class="btn btn-sm btn-outline-warning rounded-pill px-3" onclick="showAdditiveModal(${item.id})">
+                                💡 危害解析
+                            </button>
+                        </div>
+
+                        <div class="small text-light mb-1"><i class="fa-solid fa-bullseye text-info me-1"></i><strong>主要用途：</strong> ${item.purpose}</div>
+                        <div class="small text-light mb-2"><i class="fa-solid fa-cookie-bite text-warning me-1"></i><strong>常見於：</strong> ${item.common_foods}</div>
+                        <div class="p-2 rounded bg-black border border-danger small text-danger" style="line-height: 1.5;">
+                            ${item.health_hazards}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function showAdditiveModal(id) {
+            const item = allAdditives.find(x => x.id === id);
+            if (!item) return;
+
+            Swal.fire({
+                title: `<span style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation me-2"></i>【${item.name}】健康危害與安全建議</span>`,
+                html: `
+                    <div class="text-start small" style="line-height: 1.6;">
+                        <div class="p-2 mb-2 rounded bg-dark border border-secondary">
+                            <div class="text-info fw-bold"><i class="fa-solid fa-tag me-1"></i>法定分類與代碼：</div>
+                            <div class="text-light">${item.category} (${item.e_number})</div>
+                        </div>
+                        <div class="p-2 mb-2 rounded bg-dark border border-secondary">
+                            <div class="text-info fw-bold"><i class="fa-solid fa-cookie-bite me-1"></i>常見於哪些加工食品：</div>
+                            <div class="text-light">${item.common_foods}</div>
+                        </div>
+                        <div class="p-2 mb-2 rounded" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+                            <div style="color: #ef4444; font-weight: bold;"><i class="fa-solid fa-skull-crossbones me-1"></i>吃了的健康危害與風險：</div>
+                            <div style="color: #fca5a5;">${item.health_hazards}</div>
+                        </div>
+                        <div class="p-2 rounded" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3);">
+                            <div style="color: #38bdf8; font-weight: bold;"><i class="fa-solid fa-user-doctor me-1"></i>營養師安全建議：</div>
+                            <div style="color: #ddd;">${item.safe_advice || '盡量減少高度加工食品之食用頻率。'}</div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: '了解並留意避開',
+                background: '#1e293b',
+                color: '#fff'
+            });
+        }
+
+        function buildCategoryPills(filterKeyword = '') {
+            categoryCounts = {};
+            allFoodItems.forEach(item => {
+                const cat = item.category || '其他';
+                categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+            });
+
+            const sortedCats = Object.keys(categoryCounts).sort();
+
+            const selectEl = document.getElementById('category-select');
+            let selectHtml = `<option value="">📂 全部分類 (共 ${allFoodItems.length} 筆)</option>`;
+            sortedCats.forEach(cat => {
+                const selected = (cat === selectedCategory) ? 'selected' : '';
+                selectHtml += `<option value="${cat}" ${selected}>${cat} (${categoryCounts[cat]})</option>`;
+            });
+            selectEl.innerHTML = selectHtml;
+
+            const pillsContainer = document.getElementById('category-pills');
+            const qCat = (filterKeyword || '').trim().toLowerCase();
+            let pillsHtml = `<span class="cat-pill ${selectedCategory === '' ? 'active' : ''}" data-cat="" onclick="selectCategory('')">全部食品</span>`;
+
+            sortedCats.forEach(cat => {
+                if (qCat && !cat.toLowerCase().includes(qCat)) return;
+                const activeClass = (cat === selectedCategory) ? 'active' : '';
+                pillsHtml += `<span class="cat-pill ${activeClass}" data-cat="${cat}" onclick="selectCategory('${cat}')">${cat} (${categoryCounts[cat]})</span>`;
+            });
+
+            pillsContainer.innerHTML = pillsHtml || '<span class="text-muted small p-1">無符合分類</span>';
+        }
+
+        function onCategorySearchInput() {
+            const catQ = document.getElementById('category-search-input').value;
+            buildCategoryPills(catQ);
+        }
+
+        function onCategorySelectChange(cat) {
+            selectCategory(cat);
+        }
+
+        function selectCategory(cat) {
+            selectedCategory = cat;
+            const selectEl = document.getElementById('category-select');
+            if (selectEl) selectEl.value = cat;
+
+            document.querySelectorAll('#category-pills .cat-pill').forEach(el => {
+                if (el.dataset.cat === cat) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+            currentPage = 1;
+            applyFilter();
+        }
+
+        function onSearchInput() {
+            currentPage = 1;
+            applyFilter();
+        }
+
+        function applyFilter() {
+            const searchInput = document.getElementById('search-input');
+            const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+            filteredItems = allFoodItems.filter(item => {
+                if (selectedCategory && item.category !== selectedCategory) return false;
+                if (q) {
+                    const name = (item.name || '').toLowerCase();
+                    const common = (item.common_name || '').toLowerCase();
+                    const code = (item.code || '').toLowerCase();
+                    if (!name.includes(q) && !common.includes(q) && !code.includes(q)) return false;
+                }
+                return true;
+            });
+
+            renderPage();
+        }
+
+        function renderPage() {
+            const total = filteredItems.length;
+            const totalPages = Math.ceil(total / pageSize) || 1;
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            document.getElementById('stat-count').textContent = total;
+            document.getElementById('page-info').textContent = `${currentPage} / ${totalPages}`;
+            document.getElementById('btn-prev').disabled = currentPage <= 1;
+            document.getElementById('btn-next').disabled = currentPage >= totalPages;
+
+            const container = document.getElementById('food-list-container');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (total === 0) {
+                container.innerHTML = `
+                    <div class="glass-card p-4 text-center text-white-50">
+                        <i class="fa-solid fa-magnifying-glass fa-2x mb-2"></i>
+                        <p class="mb-0">查無符合關鍵字的食品成分資料</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const start = (currentPage - 1) * pageSize;
+            const pageSlice = filteredItems.slice(start, start + pageSize);
+
+            pageSlice.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'food-card p-3';
+                card.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="badge bg-info text-dark me-1" style="font-size: 0.75rem;">${item.category}</span>
+                            <span class="text-white-50 small">${item.code}</span>
+                            <h5 class="fw-bold text-light mb-0 mt-1">${item.name}</h5>
+                            ${item.common_name ? `<div class="small text-warning">俗名: ${item.common_name}</div>` : ''}
+                        </div>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-outline-success rounded-pill px-2" style="font-size: 0.78rem;" onclick="openAddIntakeModal(${item.id}, '${item.name.replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-plus me-1"></i>記錄這餐
+                            </button>
+                            <button class="btn btn-sm btn-outline-info rounded-pill px-2" style="font-size: 0.78rem;" onclick="openDetailModal(${item.id})">
+                                <i class="fa-solid fa-chart-pie me-1"></i>詳情
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="nutri-badge text-warning"><i class="fa-solid fa-fire me-1"></i>熱量 ${item.calories} kcal</span>
+                        <span class="nutri-badge text-danger"><i class="fa-solid fa-drumstick-bite me-1"></i>蛋白 ${item.protein}g</span>
+                        <span class="nutri-badge text-info"><i class="fa-solid fa-droplet me-1"></i>脂肪 ${item.fat}g</span>
+                        <span class="nutri-badge text-success"><i class="fa-solid fa-wheat-awn me-1"></i>碳水 ${item.carbs}g</span>
+                        <span class="nutri-badge text-secondary"><i class="fa-solid fa-leaf me-1"></i>纖維 ${item.fiber}g</span>
+                        <span class="nutri-badge text-light"><i class="fa-solid fa-cubes-stacked me-1"></i>鈉 ${item.sodium}mg</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            renderPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function loadNutrientReferences() {
+            safeFetchJson(apiBaseUrl + '/line/api/nutrition/references/')
+                .then(data => {
+                    if (data.status === 'success') {
+                        nutrientReferences = data.references || {};
+                    }
+                })
+                .catch(err => console.log('載入營養建議失敗:', err));
+        }
+
+        function getRefData(keyName) {
+            for (const refKey in nutrientReferences) {
+                if (keyName.includes(refKey)) {
+                    return nutrientReferences[refKey];
+                }
+            }
+            return null;
+        }
+
+        function showRefModal(refKey) {
+            const ref = nutrientReferences[refKey];
+            if (!ref) return;
+
+            Swal.fire({
+                title: `<span style="color: #38bdf8;"><i class="fa-solid fa-notes-medical me-2"></i>【${ref.name}】健康建議與危害分析</span>`,
+                html: `
+                    <div class="text-start small" style="line-height: 1.6;">
+                        <div class="p-2 mb-2 rounded" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3);">
+                            <div style="color: #38bdf8; font-weight: bold;"><i class="fa-solid fa-bullseye me-1"></i>每日建議攝取量 (RDA/DRI)：</div>
+                            <div style="color: #fff;">${ref.daily_recommended || '無特定標示'}</div>
+                            ${ref.daily_upper_limit ? `<div style="color: #ffb703; font-weight: bold; margin-top: 4px;"><i class="fa-solid fa-ban me-1"></i>每日攝取上限 (UL)：${ref.daily_upper_limit}</div>` : ''}
+                        </div>
+
+                        <div class="p-2 mb-2 rounded" style="background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3);">
+                            <div style="color: #4ade80; font-weight: bold;"><i class="fa-solid fa-star me-1"></i>生理功能與主要優點：</div>
+                            <div style="color: #ddd;">${ref.benefits || '暫無'}</div>
+                        </div>
+
+                        <div class="p-2 mb-2 rounded" style="background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3);">
+                            <div style="color: #f87171; font-weight: bold;"><i class="fa-solid fa-triangle-exclamation me-1"></i>攝取過多危害 (副作用)：</div>
+                            <div style="color: #ddd;">${ref.excess_hazards || '暫無'}</div>
+                        </div>
+
+                        <div class="p-2 mb-2 rounded" style="background: rgba(251, 146, 60, 0.1); border: 1px solid rgba(251, 146, 60, 0.3);">
+                            <div style="color: #fb923c; font-weight: bold;"><i class="fa-solid fa-circle-exclamation me-1"></i>攝取過少危害 (缺乏症)：</div>
+                            <div style="color: #ddd;">${ref.deficiency_hazards || '暫無'}</div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: '了解',
+                background: '#1e293b',
+                color: '#fff'
+            });
+        }
+
+        function showModalSafely(modalEl) {
+            if (!modalEl) return;
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                try {
+                    const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    bsModal.show();
+                    return;
+                } catch (e) {}
+            }
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+
+        function hideModalSafely(modalEl) {
+            if (!modalEl) return;
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                try {
+                    const bsModal = bootstrap.Modal.getInstance(modalEl);
+                    if (bsModal) {
+                        bsModal.hide();
+                        return;
+                    }
+                } catch (e) {}
+            }
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        function openDetailModal(id) {
+            const modalEl = document.getElementById('nutritionDetailModal');
+            if (!modalEl) return;
+            
+            document.getElementById('detail-summary-box').innerHTML = '<div class="text-center"><i class="fa-solid fa-spinner fa-spin"></i> 載入中...</div>';
+            document.getElementById('detail-table-body').innerHTML = '<tr><td colspan="2" class="text-center">載入中...</td></tr>';
+            
+            showModalSafely(modalEl);
+
+            safeFetchJson(apiBaseUrl + `/line/api/nutrition/detail/${id}/`)
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('detailModalTitle').innerHTML = `<i class="fa-solid fa-leaf me-2"></i>[${data.category}] ${data.name}`;
+                        
+                        document.getElementById('detail-summary-box').innerHTML = `
+                            <div class="row g-2 text-center">
+                                <div class="col-4" onclick="showRefModal('熱量')" style="cursor: pointer;"><div class="p-2 rounded bg-dark border border-warning"><div class="small text-muted">熱量 💡</div><div class="fw-bold text-warning">${data.calories} kcal</div></div></div>
+                                <div class="col-4" onclick="showRefModal('粗蛋白')" style="cursor: pointer;"><div class="p-2 rounded bg-dark border border-danger"><div class="small text-muted">蛋白質 💡</div><div class="fw-bold text-danger">${data.protein} g</div></div></div>
+                                <div class="col-4" onclick="showRefModal('粗脂肪')" style="cursor: pointer;"><div class="p-2 rounded bg-dark border border-info"><div class="small text-muted">脂肪 💡</div><div class="fw-bold text-info">${data.fat} g</div></div></div>
+                                <div class="col-4" onclick="showRefModal('總碳水化合物')" style="cursor: pointer;"><div class="p-2 rounded bg-dark border border-success"><div class="small text-muted">碳水化合物 💡</div><div class="fw-bold text-success">${data.carbs} g</div></div></div>
+                                <div class="col-4" onclick="showRefModal('膳食纖維')" style="cursor: pointer;"><div class="p-2 rounded bg-dark border border-secondary"><div class="small text-muted">膳食纖維 💡</div><div class="fw-bold text-light">${data.fiber} g</div></div></div>
+                                <div class="col-4" onclick="showRefModal('鈉')" style="cursor: pointer;"><div class="p-2 rounded bg-dark border border-light"><div class="small text-muted">鈉 💡</div><div class="fw-bold text-light">${data.sodium} mg</div></div></div>
+                            </div>
+                        `;
+
+                        const raw = data.raw_details || {};
+                        let tbodyHtml = '';
+                        Object.keys(raw).forEach(k => {
+                            const ref = getRefData(k);
+                            let infoBtn = '';
+                            if (ref) {
+                                infoBtn = `
+                                    <button type="button" class="btn btn-sm btn-outline-info py-0 px-2 ms-2" style="font-size: 0.72rem;" onclick="showRefModal('${ref.name}')">
+                                        💡 建議與危害
+                                    </button>
+                                `;
+                            }
+
+                            tbodyHtml += `
+                                <tr>
+                                    <td class="fw-bold text-info">
+                                        ${k}
+                                        ${infoBtn}
+                                    </td>
+                                    <td>${raw[k]}</td>
+                                </tr>
+                            `;
+                        });
+                        document.getElementById('detail-table-body').innerHTML = tbodyHtml || '<tr><td colspan="2" class="text-center">無細節資料</td></tr>';
+                    }
+                });
+        }
+
+        // ==================== 自訂手動輸入成分與餐別功能 ==================== //
+
+        function openCustomNutrientModal() {
+            const modalEl = document.getElementById('customNutrientModal');
+            if (!modalEl) return;
+
+            document.getElementById('custom-date-input').value = selectedDate;
+            document.getElementById('custom-name-input').value = '';
+            document.getElementById('c-nut-cal').value = '';
+            document.getElementById('c-nut-prot').value = '';
+            document.getElementById('c-nut-fat').value = '';
+            document.getElementById('c-nut-carbs').value = '';
+            document.getElementById('c-nut-fiber').value = '';
+            document.getElementById('c-nut-sod').value = '';
+            document.getElementById('c-nut-calcium').value = '';
+            document.getElementById('c-nut-iron').value = '';
+            document.getElementById('c-nut-vitc').value = '';
+            document.getElementById('c-nut-potassium').value = '';
+            document.getElementById('c-nut-zinc').value = '';
+            document.getElementById('c-nut-vitd').value = '';
+
+            showModalSafely(modalEl);
+        }
+
+        function submitCustomNutrientLog() {
+            const name = document.getElementById('custom-name-input').value.trim();
+            if (!name) {
+                Swal.fire({ title: '提醒', text: '請輸入餐點或保健品名稱！', icon: 'warning', background: '#1e293b', color: '#fff' });
+                return;
+            }
+
+            const meal = document.getElementById('custom-meal-select').value;
+            const date = document.getElementById('custom-date-input').value || selectedDate;
+
+            const nutrients = {};
+            const valCal = parseFloat(document.getElementById('c-nut-cal').value) || 0;
+            const valProt = parseFloat(document.getElementById('c-nut-prot').value) || 0;
+            const valFat = parseFloat(document.getElementById('c-nut-fat').value) || 0;
+            const valCarbs = parseFloat(document.getElementById('c-nut-carbs').value) || 0;
+            const valFiber = parseFloat(document.getElementById('c-nut-fiber').value) || 0;
+            const valSod = parseFloat(document.getElementById('c-nut-sod').value) || 0;
+            const valCalcium = parseFloat(document.getElementById('c-nut-calcium').value) || 0;
+            const valIron = parseFloat(document.getElementById('c-nut-iron').value) || 0;
+            const valVitc = parseFloat(document.getElementById('c-nut-vitc').value) || 0;
+            const valPot = parseFloat(document.getElementById('c-nut-potassium').value) || 0;
+            const valZinc = parseFloat(document.getElementById('c-nut-zinc').value) || 0;
+            const valVitd = parseFloat(document.getElementById('c-nut-vitd').value) || 0;
+
+            if (valCal > 0) nutrients['熱量'] = valCal;
+            if (valProt > 0) nutrients['粗蛋白'] = valProt;
+            if (valFat > 0) nutrients['粗脂肪'] = valFat;
+            if (valCarbs > 0) nutrients['總碳水化合物'] = valCarbs;
+            if (valFiber > 0) nutrients['膳食纖維'] = valFiber;
+            if (valSod > 0) nutrients['鈉'] = valSod;
+            if (valCalcium > 0) nutrients['鈣'] = valCalcium;
+            if (valIron > 0) nutrients['鐵'] = valIron;
+            if (valVitc > 0) nutrients['維生素C'] = valVitc;
+            if (valPot > 0) nutrients['鉀'] = valPot;
+            if (valZinc > 0) nutrients['鋅'] = valZinc;
+            if (valVitd > 0) nutrients['維生素D'] = valVitd;
+
+            safeFetchJson(apiBaseUrl + '/line/api/nutrition/intake/add/', {
+                method: 'POST',
+                body: JSON.stringify({
+                    custom_name: name,
+                    meal_type: meal,
+                    date: date,
+                    custom_nutrients: nutrients
+                })
+            }).then(data => {
+                if (data.status === 'success') {
+                    hideModalSafely(document.getElementById('customNutrientModal'));
+                    Swal.fire({ title: '已儲存！', text: data.message, icon: 'success', timer: 1500, showConfirmButton: false, background: '#1e293b', color: '#fff' });
+                    selectedDate = date;
+                    document.getElementById('intake-date-picker').value = selectedDate;
+                    loadIntakeLogs(selectedDate);
+                } else {
+                    Swal.fire('儲存失敗', data.error, 'error');
+                }
+            });
+        }
+
+        // ==================== 今日飲食紀錄與一鍵健康分析功能 ==================== //
+
+        function openAddIntakeModal(foodId, foodName) {
+            Swal.fire({
+                title: `<span style="color: #38bdf8;"><i class="fa-solid fa-utensils me-2"></i>記錄食用「${foodName}」</span>`,
+                html: `
+                    <div class="text-start small mb-3">
+                        <label class="form-label text-light">食用份量 (公克 g)：</label>
+                        <input type="number" id="swal-amount" class="form-control bg-dark text-light border-secondary mb-2" value="100" min="1" step="5">
+                        
+                        <label class="form-label text-light mt-2">餐別：</label>
+                        <select id="swal-meal" class="form-select bg-dark text-light border-secondary">
+                            <option value="午餐" selected>午餐</option>
+                            <option value="早餐">早餐</option>
+                            <option value="晚餐">晚餐</option>
+                            <option value="點心/宵夜">點心/宵夜</option>
+                        </select>
+                        
+                        <label class="form-label text-light mt-2">日期：</label>
+                        <input type="date" id="swal-date" class="form-control bg-dark text-light border-secondary" value="${selectedDate}">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '💾 儲存紀錄',
+                cancelButtonText: '取消',
+                background: '#1e293b',
+                color: '#fff',
+                preConfirm: () => {
+                    const amount = parseFloat(document.getElementById('swal-amount').value) || 100;
+                    const meal = document.getElementById('swal-meal').value;
+                    const date = document.getElementById('swal-date').value || selectedDate;
+                    return { foodId, amount, meal, date };
+                }
+            }).then((res) => {
+                if (res.isConfirmed && res.value) {
+                    const { foodId, amount, meal, date } = res.value;
+                    safeFetchJson(apiBaseUrl + '/line/api/nutrition/intake/add/', {
+                        method: 'POST',
+                        body: JSON.stringify({ food_id: foodId, amount_g: amount, meal_type: meal, date: date })
+                    }).then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire({ title: '已儲存！', text: data.message, icon: 'success', timer: 1500, showConfirmButton: false, background: '#1e293b', color: '#fff' });
+                            selectedDate = date;
+                            document.getElementById('intake-date-picker').value = selectedDate;
+                            if (activeSubTab === 'log') loadIntakeLogs(selectedDate);
+                        } else {
+                            Swal.fire('儲存失敗', data.error, 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        function onIntakeDateChange(date) {
+            selectedDate = date;
+            loadIntakeLogs(selectedDate);
+        }
+
+        function loadIntakeLogs(dateStr) {
+            const container = document.getElementById('intake-log-container');
+            container.innerHTML = `
+                <div class="glass-card p-4 text-center text-white-50">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x mb-2 text-info"></i>
+                    <p class="mb-0">載入 ${dateStr} 的飲食紀錄中...</p>
+                </div>
+            `;
+
+            safeFetchJson(apiBaseUrl + `/line/api/nutrition/intake/list/?date=${dateStr}`)
+                .then(data => {
+                    if (data.status === 'success') {
+                        const totals = data.totals || {};
+                        document.getElementById('sum-cal').textContent = `${totals.calories || 0} kcal`;
+                        document.getElementById('sum-prot').textContent = `${totals.protein || 0} g`;
+                        document.getElementById('sum-fat').textContent = `${totals.fat || 0} g`;
+                        document.getElementById('sum-carbs').textContent = `${totals.carbs || 0} g`;
+                        document.getElementById('sum-fiber').textContent = `${totals.fiber || 0} g`;
+                        document.getElementById('sum-sodium').textContent = `${totals.sodium || 0} mg`;
+
+                        const logs = data.logs || [];
+                        if (logs.length === 0) {
+                            container.innerHTML = `
+                                <div class="glass-card p-4 text-center text-white-50">
+                                    <i class="fa-solid fa-utensils fa-2x mb-2 text-muted"></i>
+                                    <p class="mb-0">${dateStr} 尚無任何飲食紀錄</p>
+                                    <div class="d-flex gap-2 justify-content-center mt-2">
+                                        <button class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="openCustomNutrientModal()">
+                                            ✏️ 自訂手動輸入成分
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="switchSubTab('search')">
+                                            🔍 前往搜尋食品庫
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        let html = '';
+                        logs.forEach(log => {
+                            html += `
+                                <div class="food-card p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <div>
+                                            <span class="badge bg-warning text-dark me-1" style="font-size: 0.75rem;">${log.meal_type}</span>
+                                            <span class="badge bg-secondary me-1" style="font-size: 0.75rem;">${log.category}</span>
+                                            <h5 class="fw-bold text-light mb-0 mt-1">${log.food_name} ${log.food_id ? `<span class="small text-info">(${log.amount_g}g)</span>` : ''}</h5>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger border-0 rounded-circle" onclick="deleteIntakeLog(${log.id}, '${log.food_name}')">
+                                            <i class="fa-solid fa-trash-can text-danger"></i>
+                                        </button>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                                        <span class="nutri-badge text-warning"><i class="fa-solid fa-fire me-1"></i>熱量 ${log.calories} kcal</span>
+                                        <span class="nutri-badge text-danger"><i class="fa-solid fa-drumstick-bite me-1"></i>蛋白 ${log.protein}g</span>
+                                        <span class="nutri-badge text-info"><i class="fa-solid fa-droplet me-1"></i>脂肪 ${log.fat}g</span>
+                                        <span class="nutri-badge text-success"><i class="fa-solid fa-wheat-awn me-1"></i>碳水 ${log.carbs}g</span>
+                                        <span class="nutri-badge text-secondary"><i class="fa-solid fa-leaf me-1"></i>纖維 ${log.fiber}g</span>
+                                        <span class="nutri-badge text-light"><i class="fa-solid fa-cubes-stacked me-1"></i>鈉 ${log.sodium}mg</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = html;
+                    }
+                })
+                .catch(err => {
+                    container.innerHTML = `<div class="glass-card p-3 text-center text-danger">載入失敗: ${err.message || err}</div>`;
+                });
+        }
+
+        function deleteIntakeLog(logId, foodName) {
+            Swal.fire({
+                title: `確認刪除「${foodName}」紀錄？`,
+                text: '刪除後該筆飲食資料將從資料庫中移除。',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '🗑️ 刪除紀錄',
+                cancelButtonText: '取消',
+                background: '#1e293b',
+                color: '#fff'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    safeFetchJson(apiBaseUrl + `/line/api/nutrition/intake/delete/${logId}/`, { method: 'POST' })
+                        .then(d => {
+                            if (d.status === 'success') {
+                                loadIntakeLogs(selectedDate);
+                            } else {
+                                Swal.fire('刪除失敗', d.error, 'error');
+                            }
+                        });
+                }
+            });
+        }
+
+        function analyzeDailyIntake() {
+            const modalEl = document.getElementById('healthAnalysisModal');
+            if (!modalEl) return;
+
+            document.getElementById('analysis-modal-body').innerHTML = `
+                <div class="text-center p-4 text-white-50">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x mb-2 text-warning"></i>
+                    <p class="mb-0">正在計算全成分並比對衛福部 DRIs 基準...</p>
+                </div>
+            `;
+            showModalSafely(modalEl);
+
+            safeFetchJson(apiBaseUrl + `/line/api/nutrition/intake/analyze/?date=${selectedDate}`)
+                .then(data => {
+                    if (data.status === 'warning') {
+                        document.getElementById('analysis-modal-body').innerHTML = `
+                            <div class="p-4 text-center text-warning">
+                                <i class="fa-solid fa-circle-exclamation fa-2x mb-2"></i>
+                                <h5>${data.message}</h5>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    if (data.status === 'success') {
+                        let html = `
+                            <div class="p-3 mb-3 rounded bg-black border border-warning text-center">
+                                <h6 class="text-white-50 mb-1">${data.date} 當日飲食全成分分析摘要</h6>
+                                <h4 class="fw-bold text-warning mb-0">總熱量：${data.total_calories} kcal (已記錄 ${data.food_count} 項餐點)</h4>
+                            </div>
+                        `;
+
+                        if (data.excess && data.excess.length > 0) {
+                            html += `<h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>🔴 攝取超量警戒 (超過每日上限 UL)</h6><div class="d-flex flex-column gap-2 mb-3">`;
+                            data.excess.forEach(item => {
+                                html += `
+                                    <div class="p-3 rounded bg-dark border border-danger">
+                                        <div class="d-flex justify-content-between fw-bold text-danger">
+                                            <span>${item.name}</span>
+                                            <span>${item.val} / 上限 ${item.ul} ${item.unit} (${item.pct}%)</span>
+                                        </div>
+                                        <div class="small text-white-50 mt-1">⚠️ 危害風險：${item.hazard || '易造成生理代謝負擔'}</div>
+                                    </div>
+                                `;
+                            });
+                            html += `</div>`;
+                        }
+
+                        if (data.low && data.low.length > 0) {
+                            html += `<h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-circle-exclamation me-1"></i>🟡 攝取偏低提醒 (未達 RDA 建議量 60%)</h6><div class="d-flex flex-column gap-2 mb-3">`;
+                            data.low.forEach(item => {
+                                html += `
+                                    <div class="p-3 rounded bg-dark border border-warning">
+                                        <div class="d-flex justify-content-between fw-bold text-warning">
+                                            <span>${item.name}</span>
+                                            <span>${item.val} / 建議 ${item.target} ${item.unit} (達標 ${item.pct}%)</span>
+                                        </div>
+                                        <div class="small text-white-50 mt-1">💡 欠缺危害：${item.hazard || '長期偏低易導致相應缺乏症'}</div>
+                                    </div>
+                                `;
+                            });
+                            html += `</div>`;
+                        }
+
+                        if (data.optimal && data.optimal.length > 0) {
+                            html += `<h6 class="fw-bold text-success mb-2"><i class="fa-solid fa-circle-check me-1"></i>🟢 攝取達標優良 (合理健康範圍)</h6><div class="d-flex flex-wrap gap-2 mb-3">`;
+                            data.optimal.forEach(item => {
+                                html += `
+                                    <span class="badge bg-dark border border-success text-success p-2">
+                                        ${item.name}: ${item.val} ${item.unit} (${item.pct}%)
+                                    </span>
+                                `;
+                            });
+                            html += `</div>`;
+                        }
+
+                        if (data.advices && data.advices.length > 0) {
+                            html += `
+                                <div class="p-3 rounded bg-dark border border-info mt-2">
+                                    <h6 class="fw-bold text-info mb-2"><i class="fa-solid fa-user-doctor me-1"></i>💡 營養師綜合飲食調整建議</h6>
+                                    <ul class="small text-light mb-0 ps-3">
+                            `;
+                            data.advices.forEach(adv => {
+                                html += `<li class="mb-1">${adv}</li>`;
+                            });
+                            html += `</ul></div>`;
+                        }
+
+                        document.getElementById('analysis-modal-body').innerHTML = html;
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

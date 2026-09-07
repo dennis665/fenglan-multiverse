@@ -1,0 +1,315 @@
+[
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 1,
+  "fields": {
+    "name": "熱量",
+    "unit": "kcal",
+    "category": "三大營養素",
+    "daily_recommended": "成人約 1,800 - 2,200 kcal/天 (依體重與活動量調整)",
+    "daily_upper_limit": "2,500 kcal/天",
+    "benefits": "提供人體器官運作、心跳、體溫與日常活動所需的主要能量來源。",
+    "concerns": "精緻糖與高脂熱量易快速轉化為體脂堆積。",
+    "excess_hazards": "體重過重、肥胖症、三高（高血壓/高血糖/高血脂）、代謝症候群、脂肪肝與心血管疾病風險。",
+    "deficiency_hazards": "體重過輕、肌少症、基礎代謝率下降、神經倦怠、免疫力降低與女性月經失調。",
+    "updated_at": "2026-09-03T01:10:11.573Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 2,
+  "fields": {
+    "name": "粗蛋白",
+    "unit": "g",
+    "category": "三大營養素",
+    "daily_recommended": "成人約 1.0 - 1.2 g/kg 體重 (約 60 - 75 g/天)",
+    "daily_upper_limit": "2.0 g/kg 體重",
+    "benefits": "肌肉合成與修復、生成免疫抗體與酵素、維持器官與皮膚組織健康。",
+    "concerns": "過量蛋白質需經肝腎代謝，並可能伴隨過多飽和脂肪。",
+    "excess_hazards": "增加肝臟與腎臟負擔、尿酸偏高引發痛風、腸道好菌減少導致便秘。",
+    "deficiency_hazards": "肌肉流失（肌少症）、傷口癒合緩慢、掉髮、免疫力低下與水腫。",
+    "updated_at": "2026-09-03T01:10:11.582Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 3,
+  "fields": {
+    "name": "粗脂肪",
+    "unit": "g",
+    "category": "三大營養素",
+    "daily_recommended": "占總熱量 20% - 30% (約 40 - 60 g/天)",
+    "daily_upper_limit": "70 g/天",
+    "benefits": "構成細胞膜、保護內臟器官、儲存熱量，幫助脂溶性維生素 (A, D, E, K) 吸收。",
+    "concerns": "應優先選擇不飽和脂肪（植物油、堅果、魚油），減少飽和脂肪與反式脂肪。",
+    "excess_hazards": "高血脂症、動脈硬化、心肌梗塞、中風與心血管疾病爆發風險。",
+    "deficiency_hazards": "脂溶性維生素吸收不良、皮膚乾燥脫屑、賀爾蒙失調與月經異常。",
+    "updated_at": "2026-09-03T01:10:11.593Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 4,
+  "fields": {
+    "name": "總碳水化合物",
+    "unit": "g",
+    "category": "三大營養素",
+    "daily_recommended": "占總熱量 50% - 60% (約 225 - 325 g/天)",
+    "daily_upper_limit": "無特定上限，應減少精製糖",
+    "benefits": "大腦、紅血球與中樞神經系統最優先且直接的能量燃料來源。",
+    "concerns": "應選擇未精製的全穀雜糧（糙米、燕麥、地瓜）。",
+    "excess_hazards": "血糖急升急降、胰島素抗性、二型糖尿病、脂肪肝與發炎反應。",
+    "deficiency_hazards": "頭暈、注意力不集中、疲勞、高酮酸血症風險與肌肉組織消耗。",
+    "updated_at": "2026-09-03T01:10:11.603Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 5,
+  "fields": {
+    "name": "膳食纖維",
+    "unit": "g",
+    "category": "三大營養素",
+    "daily_recommended": "成人約 25 - 35 g/天",
+    "daily_upper_limit": "50 g/天",
+    "benefits": "促進腸道蠕動、延緩血糖上升速度、吸附膽固醇、提供腸道益生菌養分。",
+    "concerns": "補充纖維時需搭配充足水分，否則可能加重便秘。",
+    "excess_hazards": "腸胃脹氣、腹痛、腹瀉，並影響鈣、鐵、鋅等礦物質的吸收率。",
+    "deficiency_hazards": "慢性便秘、腸道菌相失衡、宿便堆積、增加大腸癌與痔瘡發生率。",
+    "updated_at": "2026-09-03T01:10:11.610Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 6,
+  "fields": {
+    "name": "鈉",
+    "unit": "mg",
+    "category": "無機鹽",
+    "daily_recommended": "1,500 - 2,300 mg/天 (約食鹽 6g)",
+    "daily_upper_limit": "2,400 mg/天",
+    "benefits": "維持體內水分與體液滲透壓平衡、傳導神經訊號與肌肉正常收縮。",
+    "concerns": "加工食品、醬料、泡麵含高鈉，極易超標。",
+    "excess_hazards": "高血傷、下肢水腫、增加中風與心臟病機率、增加腎臟負擔與胃癌風險。",
+    "deficiency_hazards": "低鈉血症、噁心嘔吐、頭痛、肌肉抽筋、嚴重者可能昏迷。",
+    "updated_at": "2026-09-03T01:10:11.618Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 7,
+  "fields": {
+    "name": "鉀",
+    "unit": "mg",
+    "category": "無機鹽",
+    "daily_recommended": "成人約 2,500 - 2,800 mg/天",
+    "daily_upper_limit": "無特定上限 (腎臟病患者除外)",
+    "benefits": "協助排出體內多餘鈉離子、調節血壓、維持心律穩定與肌肉收縮機能。",
+    "concerns": "腎功能不全者排鉀能力差，需嚴格限制高鉀食物（如香蕉、蔬菜湯）。",
+    "excess_hazards": "高鉀血症、肌肉麻痺、心律不整、極嚴重的可能導致心臟驟停。",
+    "deficiency_hazards": "低鉀血症、肌肉無力、抽筋、心悸、高血壓與疲倦感。",
+    "updated_at": "2026-09-03T01:10:11.626Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 8,
+  "fields": {
+    "name": "鈣",
+    "unit": "mg",
+    "category": "無機鹽",
+    "daily_recommended": "成人 1,000 mg/天",
+    "daily_upper_limit": "2,500 mg/天",
+    "benefits": "維持骨骼與牙齒強健、參與神經傳導、肌肉收縮與血液凝固機能。",
+    "concerns": "需搭配維生素 D 才能維持良好吸收率。",
+    "excess_hazards": "便秘、高鈣血症、增加腎結石風險，並影響鐵質與鋅離子吸收。",
+    "deficiency_hazards": "骨質疏鬆症、骨折風險倍增、牙齒鬆動、夜間腳抽筋。",
+    "updated_at": "2026-09-03T01:10:11.635Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 9,
+  "fields": {
+    "name": "鐵",
+    "unit": "mg",
+    "category": "無機鹽",
+    "daily_recommended": "男性 10 mg/天，女性 15 mg/天",
+    "daily_upper_limit": "45 mg/天",
+    "benefits": "構成血紅素與肌紅素，攜帶氧氣輸送至全身各器官組織。",
+    "concerns": "植物性鐵質 (非血紅素鐵) 需搭配維生素 C 提升吸收率。",
+    "excess_hazards": "腸胃不適、便秘、肝臟鐵質沉積造成氧化傷害與器官損害。",
+    "deficiency_hazards": "缺鐵性貧血、容易疲倦頭暈、臉色蒼白、心悸、體力下降。",
+    "updated_at": "2026-09-03T01:10:11.644Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 10,
+  "fields": {
+    "name": "鋅",
+    "unit": "mg",
+    "category": "無機鹽",
+    "daily_recommended": "男性 15 mg/天，女性 12 mg/天",
+    "daily_upper_limit": "35 mg/天",
+    "benefits": "促進傷口癒合、維持味覺與嗅覺靈敏、維持生殖機能與免疫力。",
+    "concerns": "高劑量鋅補充劑會干擾銅離子的吸收。",
+    "excess_hazards": "噁心嘔吐、腹痛、降低免疫機能、造成缺銅性貧血。",
+    "deficiency_hazards": "皮膚炎、傷口難癒合、味覺異常、掉髮、免疫力下降與發育遲緩。",
+    "updated_at": "2026-09-03T01:10:11.652Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 11,
+  "fields": {
+    "name": "維生素C",
+    "unit": "mg",
+    "category": "維生素",
+    "daily_recommended": "成人 100 mg/天",
+    "daily_upper_limit": "2,000 mg/天",
+    "benefits": "強效抗氧化劑、促進膠原蛋白合成、提升免疫力、促進鐵質吸收。",
+    "concerns": "維生素 C 不耐熱，高溫烹調易流失。",
+    "excess_hazards": "腹瀉、噁心嘔吐、胃痙攣、增加草酸鈣腎結石風險。",
+    "deficiency_hazards": "壞血病、牙齦出血、皮膚紫斑瘀青、傷口癒合不良、關節疼痛。",
+    "updated_at": "2026-09-03T01:10:11.661Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 12,
+  "fields": {
+    "name": "維生素A",
+    "unit": "ug RE",
+    "category": "維生素",
+    "daily_recommended": "男性 700 ug RE/天，女性 600 ug RE/天",
+    "daily_upper_limit": "3,000 ug RE/天",
+    "benefits": "維持正常暗適應夜間視力、維護皮膚與黏膜健康、增強免疫力。",
+    "concerns": "動物性維生素 A 易在體內囤積；胡蘿蔔素為安全的植物來源。",
+    "excess_hazards": "噁心嘔吐、頭痛、脫髮、肝臟受損、孕婦過量可能增加胎兒畸形風險。",
+    "deficiency_hazards": "夜盲症、乾眼症、角膜軟化、皮膚乾燥發癢、呼吸道易感染。",
+    "updated_at": "2026-09-03T01:10:11.669Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 13,
+  "fields": {
+    "name": "維生素D",
+    "unit": "ug",
+    "category": "維生素",
+    "daily_recommended": "10 - 15 ug (400 - 600 IU) /天",
+    "daily_upper_limit": "50 ug (2,000 IU) /天",
+    "benefits": "促進腸道吸收鈣與磷、維護骨骼健康、調節免疫功能與情緒。",
+    "concerns": "可透過適度日照（15分鐘）由皮膚自體合成。",
+    "excess_hazards": "高鈣血症、軟組織與血管鈣化、噁心、腎臟功能受損。",
+    "deficiency_hazards": "兒童佝僂病、成人骨質軟化症、骨質疏鬆、肌肉無力與免疫力降低。",
+    "updated_at": "2026-09-03T01:10:11.678Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 14,
+  "fields": {
+    "name": "維生素E",
+    "unit": "mg",
+    "category": "維生素",
+    "daily_recommended": "成人 13 mg (a-TE) /天",
+    "daily_upper_limit": "1,000 mg /天",
+    "benefits": "保護細胞膜不受自由基氧化破壞、維持血管內皮健康、抗衰老。",
+    "concerns": "與抗凝血劑一同服用需注意出血風險。",
+    "excess_hazards": "出血時間延長、頭痛、倦怠、腸胃不適。",
+    "deficiency_hazards": "溶血性貧血、神經感覺異常、反射失調、肌肉無力。",
+    "updated_at": "2026-09-03T01:10:11.686Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 15,
+  "fields": {
+    "name": "維生素B1",
+    "unit": "mg",
+    "category": "維生素",
+    "daily_recommended": "男性 1.2 mg/天，女性 0.9 mg/天",
+    "daily_upper_limit": "無特定上限",
+    "benefits": "參與醣類代謝轉化為能量、維持神經系統與心臟正常運作。",
+    "concerns": "水溶性維生素，洗滌與烹調時易流失。",
+    "excess_hazards": "極少發生，過量多隨尿液安全排出。",
+    "deficiency_hazards": "腳氣病（神經炎/水腫）、便秘、疲倦無力、記憶力減退。",
+    "updated_at": "2026-09-03T01:10:11.703Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 16,
+  "fields": {
+    "name": "維生素B2",
+    "unit": "mg",
+    "category": "維生素",
+    "daily_recommended": "男性 1.3 mg/天，女性 1.0 mg/天",
+    "daily_upper_limit": "無特定上限",
+    "benefits": "參與能量代謝、維護皮膚、黏膜與眼睛視覺健康。",
+    "concerns": "攝取補充劑後尿液變黃屬正常現象。",
+    "excess_hazards": "極少發生，水溶性可排出體外。",
+    "deficiency_hazards": "口角炎、唇炎、舌炎、脂漏性皮膚炎、眼睛畏光充血。",
+    "updated_at": "2026-09-03T01:10:11.712Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 17,
+  "fields": {
+    "name": "維生素B6",
+    "unit": "mg",
+    "category": "維生素",
+    "daily_recommended": "成人 1.5 - 1.6 mg/天",
+    "daily_upper_limit": "80 mg/天",
+    "benefits": "參與蛋白質與胺基酸代謝、製造神經傳導物質（血清素）、維護神經功能。",
+    "concerns": "長期超大劑量補充可能引發神經病變。",
+    "excess_hazards": "感覺神經病變、手腳麻木、步態不穩。",
+    "deficiency_hazards": "貧血、抽搐、憂鬱情緒、口角炎、免疫功能受損。",
+    "updated_at": "2026-09-03T01:10:11.723Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 18,
+  "fields": {
+    "name": "維生素B12",
+    "unit": "ug",
+    "category": "維生素",
+    "daily_recommended": "成人 2.4 ug/天",
+    "daily_upper_limit": "無特定上限",
+    "benefits": "參與紅血球製造、維持神經髓鞘完整與 DNA 合成。",
+    "concerns": "主要存在於動物性食品，純全素食者需額外補充。",
+    "excess_hazards": "安全性高，多餘量隨尿液排出。",
+    "deficiency_hazards": "惡性貧血、神經受損（手腳麻木/記憶力減退/失智症風險）。",
+    "updated_at": "2026-09-03T01:10:11.730Z"
+  }
+},
+{
+  "model": "line_manager.nutrientreference",
+  "pk": 19,
+  "fields": {
+    "name": "葉酸",
+    "unit": "ug",
+    "category": "維生素",
+    "daily_recommended": "成人 400 ug/天，孕婦 600 ug/天",
+    "daily_upper_limit": "1,000 ug/天",
+    "benefits": "協助細胞分裂、紅血球生成、預防胎兒神經管缺損。",
+    "concerns": "備孕與懷孕初期婦女極重要靈魂營養素。",
+    "excess_hazards": "過量葉酸可能掩蓋維生素 B12 缺乏導致的神經病變症狀。",
+    "deficiency_hazards": "巨幼紅血球性貧血、孕婦易導致胎兒無腦症或脊柱裂、舌炎。",
+    "updated_at": "2026-09-03T01:10:11.739Z"
+  }
+},
+{
+  "model": "line_manager.foodadditive",
+  "pk": 1,
+  "fields": {
+    "name": "亞硝酸鈉 (Sodium Nitrite)",
+    "e_number": "E250 / (五)保色劑#01",
+    "category": "保色劑與防腐劑",
+    "purpose": "抑制致死肉毒桿菌滋生、保持加工肉品鮮紅色澤與獨特風味",
+    "common_foods": "香腸、臘肉、培根、火腿、熱狗、板鴨、熱狗堡、西式火腿",
+    "health_hazards": 

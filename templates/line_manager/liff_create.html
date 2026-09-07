@@ -46,11 +46,174 @@
             border-color: #1DB446;
             box-shadow: 0 0 0 0.2rem rgba(29, 180, 70, 0.25);
         }
+
+        /* LIFF 精緻下拉導覽選單樣式 */
+        .liff-nav-card,
+        .glass-card:has(.liff-nav-dropdown) {
+            position: relative;
+            z-index: 1050;
+        }
+        .liff-nav-dropdown {
+            position: relative;
+            z-index: 1060;
+        }
+        .liff-nav-dropdown .dropdown-toggle {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            color: #334155;
+            border-radius: 50px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-toggle:hover,
+        .liff-nav-dropdown .dropdown-toggle:focus,
+        .liff-nav-dropdown .dropdown-toggle[aria-expanded="true"] {
+            background: rgba(0, 0, 0, 0.1);
+            border-color: #0284c7;
+            color: #0284c7;
+        }
+        .liff-nav-dropdown .dropdown-menu {
+            background: rgba(15, 23, 42, 0.98) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75) !important;
+            padding: 6px !important;
+            min-width: 230px !important;
+            width: max-content !important;
+            max-width: min(340px, 90vw) !important;
+            max-height: calc(100vh - 120px) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            z-index: 99999 !important;
+            animation: liffDropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .liff-nav-dropdown .dropdown-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+        .liff-nav-dropdown .dropdown-menu::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.35);
+            border-radius: 4px;
+        }
+        @keyframes liffDropdownFadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .liff-nav-dropdown .dropdown-item {
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: background 0.15s ease, color 0.15s ease;
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-item span:first-child {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-item:hover,
+        .liff-nav-dropdown .dropdown-item:focus {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+        .liff-nav-dropdown .dropdown-item.active-nav-item {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(99, 102, 241, 0.25));
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            color: #38bdf8;
+            font-weight: 600;
+        }
+        .liff-nav-dropdown .dropdown-item.active-nav-item:hover,
+        .liff-nav-dropdown .dropdown-item.active-nav-item:focus {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.32), rgba(99, 102, 241, 0.32));
+            color: #38bdf8;
+        }
+        .liff-nav-dropdown .dropdown-item .badge {
+            flex-shrink: 0;
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            background: rgba(14, 165, 233, 0.35) !important;
+            color: #38bdf8 !important;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+        }
+        .liff-nav-dropdown .dropdown-header {
+            color: #94a3b8;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 3px 8px 4px;
+        }
+        .liff-nav-dropdown .dropdown-divider {
+            border-color: rgba(255, 255, 255, 0.12);
+            margin: 4px 2px;
+        }
+        }
     </style>
 </head>
 <body class="py-4">
     <div class="container" style="max-width: 500px;">
-        <div class="glass-card p-4">
+        <div class="glass-card p-4 liff-nav-card" style="position: relative; z-index: 1050;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="/line/liff/" class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-sm" style="font-size: 0.82rem;">
+                    <i class="fa-solid fa-arrow-left me-1"></i>返回行程
+                </a>
+                <!-- LIFF 服務導覽下拉選單 -->
+                <div class="dropdown liff-nav-dropdown">
+                    <button class="btn dropdown-toggle" type="button" id="liffNavDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-compass text-info"></i>
+                        <span>服務導覽</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="liffNavDropdown">
+                        <li><h6 class="dropdown-header"><i class="fa-solid fa-layer-group me-1"></i>快捷服務導覽</h6></li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/">
+                                <span><i class="fa-regular fa-calendar-check me-2 text-success"></i>行程小幫手</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/?page=drama">
+                                <span><i class="fa-solid fa-tv me-2 text-info"></i>追劇小幫手</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/?page=nutrition">
+                                <span><i class="fa-solid fa-seedling me-2 text-success"></i>食品營養百科</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/?page=gnn">
+                                <span><i class="fa-solid fa-gamepad me-2 text-warning"></i>GNN 動漫情報</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/?page=music">
+                                <span><i class="fa-solid fa-compact-disc me-2 text-danger"></i>酷炫音樂平台</span>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="/line/liff/?page=pet">
+                                <span><i class="fa-solid fa-paw me-2 text-primary"></i>休閒小站桌寵</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <h4 class="fw-bold mb-4 text-center text-success" id="form-title"><i class="fa-solid fa-calendar-plus me-2"></i>安排新行程</h4>
             
             <form id="create-form">
@@ -483,5 +646,7 @@
             });
         }
     </script>
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

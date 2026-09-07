@@ -73,6 +73,24 @@ urlpatterns = [
     path("api/pet/tower_battle/", views.api_line_pet_tower_battle, name="api_line_pet_tower_battle"),
     path("api/pet/start_expedition/", views.api_line_pet_start_expedition, name="api_line_pet_start_expedition"),
     path("api/pet/cancel_expedition/", views.api_line_pet_cancel_expedition, name="api_line_pet_cancel_expedition"),
-    path("api/pet/claim_expedition/", views.api_line_pet_claim_expedition, name="api_line_pet_claim_expedition"),
-    path("api/pet/claim_maintenance_gift/", views.api_line_pet_claim_maintenance_gift, name="api_line_pet_claim_maintenance_gift"),
+    # FDA 食品營養成分資料庫 API 與頁面
+    path("liff/nutrition/", views.liff_nutrition, name="liff_nutrition"),
+    path("api/nutrition/all/", views.api_get_fda_nutrition_list, name="api_get_fda_nutrition_list"),
+    path("api/nutrition/detail/<int:pk>/", views.api_get_fda_nutrition_detail, name="api_get_fda_nutrition_detail"),
+    path("api/nutrition/references/", views.api_get_nutrient_references, name="api_get_nutrient_references"),
+    path("api/nutrition/update_fda/", views.api_update_fda_nutrition, name="api_update_fda_nutrition"),
+
+    # 每日飲食紀錄與一鍵健康分析 API
+    path("api/nutrition/intake/add/", views.api_add_intake_log, name="api_add_intake_log"),
+    path("api/nutrition/intake/list/", views.api_get_intake_logs, name="api_get_intake_logs"),
+    path("api/nutrition/intake/delete/<int:log_id>/", views.api_delete_intake_log, name="api_delete_intake_log"),
+    path("api/nutrition/intake/analyze/", views.api_analyze_daily_intake, name="api_analyze_daily_intake"),
+
+    # 食品添加物與危害知識庫 API
+    path("api/nutrition/additives/all/", views.api_get_food_additives, name="api_get_food_additives"),
+
+    # 巴哈姆特 GNN 新聞與多標籤檢索 API
+    path("gnn/", views.liff_gnn, name="liff_gnn"),
+    path("api/gnn/list/", views.api_get_gnn_news, name="api_get_gnn_news"),
+    path("api/gnn/crawl/", views.api_trigger_gnn_crawl, name="api_trigger_gnn_crawl"),
 ]
