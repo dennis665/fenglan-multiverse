@@ -93,4 +93,9 @@ urlpatterns = [
     path("gnn/", views.liff_gnn, name="liff_gnn"),
     path("api/gnn/list/", views.api_get_gnn_news, name="api_get_gnn_news"),
     path("api/gnn/crawl/", views.api_trigger_gnn_crawl, name="api_trigger_gnn_crawl"),
+
+    # 手帳筆記本 (Planner Notebook) API
+    path("api/planner/get/", views.api_get_planner_note, name="api_get_planner_note"),
+    path("api/planner/save/", views.api_save_planner_note, name="api_save_planner_note"),
+    path("api/planner/sync_today_itineraries/", views.api_sync_planner_itineraries, name="api_sync_planner_itineraries"),
 ]

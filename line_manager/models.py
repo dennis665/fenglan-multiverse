@@ -324,6 +324,32 @@ class GNNNews(models.Model):
         return f"[{self.crawl_date}] {self.title}"
 
 
+class PlannerNotebook(models.Model):
+    """手帳筆記本（支援週間行程 WEEKLY PLAN 與每日記事 DAILY NOTES）"""
+    PLAN_TYPE_CHOICES = [
+        ("weekly", _("週間行程")),
+        ("daily", _("每日記事")),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="planner_notebooks", verbose_name=_("使用者"))
+    line_user_id = models.CharField(max_length=50, blank=True, default="", db_index=True, verbose_name=_("LINE 用戶識別碼"))
+    plan_type = models.CharField(max_length=10, choices=PLAN_TYPE_CHOICES, db_index=True, verbose_name=_("筆記類型"))
+    target_date = models.DateField(db_index=True, verbose_name=_("目標日期/週一日期"))
+    content = models.JSONField(default=dict, blank=True, verbose_name=_("筆記內容資料"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("最後更新時間"))
+
+    class Meta:
+        verbose_name = _("手帳筆記本")
+        verbose_name_plural = _("手帳筆記本")
+        unique_together = ("line_user_id", "plan_type", "target_date")
+        ordering = ["-target_date", "-updated_at"]
+
+    def __str__(self):
+        owner = self.user.username if self.user else self.line_user_id
+        return f"[{self.get_plan_type_display()}] {self.target_date} ({owner})"
+
+
+
 
 
 

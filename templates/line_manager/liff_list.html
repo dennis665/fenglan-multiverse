@@ -8,6 +8,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Planner Notebook -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- LINE LIFF SDK -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <!-- SweetAlert2 -->
@@ -282,10 +286,326 @@
             border-color: rgba(255, 255, 255, 0.12);
             margin: 4px 2px;
         }
+
+        /* ==================== 手帳筆記本 (Planner Notebook) 樣式 ==================== */
+        .planner-container-wrapper {
+            transition: all 0.3s ease;
+        }
+        .planner-book-wrapper {
+            background: #FBF9F5;
+            color: #2D3748;
+            border-radius: 20px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.25);
+            border: 1px solid #DFD8CB;
+            position: relative;
+            overflow: hidden;
+            font-family: "Noto Serif TC", "Songti TC", serif, -apple-system;
+        }
+        .planner-book-spread {
+            display: flex;
+            position: relative;
+            min-height: 720px;
+        }
+        @media (min-width: 820px) {
+            .planner-book-spread::after {
+                content: "";
+                position: absolute;
+                top: 0; bottom: 0;
+                left: 50%;
+                width: 28px;
+                transform: translateX(-50%);
+                background: linear-gradient(to right, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.02) 25%, rgba(0,0,0,0.13) 50%, rgba(0,0,0,0.02) 75%, rgba(0,0,0,0.06) 100%);
+                pointer-events: none;
+                z-index: 15;
+            }
+        }
+        .planner-page {
+            flex: 1;
+            min-width: 0;
+            padding: 26px 22px;
+            background-color: #FBF9F5;
+            background-image: radial-gradient(#E8E1D5 0.75px, transparent 0.75px);
+            background-size: 18px 18px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .planner-page-left {
+            border-right: 1px solid #E5DFD4;
+        }
+        @media (max-width: 819.98px) {
+            .planner-book-spread {
+                flex-direction: column;
+            }
+            .planner-page {
+                padding: 20px 14px;
+            }
+            .planner-page-left {
+                border-right: none;
+                border-bottom: 2px dashed #D5CDBC;
+            }
+        }
+        .planner-main-title {
+            font-size: 1.55rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            color: #2D3748;
+            line-height: 1.15;
+            font-family: "Noto Serif TC", serif;
+        }
+        .planner-eng-title {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            color: #718096;
+            margin-top: 2px;
+            font-family: inherit;
+        }
+        .planner-motto {
+            font-size: 0.78rem;
+            color: #718096;
+            margin-top: 5px;
+            letter-spacing: 1px;
+            font-family: "Noto Serif TC", serif;
+        }
+        .handwriting-script {
+            font-family: 'Caveat', cursive, -apple-system;
+            font-size: 1.45rem;
+            color: #4A5568;
+            font-weight: 700;
+            transform: rotate(-3deg);
+            display: inline-block;
+            line-height: 1.1;
+        }
+        .handwriting-quote {
+            font-family: "Noto Serif TC", serif;
+            font-size: 0.8rem;
+            color: #4A5568;
+            font-style: italic;
+            letter-spacing: 0.8px;
+        }
+        /* 橫線手寫輸入框 */
+        .planner-line-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #D5CEBF;
+            outline: none;
+            padding: 2px 4px;
+            font-size: 0.82rem;
+            color: #1A202C;
+            width: 100%;
+            font-family: "Noto Serif TC", serif, -apple-system;
+            transition: all 0.2s ease;
+        }
+        .planner-line-input:focus {
+            border-bottom: 1px solid #10B981;
+            background: rgba(255, 255, 255, 0.65);
+        }
+        .planner-item-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .planner-chk {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid #829575;
+            border-radius: 3px;
+            cursor: pointer;
+            flex-shrink: 0;
+            position: relative;
+            background: rgba(255,255,255,0.7);
+            transition: all 0.15s ease;
+            margin: 0;
+        }
+        .planner-chk:checked {
+            background-color: #58714B;
+            border-color: #58714B;
+        }
+        .planner-chk:checked::after {
+            content: "✓";
+            position: absolute;
+            color: white;
+            font-size: 11px;
+            top: -2px;
+            left: 2px;
+            font-weight: bold;
+        }
+        .planner-chk:checked + .planner-line-input {
+            text-decoration: line-through;
+            color: #A0AEC0;
+        }
+        /* 星期圓形徽章 (莫蘭迪色調) */
+        .day-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #2D3748;
+            font-size: 0.62rem;
+            font-weight: 700;
+            line-height: 1.1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            flex-shrink: 0;
+        }
+        .day-badge span:first-child {
+            font-size: 0.6rem;
+            letter-spacing: 0.5px;
+        }
+        .day-badge span:last-child {
+            font-size: 0.74rem;
+        }
+        .day-badge-mon { background: #BFCCB5; }
+        .day-badge-tue { background: #B8C4A9; }
+        .day-badge-wed { background: #D1CCC0; }
+        .day-badge-thu { background: #BDBAA9; }
+        .day-badge-fri { background: #C2B8AC; }
+        .day-badge-sat { background: #BAC9CE; color: #1E293B; }
+        .day-badge-sun { background: #DCBEB5; color: #1E293B; }
+
+        /* 週間行程表格框 */
+        .planner-week-table {
+            border: 1px solid #D5CEBF;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.45);
+        }
+        .planner-day-row {
+            border-bottom: 1px solid #E2DCD2;
+            display: flex;
+            padding: 6px 8px;
+            gap: 8px;
+            align-items: center;
+        }
+        .planner-day-row:last-child {
+            border-bottom: none;
+        }
+        .planner-day-tasks {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .planner-day-notes-col {
+            width: 25%;
+            min-width: 65px;
+            border-left: 1px solid #E2DCD2;
+            padding-left: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .planner-notes-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+            resize: none;
+            font-size: 0.75rem;
+            color: #4A5568;
+            line-height: 18px;
+            height: 72px;
+            background-image: linear-gradient(to bottom, transparent 94%, #D5CEBF 95%);
+            background-size: 100% 18px;
+            font-family: inherit;
+        }
+        .planner-notes-input:focus {
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* 每日記事模組卡片 */
+        .planner-box {
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid #D5CEBF;
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .planner-box-header {
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: #4A5568;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .planner-box-important {
+            background: #F8EFE5;
+            border: 1px solid #DECDBE;
+        }
+        .planner-box-important .planner-box-header {
+            color: #8C5935;
+        }
+        /* 今日行程時間槽 */
+        .time-slot-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 3px;
+        }
+        .time-slot-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #718096;
+            width: 18px;
+            flex-shrink: 0;
+            text-align: right;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        /* 心情臉譜 */
+        .mood-face-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1.5px solid #CBD5E1;
+            background: white;
+            font-size: 1.15rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .mood-face-btn:hover {
+            transform: scale(1.15);
+            border-color: #38BDF8;
+        }
+        .mood-face-btn.active {
+            border-color: #0284C7;
+            background: #E0F2FE;
+            box-shadow: 0 0 10px rgba(2, 132, 199, 0.4);
+            transform: scale(1.18);
+        }
+        /* 今日小記手寫文字框 */
+        .planner-reflection-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+            resize: none;
+            font-size: 0.8rem;
+            color: #2D3748;
+            line-height: 20px;
+            height: 70px;
+            background-image: linear-gradient(to bottom, transparent 94%, #D5CEBF 95%);
+            background-size: 100% 20px;
+            font-family: inherit;
+        }
+        .planner-reflection-input:focus {
+            background-color: rgba(255, 255, 255, 0.6);
+        }
     </style>
 </head>
 <body class="py-4">
-    <div class="container position-relative" style="max-width: 520px; z-index: 1;">
+    <div class="container position-relative planner-container-wrapper" id="main-container" style="max-width: 520px; z-index: 1;">
         <!-- 載入中畫面 -->
         <div id="loading-section" class="text-center py-5">
             <div class="loader d-inline-block"></div>
@@ -370,6 +690,11 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-panel" type="button" role="tab" onclick="switchTab('history')">
                         📅 歷史紀錄 <span id="badge-history-count" class="badge badge-tab-count bg-white text-dark ms-1">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="planner-tab" data-bs-toggle="tab" data-bs-target="#planner-panel" type="button" role="tab" onclick="switchTab('planner')">
+                        📖 手帳筆記
                     </button>
                 </li>
             </ul>
@@ -489,6 +814,352 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 📖 手帳筆記 Panel -->
+                <div class="tab-pane fade" id="planner-panel" role="tabpanel">
+                    <!-- 頂部手帳控制列 -->
+                    <div class="glass-card p-3 mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-radius: 16px;">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="視野切換">
+                            <button type="button" class="btn btn-outline-light active" id="btn-view-spread" onclick="setPlannerViewMode('spread')">
+                                <i class="fa-solid fa-book-open me-1"></i>雙頁手帳
+                            </button>
+                            <button type="button" class="btn btn-outline-light" id="btn-view-weekly" onclick="setPlannerViewMode('weekly')">
+                                <i class="fa-solid fa-calendar-week me-1"></i>週間行程
+                            </button>
+                            <button type="button" class="btn btn-outline-light" id="btn-view-daily" onclick="setPlannerViewMode('daily')">
+                                <i class="fa-regular fa-calendar-days me-1"></i>每日記事
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="planner-save-indicator" class="small text-light text-opacity-75">
+                                <i class="fa-solid fa-check text-success me-1"></i>已同步
+                            </span>
+                            <button class="btn btn-sm btn-line rounded-pill px-3 shadow-sm" onclick="saveAllPlannerData(true)">
+                                <i class="fa-solid fa-floppy-disk me-1"></i>立即儲存
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 筆記本本體 (Planner Book) -->
+                    <div class="planner-book-wrapper shadow-lg mb-4">
+                        <div class="planner-book-spread" id="planner-spread-container">
+                            
+                            <!-- ==================== 左頁：週間行程 (WEEKLY PLAN) ==================== -->
+                            <div class="planner-page planner-page-left" id="planner-page-weekly">
+                                <!-- 左頁頂部導航與標題 -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <!-- 左上角草寫與小花插畫 -->
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="handwriting-script">Better Things Ahead</span>
+                                            <svg width="22" height="28" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 30C12 20 12 10 12 4" stroke="#6B8063" stroke-width="1.5" stroke-linecap="round"/>
+                                                <path d="M12 18C8 16 5 13 6 9C9 9 11 12 12 18Z" fill="#A4B89D" opacity="0.8"/>
+                                                <path d="M12 14C16 12 19 9 18 5C15 5 13 8 12 14Z" fill="#A4B89D" opacity="0.8"/>
+                                                <circle cx="12" cy="4" r="3" fill="#E8C96C"/>
+                                                <circle cx="9" cy="3" r="2.2" fill="#F4DC8C"/>
+                                                <circle cx="15" cy="3" r="2.2" fill="#F4DC8C"/>
+                                                <circle cx="12" cy="1" r="2.2" fill="#F4DC8C"/>
+                                            </svg>
+                                        </div>
+                                        <!-- 右上角週別區間與切換 -->
+                                        <div class="text-end">
+                                            <div class="d-flex align-items-center gap-1 justify-content-end mb-1">
+                                                <button class="btn btn-link text-secondary p-0" onclick="navigateWeek(-1)" title="上一週"><i class="fa-solid fa-chevron-left" style="font-size:0.75rem;"></i></button>
+                                                <span class="fw-bold px-2 py-0" id="weekly-date-range-text" style="font-size: 0.85rem; letter-spacing: 1px; color: #4A5568; border-bottom: 1.5px solid #CBD5E1;">-- / -- ~ -- / --</span>
+                                                <button class="btn btn-link text-secondary p-0" onclick="navigateWeek(1)" title="下一週"><i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i></button>
+                                                <button class="btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 ms-1" style="font-size: 0.68rem;" onclick="navigateWeek(0)">本週</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center my-1">
+                                        <div class="planner-main-title">週 間 行 程</div>
+                                        <div class="planner-eng-title">W E E K L Y   P L A N</div>
+                                        <div class="planner-motto">把日子過成喜歡的樣子。</div>
+                                    </div>
+                                </div>
+
+                                <!-- 7 天列表格線 (MON - SUN) -->
+                                <div class="planner-week-table mb-3">
+                                    <!-- 週一 -->
+                                    <div class="planner-day-row">
+                                        <div class="day-badge day-badge-mon"><span>MON</span><span>一</span></div>
+                                        <div class="planner-day-tasks" id="tasks-mon">
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-mon-c-0"><input type="text" class="planner-line-input" id="w-mon-t-0" placeholder="1. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-mon-c-1"><input type="text" class="planner-line-input" id="w-mon-t-1" placeholder="2. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-mon-c-2"><input type="text" class="planner-line-input" id="w-mon-t-2" placeholder="3. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-mon-c-3"><input type="text" class="planner-line-input" id="w-mon-t-3" placeholder="4. "></div>
+                                        </div>
+                                        <div class="planner-day-notes-col">
+                                            <div class="text-muted text-center mb-1" style="font-size: 0.68rem; font-weight: bold; letter-spacing: 1px;">備註</div>
+                                            <textarea class="planner-notes-input" id="w-mon-notes" placeholder="備註..."></textarea>
+                                        </div>
+                                    </div>
+                                    <!-- 週二 -->
+                                    <div class="planner-day-row">
+                                        <div class="day-badge day-badge-tue"><span>TUE</span><span>二</span></div>
+                                        <div class="planner-day-tasks" id="tasks-tue">
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-tue-c-0"><input type="text" class="planner-line-input" id="w-tue-t-0" placeholder="1. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-tue-c-1"><input type="text" class="planner-line-input" id="w-tue-t-1" placeholder="2. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-tue-c-2"><input type="text" class="planner-line-input" id="w-tue-t-2" placeholder="3. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-tue-c-3"><input type="text" class="planner-line-input" id="w-tue-t-3" placeholder="4. "></div>
+                                        </div>
+                                        <div class="planner-day-notes-col">
+                                            <div class="text-muted text-center mb-1" style="font-size: 0.68rem; font-weight: bold; letter-spacing: 1px;">備註</div>
+                                            <textarea class="planner-notes-input" id="w-tue-notes" placeholder="備註..."></textarea>
+                                        </div>
+                                    </div>
+                                    <!-- 週三 -->
+                                    <div class="planner-day-row">
+                                        <div class="day-badge day-badge-wed"><span>WED</span><span>三</span></div>
+                                        <div class="planner-day-tasks" id="tasks-wed">
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-wed-c-0"><input type="text" class="planner-line-input" id="w-wed-t-0" placeholder="1. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-wed-c-1"><input type="text" class="planner-line-input" id="w-wed-t-1" placeholder="2. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-wed-c-2"><input type="text" class="planner-line-input" id="w-wed-t-2" placeholder="3. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-wed-c-3"><input type="text" class="planner-line-input" id="w-wed-t-3" placeholder="4. "></div>
+                                        </div>
+                                        <div class="planner-day-notes-col">
+                                            <div class="text-muted text-center mb-1" style="font-size: 0.68rem; font-weight: bold; letter-spacing: 1px;">備註</div>
+                                            <textarea class="planner-notes-input" id="w-wed-notes" placeholder="備註..."></textarea>
+                                        </div>
+                                    </div>
+                                    <!-- 週四 -->
+                                    <div class="planner-day-row">
+                                        <div class="day-badge day-badge-thu"><span>THU</span><span>四</span></div>
+                                        <div class="planner-day-tasks" id="tasks-thu">
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-thu-c-0"><input type="text" class="planner-line-input" id="w-thu-t-0" placeholder="1. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-thu-c-1"><input type="text" class="planner-line-input" id="w-thu-t-1" placeholder="2. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-thu-c-2"><input type="text" class="planner-line-input" id="w-thu-t-2" placeholder="3. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-thu-c-3"><input type="text" class="planner-line-input" id="w-thu-t-3" placeholder="4. "></div>
+                                        </div>
+                                        <div class="planner-day-notes-col">
+                                            <div class="text-muted text-center mb-1" style="font-size: 0.68rem; font-weight: bold; letter-spacing: 1px;">備註</div>
+                                            <textarea class="planner-notes-input" id="w-thu-notes" placeholder="備註..."></textarea>
+                                        </div>
+                                    </div>
+                                    <!-- 週五 -->
+                                    <div class="planner-day-row">
+                                        <div class="day-badge day-badge-fri"><span>FRI</span><span>五</span></div>
+                                        <div class="planner-day-tasks" id="tasks-fri">
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-fri-c-0"><input type="text" class="planner-line-input" id="w-fri-t-0" placeholder="1. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-fri-c-1"><input type="text" class="planner-line-input" id="w-fri-t-1" placeholder="2. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-fri-c-2"><input type="text" class="planner-line-input" id="w-fri-t-2" placeholder="3. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-fri-c-3"><input type="text" class="planner-line-input" id="w-fri-t-3" placeholder="4. "></div>
+                                        </div>
+                                        <div class="planner-day-notes-col">
+                                            <div class="text-muted text-center mb-1" style="font-size: 0.68rem; font-weight: bold; letter-spacing: 1px;">備註</div>
+                                            <textarea class="planner-notes-input" id="w-fri-notes" placeholder="備註..."></textarea>
+                                        </div>
+                                    </div>
+                                    <!-- 週六 -->
+                                    <div class="planner-day-row">
+                                        <div class="day-badge day-badge-sat"><span>SAT</span><span>六</span></div>
+                                        <div class="planner-day-tasks" id="tasks-sat">
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-sat-c-0"><input type="text" class="planner-line-input" id="w-sat-t-0" placeholder="1. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-sat-c-1"><input type="text" class="planner-line-input" id="w-sat-t-1" placeholder="2. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-sat-c-2"><input type="text" class="planner-line-input" id="w-sat-t-2" placeholder="3. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-sat-c-3"><input type="text" class="planner-line-input" id="w-sat-t-3" placeholder="4. "></div>
+                                        </div>
+                                        <div class="planner-day-notes-col">
+                                            <div class="text-muted text-center mb-1" style="font-size: 0.68rem; font-weight: bold; letter-spacing: 1px;">備註</div>
+                                            <textarea class="planner-notes-input" id="w-sat-notes" placeholder="備註..."></textarea>
+                                        </div>
+                                    </div>
+                                    <!-- 週日 -->
+                                    <div class="planner-day-row">
+                                        <div class="day-badge day-badge-sun"><span>SUN</span><span>日</span></div>
+                                        <div class="planner-day-tasks" id="tasks-sun">
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-sun-c-0"><input type="text" class="planner-line-input" id="w-sun-t-0" placeholder="1. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-sun-c-1"><input type="text" class="planner-line-input" id="w-sun-t-1" placeholder="2. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-sun-c-2"><input type="text" class="planner-line-input" id="w-sun-t-2" placeholder="3. "></div>
+                                            <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="w-sun-c-3"><input type="text" class="planner-line-input" id="w-sun-t-3" placeholder="4. "></div>
+                                        </div>
+                                        <div class="planner-day-notes-col">
+                                            <div class="text-muted text-center mb-1" style="font-size: 0.68rem; font-weight: bold; letter-spacing: 1px;">備註</div>
+                                            <textarea class="planner-notes-input" id="w-sun-notes" placeholder="備註..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 左頁底部裝飾與小語 -->
+                                <div class="d-flex justify-content-between align-items-end pt-2">
+                                    <!-- 水耕玻璃瓶插畫 (SVG) -->
+                                    <svg width="34" height="42" viewBox="0 0 34 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 18C12 10 10 5 8 3C7 5 9 10 12 18Z" fill="#7E9A75"/>
+                                        <path d="M18 18C20 12 24 7 26 4C24 6 20 11 18 18Z" fill="#8FA986"/>
+                                        <path d="M15 22V12" stroke="#688060" stroke-width="1.5" stroke-linecap="round"/>
+                                        <rect x="9" y="16" width="12" height="4" rx="1.5" stroke="#94A3B8" stroke-width="1.2" fill="white"/>
+                                        <path d="M10 20L8 38C8 39.5 9.5 41 11.5 41H18.5C20.5 41 22 39.5 22 38L20 20H10Z" fill="#E2E8F0" fill-opacity="0.5" stroke="#94A3B8" stroke-width="1.2"/>
+                                        <path d="M9 30C12 31 18 29 21 30L21.5 38C21.5 39.5 20 40.5 18.5 40.5H11.5C10 40.5 8.5 39.5 8.5 38L9 30Z" fill="#CBD5E1" fill-opacity="0.4"/>
+                                    </svg>
+                                    <div class="text-center px-2">
+                                        <span class="handwriting-quote">生活不需要很完美，但可以很有愛與溫度。</span>
+                                        <div style="height: 1px; width: 140px; background: #CBD5E1; margin: 2px auto 0;"></div>
+                                    </div>
+                                    <!-- 疊放書本與綠葉 (SVG) -->
+                                    <svg width="40" height="34" viewBox="0 0 44 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="6" y="22" width="32" height="8" rx="1.5" fill="#B5C4B1" stroke="#8A9D85" stroke-width="1"/>
+                                        <rect x="10" y="14" width="26" height="8" rx="1.5" fill="#D1CCC0" stroke="#A8A193" stroke-width="1"/>
+                                        <path d="M26 14C30 9 36 6 38 4C36 7 32 11 29 14" stroke="#688060" stroke-width="1.2"/>
+                                        <ellipse cx="33" cy="8" rx="4" ry="2" transform="rotate(-30 33 8)" fill="#8FA986"/>
+                                        <ellipse cx="37" cy="5" rx="3.5" ry="1.8" transform="rotate(-40 37 5)" fill="#A4B89D"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- ==================== 右頁：每日記事 (DAILY NOTES) ==================== -->
+                            <div class="planner-page" id="planner-page-daily">
+                                <!-- 右頁頂部導航與標題 -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <div class="planner-main-title">每 日 記 事</div>
+                                            <div class="planner-eng-title">D A I L Y   N O T E S</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="d-flex align-items-center gap-1 justify-content-end mb-1">
+                                                <button class="btn btn-link text-secondary p-0" onclick="navigateDay(-1)" title="前一天"><i class="fa-solid fa-chevron-left" style="font-size:0.75rem;"></i></button>
+                                                <input type="date" id="daily-date-input" class="form-control form-control-sm py-0 px-1 text-center" style="width: 125px; font-size: 0.75rem; background: transparent; border: 1px solid #CBD5E1; border-radius: 6px; color: #4A5568;" onchange="onDailyDateInputChange(this.value)">
+                                                <button class="btn btn-link text-secondary p-0" onclick="navigateDay(1)" title="後一天"><i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i></button>
+                                                <button class="btn btn-xs btn-outline-success rounded-pill py-0 px-2 ms-1" style="font-size: 0.68rem;" onclick="navigateDay(0)">今天</button>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-1 justify-content-end">
+                                                <span class="handwriting-quote" style="font-size: 0.72rem;">記錄今天，也記錄成長的自己。</span>
+                                                <span style="font-size: 0.8rem;">🌿</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center py-1">
+                                        <span class="fw-bold px-3 py-1" id="daily-date-header-text" style="font-size: 0.95rem; letter-spacing: 2px; color: #2D3748; border-bottom: 1.5px solid #CBD5E1;">
+                                            ____ 年 ____ 月 ____ 日 (  )
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- 每日記事主體區塊 Grid -->
+                                <div class="row g-2 mb-3">
+                                    <!-- 左側：今日行程 (時間軸 06-22) -->
+                                    <div class="col-12 col-md-6">
+                                        <div class="planner-box h-100">
+                                            <div class="planner-box-header">
+                                                <span><i class="fa-regular fa-clock me-1 text-success"></i>今日行程</span>
+                                                <button class="btn btn-link text-success p-0 small text-decoration-none" onclick="syncItinerariesToDaily()" title="自動帶入今日小幫手行程" style="font-size: 0.7rem;">
+                                                    <i class="fa-solid fa-wand-magic-sparkles me-1"></i>帶入行程
+                                                </button>
+                                            </div>
+                                            <div id="daily-schedule-slots">
+                                                <div class="time-slot-row"><span class="time-slot-label">06</span><input type="text" class="planner-line-input" id="sched-06"></div>
+                                                <div class="time-slot-row"><span class="time-slot-label">08</span><input type="text" class="planner-line-input" id="sched-08"></div>
+                                                <div class="time-slot-row"><span class="time-slot-label">10</span><input type="text" class="planner-line-input" id="sched-10"></div>
+                                                <div class="time-slot-row"><span class="time-slot-label">12</span><input type="text" class="planner-line-input" id="sched-12"></div>
+                                                <div class="time-slot-row"><span class="time-slot-label">14</span><input type="text" class="planner-line-input" id="sched-14"></div>
+                                                <div class="time-slot-row"><span class="time-slot-label">16</span><input type="text" class="planner-line-input" id="sched-16"></div>
+                                                <div class="time-slot-row"><span class="time-slot-label">18</span><input type="text" class="planner-line-input" id="sched-18"></div>
+                                                <div class="time-slot-row"><span class="time-slot-label">20</span><input type="text" class="planner-line-input" id="sched-20"></div>
+                                                <div class="time-slot-row"><span class="time-slot-label">22</span><input type="text" class="planner-line-input" id="sched-22"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 右側：待辦事項 (8項) -->
+                                    <div class="col-12 col-md-6">
+                                        <div class="planner-box h-100">
+                                            <div class="planner-box-header">
+                                                <span><i class="fa-regular fa-square-check me-1 text-primary"></i>待辦事項</span>
+                                            </div>
+                                            <div class="d-flex flex-column gap-1">
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-todo-c-0"><input type="text" class="planner-line-input" id="d-todo-t-0"></div>
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-todo-c-1"><input type="text" class="planner-line-input" id="d-todo-t-1"></div>
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-todo-c-2"><input type="text" class="planner-line-input" id="d-todo-t-2"></div>
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-todo-c-3"><input type="text" class="planner-line-input" id="d-todo-t-3"></div>
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-todo-c-4"><input type="text" class="planner-line-input" id="d-todo-t-4"></div>
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-todo-c-5"><input type="text" class="planner-line-input" id="d-todo-t-5"></div>
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-todo-c-6"><input type="text" class="planner-line-input" id="d-todo-t-6"></div>
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-todo-c-7"><input type="text" class="planner-line-input" id="d-todo-t-7"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 重要事項 (3項) -->
+                                    <div class="col-12 col-md-6">
+                                        <div class="planner-box planner-box-important">
+                                            <div class="planner-box-header">
+                                                <span><i class="fa-solid fa-star me-1 text-warning"></i>重要事項</span>
+                                            </div>
+                                            <div class="d-flex flex-column gap-1">
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-imp-c-0"><input type="text" class="planner-line-input" id="d-imp-t-0"></div>
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-imp-c-1"><input type="text" class="planner-line-input" id="d-imp-t-1"></div>
+                                                <div class="planner-item-row"><input type="checkbox" class="planner-chk" id="d-imp-c-2"><input type="text" class="planner-line-input" id="d-imp-t-2"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 心情紀錄 (5臉譜) -->
+                                    <div class="col-12 col-md-6">
+                                        <div class="planner-box">
+                                            <div class="planner-box-header">
+                                                <span><i class="fa-regular fa-face-smile me-1 text-warning"></i>心情紀錄</span>
+                                            </div>
+                                            <div class="d-flex justify-content-around my-1">
+                                                <button type="button" class="mood-face-btn" data-mood="very_happy" onclick="setPlannerMood('very_happy')" title="超開心">😄</button>
+                                                <button type="button" class="mood-face-btn" data-mood="happy" onclick="setPlannerMood('happy')" title="心情好">🙂</button>
+                                                <button type="button" class="mood-face-btn" data-mood="neutral" onclick="setPlannerMood('neutral')" title="平靜">😐</button>
+                                                <button type="button" class="mood-face-btn" data-mood="sad" onclick="setPlannerMood('sad')" title="低落">🙁</button>
+                                                <button type="button" class="mood-face-btn" data-mood="terrible" onclick="setPlannerMood('terrible')" title="難過">😢</button>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-1 mt-2">
+                                                <span style="font-size: 0.74rem; color: #4A5568; flex-shrink: 0;">今天的心情：</span>
+                                                <input type="text" class="planner-line-input" id="daily-mood-desc" placeholder="簡短紀錄心境...">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 今日小記 (自由日記隨筆) -->
+                                    <div class="col-12 col-md-6">
+                                        <div class="planner-box h-100">
+                                            <div class="planner-box-header">
+                                                <span><i class="fa-solid fa-pencil me-1 text-secondary"></i>今日小記</span>
+                                            </div>
+                                            <textarea class="planner-reflection-input" id="daily-reflection" placeholder="記錄日常小確幸、靈感或隨筆..."></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- 今日收穫 / 感想 (3項) -->
+                                    <div class="col-12 col-md-6">
+                                        <div class="planner-box h-100">
+                                            <div class="planner-box-header">
+                                                <span><i class="fa-regular fa-heart me-1 text-danger"></i>今日收穫 / 感想</span>
+                                            </div>
+                                            <div class="d-flex flex-column gap-1">
+                                                <div class="d-flex align-items-center gap-2"><span style="color:#718096; font-size:0.75rem;">✦</span><input type="text" class="planner-line-input" id="daily-harvest-0" placeholder="學到的一件事..."></div>
+                                                <div class="d-flex align-items-center gap-2"><span style="color:#718096; font-size:0.75rem;">✦</span><input type="text" class="planner-line-input" id="daily-harvest-1" placeholder="感謝的一個人或事..."></div>
+                                                <div class="d-flex align-items-center gap-2"><span style="color:#718096; font-size:0.75rem;">✦</span><input type="text" class="planner-line-input" id="daily-harvest-2" placeholder="自己的小進步..."></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 右頁底部結語與花草插畫 -->
+                                <div class="d-flex justify-content-between align-items-end pt-2">
+                                    <div class="text-start">
+                                        <span class="handwriting-quote" style="font-size: 0.85rem;">願明天的你，比今天更喜歡自己。</span>
+                                        <div style="height: 1px; width: 160px; background: #CBD5E1; margin: 3px 0 0;"></div>
+                                    </div>
+                                    <!-- 典雅小花束插畫 (SVG) -->
+                                    <svg width="34" height="40" viewBox="0 0 34 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M17 38C17 26 17 14 17 6" stroke="#688060" stroke-width="1.5" stroke-linecap="round"/>
+                                        <path d="M17 24C12 21 8 17 10 12C14 12 16 16 17 24Z" fill="#A4B89D" opacity="0.85"/>
+                                        <path d="M17 18C22 15 26 11 24 6C20 6 18 10 17 18Z" fill="#8FA986" opacity="0.85"/>
+                                        <circle cx="17" cy="6" r="3.2" fill="#E8C96C"/>
+                                        <circle cx="13" cy="5" r="2.2" fill="#F4DC8C"/>
+                                        <circle cx="21" cy="5" r="2.2" fill="#F4DC8C"/>
+                                        <circle cx="17" cy="2" r="2.2" fill="#F4DC8C"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -559,6 +1230,15 @@
 
         function switchTab(tab) {
             currentActiveTab = tab;
+            const container = document.getElementById("main-container");
+            if (container) {
+                if (tab === "planner") {
+                    container.style.maxWidth = "960px";
+                    initPlanner();
+                } else {
+                    container.style.maxWidth = "520px";
+                }
+            }
         }
 
         function fetchItineraries(tab) {
@@ -1280,6 +1960,467 @@
                     }
                 });
             }
+        }
+
+        // ==============================================================================
+        // 手帳筆記本 (Planner Notebook: 週間行程 & 每日記事) 控制邏輯
+        // ==============================================================================
+        let plannerInitialized = false;
+        let plannerCurrentWeekMonday = null; // Date object for Monday of active week
+        let plannerCurrentDay = null; // Date object for active day
+        let plannerCurrentView = "spread"; // "spread", "weekly", "daily"
+        let plannerAutoSaveTimer = null;
+        let plannerSelectedMood = "";
+
+        function getMonday(d) {
+            d = new Date(d);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function formatDateYYYYMMDD(d) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        }
+
+        function initPlanner() {
+            if (!plannerCurrentDay) {
+                const today = new Date();
+                plannerCurrentDay = new Date(today);
+                plannerCurrentWeekMonday = getMonday(today);
+            }
+
+            if (!plannerInitialized) {
+                plannerInitialized = true;
+
+                // 綁定輸入與勾選事件以觸發防抖動自動儲存
+                const plannerPanel = document.getElementById("planner-panel");
+                if (plannerPanel) {
+                    plannerPanel.addEventListener("input", function(e) {
+                        if (e.target.classList.contains("planner-line-input") || 
+                            e.target.classList.contains("planner-notes-input") || 
+                            e.target.classList.contains("planner-reflection-input")) {
+                            scheduleAutoSave();
+                        }
+                    });
+                    plannerPanel.addEventListener("change", function(e) {
+                        if (e.target.classList.contains("planner-chk")) {
+                            scheduleAutoSave();
+                        }
+                    });
+                }
+            }
+
+            updatePlannerHeaderDates();
+            loadWeeklyPlan();
+            loadDailyNote();
+        }
+
+        function updatePlannerHeaderDates() {
+            if (!plannerCurrentWeekMonday || !plannerCurrentDay) return;
+
+            // 1. 週間行程日期區間 (MM/DD ~ MM/DD)
+            const endSunday = new Date(plannerCurrentWeekMonday);
+            endSunday.setDate(endSunday.getDate() + 6);
+
+            const m1 = String(plannerCurrentWeekMonday.getMonth() + 1).padStart(2, "0");
+            const d1 = String(plannerCurrentWeekMonday.getDate()).padStart(2, "0");
+            const m2 = String(endSunday.getMonth() + 1).padStart(2, "0");
+            const d2 = String(endSunday.getDate()).padStart(2, "0");
+
+            const weeklyText = document.getElementById("weekly-date-range-text");
+            if (weeklyText) {
+                weeklyText.textContent = `${m1}/${d1} ~ ${m2}/${d2}`;
+            }
+
+            // 2. 每日記事日期 (YYYY 年 MM 月 DD 日 (週))
+            const year = plannerCurrentDay.getFullYear();
+            const month = String(plannerCurrentDay.getMonth() + 1).padStart(2, "0");
+            const day = String(plannerCurrentDay.getDate()).padStart(2, "0");
+            const weekdaysZh = ["日", "一", "二", "三", "四", "五", "六"];
+            const zhDay = weekdaysZh[plannerCurrentDay.getDay()];
+
+            const dailyHead = document.getElementById("daily-date-header-text");
+            if (dailyHead) {
+                dailyHead.textContent = `${year} 年 ${month} 月 ${day} 日 (${zhDay})`;
+            }
+
+            const dailyPicker = document.getElementById("daily-date-input");
+            if (dailyPicker) {
+                dailyPicker.value = `${year}-${month}-${day}`;
+            }
+        }
+
+        function setPlannerViewMode(mode) {
+            plannerCurrentView = mode;
+            const btnSpread = document.getElementById("btn-view-spread");
+            const btnWeekly = document.getElementById("btn-view-weekly");
+            const btnDaily = document.getElementById("btn-view-daily");
+            const pageWeekly = document.getElementById("planner-page-weekly");
+            const pageDaily = document.getElementById("planner-page-daily");
+
+            [btnSpread, btnWeekly, btnDaily].forEach(b => b && b.classList.remove("active"));
+
+            if (mode === "weekly") {
+                if (btnWeekly) btnWeekly.classList.add("active");
+                if (pageWeekly) pageWeekly.style.display = "flex";
+                if (pageDaily) pageDaily.style.display = "none";
+            } else if (mode === "daily") {
+                if (btnDaily) btnDaily.classList.add("active");
+                if (pageWeekly) pageWeekly.style.display = "none";
+                if (pageDaily) pageDaily.style.display = "flex";
+            } else { // "spread"
+                if (btnSpread) btnSpread.classList.add("active");
+                if (pageWeekly) pageWeekly.style.display = "flex";
+                if (pageDaily) pageDaily.style.display = "flex";
+            }
+        }
+
+        function navigateWeek(delta) {
+            saveAllPlannerData(false);
+            if (delta === 0) {
+                plannerCurrentWeekMonday = getMonday(new Date());
+            } else {
+                plannerCurrentWeekMonday.setDate(plannerCurrentWeekMonday.getDate() + (delta * 7));
+            }
+            updatePlannerHeaderDates();
+            loadWeeklyPlan();
+        }
+
+        function navigateDay(delta) {
+            saveAllPlannerData(false);
+            if (delta === 0) {
+                plannerCurrentDay = new Date();
+            } else {
+                plannerCurrentDay.setDate(plannerCurrentDay.getDate() + delta);
+            }
+            updatePlannerHeaderDates();
+            loadDailyNote();
+        }
+
+        function onDailyDateInputChange(val) {
+            if (!val) return;
+            saveAllPlannerData(false);
+            const parts = val.split("-");
+            plannerCurrentDay = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            updatePlannerHeaderDates();
+            loadDailyNote();
+        }
+
+        function setPlannerMood(moodKey) {
+            plannerSelectedMood = (plannerSelectedMood === moodKey) ? "" : moodKey;
+            document.querySelectorAll(".mood-face-btn").forEach(btn => {
+                if (btn.getAttribute("data-mood") === plannerSelectedMood) {
+                    btn.classList.add("active");
+                } else {
+                    btn.classList.remove("active");
+                }
+            });
+            scheduleAutoSave();
+        }
+
+        function loadWeeklyPlan() {
+            if (!plannerCurrentWeekMonday) return;
+            const mondayStr = formatDateYYYYMMDD(plannerCurrentWeekMonday);
+            fetch("/line/api/planner/get/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    plan_type: "weekly",
+                    target_date: mondayStr
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success" && data.content) {
+                    renderWeeklyPlan(data.content);
+                }
+            })
+            .catch(err => console.error("loadWeeklyPlan error:", err));
+        }
+
+        function renderWeeklyPlan(content) {
+            const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+            const daysData = content.days || {};
+
+            days.forEach(d => {
+                const dayObj = daysData[d] || { todos: [], notes: "" };
+                const todos = dayObj.todos || [];
+
+                for (let i = 0; i < 4; i++) {
+                    const item = todos[i] || { text: "", done: false };
+                    const chkEl = document.getElementById(`w-${d}-c-${i}`);
+                    const textEl = document.getElementById(`w-${d}-t-${i}`);
+                    if (chkEl) chkEl.checked = !!item.done;
+                    if (textEl) textEl.value = item.text || "";
+                }
+
+                const notesEl = document.getElementById(`w-${d}-notes`);
+                if (notesEl) notesEl.value = dayObj.notes || "";
+            });
+        }
+
+        function loadDailyNote() {
+            if (!plannerCurrentDay) return;
+            const dateStr = formatDateYYYYMMDD(plannerCurrentDay);
+            fetch("/line/api/planner/get/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    plan_type: "daily",
+                    target_date: dateStr
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success" && data.content) {
+                    renderDailyNote(data.content);
+                }
+            })
+            .catch(err => console.error("loadDailyNote error:", err));
+        }
+
+        function renderDailyNote(content) {
+            // 1. 今日行程 06-22
+            const sched = content.schedule || {};
+            [6, 8, 10, 12, 14, 16, 18, 20, 22].forEach(h => {
+                const hh = String(h).padStart(2, "0");
+                const el = document.getElementById(`sched-${hh}`);
+                if (el) el.value = sched[hh] || "";
+            });
+
+            // 2. 待辦事項 8 項
+            const todos = content.todos || [];
+            for (let i = 0; i < 8; i++) {
+                const item = todos[i] || { text: "", done: false };
+                const chkEl = document.getElementById(`d-todo-c-${i}`);
+                const textEl = document.getElementById(`d-todo-t-${i}`);
+                if (chkEl) chkEl.checked = !!item.done;
+                if (textEl) textEl.value = item.text || "";
+            }
+
+            // 3. 重要事項 3 項
+            const important = content.important || [];
+            for (let i = 0; i < 3; i++) {
+                const item = important[i] || { text: "", done: false };
+                const chkEl = document.getElementById(`d-imp-c-${i}`);
+                const textEl = document.getElementById(`d-imp-t-${i}`);
+                if (chkEl) chkEl.checked = !!item.done;
+                if (textEl) textEl.value = item.text || "";
+            }
+
+            // 4. 心情紀錄
+            setPlannerMood(content.mood || "");
+            const moodDesc = document.getElementById("daily-mood-desc");
+            if (moodDesc) moodDesc.value = content.mood_text || "";
+
+            // 5. 今日小記
+            const refEl = document.getElementById("daily-reflection");
+            if (refEl) refEl.value = content.daily_reflection || "";
+
+            // 6. 今日收穫 (3項)
+            const harvests = content.harvests || ["", "", ""];
+            for (let i = 0; i < 3; i++) {
+                const hEl = document.getElementById(`daily-harvest-${i}`);
+                if (hEl) hEl.value = harvests[i] || "";
+            }
+        }
+
+        function collectWeeklyPlanData() {
+            const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+            const daysData = {};
+
+            days.forEach(d => {
+                const todos = [];
+                for (let i = 0; i < 4; i++) {
+                    const chkEl = document.getElementById(`w-${d}-c-${i}`);
+                    const textEl = document.getElementById(`w-${d}-t-${i}`);
+                    todos.push({
+                        done: chkEl ? chkEl.checked : false,
+                        text: textEl ? textEl.value.trim() : ""
+                    });
+                }
+                const notesEl = document.getElementById(`w-${d}-notes`);
+                daysData[d] = {
+                    todos: todos,
+                    notes: notesEl ? notesEl.value.trim() : ""
+                };
+            });
+
+            return {
+                days: daysData
+            };
+        }
+
+        function collectDailyNoteData() {
+            const schedule = {};
+            [6, 8, 10, 12, 14, 16, 18, 20, 22].forEach(h => {
+                const hh = String(h).padStart(2, "0");
+                const el = document.getElementById(`sched-${hh}`);
+                schedule[hh] = el ? el.value.trim() : "";
+            });
+
+            const todos = [];
+            for (let i = 0; i < 8; i++) {
+                const chkEl = document.getElementById(`d-todo-c-${i}`);
+                const textEl = document.getElementById(`d-todo-t-${i}`);
+                todos.push({
+                    done: chkEl ? chkEl.checked : false,
+                    text: textEl ? textEl.value.trim() : ""
+                });
+            }
+
+            const important = [];
+            for (let i = 0; i < 3; i++) {
+                const chkEl = document.getElementById(`d-imp-c-${i}`);
+                const textEl = document.getElementById(`d-imp-t-${i}`);
+                important.push({
+                    done: chkEl ? chkEl.checked : false,
+                    text: textEl ? textEl.value.trim() : ""
+                });
+            }
+
+            const moodDesc = document.getElementById("daily-mood-desc");
+            const refEl = document.getElementById("daily-reflection");
+            const harvests = [];
+            for (let i = 0; i < 3; i++) {
+                const hEl = document.getElementById(`daily-harvest-${i}`);
+                harvests.push(hEl ? hEl.value.trim() : "");
+            }
+
+            return {
+                schedule: schedule,
+                todos: todos,
+                important: important,
+                mood: plannerSelectedMood,
+                mood_text: moodDesc ? moodDesc.value.trim() : "",
+                daily_reflection: refEl ? refEl.value.trim() : "",
+                harvests: harvests
+            };
+        }
+
+        function scheduleAutoSave() {
+            const indicator = document.getElementById("planner-save-indicator");
+            if (indicator) {
+                indicator.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-warning me-1"></i>編輯中...`;
+            }
+            clearTimeout(plannerAutoSaveTimer);
+            plannerAutoSaveTimer = setTimeout(() => {
+                saveAllPlannerData(false);
+            }, 1200);
+        }
+
+        function saveAllPlannerData(isManual = false) {
+            if (!plannerCurrentWeekMonday || !plannerCurrentDay) return;
+
+            const weeklyContent = collectWeeklyPlanData();
+            const dailyContent = collectDailyNoteData();
+
+            const p1 = fetch("/line/api/planner/save/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    plan_type: "weekly",
+                    target_date: formatDateYYYYMMDD(plannerCurrentWeekMonday),
+                    content: weeklyContent
+                })
+            });
+
+            const p2 = fetch("/line/api/planner/save/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: userAccessToken,
+                    plan_type: "daily",
+                    target_date: formatDateYYYYMMDD(plannerCurrentDay),
+                    content: dailyContent
+                })
+            });
+
+            Promise.all([p1, p2])
+                .then(responses => Promise.all(responses.map(r => r.json())))
+                .then(results => {
+                    const indicator = document.getElementById("planner-save-indicator");
+                    if (indicator) {
+                        indicator.innerHTML = `<i class="fa-solid fa-check text-success me-1"></i>已同步`;
+                    }
+                    if (isManual) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "手帳已儲存！",
+                            text: "您的週間行程與每日記事已成功同步至雲端。",
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: "#0f172a",
+                            color: "#fff"
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error("Save planner error:", err);
+                    const indicator = document.getElementById("planner-save-indicator");
+                    if (indicator) {
+                        indicator.innerHTML = `<i class="fa-solid fa-circle-exclamation text-danger me-1"></i>儲存失敗`;
+                    }
+                });
+        }
+
+        function syncItinerariesToDaily() {
+            if (!plannerCurrentDay) return;
+            const dateStr = formatDateYYYYMMDD(plannerCurrentDay);
+            fetch(`/line/api/planner/sync_today_itineraries/?date=${dateStr}&access_token=${encodeURIComponent(userAccessToken || '')}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success" && data.itineraries && data.itineraries.length > 0) {
+                        data.itineraries.forEach(it => {
+                            const hr = parseInt(it.hour, 10);
+                            let slotHr = 6;
+                            if (hr < 7) slotHr = 6;
+                            else if (hr < 9) slotHr = 8;
+                            else if (hr < 11) slotHr = 10;
+                            else if (hr < 13) slotHr = 12;
+                            else if (hr < 15) slotHr = 14;
+                            else if (hr < 17) slotHr = 16;
+                            else if (hr < 19) slotHr = 18;
+                            else if (hr < 21) slotHr = 20;
+                            else slotHr = 22;
+
+                            const hh = String(slotHr).padStart(2, "0");
+                            const inputEl = document.getElementById(`sched-${hh}`);
+                            if (inputEl) {
+                                const prev = inputEl.value ? inputEl.value + "；" : "";
+                                inputEl.value = `${prev}${it.time} ${it.title}`;
+                            }
+                        });
+                        scheduleAutoSave();
+                        Swal.fire({
+                            icon: "success",
+                            title: "行程已帶入！",
+                            text: `已為您成功帶入 ${data.itineraries.length} 筆今日行程至時間軸。`,
+                            timer: 1600,
+                            showConfirmButton: false,
+                            background: "#0f172a",
+                            color: "#fff"
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "info",
+                            title: "查無行程",
+                            text: "您在這一天尚無安排行程小幫手的行程紀錄。",
+                            background: "#0f172a",
+                            color: "#fff"
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error("syncItineraries error:", err);
+                });
         }
     </script>
 </body>

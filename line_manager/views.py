@@ -5927,3 +5927,246 @@ def api_trigger_gnn_crawl(request):
         })
     except Exception as e:
         return JsonResponse({"status": "error", "error": str(e)}, status=500)
+
+
+# ==============================================================================
+# 手帳筆記本 (Planner Notebook: 週間行程 & 每日記事) API
+# ==============================================================================
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+def _get_planner_user_identity(request, data=None):
+    """取得當前使用者身分 (LINE line_user_id 與 Django User 物件)"""
+    if data is None:
+        data = {}
+    req_user = getattr(request, "user", None)
+    user = req_user if req_user and req_user.is_authenticated else None
+    line_user_id = ""
+    access_token = data.get("access_token") or request.headers.get("X-Line-Access-Token")
+
+    if access_token:
+        try:
+            res = requests.get(
+                "https://api.line.me/v2/profile",
+                headers={"Authorization": f"Bearer {access_token}"},
+                timeout=5
+            )
+            if res.status_code == 200:
+                p = res.json()
+                line_user_id = p.get("userId", "")
+                if line_user_id and not user:
+                    lp = LineProfile.objects.filter(line_user_id=line_user_id).first()
+                    if lp:
+                        user = lp.user
+        except Exception as err:
+            logger.warning(f"Error fetching LINE profile for planner: {err}")
+
+    if not line_user_id and user:
+        lp = LineProfile.objects.filter(user=user).first()
+        if lp:
+            line_user_id = lp.line_user_id
+        else:
+            line_user_id = f"user_{user.id}"
+
+    if not line_user_id:
+        line_user_id = data.get("line_user_id") or "guest_default"
+
+    return user, line_user_id
+
+
+@csrf_exempt
+def api_get_planner_note(request):
+    """API 端點：取得手帳筆記內容 (週間行程或每日記事)"""
+    from .models import PlannerNotebook
+    import datetime
+
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body.decode("utf-8")) if request.body else {}
+        else:
+            data = request.GET.dict()
+
+        plan_type = data.get("plan_type", "daily") # "weekly" or "daily"
+        target_date_str = data.get("target_date", "")
+
+        if not target_date_str:
+            target_date = datetime.date.today()
+        else:
+            try:
+                target_date = datetime.datetime.strptime(target_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                target_date = datetime.date.today()
+
+        # 如果是週間行程，將 target_date 規範為該週的星期一
+        if plan_type == "weekly":
+            target_date = target_date - datetime.timedelta(days=target_date.weekday())
+
+        user, line_user_id = _get_planner_user_identity(request, data)
+
+        notebook = PlannerNotebook.objects.filter(
+            line_user_id=line_user_id,
+            plan_type=plan_type,
+            target_date=target_date
+        ).first()
+
+        # 如果用 line_user_id 沒查到，且有綁定 user，也嘗試用 user 查
+        if not notebook and user:
+            notebook = PlannerNotebook.objects.filter(
+                user=user,
+                plan_type=plan_type,
+                target_date=target_date
+            ).first()
+
+        if notebook and notebook.content:
+            content = notebook.content
+            updated_at = notebook.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            # 建立空範本
+            if plan_type == "weekly":
+                end_date = target_date + datetime.timedelta(days=6)
+                content = {
+                    "date_range": f"{target_date.strftime('%m/%d')} ~ {end_date.strftime('%m/%d')}",
+                    "days": {
+                        "mon": {"todos": [{"text": "", "done": False} for _ in range(4)], "notes": ""},
+                        "tue": {"todos": [{"text": "", "done": False} for _ in range(4)], "notes": ""},
+                        "wed": {"todos": [{"text": "", "done": False} for _ in range(4)], "notes": ""},
+                        "thu": {"todos": [{"text": "", "done": False} for _ in range(4)], "notes": ""},
+                        "fri": {"todos": [{"text": "", "done": False} for _ in range(4)], "notes": ""},
+                        "sat": {"todos": [{"text": "", "done": False} for _ in range(4)], "notes": ""},
+                        "sun": {"todos": [{"text": "", "done": False} for _ in range(4)], "notes": ""},
+                    }
+                }
+            else:
+                weekdays_zh = ["一", "二", "三", "四", "五", "六", "日"]
+                zh_day = weekdays_zh[target_date.weekday()]
+                content = {
+                    "date_display": f"{target_date.year} 年 {target_date.month:02d} 月 {target_date.day:02d} 日 ({zh_day})",
+                    "schedule": {f"{h:02d}": "" for h in [6, 8, 10, 12, 14, 16, 18, 20, 22]},
+                    "todos": [{"text": "", "done": False} for _ in range(8)],
+                    "important": [{"text": "", "done": False} for _ in range(3)],
+                    "mood": "",
+                    "mood_text": "",
+                    "daily_reflection": "",
+                    "harvests": ["", "", ""]
+                }
+            updated_at = ""
+
+        return JsonResponse({
+            "status": "success",
+            "plan_type": plan_type,
+            "target_date": target_date.strftime("%Y-%m-%d"),
+            "content": content,
+            "updated_at": updated_at,
+            "line_user_id": line_user_id
+        })
+    except Exception as e:
+        import traceback
+        logger.error(f"[Planner] api_get_planner_note error: {e}\n{traceback.format_exc()}")
+        return JsonResponse({"status": "error", "error": str(e)}, status=500)
+
+
+@csrf_exempt
+def api_save_planner_note(request):
+    """API 端點：儲存手帳筆記內容 (週間行程或每日記事)"""
+    from .models import PlannerNotebook
+    import datetime
+
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8")) if request.body else {}
+        plan_type = data.get("plan_type", "daily")
+        target_date_str = data.get("target_date", "")
+        content = data.get("content", {})
+
+        if not target_date_str:
+            target_date = datetime.date.today()
+        else:
+            try:
+                target_date = datetime.datetime.strptime(target_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                target_date = datetime.date.today()
+
+        if plan_type == "weekly":
+            target_date = target_date - datetime.timedelta(days=target_date.weekday())
+
+        user, line_user_id = _get_planner_user_identity(request, data)
+
+        notebook, created = PlannerNotebook.objects.update_or_create(
+            line_user_id=line_user_id,
+            plan_type=plan_type,
+            target_date=target_date,
+            defaults={
+                "user": user,
+                "content": content,
+            }
+        )
+
+        return JsonResponse({
+            "status": "success",
+            "message": "手帳筆記已儲存！",
+            "plan_type": plan_type,
+            "target_date": target_date.strftime("%Y-%m-%d"),
+            "updated_at": notebook.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+        })
+    except Exception as e:
+        import traceback
+        logger.error(f"[Planner] api_save_planner_note error: {e}\n{traceback.format_exc()}")
+        return JsonResponse({"status": "error", "error": str(e)}, status=500)
+
+
+@csrf_exempt
+def api_sync_planner_itineraries(request):
+    """API 端點：取得當天既有行程小幫手之行程，方便一鍵帶入手帳「今日行程」時間軸"""
+    from .models import Itinerary
+    import datetime
+
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body.decode("utf-8")) if request.body else {}
+        else:
+            data = request.GET.dict()
+
+        target_date_str = data.get("date", "")
+        if not target_date_str:
+            target_date = datetime.date.today()
+        else:
+            try:
+                target_date = datetime.datetime.strptime(target_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                target_date = datetime.date.today()
+
+        user, line_user_id = _get_planner_user_identity(request, data)
+        if not user:
+            return JsonResponse({"status": "success", "itineraries": []})
+
+        start_dt = datetime.datetime.combine(target_date, datetime.time.min)
+        end_dt = datetime.datetime.combine(target_date, datetime.time.max)
+
+        itineraries = Itinerary.objects.filter(
+            user=user,
+            start_time__range=(start_dt, end_dt)
+        ).order_by("start_time")
+
+        items = []
+        for it in itineraries:
+            time_str = it.start_time.strftime("%H:%M") if it.start_time else ""
+            hour_str = it.start_time.strftime("%H") if it.start_time else ""
+            items.append({
+                "time": time_str,
+                "hour": hour_str,
+                "title": it.title,
+                "location": it.location,
+            })
+
+        return JsonResponse({
+            "status": "success",
+            "date": target_date.strftime("%Y-%m-%d"),
+            "itineraries": items
+        })
+    except Exception as e:
+        return JsonResponse({"status": "error", "error": str(e)}, status=500)
+
