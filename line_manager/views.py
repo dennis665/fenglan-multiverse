@@ -5918,11 +5918,13 @@ def api_trigger_gnn_crawl(request):
     """API 端點：手動立即觸發爬取 GNN 新聞"""
     from .management.commands.fetch_gnn_news import crawl_gnn_articles
     crawl_all = request.GET.get("all", "0") in ("1", "true")
+    days_str = request.GET.get("days")
+    days = int(days_str) if days_str and days_str.isdigit() else None
     try:
-        res = crawl_gnn_articles(crawl_all=crawl_all, limit=50)
+        res = crawl_gnn_articles(crawl_all=crawl_all, limit=50, days=days)
         return JsonResponse({
             "status": "success",
-            "message": f"成功收錄 {res['scanned']} 則新聞 (新增: {res['created']}, 更新: {res['updated']})",
+            "message": f"成功收錄 {res['scanned']} 則新聞 (新增: {res['created']}, 更新: {res['updated']}, 略過重複: {res.get('skipped', 0)})",
             "data": res
         })
     except Exception as e:

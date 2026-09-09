@@ -1,5 +1,7 @@
 import re
+import time
 import urllib.request
+import urllib.error
 from datetime import datetime, date, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -19,6 +21,35 @@ PLATFORM_MAP = {
     "platform-party": "綜合",
     "cross": "跨平台",
 }
+
+
+def fetch_url_with_retry(url, headers, max_retries=3, backoff=3.0, timeout=12):
+    """
+    安全發送 HTTP 請求：具備指數退避與防 429 Too Many Requests 重試機制
+    """
+    for attempt in range(1, max_retries + 1):
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.read().decode("utf-8", errors="ignore")
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                wait_sec = backoff * attempt
+                print(f"  ⚠️ [429 頻率限制] 觸發巴哈姆特防爬保護，暫停 {wait_sec:.1f} 秒後自動重試 (第 {attempt}/{max_retries} 次)...")
+                time.sleep(wait_sec)
+                continue
+            elif e.code in (500, 502, 503, 504):
+                time.sleep(1.5)
+                continue
+            else:
+                print(f"  ❌ 請求失敗 HTTP {e.code}: {url}")
+                raise
+        except Exception as e:
+            if attempt == max_retries:
+                print(f"  ❌ 連線錯誤: {e} ({url})")
+                raise
+            time.sleep(1.0)
+    return None
 
 
 def crawl_gnn_articles(target_date_str=None, crawl_all=False, limit=None, days=None, force_update=False):
@@ -49,8 +80,10 @@ def crawl_gnn_articles(target_date_str=None, crawl_all=False, limit=None, days=N
         mode_desc = f"今日新聞 ({today})"
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8",
+        "Referer": "https://gnn.gamer.com.tw/",
     }
 
     created_count = 0
@@ -58,24 +91,45 @@ def crawl_gnn_articles(target_date_str=None, crawl_all=False, limit=None, days=N
     skipped_count = 0
     scanned_count = 0
 
-    page = 1
-    max_pages = 10 if (days and days > 4) else 1  # 若天數較長自動翻頁
+    # 決定抓取列表之目標 URL
+    # 巴哈姆特首頁包含近 5~6 天約 90 幾篇報導；若跨度超過 5 天則改查巴哈官方年月封存 (yy=YYYY&mm=MM)
+    target_urls = []
+    if days and days > 4:
+        cur_y, cur_m = today.year, today.month
+        end_y, end_m = cutoff_date.year, cutoff_date.month
+        y, m = cur_y, cur_m
+        while (y > end_y) or (y == end_y and m >= end_m):
+            target_urls.append(f"https://gnn.gamer.com.tw/index.php?yy={y}&mm={m}")
+            m -= 1
+            if m < 1:
+                m = 12
+                y -= 1
+    elif target_date_str:
+        if exact_date.year == today.year and exact_date.month == today.month:
+            target_urls.append("https://gnn.gamer.com.tw/")
+        else:
+            target_urls.append(f"https://gnn.gamer.com.tw/index.php?yy={exact_date.year}&mm={exact_date.month}")
+    else:
+        target_urls.append("https://gnn.gamer.com.tw/")
+
     stopped = False
 
-    while page <= max_pages and not stopped:
-        url = "https://gnn.gamer.com.tw/" if page == 1 else f"https://gnn.gamer.com.tw/index.php?page={page}"
+    for url in target_urls:
+        if stopped:
+            break
+
         try:
-            req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                html = resp.read().decode("utf-8", errors="ignore")
+            html = fetch_url_with_retry(url, headers=headers)
+            if not html:
+                continue
         except Exception as e:
-            print(f"Error fetching GNN page {page}: {e}")
+            print(f"Error fetching GNN URL {url}: {e}")
             break
 
         soup = BeautifulSoup(html, "html.parser")
         boxes = soup.find_all("div", class_="GN-lbox2B")
         if not boxes:
-            break
+            continue
 
         for b in boxes:
             if limit and scanned_count >= limit:
@@ -153,9 +207,11 @@ def crawl_gnn_articles(target_date_str=None, crawl_all=False, limit=None, days=N
             article_date = today
 
             try:
-                d_req = urllib.request.Request(full_url, headers=headers)
-                with urllib.request.urlopen(d_req, timeout=8) as d_resp:
-                    d_soup = BeautifulSoup(d_resp.read().decode("utf-8", errors="ignore"), "html.parser")
+                # 請求內頁前進行微延遲 (0.35 秒)，體貼巴哈姆特伺服器並防範 429
+                time.sleep(0.35)
+                d_html = fetch_url_with_retry(full_url, headers=headers, max_retries=3, backoff=3.0, timeout=10)
+                if d_html:
+                    d_soup = BeautifulSoup(d_html, "html.parser")
                     
                     # 發布時間字串
                     date_s = d_soup.find(string=re.compile(r"202\d-\d{2}-\d{2}\s+\d{2}:\d{2}"))
@@ -205,8 +261,6 @@ def crawl_gnn_articles(target_date_str=None, crawl_all=False, limit=None, days=N
                 created_count += 1
             else:
                 updated_count += 1
-
-        page += 1
 
     return {
         "scanned": scanned_count,
