@@ -9,7 +9,10 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django_apscheduler.jobstores import DjangoJobStore
 
-from line_manager.management.commands.start_scheduler import run_daily_drama_update
+from line_manager.tasks import (
+    run_daily_drama_update,
+    run_daily_gnn_crawler,
+)
 from utils.logger_utils import jinfo, jinfo_error
 
 
@@ -129,10 +132,10 @@ def check_itinerary_reminders_job():
 
 
 class Command(BaseCommand):
-    help = "啟動背景排程器，每天定時更新股價與劇集電影"
+    help = "啟動背景排程器，定時更新股價、LINE 行程提醒、動漫劇集與 GNN 新聞"
 
     def add_arguments(self, parser):
-        parser.add_argument('--now', action='store_true', help='立即觸發一次劇集與電影更新任務')
+        parser.add_argument('--now', action='store_true', help='立即觸發一次劇集與 GNN 新聞更新任務')
 
     def handle(self, *args, **options):
         #! 初始化排程器，並綁定 Django 的時區
@@ -140,7 +143,7 @@ class Command(BaseCommand):
         scheduler.add_jobstore(DjangoJobStore(), "default")
 
         try:
-            #! 設定排程時間：每天 (週一到週五) 的下午 14:30 執行
+            #! 設定排程時間：每天 (週一到週五) 的下午 14:30 執行台股股價更新
             scheduler.add_job(
                 update_prices_job,  # * 直接呼叫外面的函式
                 trigger=CronTrigger(day_of_week="mon-fri", hour=14, minute=30),
@@ -167,13 +170,25 @@ class Command(BaseCommand):
                 replace_existing=True,
             )
 
+            #! 新增：每日晚間 11:00 (23:00) 自動爬取巴哈姆特 GNN 首頁動漫遊戲情報並同步 DB
+            scheduler.add_job(
+                run_daily_gnn_crawler,
+                trigger=CronTrigger(hour=23, minute=0),
+                id="daily_gnn_news_crawler_job",
+                max_instances=1,
+                replace_existing=True,
+            )
+
             if options.get('now'):
-                self.stdout.write("[SCHEDULER] --now flag detected. Running daily drama update now...")
+                self.stdout.write("[SCHEDULER] --now flag detected. Running daily drama update and GNN crawler now...")
                 run_daily_drama_update()
+                run_daily_gnn_crawler()
 
             self.stdout.write(self.style.SUCCESS("[SCHEDULER] Scheduler service started successfully in background."))
-            self.stdout.write(self.style.SUCCESS("[SCHEDULER] Job 1: Mon-Fri 14:30 update stock prices."))
-            self.stdout.write(self.style.SUCCESS("[SCHEDULER] Job 2: Daily 16:00 (4:00 PM) update TV (2026/07+) & Movie (2026+) into resources/*.csv and DB."))
+            self.stdout.write(self.style.SUCCESS("[SCHEDULER] Job 1: Every 1 min check LINE itinerary reminders."))
+            self.stdout.write(self.style.SUCCESS("[SCHEDULER] Job 2: Mon-Fri 14:30 update stock prices."))
+            self.stdout.write(self.style.SUCCESS("[SCHEDULER] Job 3: Daily 16:00 (4:00 PM) update TV (2026/07+) & Movie (2026+) into resources/*.csv and DB."))
+            self.stdout.write(self.style.SUCCESS("[SCHEDULER] Job 4: Daily 23:00 (11:00 PM) crawl GNN frontpage news into DB."))
             self.stdout.write(self.style.WARNING("Press Ctrl+C to exit."))
 
             #! 開始阻擋並持續運行
