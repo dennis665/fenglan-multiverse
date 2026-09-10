@@ -1,5 +1,6 @@
 import re
 import time
+import email.utils
 import urllib.request
 import urllib.error
 from datetime import datetime, date, timedelta
@@ -25,7 +26,7 @@ PLATFORM_MAP = {
 
 def fetch_url_with_retry(url, headers, max_retries=3, backoff=3.0, timeout=12):
     """
-    安全發送 HTTP 請求：具備指數退避與防 429 Too Many Requests 重試機制
+    安全發送 HTTP 請求：具備指數退避、遵守 Retry-After 與防 429 Too Many Requests 重試機制
     """
     for attempt in range(1, max_retries + 1):
         try:
@@ -34,8 +35,23 @@ def fetch_url_with_retry(url, headers, max_retries=3, backoff=3.0, timeout=12):
                 return resp.read().decode("utf-8", errors="ignore")
         except urllib.error.HTTPError as e:
             if e.code == 429:
-                wait_sec = backoff * attempt
-                print(f"  ⚠️ [429 頻率限制] 觸發巴哈姆特防爬保護，暫停 {wait_sec:.1f} 秒後自動重試 (第 {attempt}/{max_retries} 次)...")
+                retry_after = e.headers.get("Retry-After") if (hasattr(e, "headers") and e.headers) else None
+                wait_sec = None
+                if retry_after:
+                    try:
+                        wait_sec = float(retry_after)
+                    except ValueError:
+                        try:
+                            target_dt = email.utils.parsedate_to_datetime(retry_after)
+                            wait_sec = max((target_dt - datetime.now(target_dt.tzinfo)).total_seconds(), 2.0)
+                        except Exception:
+                            pass
+                if wait_sec is None or wait_sec <= 0:
+                    wait_sec = max(backoff * (2 ** (attempt - 1)), 2.0)
+
+                # 增加 0.5 秒緩衝時間，確保嚴格超出 Cloudflare 速率限制窗口
+                wait_sec += 0.5
+                print(f"  ⚠️ [429 頻率限制] 觸發 Cloudflare / 巴哈姆特頻率保護 (Retry-After: {retry_after or '未指定'})，遵守規範暫停 {wait_sec:.1f} 秒後自動重試 (第 {attempt}/{max_retries} 次)...")
                 time.sleep(wait_sec)
                 continue
             elif e.code in (500, 502, 503, 504):
@@ -81,9 +97,18 @@ def crawl_gnn_articles(target_date_str=None, crawl_all=False, limit=None, days=N
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
         "Referer": "https://gnn.gamer.com.tw/",
+        "Connection": "keep-alive",
+        "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": '"Windows"',
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "same-origin",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
     }
 
     created_count = 0
@@ -207,8 +232,8 @@ def crawl_gnn_articles(target_date_str=None, crawl_all=False, limit=None, days=N
             article_date = today
 
             try:
-                # 請求內頁前進行微延遲 (0.35 秒)，體貼巴哈姆特伺服器並防範 429
-                time.sleep(0.35)
+                # 請求內頁前進行微延遲 (0.3 秒)，遵守禮貌性爬蟲規範避免觸發 Cloudflare / 429 頻率限制
+                time.sleep(0.3)
                 d_html = fetch_url_with_retry(full_url, headers=headers, max_retries=3, backoff=3.0, timeout=10)
                 if d_html:
                     d_soup = BeautifulSoup(d_html, "html.parser")

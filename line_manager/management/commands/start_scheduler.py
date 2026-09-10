@@ -354,21 +354,21 @@ def run_daily_drama_update():
 
 
 def run_daily_gnn_crawler():
-    """ 每日 23:59 執行：爬取當天巴哈姆特 GNN 所有新聞報導並更新 DB """
+    """ 每日 23:00 執行：只抓取巴哈姆特 GNN 首頁新聞報導並更新 DB """
     print("\n==================================================")
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [Daily Scheduler] Crawling today's GNN news (23:59)...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [Daily Scheduler] Crawling GNN frontpage news (23:00)...")
     print("==================================================")
     try:
         from line_manager.management.commands.fetch_gnn_news import crawl_gnn_articles
-        res = crawl_gnn_articles(crawl_all=False)
-        print(f"[GNN SUCCESS] 成功收錄 {res['scanned']} 則新聞 (新增: {res['created']}, 更新: {res['updated']})")
+        res = crawl_gnn_articles(crawl_all=True)
+        print(f"[GNN SUCCESS] 成功收錄 {res['scanned']} 則首頁新聞 (新增: {res['created']}, 更新: {res['updated']}, 略過重複: {res.get('skipped', 0)})")
     except Exception as e:
         print(f"[GNN ERROR] GNN 新聞爬蟲執行失敗: {e}")
     print("==================================================\n")
 
 
 class Command(BaseCommand):
-    help = "自動啟動 CSI Server 排程服務 (每日 16:00 動畫更新、23:59 GNN 新聞爬取)"
+    help = "自動啟動 CSI Server 排程服務 (每日 16:00 動畫更新、23:00 GNN 新聞爬取)"
 
     def add_arguments(self, parser):
         parser.add_argument('--now', action='store_true', help='立即觸發一次更新任務')
@@ -391,17 +391,17 @@ class Command(BaseCommand):
             replace_existing=True
         )
 
-        # 每日 23:59 執行巴哈姆特 GNN 當天新聞爬取任務
+        # 每日 23:00 執行巴哈姆特 GNN 首頁新聞爬取任務
         scheduler.add_job(
             run_daily_gnn_crawler,
-            trigger=CronTrigger(hour=23, minute=59),
+            trigger=CronTrigger(hour=23, minute=0),
             id="daily_gnn_news_crawler_job",
             replace_existing=True
         )
 
         self.stdout.write(self.style.SUCCESS("✅ 排程服務已就緒！"))
         self.stdout.write(self.style.SUCCESS("  • 每日 16:00 (下午4點): 自動更新 resources/*.csv 與 DB 動畫資料庫"))
-        self.stdout.write(self.style.SUCCESS("  • 每日 23:59 (晚間11點59分): 自動爬取當天 GNN 所有動漫遊戲情報"))
+        self.stdout.write(self.style.SUCCESS("  • 每日 23:00 (晚間11點整): 自動爬取 GNN 首頁所有動漫遊戲情報"))
         self.stdout.write(self.style.NOTICE("按 Ctrl+C 可停止排程服務。"))
 
         try:
