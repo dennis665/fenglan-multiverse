@@ -349,7 +349,69 @@ class PlannerNotebook(models.Model):
         return f"[{self.get_plan_type_display()}] {self.target_date} ({owner})"
 
 
+class Novel(models.Model):
+    """輕小說書籍主表"""
+    novel_id = models.CharField(max_length=50, unique=True, db_index=True, verbose_name=_("小說 ID"))
+    title = models.CharField(max_length=255, db_index=True, verbose_name=_("小說標題"))
+    author = models.CharField(max_length=100, blank=True, default="", verbose_name=_("作者"))
+    cover_url = models.URLField(max_length=500, blank=True, default="", verbose_name=_("封面連結"))
+    description = models.TextField(blank=True, default="", verbose_name=_("小說簡介"))
+    category = models.CharField(max_length=100, blank=True, default="", verbose_name=_("作品分類"))
+    status = models.CharField(max_length=50, blank=True, default="", verbose_name=_("連載狀態"))
+    source_url = models.URLField(max_length=500, blank=True, default="", verbose_name=_("來源網址"))
+    total_chapters = models.PositiveIntegerField(default=0, verbose_name=_("總章節數"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("匯入時間"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))
+
+    class Meta:
+        verbose_name = _("輕小說")
+        verbose_name_plural = _("輕小說庫")
+        ordering = ["-updated_at", "-created_at"]
+
+    def __str__(self):
+        return f"{self.title} ({self.novel_id})"
 
 
+class NovelChapter(models.Model):
+    """小說目錄與章節"""
+    novel = models.ForeignKey(Novel, on_delete=models.CASCADE, related_name="chapters", verbose_name=_("所屬小說"))
+    volume_title = models.CharField(max_length=200, default="正文", verbose_name=_("分卷名稱"))
+    chapter_id = models.CharField(max_length=50, db_index=True, verbose_name=_("章節 ID"))
+    title = models.CharField(max_length=255, verbose_name=_("章節標題"))
+    chapter_url = models.URLField(max_length=500, blank=True, default="", verbose_name=_("章節網址"))
+    order = models.IntegerField(default=0, db_index=True, verbose_name=_("章節排序"))
+    content_cached = models.JSONField(default=dict, blank=True, verbose_name=_("章節快取內容"))
+    has_images = models.BooleanField(default=False, verbose_name=_("是否包含插圖"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("建立時間"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("更新時間"))
+
+    class Meta:
+        verbose_name = _("小說章節")
+        verbose_name_plural = _("小說章節")
+        unique_together = ("novel", "chapter_id")
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"[{self.novel.title}] {self.volume_title} - {self.title}"
 
 
+class NovelReadingProgress(models.Model):
+    """使用者小說閱讀進度（支援精確段落紀錄與回訪導航）"""
+    novel = models.ForeignKey(Novel, on_delete=models.CASCADE, related_name="reading_progresses", verbose_name=_("所屬小說"))
+    line_user_id = models.CharField(max_length=50, db_index=True, verbose_name=_("LINE 用戶識別碼"))
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="novel_progresses", verbose_name=_("使用者"))
+    last_chapter = models.ForeignKey(NovelChapter, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("最後閱讀章節"))
+    last_chapter_key = models.CharField(max_length=50, blank=True, default="", verbose_name=_("最後章節 ID"))
+    last_chapter_title = models.CharField(max_length=255, blank=True, default="", verbose_name=_("最後章節名稱"))
+    last_paragraph_index = models.IntegerField(default=0, verbose_name=_("閱讀段落索引"))
+    scroll_percentage = models.FloatField(default=0.0, verbose_name=_("滾動進度百分比"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("最後閱讀時間"))
+
+    class Meta:
+        verbose_name = _("小說閱讀進度")
+        verbose_name_plural = _("小說閱讀進度")
+        unique_together = ("novel", "line_user_id")
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"{self.line_user_id} - {self.novel.title} ({self.last_chapter_title} P{self.last_paragraph_index})"

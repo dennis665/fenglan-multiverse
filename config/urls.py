@@ -45,8 +45,12 @@ from tigf.views import download_diff_csv, tigf_dashboard
 def ranged_media_serve(request, path, document_root=None):
     """處理開發環境下媒體檔案支援 HTTP 206 Partial Content 的請求"""
     path = os.path.normpath(path).lstrip("\\/")
-    root = Path(str(document_root))
+    root = Path(str(document_root)).resolve()
     fullpath = (root / path).resolve()
+
+    #! 防止路徑穿越：解析後的路徑必須仍位於媒體根目錄內
+    if not fullpath.is_relative_to(root):
+        raise Http404("檔案不存在")
 
     if not os.path.exists(fullpath) or os.path.isdir(fullpath):
         raise Http404("檔案不存在")

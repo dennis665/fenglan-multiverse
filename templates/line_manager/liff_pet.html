@@ -360,6 +360,11 @@
                             </a>
                         </li>
                         <li>
+                            <a class="dropdown-item" href="/line/liff/?page=novel">
+                                <span><i class="fa-solid fa-book-open me-2 text-primary"></i>輕小說瀏覽器</span>
+                            </a>
+                        </li>
+                        <li>
                             <a class="dropdown-item" href="/line/liff/?page=music">
                                 <span><i class="fa-solid fa-compact-disc me-2 text-danger"></i>酷炫音樂平台</span>
                             </a>
@@ -1314,7 +1319,11 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const claimCoins = urlParams.get('claim_coins');
                 const giftId = urlParams.get('gift_id');
-                const giftMsg = urlParams.get('gift_msg') || '禮物金幣獎勵';
+                const giftSig = urlParams.get('sig') || '';
+                // 訊息來自網址參數，跳脫後再放入 HTML 避免 XSS
+                const giftMsgEl = document.createElement('div');
+                giftMsgEl.textContent = urlParams.get('gift_msg') || '禮物金幣獎勵';
+                const giftMsg = giftMsgEl.innerHTML;
 
                 if (claimCoins && giftId) {
                     // 清除 URL 參數避免重覆觸發 UI
@@ -1327,7 +1336,8 @@
                         body: JSON.stringify({
                             access_token: userAccessToken || "",
                             coins: claimCoins,
-                            gift_id: giftId
+                            gift_id: giftId,
+                            sig: giftSig
                         })
                     })
                     .then(res => res.json())

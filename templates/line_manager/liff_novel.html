@@ -1,0 +1,3349 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>DevStudio - Python Workspace [csi_server]</title>
+    <!-- Bootstrap 5 & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- LINE LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- Ace Editor (VS Code Style Code Editor) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-python.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-one_dark.js"></script>
+    <!-- Skulpt (Client-side Python 3 runner fallback) -->
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+    <!-- Chart.js (Interactive Visual Charts) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #181818;
+            --surface-color: #252526;
+            --surface-hover: #2a2d2e;
+            --border-color: #3c3c3c;
+            --text-primary: #cccccc;
+            --text-secondary: #969696;
+            --text-muted: #6e7681;
+            --accent-color: #007acc;
+            --accent-hover: #1f8ad2;
+            --reader-bg: #1e1e1e;
+            --reader-text: #d4d4d4;
+            --reader-font-size: 16px;
+            --reader-line-height: 1.8;
+            --navbar-bg: #181818;
+
+            /* VS Code Specific Palette */
+            --vscode-editor-bg: #1e1e1e;
+            --vscode-editor-fg: #d4d4d4;
+            --vscode-tab-active-bg: #1e1e1e;
+            --vscode-tab-inactive-bg: #2d2d2d;
+            --vscode-tab-border: #252526;
+            --vscode-tab-active-border: #007acc;
+            --vscode-gutter-fg: #858585;
+            --vscode-gutter-active-fg: #c6c6c6;
+            --vscode-line-active-bg: rgba(255, 255, 255, 0.04);
+            --vscode-line-hover-bg: rgba(255, 255, 255, 0.02);
+            --vscode-statusbar-bg: #007acc;
+            --vscode-statusbar-fg: #ffffff;
+            --vscode-breadcrumb-bg: #1e1e1e;
+            --vscode-breadcrumb-fg: #969696;
+            --vscode-string-fg: #ce9178;
+            --vscode-comment-fg: #6a9955;
+            --vscode-keyword-fg: #c586c0;
+            --vscode-entity-fg: #4ec9b0;
+            --vscode-font-code: "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
+            --vscode-font-reading: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f3f3f3;
+            --surface-color: #f3f3f3;
+            --surface-hover: #e8e8e8;
+            --border-color: #e5e5e5;
+            --text-primary: #333333;
+            --text-secondary: #616161;
+            --text-muted: #8c8c8c;
+            --accent-color: #007acc;
+            --accent-hover: #0062a3;
+            --reader-bg: #ffffff;
+            --reader-text: #1e1e1e;
+            --navbar-bg: #f3f3f3;
+
+            /* VS Code Light+ Palette */
+            --vscode-editor-bg: #ffffff;
+            --vscode-editor-fg: #1e1e1e;
+            --vscode-tab-active-bg: #ffffff;
+            --vscode-tab-inactive-bg: #ececec;
+            --vscode-tab-border: #f3f3f3;
+            --vscode-tab-active-border: #007acc;
+            --vscode-gutter-fg: #9b9b9b;
+            --vscode-gutter-active-fg: #333333;
+            --vscode-line-active-bg: rgba(0, 0, 0, 0.04);
+            --vscode-line-hover-bg: rgba(0, 0, 0, 0.02);
+            --vscode-statusbar-bg: #007acc;
+            --vscode-statusbar-fg: #ffffff;
+            --vscode-breadcrumb-bg: #ffffff;
+            --vscode-breadcrumb-fg: #616161;
+            --vscode-string-fg: #a31515;
+            --vscode-comment-fg: #008000;
+            --vscode-keyword-fg: #af00db;
+            --vscode-entity-fg: #267f99;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Top Navbar */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            background: var(--navbar-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-color);
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .btn-icon:hover, .btn-icon:active {
+            background: var(--surface-hover);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        /* Views Container */
+        .view-section {
+            display: none;
+            padding: 14px 16px 80px 16px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Navigation Tabs */
+        .shelf-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            background: var(--surface-color);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .shelf-tab-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .shelf-tab-btn.active {
+            background: var(--accent-color);
+            color: #ffffff;
+        }
+
+        /* Search Bar */
+        .search-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 44px 12px 42px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: none;
+        }
+
+        /* Book Cards */
+        .novel-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            gap: 14px;
+            margin-bottom: 12px;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .novel-card:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .novel-cover-box {
+            width: 85px;
+            min-width: 85px;
+            height: 118px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #232d3f;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .novel-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .novel-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .novel-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .novel-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge-tag {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .novel-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .novel-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .progress-pill {
+            font-size: 0.75rem;
+            color: var(--accent-color);
+            background: rgba(56, 189, 248, 0.1);
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ==========================================
+           VS Code IDE Style Reader Layout
+           ========================================== */
+        #view-reader {
+            padding: 0 0 70px 0;
+            max-width: 960px;
+            margin: 0 auto;
+            background: var(--vscode-editor-bg);
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            min-height: 100vh;
+        }
+
+        /* 1. VS Code Tab Bar (分頁列) */
+        .vscode-tab-bar {
+            display: flex;
+            align-items: center;
+            background: var(--vscode-tab-inactive-bg);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            scrollbar-width: none;
+            position: sticky;
+            top: 57px;
+            z-index: 1012;
+        }
+        .vscode-tab-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .vscode-tab-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: var(--vscode-tab-inactive-bg);
+            border-right: 1px solid var(--border-color);
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .vscode-tab-item:hover {
+            color: var(--text-primary);
+        }
+
+        .vscode-tab-item.active {
+            background: var(--vscode-tab-active-bg);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .vscode-tab-item.active::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--vscode-tab-active-border);
+        }
+
+        .vscode-tab-icon {
+            color: #519aba; /* Markdown blue icon */
+            font-size: 0.95rem;
+        }
+
+        .vscode-tab-close {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+            transition: all 0.15s;
+        }
+        .vscode-tab-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+        }
+
+        /* 2. VS Code Breadcrumbs (麵包屑路徑列) */
+        .vscode-breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 16px;
+            font-size: 0.8rem;
+            color: var(--vscode-breadcrumb-fg);
+            background: var(--vscode-breadcrumb-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 96px;
+            z-index: 1011;
+            user-select: none;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .vscode-breadcrumb-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .vscode-breadcrumb-item:hover {
+            color: var(--text-primary);
+        }
+        .vscode-breadcrumb-sep {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+
+        .vscode-breadcrumb-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-vscode-action {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-vscode-action:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+        }
+
+        /* 3. VS Code Editor Body & Code Lines */
+        .reader-body {
+            background-color: var(--vscode-editor-bg);
+            color: var(--vscode-editor-fg);
+            padding: 16px 0 30px 0;
+            min-height: 85vh;
+            font-family: var(--vscode-font-code), var(--vscode-font-reading);
+            font-size: var(--reader-font-size);
+            line-height: var(--reader-line-height);
+            transition: background-color 0.2s;
+        }
+
+        /* Header comment block (/* === Chapter Title === * /) */
+        .vscode-file-header {
+            padding: 10px 18px 18px 18px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--vscode-comment-fg);
+            font-family: var(--vscode-font-code);
+            font-size: 0.88rem;
+        }
+        .vscode-file-header .comment-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .vscode-file-header h2 {
+            font-size: 1.18rem;
+            font-weight: 700;
+            color: var(--vscode-entity-fg);
+            margin: 6px 0;
+            font-family: var(--vscode-font-reading);
+        }
+        .vscode-file-header .file-meta {
+            color: var(--vscode-comment-fg);
+            font-size: 0.8rem;
+        }
+
+        /* Code Line Row with Gutter */
+        .code-line {
+            display: flex;
+            align-items: flex-start;
+            padding: 3px 0;
+            margin: 0;
+            border-left: 3px solid transparent;
+            transition: background 0.15s ease, border-color 0.15s ease;
+            position: relative;
+        }
+
+        .code-line:hover {
+            background: var(--vscode-line-hover-bg);
+        }
+
+        .code-line.active-line {
+            background: var(--vscode-line-active-bg);
+            border-left-color: var(--vscode-tab-active-border);
+        }
+        .code-line.active-line .line-num {
+            color: var(--vscode-gutter-active-fg);
+            font-weight: bold;
+        }
+
+        .code-line.highlight-target {
+            background: rgba(0, 122, 204, 0.2);
+            border-left-color: var(--vscode-tab-active-border);
+            box-shadow: inset 0 0 10px rgba(0, 122, 204, 0.3);
+        }
+
+        /* Gutter (行號欄) */
+        .line-num {
+            flex-shrink: 0;
+            width: 46px;
+            padding-right: 14px;
+            text-align: right;
+            color: var(--vscode-gutter-fg);
+            font-family: var(--vscode-font-code);
+            font-size: 0.78rem;
+            user-select: none;
+            line-height: inherit;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .line-num:hover {
+            color: var(--vscode-gutter-active-fg);
+        }
+
+        /* Code Line Content (段落正文) */
+        .line-content {
+            flex-grow: 1;
+            padding-right: 18px;
+            word-break: break-word;
+            letter-spacing: 0.02em;
+            color: var(--vscode-editor-fg);
+        }
+
+        /* Dialog quotation styling (如字串暖橘色) */
+        .line-content.is-dialog {
+            color: var(--vscode-string-fg);
+        }
+
+        /* 插圖行 */
+        .code-line.image-line {
+            padding: 14px 0;
+        }
+        .code-line.image-line .line-content {
+            text-align: center;
+        }
+
+        .novel-img-container {
+            margin: 8px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .novel-img {
+            max-width: 95%;
+            height: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+            cursor: zoom-in;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background: #252526;
+        }
+
+        .novel-img:hover {
+            transform: scale(1.01);
+            box-shadow: 0 6px 24px rgba(0, 122, 204, 0.35);
+        }
+
+        .hide-illustrations .image-line {
+            display: none !important;
+        }
+
+        .illustration-notice {
+            display: none;
+            background: var(--surface-color);
+            border: 1px dashed var(--border-color);
+            border-radius: 6px;
+            padding: 8px 14px;
+            margin: 10px 18px;
+            font-size: 0.8rem;
+            color: var(--vscode-comment-fg);
+            font-family: var(--vscode-font-code);
+        }
+        .hide-illustrations .illustration-notice {
+            display: block !important;
+        }
+
+        /* 4. Reader Bottom Navigation */
+        .reader-nav-footer {
+            margin: 40px 18px 20px 18px;
+            padding: 16px 0;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .btn-nav-page {
+            flex: 1;
+            padding: 9px 12px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-family: var(--vscode-font-code);
+            transition: all 0.15s;
+        }
+
+        .btn-nav-page:hover:not(:disabled) {
+            background: var(--surface-hover);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn-nav-page:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* 5. VS Code Bottom Status Bar (底部經典藍色狀態列) */
+        .vscode-statusbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 24px;
+            background: var(--vscode-statusbar-bg);
+            color: var(--vscode-statusbar-fg);
+            font-family: var(--vscode-font-code);
+            font-size: 0.72rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            z-index: 1030;
+            user-select: none;
+            box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.25);
+        }
+
+        .vscode-statusbar-left,
+        .vscode-statusbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            height: 100%;
+        }
+
+        .statusbar-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            height: 100%;
+            padding: 0 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .statusbar-item:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Catalog Drawer / Offcanvas */
+        .offcanvas {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+        }
+
+        .offcanvas-header {
+            border-bottom: 1px solid var(--border-color);
+            background: var(--surface-color);
+        }
+
+        .volume-card {
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--surface-color);
+        }
+
+        .volume-header {
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .volume-chapters {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .chapter-item {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .chapter-item:last-child {
+            border-bottom: none;
+        }
+
+        .chapter-item:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+        }
+
+        .chapter-item.active {
+            background: rgba(56, 189, 248, 0.18);
+            color: var(--accent-color);
+            font-weight: 700;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .chapter-item.has-read {
+            opacity: 0.75;
+        }
+
+        /* Floating Progress Indicator */
+        .progress-indicator {
+            position: fixed;
+            bottom: 18px;
+            right: 18px;
+            z-index: 1005;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Loading Spinner */
+        .loading-cover {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .spinner-custom {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* 服務導覽下拉選單樣式 */
+        .liff-nav-dropdown .dropdown-toggle {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: var(--text-primary);
+            border-radius: 50px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-toggle:hover,
+        .liff-nav-dropdown .dropdown-toggle:focus,
+        .liff-nav-dropdown .dropdown-toggle[aria-expanded="true"] {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(56, 189, 248, 0.6);
+            color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        .liff-nav-dropdown .dropdown-menu {
+            background: var(--surface-color) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+            padding: 6px !important;
+            min-width: 230px !important;
+            width: max-content !important;
+            max-width: min(340px, 90vw) !important;
+            max-height: calc(100vh - 120px) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            z-index: 99999 !important;
+            animation: liffDropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes liffDropdownFadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .liff-nav-dropdown .dropdown-item {
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: background 0.15s ease, color 0.15s ease;
+            white-space: nowrap;
+        }
+        .liff-nav-dropdown .dropdown-item:hover,
+        .liff-nav-dropdown .dropdown-item:focus {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+        }
+        .liff-nav-dropdown .dropdown-item.active-nav-item {
+            background: rgba(56, 189, 248, 0.18);
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        .liff-nav-dropdown .dropdown-item .badge {
+            flex-shrink: 0;
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            background: rgba(14, 165, 233, 0.35) !important;
+            color: #38bdf8 !important;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+        }
+        .liff-nav-dropdown .dropdown-header {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 3px 8px 4px;
+        }
+        .liff-nav-dropdown .dropdown-divider {
+            border-color: var(--border-color);
+            margin: 4px 2px;
+        }
+
+        /* 6. Python Workspace & Interactive Terminal Styles */
+        #view-python-workspace {
+            display: none;
+            background: var(--vscode-editor-bg);
+            min-height: calc(100vh - 60px);
+            padding-bottom: 30px;
+        }
+        #view-python-workspace.active {
+            display: block;
+        }
+
+        .python-editor-container {
+            position: relative;
+            background: #1e1e1e;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #ace-python-editor {
+            width: 100%;
+            height: 380px;
+            font-family: var(--vscode-font-code);
+            font-size: 13.5px;
+            line-height: 1.5;
+        }
+
+        #fallback-python-editor {
+            width: 100%;
+            height: 380px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: var(--vscode-font-code);
+            font-size: 13.5px;
+            line-height: 1.5;
+            padding: 12px 16px;
+            border: none;
+            outline: none;
+            resize: vertical;
+        }
+
+        .vscode-terminal-panel {
+            background: #121212;
+            border-top: 1px solid #2d2d2d;
+            border-bottom: 1px solid var(--border-color);
+            font-family: var(--vscode-font-code);
+            font-size: 0.8rem;
+            color: #cccccc;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #181818;
+            border-bottom: 1px solid #2a2a2a;
+            height: 32px;
+            padding: 0 10px;
+            user-select: none;
+        }
+
+        .terminal-tabs {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 100%;
+        }
+
+        .terminal-tab {
+            display: inline-flex;
+            align-items: center;
+            height: 100%;
+            font-size: 0.73rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            padding: 0 2px;
+            transition: all 0.15s;
+        }
+
+        .terminal-tab.active {
+            color: #ffffff;
+            border-bottom-color: var(--accent-color);
+        }
+
+        .terminal-tab:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        .terminal-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-badge {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            font-size: 0.65rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-terminal-tool {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-terminal-tool:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .terminal-body {
+            min-height: 190px;
+            max-height: 380px;
+            overflow-y: auto;
+            padding: 12px 14px;
+            background: #101010;
+            color: #e2e8f0;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .terminal-body .prompt-user {
+            color: #38bdf8;
+            font-weight: 600;
+        }
+        .terminal-body .prompt-path {
+            color: #34d399;
+        }
+        .terminal-body .prompt-cmd {
+            color: #facc15;
+            font-weight: 600;
+        }
+        .terminal-body .terminal-stdout {
+            color: #f1f5f9;
+        }
+        .terminal-body .terminal-stderr {
+            color: #f87171;
+            font-weight: 500;
+        }
+        .terminal-body .terminal-meta {
+            color: #a78bfa;
+            font-size: 0.72rem;
+            margin-top: 4px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.12);
+            padding-top: 4px;
+        }
+        .terminal-body .terminal-executing {
+            color: #fbbf24;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 7. Plot Cards & Interactive Visual Chart Styles */
+        .plot-card {
+            background: #1e1e1e;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            margin-bottom: 12px;
+        }
+        .plot-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2d2d2d;
+        }
+        .plot-card-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .plot-card-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .plot-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+        }
+        .plot-img:hover {
+            transform: scale(1.01);
+        }
+        .chart-canvas-box {
+            position: relative;
+            width: 100%;
+            min-height: 250px;
+            max-height: 380px;
+        }
+        .terminal-inline-plot-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            margin: 6px 0;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 6px;
+            color: #38bdf8;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .terminal-inline-plot-badge:hover {
+            background: rgba(56, 189, 248, 0.22);
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Sticky Header -->
+    <header class="app-header">
+        <div class="brand-title" id="btn-home" title="點擊返回專案工作區/書庫" style="cursor: pointer; gap: 8px;">
+            <i class="fa-brands fa-python text-warning" style="font-size: 1.5rem;"></i>
+            <div class="d-flex flex-column" style="line-height: 1.15;">
+                <span class="fw-bold" style="font-size: 0.95rem; letter-spacing: 0.5px;">Python DevStudio</span>
+                <span class="text-muted" style="font-size: 0.68rem; font-family: var(--vscode-font-code);">csi_server &bull; v3.11</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <!-- 一鍵切換 Python 終端 / 閱讀工作區 (Boss Key) -->
+            <button class="btn btn-outline-warning btn-sm d-inline-flex align-items-center gap-1" id="btn-toggle-workspace" onclick="toggleWorkspaceMode()" title="一鍵切換 Python 終端環境 (快捷鍵 Alt+Q)" style="border-radius: 6px; font-size: 0.76rem; font-weight: 600; padding: 4px 10px;">
+                <i class="fa-brands fa-python text-warning" id="btn-toggle-icon"></i>
+                <span id="btn-toggle-text">Python 終端</span>
+            </button>
+
+            <!-- LIFF 服務導覽下拉選單 -->
+            <div class="dropdown liff-nav-dropdown">
+                <button class="btn dropdown-toggle" type="button" id="liffNavDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa-solid fa-compass text-info"></i>
+                    <span>服務導覽</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="liffNavDropdown">
+                    <li><h6 class="dropdown-header"><i class="fa-solid fa-layer-group me-1"></i>快捷服務導覽</h6></li>
+                    <li>
+                        <a class="dropdown-item" href="/line/liff/">
+                            <span><i class="fa-regular fa-calendar-check me-2 text-success"></i>行程小幫手</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="/line/liff/?page=drama">
+                            <span><i class="fa-solid fa-tv me-2 text-info"></i>追劇小幫手</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="/line/liff/?page=nutrition">
+                            <span><i class="fa-solid fa-seedling me-2 text-success"></i>食品營養百科</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="/line/liff/?page=gnn">
+                            <span><i class="fa-solid fa-gamepad me-2 text-warning"></i>GNN 動漫情報</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item active-nav-item" href="/line/liff/?page=novel">
+                            <span><i class="fa-brands fa-python me-2 text-warning"></i>Python DevStudio (調試工作區)</span>
+                            <span class="badge bg-primary bg-opacity-75" style="font-size: 0.65rem;">目前</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="/line/liff/?page=music">
+                            <span><i class="fa-solid fa-compact-disc me-2 text-danger"></i>酷炫音樂平台</span>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="/line/liff/?page=pet">
+                            <span><i class="fa-solid fa-paw me-2 text-primary"></i>休閒小站桌寵</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 插圖開關 -->
+            <button class="btn-icon" id="btn-toggle-images" title="插圖顯示/隱藏">
+                <i class="fa-regular fa-image" id="icon-images"></i>
+            </button>
+            <!-- 日間 / 夜間主題切換 -->
+            <button class="btn-icon" id="btn-toggle-theme" title="切換黑/白主題">
+                <i class="fa-solid fa-moon" id="icon-theme"></i>
+            </button>
+            <!-- 字級縮放 -->
+            <button class="btn-icon" id="btn-font-smaller" title="字體縮小">
+                <span style="font-weight: bold; font-size: 0.8rem;">A-</span>
+            </button>
+            <button class="btn-icon" id="btn-font-larger" title="字體放大">
+                <span style="font-weight: bold; font-size: 0.95rem;">A+</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Views Container -->
+    <main>
+        <!-- 1. 書架與搜尋主視圖 -->
+        <section class="view-section active" id="view-shelf">
+            <!-- 分頁按鈕 -->
+            <div class="shelf-tabs">
+                <button class="shelf-tab-btn active" id="tab-my-shelf" onclick="switchShelfTab('my-shelf')">
+                    <i class="fa-solid fa-bookmark me-1"></i>我的書庫 (<span id="shelf-count">0</span>)
+                </button>
+                <button class="shelf-tab-btn" id="tab-online-search" onclick="switchShelfTab('online-search')">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i>線上檢索 (tw.linovelib)
+                </button>
+            </div>
+
+            <!-- 搜尋列 -->
+            <div class="input-group mb-3">
+                <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-color: var(--border-color); border-radius: 12px 0 0 12px;">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" class="form-control" id="search-input" placeholder="輸入書名（如 無職轉生）、作者、編號（如 2013）或連結..." autocomplete="off" style="background: var(--surface-color); border-color: var(--border-color); color: var(--text-primary); border-left: none; border-right: none;">
+                <button class="btn btn-outline-secondary border-start-0 border-end-0" type="button" id="search-clear" onclick="clearSearch()" style="border-color: var(--border-color); display: none; background: var(--surface-color); color: var(--text-muted);">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <button class="btn btn-primary px-3 fw-bold" type="button" id="btn-search-trigger" onclick="performSearch(document.getElementById('search-input').value)" style="border-radius: 0 12px 12px 0;">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i>搜尋
+                </button>
+            </div>
+
+
+            <!-- 我的書庫清單 -->
+            <div id="shelf-list-container">
+                <div class="loading-cover" id="shelf-loading">
+                    <div class="spinner-custom"></div>
+                    <div>載入個人書庫中...</div>
+                </div>
+                <div id="shelf-items"></div>
+                <div id="shelf-empty" class="text-center py-5 text-muted" style="display: none;">
+                    <i class="fa-regular fa-folder-open fa-3x mb-3 opacity-50"></i>
+                    <p>目前書庫尚無任何小說！<br>請切換至「線上檢索」搜尋並一鍵匯入您想觀看的輕小說。</p>
+                </div>
+            </div>
+
+            <!-- 線上搜尋結果清單 -->
+            <div id="search-results-container" style="display: none;">
+                <div class="loading-cover" id="search-loading" style="display: none;">
+                    <div class="spinner-custom"></div>
+                    <div>正在從 tw.linovelib.com 檢索中...</div>
+                </div>
+                <div id="search-items"></div>
+                <div id="search-empty" class="text-center py-5 text-muted" style="display: none;">
+                    <i class="fa-solid fa-book-journal-whills fa-3x mb-3 opacity-50"></i>
+                    <p id="search-empty-text">請輸入關鍵字並按下 Enter 或搜尋！</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 小說沉浸閱讀器視圖 (VS Code IDE 風格) -->
+        <section class="view-section" id="view-reader">
+            <!-- 1. VS Code Tab Bar (編輯器頂部分頁標籤) -->
+            <div class="vscode-tab-bar">
+                <div class="vscode-tab-item active" id="vscode-active-tab">
+                    <i class="fa-brands fa-markdown vscode-tab-icon"></i>
+                    <span id="tab-chapter-filename">chapter.md</span>
+                    <span class="vscode-tab-close" id="btn-tab-close" title="關閉檔案回到書庫">
+                        <i class="fa-solid fa-xmark"></i>
+                    </span>
+                </div>
+                <div class="vscode-tab-item" id="tab-reader-to-python" onclick="switchWorkspaceMode('python')" title="切換至 Python 腳本工作區 (快捷鍵 Alt+Q)">
+                    <i class="fa-brands fa-python vscode-tab-icon" style="color: #38bdf8;"></i>
+                    <span>main.py</span>
+                </div>
+            </div>
+
+            <!-- 2. VS Code Breadcrumbs (麵包屑路徑列 & 快捷操作) -->
+            <div class="vscode-breadcrumbs">
+                <div class="vscode-breadcrumb-item" id="breadcrumb-shelf" title="點擊返回書庫">
+                    <i class="fa-solid fa-folder-tree text-warning me-1"></i><span>workspace</span>
+                </div>
+                <span class="vscode-breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                <div class="vscode-breadcrumb-item" id="breadcrumb-novel" title="點擊檢視作品目錄">
+                    <i class="fa-solid fa-book me-1 text-info"></i><span id="breadcrumb-novel-title">小說名稱</span>
+                </div>
+                <span class="vscode-breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                <div class="vscode-breadcrumb-item active" id="breadcrumb-chapter">
+                    <span id="breadcrumb-chapter-title">章節名稱</span>
+                </div>
+
+                <!-- 麵包屑右側動作按鈕 -->
+                <div class="vscode-breadcrumb-actions">
+                    <button class="btn-vscode-action" id="btn-refresh-chapter" onclick="refreshCurrentChapter()" title="重新載入/爬取此章 (Ctrl+R)">
+                        <i class="fa-solid fa-rotate-right"></i><span class="d-none d-sm-inline">Re-fetch</span>
+                    </button>
+                    <button class="btn-vscode-action" id="btn-open-catalog" data-bs-toggle="offcanvas" data-bs-target="#catalogOffcanvas" title="打開目錄大綱 (Outline)">
+                        <i class="fa-solid fa-list-tree"></i><span>Outline</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. VS Code 閱讀本文主體 (Editor Content) -->
+            <div class="reader-body" id="reader-content-body">
+                <!-- 文件頭部註解區 (Docstring / Comment Header) -->
+                <div class="vscode-file-header">
+                    <div class="comment-line">
+                        <span>/**</span>
+                    </div>
+                    <div class="comment-line ps-3">
+                        <span>* @file <b id="reader-novel-title" class="text-info">Novel Title</b></span>
+                    </div>
+                    <div class="comment-line ps-3">
+                        <span>* @chapter <span id="reader-chapter-title" style="color: var(--vscode-string-fg);">Chapter Title</span></span>
+                    </div>
+                    <div class="comment-line ps-3">
+                        <span>* @progress <span id="reader-progress-hint" class="text-success">0%</span></span>
+                    </div>
+                    <div class="comment-line">
+                        <span>*/</span>
+                    </div>
+                </div>
+
+                <!-- 隱藏插圖提示 -->
+                <div class="illustration-notice" id="illustration-notice">
+                    <i class="fa-solid fa-eye-slash me-1"></i>// Warning: Illustrations are hidden (Toggle via top-right image icon).
+                </div>
+
+                <!-- 段落內容主體 (Code lines with line numbers) -->
+                <div id="reader-paragraphs">
+                    <div class="loading-cover">
+                        <div class="spinner-custom"></div>
+                        <div>正在以 VS Code 格式加載章節...</div>
+                    </div>
+                </div>
+
+                <!-- 上一章 / 下一章 導航按鈕 (Git-style pagination) -->
+                <div class="reader-nav-footer">
+                    <button class="btn-nav-page" id="btn-prev-chapter">
+                        <i class="fa-solid fa-arrow-left"></i><span>Prev Chapter</span>
+                    </button>
+                    <button class="btn-nav-page" id="btn-footer-catalog" data-bs-toggle="offcanvas" data-bs-target="#catalogOffcanvas">
+                        <i class="fa-solid fa-bars-staggered"></i><span>Outline</span>
+                    </button>
+                    <button class="btn-nav-page" id="btn-next-chapter">
+                        <span>Next Chapter</span><i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4. VS Code 底端經典狀態列 (Status Bar) -->
+            <div class="vscode-statusbar" id="vscode-statusbar">
+                <div class="vscode-statusbar-left">
+                    <div class="statusbar-item" id="statusbar-git" title="分支狀態">
+                        <i class="fa-solid fa-code-branch me-1"></i><span id="statusbar-branch">main*</span>
+                    </div>
+                    <div class="statusbar-item" id="statusbar-errors" title="問題與診斷">
+                        <i class="fa-solid fa-circle-xmark me-1 small"></i>0
+                        <i class="fa-solid fa-triangle-exclamation ms-1 me-1 small"></i>0
+                    </div>
+                    <div class="statusbar-item d-none d-sm-inline-flex" id="statusbar-sync">
+                        <i class="fa-solid fa-rotate text-light"></i>
+                    </div>
+                </div>
+                <div class="vscode-statusbar-right">
+                    <div class="statusbar-item" id="statusbar-line-col">
+                        Ln <span id="status-line-num">1</span>, Col 1
+                    </div>
+                    <div class="statusbar-item" id="statusbar-progress">
+                        <span id="status-progress-pct">0%</span>
+                    </div>
+                    <div class="statusbar-item d-none d-sm-inline-flex">
+                        UTF-8
+                    </div>
+                    <div class="statusbar-item">
+                        Markdown
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Python 程式碼編輯與交互終端視圖 (VS Code IDE 風格) -->
+        <section class="view-section" id="view-python-workspace">
+            <!-- 1. VS Code Tab Bar -->
+            <div class="vscode-tab-bar">
+                <div class="vscode-tab-item active" id="python-tab-main">
+                    <i class="fa-brands fa-python vscode-tab-icon" style="color: #38bdf8;"></i>
+                    <span>main.py</span>
+                </div>
+                <div class="vscode-tab-item" id="python-tab-reader-link" onclick="switchWorkspaceMode('reader')" title="切換回閱讀/筆記檢視 (快捷鍵 Alt+Q)">
+                    <i class="fa-brands fa-markdown vscode-tab-icon" style="color: #42b883;"></i>
+                    <span id="python-tab-reader-label">chapter.md</span>
+                </div>
+            </div>
+
+            <!-- 2. VS Code Breadcrumbs & Toolbar -->
+            <div class="vscode-breadcrumbs">
+                <div class="vscode-breadcrumb-item">
+                    <i class="fa-solid fa-folder-tree text-warning me-1"></i><span>workspace</span>
+                </div>
+                <span class="vscode-breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                <div class="vscode-breadcrumb-item">
+                    <i class="fa-solid fa-folder me-1 text-info"></i><span>src</span>
+                </div>
+                <span class="vscode-breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                <div class="vscode-breadcrumb-item active">
+                    <i class="fa-brands fa-python me-1 text-warning"></i><span>main.py</span>
+                </div>
+
+                <div class="vscode-breadcrumb-actions">
+                    <select class="form-select form-select-sm bg-dark text-light border-secondary" id="python-snippet-select" onchange="loadPythonSnippet(this.value)" style="font-size: 0.75rem; max-width: 175px; padding: 2px 8px; height: 26px;">
+                        <option value="">📋 程式範本...</option>
+                        <optgroup label="📊 TIOBE 程式語言排行統計">
+                            <option value="tiobe_top10">1. TIOBE Top 10 市佔長條圖</option>
+                            <option value="tiobe_pie">2. TIOBE 語言市佔佔比圓餅圖</option>
+                            <option value="tiobe_growth">3. TIOBE 年度漲跌排行圖</option>
+                            <option value="tiobe_hall_of_fame">4. TIOBE 歷年風雲語言名人堂</option>
+                            <option value="tiobe_multi">5. TIOBE 多圖表綜合分析儀表板</option>
+                        </optgroup>
+                        <optgroup label="⚡ 常用演算法與工具">
+                            <option value="hello">6. 系統環境與輸出</option>
+                            <option value="fibonacci">7. 費氏數列效能檢測</option>
+                            <option value="primes">8. 質數篩選器 (Sieve)</option>
+                            <option value="data">9. 資料解析與列表推導</option>
+                            <option value="classes">10. 類別封裝與物件導向</option>
+                        </optgroup>
+                    </select>
+                    <button class="btn btn-sm btn-success py-1 px-2 d-inline-flex align-items-center gap-1" id="btn-run-python" onclick="executePythonCode()" title="執行 Python 程式碼 (Ctrl + Enter)" style="font-size: 0.78rem; font-weight: 700;">
+                        <i class="fa-solid fa-play"></i> <span>Run</span>
+                    </button>
+                    <button class="btn-vscode-action" onclick="clearTerminalOutput()" title="清空終端機">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    <button class="btn-vscode-action" onclick="resetPythonCode()" title="重設代碼">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. Python Code Editor Container -->
+            <div class="python-editor-container">
+                <div id="ace-python-editor"></div>
+                <textarea id="fallback-python-editor" class="form-control" spellcheck="false" placeholder="# 在此輸入 Python 程式碼..."></textarea>
+            </div>
+
+            <!-- 4. VS Code Terminal Panel -->
+            <div class="vscode-terminal-panel">
+                <div class="terminal-header">
+                    <div class="terminal-tabs">
+                        <span class="terminal-tab active" id="tab-terminal-cmd" onclick="switchTerminalTab('cmd')"><i class="fa-solid fa-terminal me-1"></i>TERMINAL</span>
+                        <span class="terminal-tab" id="tab-terminal-plots" onclick="switchTerminalTab('plots')">
+                            <i class="fa-solid fa-chart-pie me-1 text-warning"></i>PLOTS / 統計圖表
+                            <span class="badge bg-warning text-dark ms-1" id="plots-badge" style="display: none; font-size: 0.65rem; padding: 2px 5px;">0</span>
+                        </span>
+                        <span class="terminal-tab" id="tab-terminal-debug" onclick="switchTerminalTab('debug')"><i class="fa-solid fa-bug me-1"></i>DEBUG CONSOLE</span>
+                    </div>
+                    <div class="terminal-actions">
+                        <span class="terminal-badge" id="terminal-status-badge">Python 3.11</span>
+                        <button class="btn-terminal-tool" onclick="clearTerminalOutput()" title="清空終端/圖表"><i class="fa-solid fa-ban"></i></button>
+                    </div>
+                </div>
+
+                <!-- 終端文字輸出區 (Terminal Command Stream) -->
+                <div class="terminal-body" id="python-terminal-output">
+                    <div class="terminal-line prompt-line">
+                        <span class="prompt-user">dev@csi-server</span>:<span class="prompt-path">~/workspace/src</span>$ <span class="prompt-cmd">python main.py</span>
+                    </div>
+                    <div class="terminal-line text-muted"># 歡迎使用 Python DevStudio 交互環境！
+# 已內建 TIOBE Index 數據分析模組（import tiobe）
+# 點擊右上「Run」或按下 [Ctrl + Enter] 即可直接執行並即時繪製統計圖表。</div>
+                </div>
+
+                <!-- 視覺統計圖表區 (Plots / Visual Charts Container) -->
+                <div class="terminal-body" id="python-plots-output" style="display: none; background: #141414;">
+                    <div id="plots-empty-state" class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-chart-pie fa-2x mb-2 opacity-50 text-warning"></i>
+                        <p class="mb-1 fw-bold">尚未產生統計圖表</p>
+                        <small>可從上方範本選取「TIOBE Top 10 市佔長條圖」並點擊 Run 執行！</small>
+                    </div>
+                    <div id="plots-container" class="d-flex flex-column gap-3"></div>
+                </div>
+            </div>
+
+            <!-- 5. VS Code Bottom Status Bar -->
+            <div class="vscode-statusbar">
+                <div class="vscode-statusbar-left">
+                    <div class="statusbar-item" title="Git Branch">
+                        <i class="fa-solid fa-code-branch me-1"></i><span>main*</span>
+                    </div>
+                    <div class="statusbar-item" id="python-status-error-count">
+                        <i class="fa-regular fa-circle-xmark me-1 small"></i><span>0</span>
+                        <i class="fa-solid fa-triangle-exclamation ms-1 me-1 small"></i><span>0</span>
+                    </div>
+                </div>
+                <div class="vscode-statusbar-right">
+                    <div class="statusbar-item" id="python-status-cursor">
+                        <span>Ln 1, Col 1</span>
+                    </div>
+                    <div class="statusbar-item">
+                        <span>Spaces: 4</span>
+                    </div>
+                    <div class="statusbar-item">
+                        <span>UTF-8</span>
+                    </div>
+                    <div class="statusbar-item" style="color: #4fc1ff;">
+                        <i class="fa-brands fa-python me-1"></i><span>Python 3.11 (venv)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 浮動段落儲存狀態提示 -->
+    <div class="progress-indicator" id="progress-indicator">
+        <i class="fa-solid fa-circle-check text-success"></i>
+        <span id="progress-text">已記錄至第 0 段</span>
+    </div>
+
+    <!-- 章節目錄側邊抽屜 Offcanvas Drawer -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="catalogOffcanvas" aria-labelledby="catalogOffcanvasLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title d-flex align-items-center gap-2 text-truncate me-2" id="catalogOffcanvasLabel">
+                <i class="fa-solid fa-list-ol text-primary"></i>
+                <span id="catalog-novel-title">章節目錄</span>
+            </h5>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="btn btn-sm btn-outline-info d-flex align-items-center gap-1 py-1 px-2" id="btn-refresh-catalog" onclick="refreshNovelContent(state.currentNovel?.novel_id, state.currentNovel?.title, this)" title="一鍵更新此部小說目錄與內容">
+                    <i class="fa-solid fa-arrows-rotate"></i><span>更新此部</span>
+                </button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="offcanvas-body" id="catalog-body">
+            <div class="loading-cover">
+                <div class="spinner-custom"></div>
+                <div>正在載入目錄結構...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ==========================================
+        // 全域狀態管理與設定
+        // ==========================================
+        let apiBaseUrl = "{{ request.scheme }}://{{ request.get_host }}";
+        if (!apiBaseUrl || apiBaseUrl.includes("liff.line.me")) {
+            apiBaseUrl = window.location.origin;
+        }
+
+        function safeFetchJson(url, options = {}) {
+            if (!options.headers) options.headers = {};
+            options.headers["ngrok-skip-browser-warning"] = "69420";
+            options.headers["Accept"] = "application/json";
+
+            return fetch(url, options).then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP 狀態碼 ${res.status}`);
+                }
+                return res.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error("Non-JSON response text:", text.slice(0, 150));
+                        throw new Error("伺服器回應非 JSON 格式資料 (請檢視網路或 ngrok 狀態)");
+                    }
+                });
+            });
+        }
+
+        function getProxyImageUrl(url) {
+            if (!url) return "/static/images/cover_placeholder.png";
+            if (url.includes("readpai.com") || url.includes("linovelib.com") || url.includes("bilinovel.com")) {
+                return `${apiBaseUrl}/line/api/novel/proxy_image/?url=${encodeURIComponent(url)}`;
+            }
+            return url;
+        }
+
+        function previewImage(url) {
+            if (!url) return;
+            const proxyUrl = getProxyImageUrl(url);
+            Swal.fire({
+                imageUrl: proxyUrl,
+                imageAlt: "小說插圖 / 日記原圖",
+                showConfirmButton: false,
+                showCloseButton: true,
+                background: "rgba(15, 23, 42, 0.96)",
+                customClass: {
+                    image: "img-fluid rounded-3 shadow-lg"
+                }
+            });
+        }
+
+        const CONFIG = {
+            liffId: "{{ liff_id }}",
+            apiNovelList: apiBaseUrl + "{% url 'line_manager:api_novel_list' %}",
+            apiNovelSearch: apiBaseUrl + "{% url 'line_manager:api_novel_search' %}",
+            apiNovelImport: apiBaseUrl + "{% url 'line_manager:api_novel_import' %}",
+            apiNovelProgressSave: apiBaseUrl + "{% url 'line_manager:api_novel_progress_save' %}",
+            apiNovelRunPython: apiBaseUrl + "{% url 'line_manager:api_novel_run_python' %}",
+        };
+
+        const state = {
+            userId: localStorage.getItem("novel_line_user_id") || "guest_user",
+            userProfile: null,
+            theme: localStorage.getItem("novel_reader_theme") || "dark",
+            hideImages: localStorage.getItem("novel_hide_images") === "true",
+            fontSize: parseInt(localStorage.getItem("novel_font_size") || "17", 10),
+            currentTab: "my-shelf",
+            currentNovel: null,
+            currentChapter: null,
+            currentVolumes: [],
+            savedProgress: {},
+            activeParagraphIndex: 0,
+            saveTimer: null,
+            isScrollingToSaved: false,
+            isSearching: false,
+        };
+
+        // ==========================================
+        // 初始化 LINE LIFF & 主題外觀
+        // ==========================================
+        document.addEventListener("DOMContentLoaded", async () => {
+            applyTheme(state.theme);
+            applyImageVisibility(state.hideImages);
+            applyFontSize(state.fontSize);
+            setupEventListeners();
+
+            // LIFF 初始化
+            if (CONFIG.liffId && typeof liff !== "undefined") {
+                try {
+                    await liff.init({ liffId: CONFIG.liffId });
+                    if (liff.isLoggedIn()) {
+                        const profile = await liff.getProfile();
+                        state.userId = profile.userId;
+                        state.userProfile = profile;
+                        localStorage.setItem("novel_line_user_id", profile.userId);
+                    }
+                } catch (err) {
+                    console.warn("LIFF init error:", err);
+                }
+            }
+
+            // 預設載入個人書庫
+            loadShelfNovels();
+        });
+
+        // ==========================================
+        // 主題與字級外觀切換
+        // ==========================================
+        function applyTheme(theme) {
+            state.theme = theme;
+            document.documentElement.setAttribute("data-theme", theme);
+            localStorage.setItem("novel_reader_theme", theme);
+            const icon = document.getElementById("icon-theme");
+            if (theme === "light") {
+                icon.className = "fa-solid fa-sun text-warning";
+            } else {
+                icon.className = "fa-solid fa-moon text-light";
+            }
+        }
+
+        function toggleTheme() {
+            const nextTheme = state.theme === "dark" ? "light" : "dark";
+            applyTheme(nextTheme);
+        }
+
+        function applyImageVisibility(hide) {
+            state.hideImages = hide;
+            localStorage.setItem("novel_hide_images", hide);
+            const body = document.getElementById("reader-content-body");
+            const icon = document.getElementById("icon-images");
+            if (hide) {
+                body.classList.add("hide-illustrations");
+                icon.className = "fa-regular fa-image text-danger";
+                icon.title = "已隱藏插圖 (點擊開啟)";
+            } else {
+                body.classList.remove("hide-illustrations");
+                icon.className = "fa-solid fa-image text-success";
+                icon.title = "已開啟插圖 (點擊隱藏)";
+            }
+        }
+
+        function toggleImages() {
+            applyImageVisibility(!state.hideImages);
+            const toastMsg = state.hideImages ? "已隱藏章節插圖" : "已開啟章節插圖";
+            showToast(toastMsg, "info");
+        }
+
+        function applyFontSize(size) {
+            state.fontSize = Math.min(28, Math.max(13, size));
+            localStorage.setItem("novel_font_size", state.fontSize);
+            document.documentElement.style.setProperty("--reader-font-size", `${state.fontSize}px`);
+        }
+
+        function changeFontSize(delta) {
+            applyFontSize(state.fontSize + delta);
+        }
+
+        // ==========================================
+        // 頁面與標籤切換
+        // ==========================================
+        function showView(viewName) {
+            document.querySelectorAll(".view-section").forEach(sec => sec.classList.remove("active"));
+            const target = document.getElementById(`view-${viewName}`);
+            if (target) {
+                target.classList.add("active");
+                window.scrollTo({ top: 0, behavior: "instant" });
+            }
+        }
+
+        function switchShelfTab(tabName) {
+            state.currentTab = tabName;
+            document.getElementById("tab-my-shelf").classList.toggle("active", tabName === "my-shelf");
+            document.getElementById("tab-online-search").classList.toggle("active", tabName === "online-search");
+
+            if (tabName === "my-shelf") {
+                document.getElementById("shelf-list-container").style.display = "block";
+                document.getElementById("search-results-container").style.display = "none";
+                loadShelfNovels();
+            } else {
+                document.getElementById("shelf-list-container").style.display = "none";
+                document.getElementById("search-results-container").style.display = "block";
+            }
+        }
+
+        // ==========================================
+        // 我的書庫 API 互動
+        // ==========================================
+        async function loadShelfNovels() {
+            const loading = document.getElementById("shelf-loading");
+            const itemsBox = document.getElementById("shelf-items");
+            const emptyBox = document.getElementById("shelf-empty");
+            const countEl = document.getElementById("shelf-count");
+
+            loading.style.display = "block";
+            itemsBox.innerHTML = "";
+            emptyBox.style.display = "none";
+
+            try {
+                const data = await safeFetchJson(`${CONFIG.apiNovelList}?line_user_id=${encodeURIComponent(state.userId)}`);
+
+                loading.style.display = "none";
+                if (data.status === "success" && data.novels && data.novels.length > 0) {
+                    countEl.innerText = data.novels.length;
+                    renderShelfList(data.novels);
+                } else {
+                    countEl.innerText = "0";
+                    emptyBox.style.display = "block";
+                }
+            } catch (err) {
+                loading.style.display = "none";
+                emptyBox.style.display = "block";
+                console.error("loadShelfNovels error:", err);
+            }
+        }
+
+        function renderShelfList(novels) {
+            const container = document.getElementById("shelf-items");
+            container.innerHTML = "";
+
+            novels.forEach(novel => {
+                const prog = novel.progress;
+                let progressHtml = "";
+                let readBtnText = "開始閱讀";
+                let readBtnClass = "btn-outline-primary";
+
+                if (prog && prog.chapter_id) {
+                    readBtnText = `續讀: ${prog.chapter_title || '上次進度'}`;
+                    readBtnClass = "btn-primary";
+                    progressHtml = `
+                        <div class="progress-pill">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <span>${prog.chapter_title} (第 ${prog.paragraph_index + 1} 段)</span>
+                        </div>
+                    `;
+                }
+
+                const card = document.createElement("div");
+                card.className = "novel-card";
+                card.innerHTML = `
+                    <div class="novel-cover-box" onclick="openNovelDetail('${novel.novel_id}')">
+                        <img class="novel-cover-img" src="${getProxyImageUrl(novel.cover_url)}" onerror="this.src='https://placehold.co/100x140/1e293b/f8fafc?text=Cover'" alt="${escapeHtml(novel.title)}">
+                    </div>
+                    <div class="novel-info">
+                        <div>
+                            <div class="novel-title" onclick="openNovelDetail('${novel.novel_id}')" style="cursor: pointer;">
+                                ${escapeHtml(novel.title)}
+                            </div>
+                            <div class="novel-meta">
+                                <span><i class="fa-solid fa-pen-nib me-1"></i>${escapeHtml(novel.author || '未知作者')}</span>
+                                ${novel.category ? `<span class="badge-tag">${escapeHtml(novel.category)}</span>` : ''}
+                                ${novel.status ? `<span class="badge-tag">${escapeHtml(novel.status)}</span>` : ''}
+                                <span>${novel.total_chapters} 章</span>
+                            </div>
+                            <div class="novel-desc">${escapeHtml(novel.description || '暫無簡介')}</div>
+                        </div>
+                        <div class="novel-footer">
+                            ${progressHtml}
+                            <div class="d-flex gap-2 ms-auto">
+                                <button class="btn btn-sm ${readBtnClass} d-inline-flex align-items-center gap-1" onclick="continueReading('${novel.novel_id}')">
+                                    <i class="fa-solid fa-book-reader"></i><span>${readBtnText}</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="refreshNovelContent('${novel.novel_id}', '${escapeHtml(novel.title)}', this)" title="一鍵更新此部內容">
+                                    <i class="fa-solid fa-arrows-rotate"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="openNovelDetail('${novel.novel_id}')" title="章節目錄">
+                                    <i class="fa-solid fa-list"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteNovel('${novel.novel_id}', '${escapeHtml(novel.title)}')" title="移出書庫">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 線上搜尋 tw.linovelib.com
+        // ==========================================
+        async function performSearch(keyword) {
+            keyword = (keyword || "").trim();
+            if (!keyword) return;
+
+            if (state.isSearching) return;
+            state.isSearching = true;
+
+            // 切換至線上搜尋分頁視圖
+            state.currentTab = "online-search";
+            document.getElementById("tab-my-shelf").classList.remove("active");
+            document.getElementById("tab-online-search").classList.add("active");
+            document.getElementById("shelf-list-container").style.display = "none";
+            document.getElementById("search-results-container").style.display = "block";
+
+            const loading = document.getElementById("search-loading");
+            const itemsBox = document.getElementById("search-items");
+            const emptyBox = document.getElementById("search-empty");
+            const emptyText = document.getElementById("search-empty-text");
+
+            loading.style.display = "block";
+            itemsBox.innerHTML = "";
+            emptyBox.style.display = "none";
+
+            try {
+                const data = await safeFetchJson(`${CONFIG.apiNovelSearch}?keyword=${encodeURIComponent(keyword)}`);
+
+                loading.style.display = "none";
+                if (data.status === "success" && data.results && data.results.length > 0) {
+                    renderSearchResults(data.results);
+                } else {
+                    emptyText.innerText = `抱歉，找不到與「${keyword}」相關的小說。\n請嘗試輸入小說 ID（如 2013）或連結。`;
+                    emptyBox.style.display = "block";
+                }
+            } catch (err) {
+                loading.style.display = "none";
+                emptyText.innerText = `搜尋連線發生異常（${err.message || '連線逾時'}），請稍後再試！`;
+                emptyBox.style.display = "block";
+                console.error("performSearch error:", err);
+            } finally {
+                state.isSearching = false;
+            }
+        }
+
+
+        function renderSearchResults(results) {
+            const container = document.getElementById("search-items");
+            container.innerHTML = "";
+
+            results.forEach(novel => {
+                const card = document.createElement("div");
+                card.className = "novel-card";
+
+                const importBtn = novel.is_imported
+                    ? `<button class="btn btn-sm btn-success disabled" style="opacity: 0.85;"><i class="fa-solid fa-check me-1"></i>已在書庫</button>`
+                    : `<button class="btn btn-sm btn-outline-primary" id="btn-import-${novel.novel_id}" onclick="importNovelToDb('${novel.novel_id}', this)"><i class="fa-solid fa-cloud-arrow-down me-1"></i>一鍵匯入 DB</button>`;
+
+                card.innerHTML = `
+                    <div class="novel-cover-box">
+                        <img class="novel-cover-img" src="${getProxyImageUrl(novel.cover_url)}" onerror="this.src='https://placehold.co/100x140/1e293b/f8fafc?text=Cover'" alt="${escapeHtml(novel.title)}">
+                    </div>
+                    <div class="novel-info">
+                        <div>
+                            <div class="novel-title">${escapeHtml(novel.title)}</div>
+                            <div class="novel-meta">
+                                <span><i class="fa-solid fa-pen-nib me-1"></i>${escapeHtml(novel.author || '未知')}</span>
+                                ${novel.category ? `<span class="badge-tag">${escapeHtml(novel.category)}</span>` : ''}
+                                ${novel.status ? `<span class="badge-tag">${escapeHtml(novel.status)}</span>` : ''}
+                                <span class="text-muted">ID: ${novel.novel_id}</span>
+                            </div>
+                            <div class="novel-desc">${escapeHtml(novel.description || '無簡介資料')}</div>
+                        </div>
+                        <div class="novel-footer">
+                            <span class="text-muted small"><i class="fa-solid fa-link me-1"></i>來源: bilinovel/linovelib</span>
+                            <div class="d-flex gap-2 ms-auto">
+                                ${importBtn}
+                                <button class="btn btn-sm btn-primary" onclick="readOnlineNovel('${novel.novel_id}')">
+                                    <i class="fa-solid fa-eye me-1"></i>立即預覽
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 一鍵匯入 DB
+        // ==========================================
+        async function importNovelToDb(novelId, btnEl) {
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>匯入中...`;
+            }
+
+            try {
+                const data = await safeFetchJson(CONFIG.apiNovelImport, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ novel_id: novelId })
+                });
+
+                if (data.status === "success") {
+                    if (btnEl) {
+                        btnEl.className = "btn btn-sm btn-success disabled";
+                        btnEl.innerHTML = `<i class="fa-solid fa-check me-1"></i>已在書庫`;
+                    }
+                    Swal.fire({
+                        title: "匯入成功！",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonText: "查看目錄",
+                        showCancelButton: true,
+                        cancelButtonText: "留在搜尋",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            openNovelDetail(novelId);
+                        }
+                    });
+                } else {
+                    if (btnEl) {
+                        btnEl.disabled = false;
+                        btnEl.innerHTML = `<i class="fa-solid fa-cloud-arrow-down me-1"></i>一鍵匯入 DB`;
+                    }
+                    Swal.fire("匯入失敗", data.error || "未知錯誤", "error");
+                }
+            } catch (err) {
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = `<i class="fa-solid fa-cloud-arrow-down me-1"></i>一鍵匯入 DB`;
+                }
+                Swal.fire("連線異常", err.message, "error");
+            }
+        }
+
+        // ==========================================
+        // 刪除 / 移出書庫
+        // ==========================================
+        async function deleteNovel(novelId, title) {
+            const confirm = await Swal.fire({
+                title: "確定移出書庫？",
+                text: `將會從本機資料庫刪除《${title}》及其章節目錄。`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#ef4444",
+                confirmButtonText: "確定移除",
+                cancelButtonText: "取消"
+            });
+
+            if (!confirm.isConfirmed) return;
+
+            try {
+                const data = await safeFetchJson(`${apiBaseUrl}/line/api/novel/${novelId}/delete/`, { method: "POST" });
+                if (data.status === "success") {
+                    showToast(data.message, "success");
+                    loadShelfNovels();
+                } else {
+                    Swal.fire("錯誤", data.error, "error");
+                }
+            } catch (err) {
+                Swal.fire("連線錯誤", err.message, "error");
+            }
+        }
+
+        // ==========================================
+        // 一鍵更新此部小說內容與目錄結構
+        // ==========================================
+        async function refreshNovelContent(novelId, title, btnEl) {
+            if (!novelId) return;
+            const confirm = await Swal.fire({
+                title: "一鍵更新此部內容？",
+                html: `將會重新爬取《<b>${escapeHtml(title || '此作品')}</b>》的最新章節目錄，並清空舊快取以確保呈現最新完整正文。`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#0ea5e9",
+                confirmButtonText: "🔄 立即更新",
+                cancelButtonText: "取消"
+            });
+
+            if (!confirm.isConfirmed) return;
+
+            let originalBtnHtml = "";
+            if (btnEl) {
+                btnEl.disabled = true;
+                originalBtnHtml = btnEl.innerHTML;
+                btnEl.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>更新中...`;
+            }
+
+            Swal.fire({
+                title: "正在同步更新內容...",
+                text: "向線上來源同步最新分卷目錄與章節，請稍候",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const data = await safeFetchJson(`${apiBaseUrl}/line/api/novel/${novelId}/refresh/`, { method: "POST" });
+                if (data.status === "success") {
+                    Swal.fire({
+                        title: "更新成功！",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonText: "知道了"
+                    });
+                    // 重新整理書庫列表
+                    loadShelfNovels();
+                    // 若當前開啟的抽屜剛好是這本小說，重新整理目錄
+                    if (state.currentNovel && String(state.currentNovel.novel_id) === String(novelId)) {
+                        openNovelDetail(novelId, false);
+                    }
+                } else {
+                    Swal.fire("更新失敗", data.error || "未知錯誤", "error");
+                }
+            } catch (err) {
+                Swal.fire("連線異常", err.message, "error");
+            } finally {
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = originalBtnHtml;
+                }
+            }
+        }
+
+        // ==========================================
+        // 強制重整當前章節
+        // ==========================================
+        async function refreshCurrentChapter() {
+            if (!state.currentNovel || !state.currentChapter) return;
+            const novelId = state.currentNovel.novel_id;
+            const chId = state.currentChapter.chapter_id;
+
+            showToast("正在強制重新爬取本章...", "info");
+
+            const paragraphsBox = document.getElementById("reader-paragraphs");
+            paragraphsBox.innerHTML = `
+                <div class="loading-cover">
+                    <div class="spinner-custom"></div>
+                    <div>正在強制重新爬取本章最新內文...</div>
+                </div>
+            `;
+
+            try {
+                const data = await safeFetchJson(`${apiBaseUrl}/line/api/novel/${novelId}/chapter/${chId}/?refresh=1`);
+                if (data.status === "success" && data.chapter) {
+                    state.currentChapter = data.chapter;
+                    renderChapterContent(data.chapter.elements, 0);
+                    showToast("本章已重新抓取完成！", "success");
+                } else {
+                    showToast("重整失敗: " + (data.error || "未知錯誤"), "error");
+                }
+            } catch (err) {
+                showToast("重整失敗: " + err.message, "error");
+            }
+        }
+
+        // ==========================================
+        // 閱讀與目錄導航
+        // ==========================================
+        async function continueReading(novelId) {
+            await openNovelDetail(novelId, true);
+        }
+
+        async function readOnlineNovel(novelId) {
+            await openNovelDetail(novelId, true);
+        }
+
+        async function openNovelDetail(novelId, autoEnterFirstChapter = false) {
+            Swal.showLoading();
+
+            try {
+                const data = await safeFetchJson(`${apiBaseUrl}/line/api/novel/${novelId}/catalog/?line_user_id=${encodeURIComponent(state.userId)}`);
+                Swal.close();
+
+                if (data.status !== "success" || !data.novel) {
+                    Swal.fire("錯誤", data.error || "找不到此小說目錄", "error");
+                    return;
+                }
+
+                state.currentNovel = data.novel;
+                state.currentVolumes = data.volumes || [];
+                state.savedProgress = data.progress || {};
+
+                renderCatalogDrawer(data.volumes, state.savedProgress);
+
+                if (autoEnterFirstChapter) {
+                    // 若有上次閱讀章節，直接進入該章節與段落
+                    if (state.savedProgress && state.savedProgress.chapter_id) {
+                        loadChapter(novelId, state.savedProgress.chapter_id, state.savedProgress.paragraph_index || 0);
+                    } else if (data.volumes.length > 0 && data.volumes[0].chapters.length > 0) {
+                        const firstCh = data.volumes[0].chapters[0];
+                        loadChapter(novelId, firstCh.chapter_id, 0);
+                    } else {
+                        Swal.fire("提示", "此作品目錄目前沒有章節內容！", "info");
+                    }
+                } else {
+                    // 打開目錄抽屜
+                    const offcanvasEl = document.getElementById("catalogOffcanvas");
+                    const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
+                    bsOffcanvas.show();
+                }
+            } catch (err) {
+                Swal.close();
+                Swal.fire("連線錯誤", err.message, "error");
+            }
+        }
+
+        function renderCatalogDrawer(volumes, progress) {
+            const titleEl = document.getElementById("catalog-novel-title");
+            const bodyEl = document.getElementById("catalog-body");
+
+            titleEl.innerText = state.currentNovel ? state.currentNovel.title : "目錄";
+            bodyEl.innerHTML = "";
+
+            if (!volumes || volumes.length === 0) {
+                bodyEl.innerHTML = `<div class="text-center py-4 text-muted">無分卷章節資料</div>`;
+                return;
+            }
+
+            const currentChId = state.currentChapter ? state.currentChapter.chapter_id : (progress ? progress.chapter_id : null);
+
+            volumes.forEach((vol, vIdx) => {
+                const volCard = document.createElement("div");
+                volCard.className = "volume-card";
+
+                const volHeader = document.createElement("div");
+                volHeader.className = "volume-header";
+                volHeader.innerHTML = `
+                    <span><i class="fa-solid fa-bookmark me-2"></i>${escapeHtml(vol.volume_title)}</span>
+                    <span class="badge bg-secondary">${vol.chapters.length} 章</span>
+                `;
+
+                const chList = document.createElement("ul");
+                chList.className = "volume-chapters";
+
+                vol.chapters.forEach(ch => {
+                    const li = document.createElement("li");
+                    li.className = "chapter-item";
+                    if (String(ch.chapter_id) === String(currentChId)) {
+                        li.classList.add("active");
+                    }
+
+                    li.innerHTML = `
+                        <span class="text-truncate me-2">${escapeHtml(ch.title)}</span>
+                        <div class="d-flex align-items-center gap-1">
+                            ${ch.has_images ? '<i class="fa-regular fa-image text-info small" title="包含插圖"></i>' : ''}
+                            <i class="fa-solid fa-chevron-right text-muted small"></i>
+                        </div>
+                    `;
+                    li.onclick = () => {
+                        const bsOffcanvas = bootstrap.Offcanvas.getInstance(document.getElementById("catalogOffcanvas"));
+                        if (bsOffcanvas) bsOffcanvas.hide();
+                        loadChapter(state.currentNovel.novel_id, ch.chapter_id, 0);
+                    };
+                    chList.appendChild(li);
+                });
+
+                volCard.appendChild(volHeader);
+                volCard.appendChild(chList);
+                bodyEl.appendChild(volCard);
+            });
+        }
+
+        // ==========================================
+        // 載入章節內文與精確段落導航 (VS Code IDE 風格)
+        // ==========================================
+        async function loadChapter(novelId, chapterId, targetParagraphIndex = 0) {
+            showView("reader");
+
+            const paragraphsBox = document.getElementById("reader-paragraphs");
+            const chapterTitleEl = document.getElementById("reader-chapter-title");
+            const novelTitleEl = document.getElementById("reader-novel-title");
+            const progressHintEl = document.getElementById("reader-progress-hint");
+            const tabChapterFilenameEl = document.getElementById("tab-chapter-filename");
+            const breadcrumbNovelTitleEl = document.getElementById("breadcrumb-novel-title");
+            const breadcrumbChapterTitleEl = document.getElementById("breadcrumb-chapter-title");
+            const statusLineNumEl = document.getElementById("status-line-num");
+            const statusProgressPctEl = document.getElementById("status-progress-pct");
+
+            // 按鈕狀態重置
+            document.getElementById("btn-prev-chapter").disabled = true;
+            document.getElementById("btn-next-chapter").disabled = true;
+
+            const novelTitle = state.currentNovel ? state.currentNovel.title : "輕小說";
+            novelTitleEl.innerText = novelTitle;
+            breadcrumbNovelTitleEl.innerText = novelTitle;
+            chapterTitleEl.innerText = "loading...";
+            breadcrumbChapterTitleEl.innerText = "loading...";
+            tabChapterFilenameEl.innerText = `chapter_${chapterId}.md`;
+            progressHintEl.innerText = "0%";
+            if (statusLineNumEl) statusLineNumEl.innerText = "1";
+            if (statusProgressPctEl) statusProgressPctEl.innerText = "0%";
+
+            paragraphsBox.innerHTML = `
+                <div class="loading-cover">
+                    <div class="spinner-custom"></div>
+                    <div>// Initializing editor buffer for Chapter ${chapterId}...</div>
+                </div>
+            `;
+
+            try {
+                const data = await safeFetchJson(`${apiBaseUrl}/line/api/novel/${novelId}/chapter/${chapterId}/`);
+
+                if (data.status !== "success" || !data.chapter) {
+                    paragraphsBox.innerHTML = `
+                        <div class="alert alert-danger m-3 font-monospace">
+                            <i class="fa-solid fa-triangle-exclamation me-2"></i>[Error: LoadFailed] ${escapeHtml(data.error || 'Failed to read chapter stream')}
+                        </div>
+                    `;
+                    return;
+                }
+
+                state.currentChapter = data.chapter;
+                const chapterTitle = data.chapter.title || `Chapter ${chapterId}`;
+                chapterTitleEl.innerText = chapterTitle;
+                breadcrumbChapterTitleEl.innerText = chapterTitle;
+                tabChapterFilenameEl.innerText = `${chapterTitle}.md`;
+
+                // 更新上下章按鈕
+                const prevBtn = document.getElementById("btn-prev-chapter");
+                const nextBtn = document.getElementById("btn-next-chapter");
+
+                if (data.chapter.prev_chapter_id) {
+                    prevBtn.disabled = false;
+                    prevBtn.onclick = () => loadChapter(novelId, data.chapter.prev_chapter_id, 0);
+                } else {
+                    prevBtn.disabled = true;
+                }
+
+                if (data.chapter.next_chapter_id) {
+                    nextBtn.disabled = false;
+                    nextBtn.onclick = () => loadChapter(novelId, data.chapter.next_chapter_id, 0);
+                } else {
+                    nextBtn.disabled = true;
+                }
+
+                // 渲染段落與插圖 (VS Code Code-Line Layout)
+                renderChapterContent(data.chapter.elements, targetParagraphIndex);
+
+            } catch (err) {
+                paragraphsBox.innerHTML = `
+                    <div class="alert alert-danger m-3 font-monospace">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>[ConnectionError] ${escapeHtml(err.message)}
+                    </div>
+                `;
+            }
+        }
+
+        function renderChapterContent(elements, targetParagraphIndex = 0) {
+            const container = document.getElementById("reader-paragraphs");
+            container.innerHTML = "";
+
+            if (!elements || elements.length === 0) {
+                container.innerHTML = `<div class="text-center py-5 text-muted font-monospace">// No lines found in this buffer.</div>`;
+                return;
+            }
+
+            elements.forEach((item, idx) => {
+                const lineNum = idx + 1;
+                const lineRow = document.createElement("div");
+                lineRow.className = "code-line";
+                lineRow.setAttribute("data-pid", idx);
+
+                if (item.type === "image") {
+                    lineRow.classList.add("image-line");
+                    const proxySrc = getProxyImageUrl(item.content);
+                    lineRow.innerHTML = `
+                        <div class="line-num" onclick="scrollToParagraph(${idx})" title="Jump to Line ${lineNum}">${lineNum}</div>
+                        <div class="line-content">
+                            <div class="novel-img-container">
+                                <img class="novel-img" src="${proxySrc}" alt="Illustration" loading="lazy" onclick="previewImage('${item.content}')" title="Click to view full image in lightbox">
+                                <div class="text-muted small mt-1 font-monospace"><i class="fa-solid fa-magnifying-glass-plus me-1"></i>// Image [Line ${lineNum}]: click to zoom</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const text = item.content || "";
+                    // 偵測是否為對話語句 (開頭為「、"、'、『 等引號)
+                    const isDialog = /^[\s]*[「"『“]/.test(text);
+
+                    lineRow.innerHTML = `
+                        <div class="line-num" onclick="scrollToParagraph(${idx})" title="Bookmark & jump to Line ${lineNum}">${lineNum}</div>
+                        <div class="line-content ${isDialog ? 'is-dialog' : ''}">${escapeHtml(text)}</div>
+                    `;
+
+                    lineRow.onclick = (e) => {
+                        // 點擊段落設為當前行高亮
+                        setActiveCodeLine(idx);
+                    };
+                }
+
+                container.appendChild(lineRow);
+            });
+
+            // 段落回跳與動畫高亮
+            setTimeout(() => {
+                scrollToParagraph(targetParagraphIndex);
+            }, 150);
+        }
+
+        function setActiveCodeLine(pIndex) {
+            document.querySelectorAll(".code-line.active-line").forEach(el => el.classList.remove("active-line"));
+            const target = document.querySelector(`.code-line[data-pid="${pIndex}"]`);
+            if (target) {
+                target.classList.add("active-line");
+            }
+            const statusLineNumEl = document.getElementById("status-line-num");
+            if (statusLineNumEl) {
+                statusLineNumEl.innerText = pIndex + 1;
+            }
+        }
+
+        function scrollToParagraph(pIndex) {
+            if (pIndex <= 0) {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setActiveCodeLine(0);
+                return;
+            }
+
+            const targetEl = document.querySelector(`[data-pid="${pIndex}"]`);
+            if (targetEl) {
+                state.isScrollingToSaved = true;
+                targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+
+                setActiveCodeLine(pIndex);
+
+                // 加入溫和發光動畫
+                targetEl.classList.add("highlight-target");
+                setTimeout(() => {
+                    targetEl.classList.remove("highlight-target");
+                    state.isScrollingToSaved = false;
+                }, 3000);
+
+                showFloatingIndicator(`Ln ${pIndex + 1}, Col 1`);
+            } else {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setActiveCodeLine(0);
+            }
+        }
+
+        function previewImage(url) {
+            Swal.fire({
+                imageUrl: url,
+                imageAlt: '小說插圖',
+                showCloseButton: true,
+                showConfirmButton: false,
+                background: '#1e1e1e',
+                customClass: {
+                    image: 'img-fluid rounded border border-secondary shadow-lg'
+                }
+            });
+        }
+
+        // ==========================================
+        // 閱讀進度防抖監聽與自動儲存
+        // ==========================================
+        window.addEventListener("scroll", () => {
+            if (!state.currentChapter || state.isScrollingToSaved) return;
+
+            clearTimeout(state.saveTimer);
+            state.saveTimer = setTimeout(() => {
+                calculateAndSaveReadingProgress();
+            }, 400);
+        }, { passive: true });
+
+        function calculateAndSaveReadingProgress() {
+            if (!state.currentNovel || !state.currentChapter) return;
+
+            const lines = document.querySelectorAll("#reader-paragraphs > .code-line[data-pid]");
+            if (lines.length === 0) return;
+
+            const viewportCenter = window.innerHeight * 0.35;
+            let currentPid = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                const rect = lines[i].getBoundingClientRect();
+                if (rect.top <= viewportCenter) {
+                    currentPid = parseInt(lines[i].getAttribute("data-pid"), 10);
+                } else {
+                    break;
+                }
+            }
+
+            state.activeParagraphIndex = currentPid;
+            setActiveCodeLine(currentPid);
+
+            // 計算滾動百分比
+            const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPct = totalScroll > 0 ? Math.min(100, Math.max(0, (window.scrollY / totalScroll) * 100)) : 0;
+            const formattedPct = `${Math.round(scrollPct)}%`;
+
+            // 更新頂端註解與底端狀態列
+            const progressHintEl = document.getElementById("reader-progress-hint");
+            const statusProgressPctEl = document.getElementById("status-progress-pct");
+            if (progressHintEl) progressHintEl.innerText = formattedPct;
+            if (statusProgressPctEl) statusProgressPctEl.innerText = formattedPct;
+
+            // 即時同步至 DB 與 LocalStorage
+            saveProgressToDb(state.currentNovel.novel_id, state.currentChapter.chapter_id, currentPid, scrollPct, state.currentChapter.title);
+        }
+
+        async function saveProgressToDb(novelId, chapterId, pIndex, scrollPct, chapterTitle) {
+            try {
+                const payload = {
+                    line_user_id: state.userId,
+                    novel_id: novelId,
+                    chapter_id: chapterId,
+                    chapter_title: chapterTitle,
+                    paragraph_index: pIndex,
+                    scroll_percentage: Math.round(scrollPct * 10) / 10,
+                };
+
+                // 更新 local cache
+                localStorage.setItem(`novel_prog_${novelId}`, JSON.stringify(payload));
+
+                safeFetchJson(CONFIG.apiNovelProgressSave, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                }).catch(e => console.warn("Save progress error:", e));
+
+                showFloatingIndicator(`Ln ${pIndex + 1}, Saved`);
+            } catch (err) {
+                console.warn("Save progress error:", err);
+            }
+        }
+
+        function showFloatingIndicator(text) {
+            const el = document.getElementById("progress-indicator");
+            const textEl = document.getElementById("progress-text");
+            textEl.innerText = text;
+            el.style.display = "inline-flex";
+
+            clearTimeout(el._hideTimer);
+            el._hideTimer = setTimeout(() => {
+                el.style.display = "none";
+            }, 2200);
+        }
+
+        // ==========================================
+        // 事件監聽與快捷綁定
+        // ==========================================
+        function setupEventListeners() {
+            // 回首頁/書庫
+            document.getElementById("btn-home").onclick = () => showView("shelf");
+            const btnBackShelf = document.getElementById("btn-back-shelf");
+            if (btnBackShelf) {
+                btnBackShelf.onclick = () => {
+                    showView("shelf");
+                    loadShelfNovels();
+                };
+            }
+
+            // VS Code Tab 關閉按鈕與麵包屑點擊返回書庫
+            const btnTabClose = document.getElementById("btn-tab-close");
+            if (btnTabClose) {
+                btnTabClose.onclick = (e) => {
+                    e.stopPropagation();
+                    showView("shelf");
+                    loadShelfNovels();
+                };
+            }
+
+            const breadcrumbShelf = document.getElementById("breadcrumb-shelf");
+            if (breadcrumbShelf) {
+                breadcrumbShelf.onclick = () => {
+                    showView("shelf");
+                    loadShelfNovels();
+                };
+            }
+
+            const breadcrumbNovel = document.getElementById("breadcrumb-novel");
+            if (breadcrumbNovel) {
+                breadcrumbNovel.onclick = () => {
+                    if (state.currentNovel) {
+                        openNovelDetail(state.currentNovel.novel_id, false);
+                    }
+                };
+            }
+
+            const breadcrumbChapter = document.getElementById("breadcrumb-chapter");
+            if (breadcrumbChapter) {
+                breadcrumbChapter.onclick = () => {
+                    const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("catalogOffcanvas"));
+                    bsOffcanvas.show();
+                };
+            }
+
+            // 底端狀態列點擊事件
+            const statusLineCol = document.getElementById("statusbar-line-col");
+            if (statusLineCol) {
+                statusLineCol.onclick = () => {
+                    Swal.fire({
+                        title: "跳轉至指定行 (Go to Line)",
+                        input: "number",
+                        inputLabel: "請輸入目標行號 (Line number):",
+                        inputPlaceholder: "例如: 50",
+                        showCancelButton: true,
+                        confirmButtonText: "跳轉 (Jump)",
+                        cancelButtonText: "取消",
+                        confirmButtonColor: "#007acc",
+                    }).then((result) => {
+                        if (result.isConfirmed && result.value) {
+                            const line = parseInt(result.value, 10);
+                            if (line > 0) {
+                                scrollToParagraph(line - 1);
+                            }
+                        }
+                    });
+                };
+            }
+
+            // 主題開關
+            document.getElementById("btn-toggle-theme").onclick = toggleTheme;
+
+            // 插圖開關
+            document.getElementById("btn-toggle-images").onclick = toggleImages;
+
+            // 字級縮放
+            document.getElementById("btn-font-smaller").onclick = () => changeFontSize(-1.5);
+            document.getElementById("btn-font-larger").onclick = () => changeFontSize(1.5);
+
+            // 搜尋鍵盤 Enter 觸發
+            const searchInput = document.getElementById("search-input");
+            const searchClear = document.getElementById("search-clear");
+
+            searchInput.addEventListener("input", () => {
+                searchClear.style.display = searchInput.value ? "block" : "none";
+            });
+
+            searchInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    performSearch(searchInput.value);
+                }
+            });
+            // 全域快捷鍵監聽 (Alt + Q / F2 切換工作區，Ctrl + Enter 執行 Python)
+            window.addEventListener("keydown", (e) => {
+                if ((e.altKey && e.key.toLowerCase() === "q") || e.key === "F2") {
+                    e.preventDefault();
+                    toggleWorkspaceMode();
+                } else if (e.ctrlKey && e.key === "Enter") {
+                    const pyView = document.getElementById("view-python-workspace");
+                    if (pyView && pyView.classList.contains("active")) {
+                        e.preventDefault();
+                        executePythonCode();
+                    }
+                }
+            });
+
+            // 監聽閱讀器滾動位置以供切換回時精準復原
+            window.addEventListener("scroll", () => {
+                const readerView = document.getElementById("view-reader");
+                if (readerView && readerView.classList.contains("active")) {
+                    window.lastReaderScrollY = window.scrollY;
+                }
+            }, { passive: true });
+        }
+
+        function clearSearch() {
+            const input = document.getElementById("search-input");
+            input.value = "";
+            document.getElementById("search-clear").style.display = "none";
+            input.focus();
+        }
+
+        function showToast(message, icon = "success") {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: false,
+            });
+            Toast.fire({ icon, title: message });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // ==========================================
+        // Python DevStudio 交互環境與終端機控制邏輯
+        // ==========================================
+        let previousNonPythonView = "shelf";
+        let aceEditorInstance = null;
+
+        const DEFAULT_PYTHON_CODE = `# ============================================================
+# DevStudio Python Runtime Console - TIOBE Index Analysis
+# Source: https://www.tiobe.com/tiobe-index/
+# Press [Ctrl + Enter] or click 'Run' to execute & plot charts
+# ============================================================
+import tiobe
+
+print("✨ TIOBE Index - Top 10 Programming Languages")
+tiobe.print_table(10)
+
+print("\\n📊 Generating Top 10 Market Share Chart...")
+tiobe.plot_top10(10)
+`;
+
+        function toggleWorkspaceMode() {
+            const pyView = document.getElementById("view-python-workspace");
+            const isPyActive = pyView && pyView.classList.contains("active");
+
+            if (isPyActive) {
+                switchWorkspaceMode(previousNonPythonView || "reader");
+            } else {
+                switchWorkspaceMode("python");
+            }
+        }
+
+        function switchWorkspaceMode(mode) {
+            const toggleBtn = document.getElementById("btn-toggle-workspace");
+            const toggleIcon = document.getElementById("btn-toggle-icon");
+            const toggleText = document.getElementById("btn-toggle-text");
+
+            if (mode === "python") {
+                const readerView = document.getElementById("view-reader");
+                if (readerView && readerView.classList.contains("active")) {
+                    previousNonPythonView = "reader";
+                    const currentTabName = document.getElementById("tab-chapter-filename")?.innerText || "chapter.md";
+                    const readerLabel = document.getElementById("python-tab-reader-label");
+                    if (readerLabel) readerLabel.innerText = currentTabName;
+                } else {
+                    previousNonPythonView = "shelf";
+                    const readerLabel = document.getElementById("python-tab-reader-label");
+                    if (readerLabel) readerLabel.innerText = "workspace.md";
+                }
+
+                showView("python-workspace");
+
+                if (toggleBtn) {
+                    toggleBtn.className = "btn btn-outline-info btn-sm d-inline-flex align-items-center gap-1";
+                    toggleBtn.title = "一鍵返回閱讀/文檔區 (快捷鍵 Alt+Q)";
+                }
+                if (toggleIcon) toggleIcon.className = "fa-brands fa-markdown text-info";
+                if (toggleText) toggleText.innerText = "返回閱讀 (Alt+Q)";
+
+                setTimeout(() => {
+                    initPythonEditor();
+                }, 50);
+
+            } else {
+                const targetView = previousNonPythonView || "reader";
+                showView(targetView);
+
+                if (targetView === "reader" && window.lastReaderScrollY) {
+                    window.scrollTo({ top: window.lastReaderScrollY, behavior: "instant" });
+                }
+
+                if (toggleBtn) {
+                    toggleBtn.className = "btn btn-outline-warning btn-sm d-inline-flex align-items-center gap-1";
+                    toggleBtn.title = "一鍵切換 Python 終端環境 (快捷鍵 Alt+Q)";
+                }
+                if (toggleIcon) toggleIcon.className = "fa-brands fa-python text-warning";
+                if (toggleText) toggleText.innerText = "Python 終端";
+            }
+        }
+
+        function initPythonEditor() {
+            const savedCode = localStorage.getItem("devstudio_python_code") || DEFAULT_PYTHON_CODE;
+
+            if (typeof ace !== "undefined" && !aceEditorInstance) {
+                try {
+                    aceEditorInstance = ace.edit("ace-python-editor");
+                    aceEditorInstance.setTheme("ace/theme/one_dark");
+                    aceEditorInstance.session.setMode("ace/mode/python");
+                    aceEditorInstance.setOptions({
+                        fontSize: "13.5px",
+                        fontFamily: "var(--vscode-font-code), Consolas, monospace",
+                        showPrintMargin: false,
+                        tabSize: 4,
+                        useSoftTabs: true,
+                        wrap: true,
+                        autoScrollEditorIntoView: true,
+                    });
+                    aceEditorInstance.setValue(savedCode, -1);
+
+                    aceEditorInstance.session.on("change", () => {
+                        localStorage.setItem("devstudio_python_code", aceEditorInstance.getValue());
+                        updateEditorCursorStatus();
+                    });
+
+                    aceEditorInstance.selection.on("changeCursor", () => {
+                        updateEditorCursorStatus();
+                    });
+
+                    // 綁定 Ctrl + Enter 執行指令
+                    aceEditorInstance.commands.addCommand({
+                        name: "runPythonCode",
+                        bindKey: { win: "Ctrl-Enter", mac: "Command-Enter" },
+                        exec: function() {
+                            executePythonCode();
+                        }
+                    });
+
+                    aceEditorInstance.focus();
+                    updateEditorCursorStatus();
+                } catch (e) {
+                    console.warn("Ace editor init error, using fallback textarea:", e);
+                    setupFallbackEditor(savedCode);
+                }
+            } else if (aceEditorInstance) {
+                aceEditorInstance.resize();
+                aceEditorInstance.focus();
+                updateEditorCursorStatus();
+            } else {
+                setupFallbackEditor(savedCode);
+            }
+        }
+
+        function setupFallbackEditor(code) {
+            const aceEl = document.getElementById("ace-python-editor");
+            const fbEl = document.getElementById("fallback-python-editor");
+            if (aceEl) aceEl.style.display = "none";
+            if (fbEl) {
+                fbEl.style.display = "block";
+                fbEl.value = code;
+                fbEl.oninput = () => {
+                    localStorage.setItem("devstudio_python_code", fbEl.value);
+                    updateFallbackCursorStatus();
+                };
+                fbEl.onkeydown = (e) => {
+                    if (e.key === "Tab") {
+                        e.preventDefault();
+                        const start = fbEl.selectionStart;
+                        const end = fbEl.selectionEnd;
+                        fbEl.value = fbEl.value.substring(0, start) + "    " + fbEl.value.substring(end);
+                        fbEl.selectionStart = fbEl.selectionEnd = start + 4;
+                    } else if (e.ctrlKey && e.key === "Enter") {
+                        e.preventDefault();
+                        executePythonCode();
+                    }
+                };
+                fbEl.onkeyup = updateFallbackCursorStatus;
+                fbEl.onclick = updateFallbackCursorStatus;
+                fbEl.focus();
+            }
+        }
+
+        function getPythonCode() {
+            if (aceEditorInstance) {
+                return aceEditorInstance.getValue();
+            }
+            const fbEl = document.getElementById("fallback-python-editor");
+            return fbEl ? fbEl.value : "";
+        }
+
+        function setPythonCode(code) {
+            if (aceEditorInstance) {
+                aceEditorInstance.setValue(code, -1);
+            }
+            const fbEl = document.getElementById("fallback-python-editor");
+            if (fbEl) fbEl.value = code;
+            localStorage.setItem("devstudio_python_code", code);
+            updateEditorCursorStatus();
+        }
+
+        function updateEditorCursorStatus() {
+            if (aceEditorInstance) {
+                const cursor = aceEditorInstance.getCursorPosition();
+                const statusCursor = document.getElementById("python-status-cursor");
+                if (statusCursor) {
+                    statusCursor.innerText = `Ln ${cursor.row + 1}, Col ${cursor.column + 1}`;
+                }
+            }
+        }
+
+        function updateFallbackCursorStatus() {
+            const fbEl = document.getElementById("fallback-python-editor");
+            if (!fbEl) return;
+            const textLines = fbEl.value.substr(0, fbEl.selectionStart).split("\n");
+            const currentLine = textLines.length;
+            const currentColumn = textLines[textLines.length - 1].length + 1;
+            const statusCursor = document.getElementById("python-status-cursor");
+            if (statusCursor) {
+                statusCursor.innerText = `Ln ${currentLine}, Col ${currentColumn}`;
+            }
+        }
+
+        async function executePythonCode() {
+            const code = getPythonCode();
+            const terminal = document.getElementById("python-terminal-output");
+            const runBtn = document.getElementById("btn-run-python");
+
+            if (runBtn) {
+                runBtn.disabled = true;
+                runBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span><span>Running...</span>';
+            }
+
+            // 在終端機印出命令列提示
+            const cmdBlock = document.createElement("div");
+            cmdBlock.className = "terminal-line prompt-line mt-2";
+            cmdBlock.innerHTML = '<span class="prompt-user">dev@csi-server</span>:<span class="prompt-path">~/workspace/src</span>$ <span class="prompt-cmd">python main.py</span>';
+            terminal.appendChild(cmdBlock);
+
+            const statusLine = document.createElement("div");
+            statusLine.className = "terminal-line terminal-executing";
+            statusLine.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> [Executing in python venv...]';
+            terminal.appendChild(statusLine);
+            terminal.scrollTop = terminal.scrollHeight;
+
+            const startTime = performance.now();
+
+            try {
+                const response = await fetch(CONFIG.apiNovelRunPython, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ code: code }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                statusLine.remove();
+
+                if (data.stdout) {
+                    const outLine = document.createElement("div");
+                    outLine.className = "terminal-line terminal-stdout";
+                    outLine.textContent = data.stdout;
+                    terminal.appendChild(outLine);
+                }
+
+                if (data.stderr) {
+                    const errLine = document.createElement("div");
+                    errLine.className = "terminal-line terminal-stderr";
+                    errLine.textContent = data.stderr;
+                    terminal.appendChild(errLine);
+                }
+
+                const metaLine = document.createElement("div");
+                metaLine.className = "terminal-line terminal-meta";
+                const isSuccess = data.exit_code === 0;
+                const statusColor = isSuccess ? "#4ade80" : "#f87171";
+                const codeText = isSuccess ? "exit code 0 (success)" : `exit code ${data.exit_code} (error)`;
+                metaLine.innerHTML = `<span style="color: ${statusColor}; font-weight: bold;">[Finished in ${data.elapsed || 0}s with ${codeText}]</span>`;
+                terminal.appendChild(metaLine);
+
+                // 渲染 Matplotlib 與 Chart.js 統計圖表
+                if ((data.plot_images && data.plot_images.length > 0) || (data.chart_configs && data.chart_configs.length > 0)) {
+                    renderPlots(data.plot_images || [], data.chart_configs || []);
+                }
+
+            } catch (netErr) {
+                console.warn("Backend Python execution failed, attempting Skulpt client fallback...", netErr);
+                statusLine.innerHTML = '<span class="text-warning">[Offline/API Fallback] 正在以瀏覽器本地 Skulpt Python 3 引擎執行...</span>';
+                await runSkulptPython(code, terminal, statusLine, startTime);
+            } finally {
+                if (runBtn) {
+                    runBtn.disabled = false;
+                    runBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Run</span>';
+                }
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        }
+
+        // ==========================================
+        // 終端分頁與統計圖表渲染器 (Plots & Charts)
+        // ==========================================
+        let activeChartInstances = [];
+
+        function switchTerminalTab(tab) {
+            const cmdTab = document.getElementById("tab-terminal-cmd");
+            const plotsTab = document.getElementById("tab-terminal-plots");
+            const debugTab = document.getElementById("tab-terminal-debug");
+            const cmdBody = document.getElementById("python-terminal-output");
+            const plotsBody = document.getElementById("python-plots-output");
+
+            cmdTab.classList.remove("active");
+            plotsTab.classList.remove("active");
+            if (debugTab) debugTab.classList.remove("active");
+
+            if (tab === "plots") {
+                plotsTab.classList.add("active");
+                if (cmdBody) cmdBody.style.display = "none";
+                if (plotsBody) plotsBody.style.display = "block";
+            } else if (tab === "debug") {
+                if (debugTab) debugTab.classList.add("active");
+                if (cmdBody) cmdBody.style.display = "block";
+                if (plotsBody) plotsBody.style.display = "none";
+            } else {
+                cmdTab.classList.add("active");
+                if (cmdBody) cmdBody.style.display = "block";
+                if (plotsBody) plotsBody.style.display = "none";
+            }
+        }
+
+        function renderPlots(plotImages = [], chartConfigs = []) {
+            const container = document.getElementById("plots-container");
+            const emptyState = document.getElementById("plots-empty-state");
+            const plotsBadge = document.getElementById("plots-badge");
+
+            if ((!plotImages || plotImages.length === 0) && (!chartConfigs || chartConfigs.length === 0)) {
+                return;
+            }
+
+            if (emptyState) emptyState.style.display = "none";
+
+            // 銷毀既有的 Chart.js 實例避免重疊與記憶體洩漏
+            activeChartInstances.forEach(c => { try { c.destroy(); } catch(e){} });
+            activeChartInstances = [];
+            container.innerHTML = "";
+
+            const totalPlots = (plotImages ? plotImages.length : 0) + (chartConfigs ? chartConfigs.length : 0);
+            if (plotsBadge) {
+                plotsBadge.innerText = totalPlots;
+                plotsBadge.style.display = "inline-block";
+            }
+
+            // 1. 渲染 Matplotlib 生成的圖片
+            if (plotImages && plotImages.length > 0) {
+                plotImages.forEach((imgSrc, idx) => {
+                    const card = document.createElement("div");
+                    card.className = "plot-card";
+                    card.innerHTML = `
+                        <div class="plot-card-header">
+                            <div class="plot-card-title">
+                                <i class="fa-solid fa-chart-column text-warning"></i>
+                                <span>Matplotlib 圖表 #${idx + 1}</span>
+                            </div>
+                            <div class="plot-card-actions">
+                                <a href="${imgSrc}" download="tiobe_chart_${idx+1}.png" class="btn btn-sm btn-outline-info py-0 px-2" style="font-size: 0.72rem;">
+                                    <i class="fa-solid fa-download me-1"></i>下載 PNG
+                                </a>
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="previewImage('${imgSrc}')" style="font-size: 0.72rem;">
+                                    <i class="fa-solid fa-magnifying-glass-plus me-1"></i>放大
+                                </button>
+                            </div>
+                        </div>
+                        <img src="${imgSrc}" class="plot-img" alt="Matplotlib Plot" onclick="previewImage('${imgSrc}')" title="點擊檢視放大燈箱">
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            // 2. 渲染 Chart.js 互動式向量圖表
+            if (chartConfigs && chartConfigs.length > 0 && typeof Chart !== "undefined") {
+                chartConfigs.forEach((cfg, idx) => {
+                    const canvasId = `chart-canvas-${Date.now()}-${idx}`;
+                    const card = document.createElement("div");
+                    card.className = "plot-card";
+                    card.innerHTML = `
+                        <div class="plot-card-header">
+                            <div class="plot-card-title">
+                                <i class="fa-solid fa-chart-pie text-info"></i>
+                                <span>${escapeHtml(cfg.title || '互動圖表')}</span>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-box">
+                            <canvas id="${canvasId}"></canvas>
+                        </div>
+                    `;
+                    container.appendChild(card);
+
+                    setTimeout(() => {
+                        const canvas = document.getElementById(canvasId);
+                        if (canvas) {
+                            const ctx = canvas.getContext("2d");
+                            const chart = new Chart(ctx, {
+                                type: cfg.type || "bar",
+                                data: {
+                                    labels: cfg.labels || [],
+                                    datasets: cfg.datasets || []
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            labels: { color: "#e2e8f0", font: { family: "'Cascadia Code', Consolas, monospace" } }
+                                        }
+                                    },
+                                    scales: cfg.type !== "doughnut" && cfg.type !== "pie" ? {
+                                        x: { ticks: { color: "#94a3b8" }, grid: { color: "rgba(255,255,255,0.06)" } },
+                                        y: { ticks: { color: "#94a3b8" }, grid: { color: "rgba(255,255,255,0.06)" } }
+                                    } : {}
+                                }
+                            });
+                            activeChartInstances.push(chart);
+                        }
+                    }, 80);
+                });
+            }
+
+            // 在 Terminal 命令列文字流中也嵌入一個可點擊的快捷跳轉按鈕
+            const terminal = document.getElementById("python-terminal-output");
+            const inlineBadge = document.createElement("div");
+            inlineBadge.className = "terminal-inline-plot-badge";
+            inlineBadge.innerHTML = `<i class="fa-solid fa-chart-pie text-warning"></i> <span>已生成 ${totalPlots} 個統計圖表 ➡️ 點擊切換至 PLOTS 檢視</span>`;
+            inlineBadge.onclick = () => switchTerminalTab("plots");
+            terminal.appendChild(inlineBadge);
+
+            // 自動切換到 PLOTS 標籤頁
+            switchTerminalTab("plots");
+        }
+
+        function runSkulptPython(code, terminal, statusLine, startTime) {
+            return new Promise((resolve) => {
+                if (typeof Sk === "undefined") {
+                    statusLine.remove();
+                    const errLine = document.createElement("div");
+                    errLine.className = "terminal-line terminal-stderr";
+                    errLine.textContent = "無法執行 Python: 後端連線異常且前端 Skulpt 尚未就緒。";
+                    terminal.appendChild(errLine);
+                    resolve();
+                    return;
+                }
+
+                let outputText = "";
+                Sk.configure({
+                    output: function(text) { outputText += text; },
+                    read: function(x) {
+                        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
+                            throw "File not found: '" + x + "'";
+                        }
+                        return Sk.builtinFiles["files"][x];
+                    },
+                    execLimit: 5000
+                });
+
+                Sk.misceval.asyncToPromise(function() {
+                    return Sk.importMainWithBody("<stdin>", false, code, true);
+                }).then(function() {
+                    statusLine.remove();
+                    if (outputText) {
+                        const outLine = document.createElement("div");
+                        outLine.className = "terminal-line terminal-stdout";
+                        outLine.textContent = outputText;
+                        terminal.appendChild(outLine);
+                    }
+                    const metaLine = document.createElement("div");
+                    metaLine.className = "terminal-line terminal-meta";
+                    const elapsed = ((performance.now() - startTime) / 1000).toFixed(4);
+                    metaLine.innerHTML = `<span style="color: #4ade80; font-weight: bold;">[Finished in ${elapsed}s via Browser Skulpt (exit code 0)]</span>`;
+                    terminal.appendChild(metaLine);
+                    resolve();
+                }, function(err) {
+                    statusLine.remove();
+                    if (outputText) {
+                        const outLine = document.createElement("div");
+                        outLine.className = "terminal-line terminal-stdout";
+                        outLine.textContent = outputText;
+                        terminal.appendChild(outLine);
+                    }
+                    const errLine = document.createElement("div");
+                    errLine.className = "terminal-line terminal-stderr";
+                    errLine.textContent = err.toString();
+                    terminal.appendChild(errLine);
+                    resolve();
+                });
+            });
+        }
+
+        function loadPythonSnippet(key) {
+            const snippets = {
+                tiobe_top10: `# 📊 1. TIOBE Index Top 10 語言市佔長條圖 (Live Scraping)
+# 資料來源: https://www.tiobe.com/tiobe-index/
+import tiobe
+
+print("✨ 正在檢索 TIOBE Index Top 10 排行...")
+tiobe.print_table(10)
+
+print("\\n📊 正在繪製市佔率長條圖 (自動渲染至 PLOTS 標籤)...")
+tiobe.plot_top10(10)
+`,
+                tiobe_pie: `# 🍩 2. TIOBE Index 程式語言佔比圓餅圖 (Donut Chart)
+# 資料來源: https://www.tiobe.com/tiobe-index/
+import tiobe
+
+print("✨ TIOBE 程式語言市佔分佈:")
+top20 = tiobe.get_top20()
+for x in top20[:7]:
+    print(f" • {x['name']:<16}: {x['ratings']}")
+
+print("\\n🍩 正在繪製語言市佔分佈圓餅圖...")
+tiobe.plot_pie(top_n=7)
+`,
+                tiobe_growth: `# 📈 3. TIOBE 年度漲跌排行 (Year-over-Year Growth & Fall)
+# 資料來源: https://www.tiobe.com/tiobe-index/
+import tiobe
+
+print("✨ 分析 TIOBE 語言年度同比 (YoY) 漲跌幅度:")
+top20 = tiobe.get_top20()
+fastest_rising = max(top20, key=lambda x: x['change_val'])
+fastest_falling = min(top20, key=lambda x: x['change_val'])
+
+print(f"🚀 成長最快: {fastest_rising['name']} ({fastest_rising['change']})")
+print(f"📉 跌幅最大: {fastest_falling['name']} ({fastest_falling['change']})")
+
+print("\\n📈 正在繪製年度漲跌長條圖 (+綠 / -紅)...")
+tiobe.plot_growth(10)
+`,
+                tiobe_hall_of_fame: `# 🏆 4. TIOBE 歷年年度風雲語言名人堂 (Hall of Fame)
+# 資料來源: https://www.tiobe.com/tiobe-index/
+import tiobe
+
+hof = tiobe.get_hall_of_fame()
+print(f"✨ TIOBE 歷年年度程式語言得主 (2003-2025): 共 {len(hof)} 屆")
+for entry in hof[:6]:
+    print(f" • {entry['year']} 年得主: 🏆 {entry['winner']}")
+
+print("\\n🏆 正在繪製歷年風雲語言獲獎次數統計圖...")
+tiobe.plot_hall_of_fame()
+`,
+                tiobe_multi: `# ⚡ 5. TIOBE 多圖表綜合分析儀表板 (Pandas & Multi-plot)
+# 資料來源: https://www.tiobe.com/tiobe-index/
+import tiobe
+import pandas as pd
+
+df = tiobe.get_top20(as_dataframe=True)
+print("=== TIOBE Index Top 8 DataFrame ===")
+print(df[['rank', 'name', 'ratings', 'change']].head(8).to_string(index=False))
+
+print("\\n📊 正在連續生成多張統計圖表 (長條圖 + 圓餅圖)...")
+tiobe.plot_top10(8)
+tiobe.plot_pie(6)
+`,
+                hello: `# 6. 系統環境與基礎輸出 (System & Environment)
+import sys
+import platform
+import datetime
+
+print("================== DevStudio Python ==================")
+print(f"Python Version : {sys.version.split()[0]}")
+print(f"Platform       : {platform.platform()}")
+print(f"Current Time   : {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+print("Hello from Python Workspace!")
+`,
+                fibonacci: `# 7. 費氏數列效能檢測 (Fibonacci Benchmark)
+import time
+
+def fib_iterative(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+print("Calculating Fibonacci numbers...")
+for n in [10, 50, 100, 500, 1000]:
+    t0 = time.time()
+    val = fib_iterative(n)
+    cost = (time.time() - t0) * 1e6
+    print(f"F({n:>4}) = {str(val)[:20]}... ({len(str(val))} digits) in {cost:.2f} µs")
+`,
+                primes: `# 8. 質數篩選器 (Prime Sieve of Eratosthenes)
+import math
+
+def sieve_of_eratosthenes(limit):
+    is_prime = [True] * (limit + 1)
+    is_prime[0] = is_prime[1] = False
+    for i in range(2, int(math.isqrt(limit)) + 1):
+        if is_prime[i]:
+            for j in range(i * i, limit + 1, i):
+                is_prime[j] = False
+    return [i for i, prime in enumerate(is_prime) if prime]
+
+primes = sieve_of_eratosthenes(100)
+print(f"Found {len(primes)} primes under 100:")
+print(primes)
+`,
+                data: `# 9. 資料解析與列表推導 (Data Analysis & Comprehension)
+employees = [
+    {"name": "Alice", "dept": "Dev", "salary": 95000, "skills": ["Python", "Docker"]},
+    {"name": "Bob", "dept": "QA", "salary": 72000, "skills": ["Selenium", "Python"]},
+    {"name": "Charlie", "dept": "Dev", "salary": 110000, "skills": ["Go", "Kubernetes"]},
+    {"name": "Diana", "dept": "Product", "salary": 88000, "skills": ["Figma", "Jira"]},
+]
+
+devs = [e["name"] for e in employees if e["dept"] == "Dev"]
+avg_salary = sum(e["salary"] for e in employees) / len(employees)
+python_users = [e["name"] for e in employees if "Python" in e["skills"]]
+
+print(f"Developers      : {devs}")
+print(f"Average Salary  : $ {avg_salary:,.2f}")
+print(f"Python Users    : {python_users}")
+`,
+                classes: `# 10. 類別封裝與物件導向 (Object-Oriented Design)
+class TaskRunner:
+    def __init__(self, name):
+        self.name = name
+        self.tasks = []
+
+    def add_task(self, task_name, priority=1):
+        self.tasks.append({"task": task_name, "priority": priority})
+        self.tasks.sort(key=lambda x: x["priority"], reverse=True)
+
+    def run_all(self):
+        print(f"[{self.name}] Starting execution of {len(self.tasks)} tasks:")
+        for t in self.tasks:
+            print(f"  ⚡ Running: {t['task']} (Priority: {t['priority']})")
+        print(f"[{self.name}] All tasks completed successfully.")
+
+runner = TaskRunner("CSI-Worker")
+runner.add_task("Database Migration", 2)
+runner.add_task("Security Audit", 3)
+runner.add_task("Cache Warm-up", 1)
+runner.run_all()
+`
+            };
+
+            if (snippets[key]) {
+                setPythonCode(snippets[key]);
+                const select = document.getElementById("python-snippet-select");
+                if (select) select.value = "";
+            }
+        }
+
+        function clearTerminalOutput() {
+            const terminal = document.getElementById("python-terminal-output");
+            if (terminal) {
+                terminal.innerHTML = `
+                    <div class="terminal-line prompt-line">
+                        <span class="prompt-user">dev@csi-server</span>:<span class="prompt-path">~/workspace/src</span>$ <span class="prompt-cmd">clear</span>
+                    </div>
+                    <div class="terminal-line text-muted"># 終端機已清空。隨時輸入代碼並點擊「Run」或按下 [Ctrl + Enter] 執行。</div>
+                `;
+            }
+            const plotsContainer = document.getElementById("plots-container");
+            if (plotsContainer) plotsContainer.innerHTML = "";
+            const emptyState = document.getElementById("plots-empty-state");
+            if (emptyState) emptyState.style.display = "block";
+            const plotsBadge = document.getElementById("plots-badge");
+            if (plotsBadge) {
+                plotsBadge.innerText = "0";
+                plotsBadge.style.display = "none";
+            }
+            activeChartInstances.forEach(c => { try { c.destroy(); } catch(e){} });
+            activeChartInstances = [];
+        }
+
+        function resetPythonCode() {
+            Swal.fire({
+                title: "重置代碼？",
+                text: "確定要將當前編輯器內容重設為預設 Python 範例嗎？",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#007acc",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "確定重設",
+                cancelButtonText: "取消"
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    setPythonCode(DEFAULT_PYTHON_CODE);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

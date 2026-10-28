@@ -5,6 +5,7 @@ import urllib.parse
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from line_manager.models import LineProfile
+from line_manager.views import build_gift_claim_url
 from linebot.v3.messaging import (
     ApiClient,
     Configuration,
@@ -46,7 +47,7 @@ class Command(BaseCommand):
             for prof in profiles:
                 if prof.line_user_id and len(prof.line_user_id) >= 30:
                     encoded_msg = urllib.parse.quote(str(msg_text))
-                    liff_claim_url = f"https://liff.line.me/{settings.LINE_LIFF_ID}?page=pet&claim_coins={coins}&gift_id={gift_id}&gift_msg={encoded_msg}"
+                    liff_claim_url = build_gift_claim_url(gift_id, coins, encoded_msg)
 
                     flex_contents = {
                         "type": "bubble",

@@ -54,6 +54,10 @@ LINE_CHANNEL_ACCESS_TOKEN = env("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_LIFF_ID = env("LINE_LIFF_ID")
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY")
 LINE_MAINTENANCE_MODE = env.bool("LINE_MAINTENANCE_MODE", default=False)
+#! 小說工作區的伺服器端 Python 執行 (預設關閉，關閉時前端改用 Skulpt)
+NOVEL_SERVER_PYTHON_ENABLED = env.bool("NOVEL_SERVER_PYTHON_ENABLED", default=False)
+#! 允許在 LINE 私訊使用「發放金幣」指令的 LINE userId (逗號分隔)；綁定 superuser 的帳號亦可使用
+LINE_ADMIN_USER_IDS = env.list("LINE_ADMIN_USER_IDS", default=[])
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"

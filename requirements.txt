@@ -115,3 +115,5 @@ chardet==7.4.3
 #! LINE Bot 與欄位加密
 line-bot-sdk==3.25.0
 django-encrypted-model-fields==0.6.5
+zhconv==1.4.3
+

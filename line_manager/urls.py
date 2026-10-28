@@ -98,4 +98,18 @@ urlpatterns = [
     path("api/planner/get/", views.api_get_planner_note, name="api_get_planner_note"),
     path("api/planner/save/", views.api_save_planner_note, name="api_save_planner_note"),
     path("api/planner/sync_today_itineraries/", views.api_sync_planner_itineraries, name="api_sync_planner_itineraries"),
+
+    # 輕小說瀏覽器 (Novel Reader) LIFF 與 API 路由
+    path("liff/novel/", views.liff_novel, name="liff_novel"),
+    path("api/novel/list/", views.api_novel_list, name="api_novel_list"),
+    path("api/novel/search/", views.api_novel_search, name="api_novel_search"),
+    path("api/novel/import/", views.api_novel_import, name="api_novel_import"),
+    path("api/novel/<str:novel_id>/catalog/", views.api_novel_catalog, name="api_novel_catalog"),
+    path("api/novel/<str:novel_id>/chapter/<str:chapter_id>/", views.api_novel_chapter, name="api_novel_chapter"),
+    path("api/novel/progress/save/", views.api_novel_progress_save, name="api_novel_progress_save"),
+    path("api/novel/<str:novel_id>/delete/", views.api_novel_delete, name="api_novel_delete"),
+    path("api/novel/<str:novel_id>/refresh/", views.api_novel_refresh, name="api_novel_refresh"),
+    path("api/novel/proxy_image/", views.api_novel_proxy_image, name="api_novel_proxy_image"),
+    path("api/novel/run_python/", views.api_novel_run_python, name="api_novel_run_python"),
 ]
+

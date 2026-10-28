@@ -1,5 +1,5 @@
 from django.contrib import admin, messages
-from .models import AnimeFranchise, Drama, GroupMembership, Itinerary, LineProfile
+from .models import AnimeFranchise, Drama, GroupMembership, Itinerary, LineProfile, Novel, NovelChapter, NovelReadingProgress
 
 
 def cleanup_empty_franchises():
@@ -318,3 +318,24 @@ class DramaAdmin(admin.ModelAdmin):
     def delete_queryset(self, request, queryset):
         super().delete_queryset(request, queryset)
         cleanup_empty_franchises()
+
+
+@admin.register(Novel)
+class NovelAdmin(admin.ModelAdmin):
+    list_display = ("title", "novel_id", "author", "category", "status", "total_chapters", "updated_at")
+    search_fields = ("title", "novel_id", "author")
+    list_filter = ("category", "status")
+
+
+@admin.register(NovelChapter)
+class NovelChapterAdmin(admin.ModelAdmin):
+    list_display = ("novel", "volume_title", "title", "chapter_id", "order", "has_images", "updated_at")
+    search_fields = ("title", "chapter_id", "novel__title")
+    list_filter = ("has_images", "novel")
+
+
+@admin.register(NovelReadingProgress)
+class NovelReadingProgressAdmin(admin.ModelAdmin):
+    list_display = ("line_user_id", "novel", "last_chapter_title", "last_paragraph_index", "updated_at")
+    search_fields = ("line_user_id", "novel__title")
+

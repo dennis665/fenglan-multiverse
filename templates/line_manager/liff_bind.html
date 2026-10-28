@@ -199,6 +199,11 @@
                             </a>
                         </li>
                         <li>
+                            <a class="dropdown-item" href="/line/liff/?page=novel">
+                                <span><i class="fa-solid fa-book-open me-2 text-primary"></i>輕小說瀏覽器</span>
+                            </a>
+                        </li>
+                        <li>
                             <a class="dropdown-item" href="/line/liff/?page=music">
                                 <span><i class="fa-solid fa-compact-disc me-2 text-danger"></i>酷炫音樂平台</span>
                             </a>
@@ -425,7 +430,7 @@
         function redirectToList() {
             const groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
             let listUrl = `/line/liff/`;
-            if (groupId) {
+            if (groupId && groupId.startsWith("C") && !groupId.includes("-")) {
                 listUrl += `?groupId=${groupId}`;
             }
             window.location.href = listUrl;
@@ -435,7 +440,7 @@
         document.getElementById("google-bind-btn").addEventListener("click", function() {
             const groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
             let nextUrl = `/line/liff/bind/?action=google_bind`;
-            if (groupId) {
+            if (groupId && groupId.startsWith("C") && !groupId.includes("-")) {
                 nextUrl += `&groupId=${groupId}`;
             }
             

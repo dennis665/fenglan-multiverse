@@ -6,6 +6,26 @@
 * **Minor (Y)**：新增功能。
 * **Patch (Z)**：Bug 修復或效能優化。
 
+## [1.19.0] - 2026-09-22
+### Added (新增)
+* **📖 輕小說瀏覽器 LINE LIFF 系統 (`liff_novel.html`, `linovelib_crawler.py`, `Novel`, `NovelChapter`, `NovelReadingProgress`)**：
+  * **目標網站爬取與目錄解析**：爬取 `tw.linovelib.com` / `bilinovel`，支援線上關鍵字檢索、小說編號/網址直連解析、分卷章節目錄爬取與章節內文即時讀取。
+  * **繁簡中文雙向互轉搜尋**：整合 `zhconv` 繁簡體庫，繁體輸入「無職轉生」自動搜尋繁體與簡體並轉換結果標題、作者與簡介為繁體中文呈現。
+  * **單次有效 Ticket 交握防護機制**：實作每次檢索動態請求一次性 `jieqiSearchTicket`，規避站方防護阻擋。
+  * **一鍵匯入本地 DB 書庫**：支援自線上搜尋結果一鍵匯入小說基本資訊與全部分卷章節目錄結構至資料庫。
+  * **沉浸式小說閱讀器**：
+    * 支援日間 / 夜間（白/黑）主題即時切換。
+    * 支援插圖隱藏 / 開啟切換（無干擾純文字模式與完整圖文模式）。
+    * 支援閱讀字級放大 / 縮小與離線記住偏好設定。
+    * **段落級精確進度自動紀錄與導航**：滑動閱讀時透過防抖自動計算當前視窗中心段落，即時寫入 DB 與 LocalStorage，下次打開自動回跳至上次閱讀段落並以發光動畫提示。
+  * **全站 9 大 LIFF 服務導覽整合**：全面整合行程小幫手、追劇、營養百科、GNN、音樂、寵物等全站快捷選單。
+
+### Fixed (修復)
+* **🛡️ 手機 LINE LIFF ngrok 警告頁攔截與 WebKit 空白修復**：
+  * 前端全面改用 `safeFetchJson()` 注入 `ngrok-skip-browser-warning: 69420` 與 `Accept: application/json` 標頭，徹底解決手機 LINE App 內嵌 WebKit 載入 ngrok 免費版警告 HTML 頁面導致 `SyntaxError: Unexpected token '<'` 且書庫與搜尋全空白之致命問題。
+  * 修復前端 `performSearch()` 與 `switchShelfTab()` 相互遞迴呼叫導致 `Maximum call stack size exceeded` 之 Bug，並加入 `isSearching` 防抖保護。
+  * 於 `<head>` 注入 `<meta name="referrer" content="no-referrer">` 解決第三方封面圖片跨域防盜鏈破圖問題。
+
 ## [1.18.1] - 2026-09-07
 ### Added (新增)
 * **🎮 巴哈姆特 GNN 新聞每日 23:59 定時排程爬蟲與 LIFF 搜尋情報庫 (`GNNNews`, `liff_gnn.html`, `fetch_gnn_news.py`, `start_scheduler.py`)**：
@@ -23,9 +43,10 @@
     * `GET/POST /line/api/gnn/crawl/`：手動立即觸發爬取端點。
 
 * **✨ LIFF 全站精緻服務導覽下拉選單系統（Unified Dropdown Menu）**：
-  * **跨頁面快捷導航**：全面重構所有 LIFF 頁面頂部導航按鈕，統一替換為暗黑毛玻璃質感之「服務導覽 ▾」精緻下拉選單，包含行程看板、追劇小幫手、食品營養百科、GNN 動漫情報、酷炫音樂平台與休閒小站桌寵。
+  * **跨頁面快捷導航**：全面重構所有 LIFF 頁面頂部導航按鈕，統一替換為暗黑毛玻璃質感之「服務導覽 ▾」精緻下拉選單，包含行程看板、追劇小幫手、食品營養百科、GNN 動漫情報、輕小說瀏覽器、酷炫音樂平台與休閒小站桌寵。
   * **手機行動端極致優化**：徹底消滅在行動裝置 LINE 內嵌瀏覽器 (WebView) 下多按鈕折行、擁擠的版面問題，提供當前頁籤高亮標示與自適應陰影反饋。
-  * **涵蓋全站 8 大 LIFF 模板**：`liff_list.html`、`liff_drama.html`、`liff_nutrition.html`、`liff_gnn.html`、`liff_music.html`、`liff_pet.html`、`liff_create.html`、`liff_bind.html`。
+  * **涵蓋全站 9 大 LIFF 模板**：`liff_list.html`、`liff_drama.html`、`liff_nutrition.html`、`liff_gnn.html`、`liff_novel.html`、`liff_music.html`、`liff_pet.html`、`liff_create.html`、`liff_bind.html`。
+
 
 
 * **🥗 衛福部 FDA 台灣食品營養成分庫與每日飲食智慧健康分析平台 (`FDANutrition`, `DailyIntakeLog`, `liff_nutrition.html`)**：

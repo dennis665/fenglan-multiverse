@@ -53,6 +53,31 @@ configuration = Configuration(access_token=settings.LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(settings.LINE_CHANNEL_SECRET)
 
 
+def _resolve_valid_group_id(raw_group_id, user=None):
+    """
+    確保 group_id 為合法的 LINE Messaging API 群組 ID (C 開頭且不含 '-')。
+    若前端傳入的是 LIFF Context 的內部混淆 UUID (含 '-')，
+    自動從該使用者的 GroupMembership 中尋找已綁定的合法 C 開頭群組 ID 進行對應；
+    絕不將 UUID 寫入資料庫。
+    """
+    if not raw_group_id or not isinstance(raw_group_id, str):
+        return None
+    gid = raw_group_id.strip()
+    if gid.startswith("C") and "-" not in gid:
+        return gid
+    if user:
+        valid_membership = (
+            GroupMembership.objects.filter(user=user, group_id__startswith="C")
+            .exclude(group_id__contains="-")
+            .order_by("-id")
+            .first()
+        )
+        if valid_membership:
+            return valid_membership.group_id
+    return None
+
+
+
 def parse_itinerary_with_gemini(text):
     """呼叫 Gemini 進行自然語言解析，提取結構化的行程資料"""
     from google import genai
@@ -273,6 +298,25 @@ def line_webhook(request):
     return HttpResponse("OK")
 
 
+_GIFT_SIGN_SALT = "line_manager.broadcast_gift"
+
+
+def sign_broadcast_gift(gift_id, coins):
+    """產生廣播禮物連結的伺服器簽章，領取時用來驗證 gift_id 與金額未被竄改"""
+    from django.core.signing import Signer
+
+    return Signer(salt=_GIFT_SIGN_SALT).signature(f"{gift_id}:{int(coins)}")
+
+
+def build_gift_claim_url(gift_id, coins, encoded_msg):
+    """組出 Flex 禮物卡的 LIFF 領取連結 (含簽章)"""
+    sig = sign_broadcast_gift(gift_id, coins)
+    return (
+        f"https://liff.line.me/{settings.LINE_LIFF_ID}?page=pet&claim_coins={int(coins)}"
+        f"&gift_id={gift_id}&sig={sig}&gift_msg={encoded_msg}"
+    )
+
+
 def broadcast_coins_to_all_users(coins, message_text="🎉 系統獎勵金幣已發放！", title_text="🎉 感謝大家支持！"):
     """向所有 LINE Profile 使用者推播 Flex Box 禮物卡，點進 LIFF 才領取金幣"""
     import uuid
@@ -298,7 +342,7 @@ def broadcast_coins_to_all_users(coins, message_text="🎉 系統獎勵金幣已
 
         for prof in profiles:
             if prof.line_user_id:
-                liff_claim_url = f"https://liff.line.me/{settings.LINE_LIFF_ID}?page=pet&claim_coins={coins}&gift_id={gift_id}&gift_msg={encoded_msg}"
+                liff_claim_url = build_gift_claim_url(gift_id, coins, encoded_msg)
 
                 flex_contents = {
                     "type": "bubble",
@@ -401,6 +445,15 @@ def broadcast_coins_to_all_users(coins, message_text="🎉 系統獎勵金幣已
     return success_count, fail_count
 
 
+def _is_line_admin(line_user_id):
+    """判斷 LINE 使用者是否具管理員權限：列於 LINE_ADMIN_USER_IDS，或綁定的 Django 帳號為 superuser"""
+    if not line_user_id:
+        return False
+    if line_user_id in getattr(settings, "LINE_ADMIN_USER_IDS", []):
+        return True
+    return LineProfile.objects.filter(line_user_id=line_user_id, user__is_superuser=True).exists()
+
+
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
     """處理收到的文字訊息：暫停 Gemini AI 解析，改為直接回傳看板連結"""
@@ -435,7 +488,9 @@ def handle_message(event):
         return
 
 # 判斷是否為管理員發放金幣指令 (格式: 發放金幣 100 訊息 / 廣播金幣 200 / /gift 500)
-    if text.startswith("廣播金幣") or text.startswith("發放金幣") or text.startswith("/gift"):
+    #! 僅限一對一私訊中的管理員，其他人的同樣文字視為一般訊息
+    is_coin_cmd = text.startswith("廣播金幣") or text.startswith("發放金幣") or text.startswith("/gift")
+    if is_coin_cmd and not group_id and _is_line_admin(user_id):
         parts = text.split(maxsplit=2)
         try:
             coins_num = int(parts[1]) if len(parts) > 1 else 100
@@ -684,6 +739,8 @@ def liff_itinerary_list(request):
             page = "nutrition"
         elif "page=gnn" in liff_state:
             page = "gnn"
+        elif "page=novel" in liff_state:
+            page = "novel"
 
     if page == "music":
         response = render(request, "line_manager/liff_music.html", {"liff_id": settings.LINE_LIFF_ID, "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False)})
@@ -697,6 +754,8 @@ def liff_itinerary_list(request):
         return liff_nutrition(request)
     elif page == "gnn":
         return liff_gnn(request)
+    elif page == "novel":
+        return liff_novel(request)
 
     context = {
         "liff_id": settings.LINE_LIFF_ID,
@@ -760,12 +819,19 @@ def api_get_itineraries(request):
     user = line_profile.user
     current_time = now()
 
-    # 如果有傳入 group_id，記錄當前用戶與該群組的成員關係
+    # 過濾並正規化 group_id（防止 LIFF 混淆 UUID 寫入資料庫）
+    group_id = _resolve_valid_group_id(group_id, user=user)
+
+    # 如果有傳入合法 group_id，記錄當前用戶與該群組的成員關係
     if group_id:
         GroupMembership.objects.get_or_create(user=user, group_id=group_id)
 
-    # 取得該用戶加入的所有群組 ID
-    user_group_ids = list(GroupMembership.objects.filter(user=user).values_list("group_id", flat=True))
+    # 取得該用戶加入的所有合法群組 ID (排除歷史異常 UUID)
+    user_group_ids = list(
+        GroupMembership.objects.filter(user=user, group_id__startswith="C")
+        .exclude(group_id__contains="-")
+        .values_list("group_id", flat=True)
+    )
 
     # 獲取群組成員名單對應表，避免 N+1 查詢
     from collections import defaultdict
@@ -928,6 +994,7 @@ def api_get_itineraries(request):
             "is_bound": True,
             "is_temporary": is_temporary,
             "username": line_profile.line_display_name,
+            "resolved_group_id": group_id,
             "list": list_data,
             "page": page,
             "page_size": page_size,
@@ -975,6 +1042,9 @@ def api_create_itinerary(request):
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     if not line_profile:
         return JsonResponse({"error": "Account not bound"}, status=403)
+
+    # 過濾並正規化 group_id（防止 LIFF 混淆 UUID 寫入資料庫）
+    group_id = _resolve_valid_group_id(group_id, user=line_profile.user)
 
     dt = None
     if date_time_str:
@@ -1223,6 +1293,7 @@ def api_bind_account(request):
         LineProfile.objects.create(
             user=user, line_user_id=line_user_id, line_display_name=line_display_name
         )
+        group_id = _resolve_valid_group_id(group_id, user=user)
         if group_id:
             GroupMembership.objects.get_or_create(user=user, group_id=group_id)
         return JsonResponse({"status": "success", "username": user.username})
@@ -1260,6 +1331,7 @@ def api_bind_account(request):
         LineProfile.objects.create(
             user=user, line_user_id=line_user_id, line_display_name=line_display_name
         )
+        group_id = _resolve_valid_group_id(group_id, user=user)
         if group_id:
             GroupMembership.objects.get_or_create(user=user, group_id=group_id)
         return JsonResponse({"status": "success", "username": user.username})
@@ -1274,6 +1346,7 @@ def api_bind_account(request):
         LineProfile.objects.create(
             user=user, line_user_id=line_user_id, line_display_name=line_display_name
         )
+        group_id = _resolve_valid_group_id(group_id, user=user)
         if group_id:
             GroupMembership.objects.get_or_create(user=user, group_id=group_id)
         return JsonResponse({"status": "success", "username": user.username})
@@ -1457,6 +1530,8 @@ def api_send_guide_message(request):
 
     profile_data = res.json()
     line_user_id = profile_data["userId"]
+    line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
+    group_id = _resolve_valid_group_id(group_id, user=line_profile.user if line_profile else None)
 
     # 決定目標 (優先發送到群組，否則發送給個人)
     target_id = group_id if group_id else line_user_id
@@ -1513,6 +1588,8 @@ def api_join_unscheduled_itinerary(request, pk):
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     if not line_profile:
         return JsonResponse({"error": "Account not bound"}, status=403)
+
+    group_id = _resolve_valid_group_id(group_id, user=line_profile.user)
 
     itinerary = Itinerary.objects.filter(pk=pk).first()
     if not itinerary:
@@ -1572,6 +1649,8 @@ def api_set_unscheduled_time(request, pk):
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     if not line_profile:
         return JsonResponse({"error": "Account not bound"}, status=403)
+
+    group_id = _resolve_valid_group_id(group_id, user=line_profile.user)
 
     itinerary = Itinerary.objects.filter(pk=pk).first()
     if not itinerary:
@@ -3730,12 +3809,6 @@ def api_line_pet_status(request):
             user = line_profile.user
 
     if not user:
-        from pet_system.models import LinePetProfile
-        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
-        if main_prof:
-            user = main_prof.user
-
-    if not user:
         return JsonResponse({"error": "No valid user profile found"}, status=400)
 
     from datetime import date
@@ -3953,12 +4026,6 @@ def api_line_pet_sync_steps(request):
             user = line_profile.user
 
     if not user:
-        from pet_system.models import LinePetProfile
-        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
-        if main_prof:
-            user = main_prof.user
-
-    if not user:
         return JsonResponse({"error": "No valid user profile found"}, status=400)
 
     from datetime import date
@@ -4021,12 +4088,6 @@ def api_line_pet_buy_item(request):
         if line_user_id:
             line_profile = _get_or_create_profile(line_user_id, display_name)
             user = line_profile.user
-
-    if not user:
-        from pet_system.models import LinePetProfile
-        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
-        if main_prof:
-            user = main_prof.user
 
     if not user:
         return JsonResponse({"error": "No valid user profile found"}, status=400)
@@ -4103,12 +4164,6 @@ def api_line_pet_evolve(request):
         if line_user_id:
             line_profile = _get_or_create_profile(line_user_id, display_name)
             user = line_profile.user
-
-    if not user:
-        from pet_system.models import LinePetProfile
-        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
-        if main_prof:
-            user = main_prof.user
 
     if not user:
         return JsonResponse({"error": "No valid user profile found"}, status=400)
@@ -4509,12 +4564,6 @@ def api_line_pet_switch_active(request):
         if line_user_id:
             line_profile = _get_or_create_profile(line_user_id, display_name)
             user = line_profile.user
-
-    if not user:
-        from pet_system.models import LinePetProfile
-        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
-        if main_prof:
-            user = main_prof.user
 
     if not user:
         return JsonResponse({"error": "No valid user profile found"}, status=400)
@@ -5174,10 +5223,27 @@ def api_line_pet_claim_broadcast_gift(request):
     try:
         data = json.loads(request.body)
         access_token = data.get("access_token")
-        coins = int(data.get("coins", 800))
-        gift_id = str(data.get("gift_id") or "gift_default").strip()
+        coins = int(data.get("coins", 0))
+        gift_id = str(data.get("gift_id") or "").strip()
+        sig = str(data.get("sig") or "").strip()
     except Exception:
         return JsonResponse({"error": "Invalid request body"}, status=400)
+
+    from django.utils.crypto import constant_time_compare
+    from pet_system.models import LinePetGiftClaim
+
+    #! 金額與 gift_id 必須由伺服器簽章擔保，不採信前端傳入的數值
+    if not gift_id:
+        return JsonResponse({"status": "error", "error": "無效的禮物連結"}, status=400)
+    if sig:
+        if coins <= 0 or not constant_time_compare(sig, sign_broadcast_gift(gift_id, coins)):
+            return JsonResponse({"status": "error", "error": "無效的禮物連結"}, status=400)
+    else:
+        #! 相容簽章機制上線前發出的舊卡片：僅限已有人領過的真實 gift_id，金額以既有紀錄為準
+        legacy = LinePetGiftClaim.objects.filter(gift_id=gift_id).order_by("id").values_list("coins", flat=True).first()
+        if not legacy:
+            return JsonResponse({"status": "error", "error": "無效的禮物連結"}, status=400)
+        coins = legacy
 
     user = None
     if access_token:
@@ -5185,12 +5251,6 @@ def api_line_pet_claim_broadcast_gift(request):
         if line_user_id:
             line_profile = _get_or_create_profile(line_user_id, display_name)
             user = line_profile.user
-
-    if not user:
-        from pet_system.models import LinePetProfile
-        main_prof = LinePetProfile.objects.order_by("-pet_gold_coins", "id").first()
-        if main_prof:
-            user = main_prof.user
 
     if not user:
         return JsonResponse({"error": "No valid user profile found"}, status=400)
@@ -6171,4 +6231,658 @@ def api_sync_planner_itineraries(request):
         })
     except Exception as e:
         return JsonResponse({"status": "error", "error": str(e)}, status=500)
+
+
+# ==========================================
+# 輕小說瀏覽器 (Novel Reader) LIFF & APIs
+# ==========================================
+
+def _get_novel_user_identity(request, data=None):
+    """取得小說閱讀器用戶身分 (支援 LINE access_token, line_user_id 或 Django Session)"""
+    from .models import LineProfile
+    import requests
+
+    if data is None:
+        data = {}
+
+    user = request.user if request.user.is_authenticated else None
+    line_user_id = data.get("line_user_id") or request.GET.get("line_user_id") or ""
+    access_token = data.get("access_token") or request.GET.get("access_token") or ""
+
+    if access_token and not line_user_id:
+        try:
+            res = requests.get(
+                "https://api.line.me/v2/profile",
+                headers={"Authorization": f"Bearer {access_token}"},
+                timeout=5
+            )
+            if res.status_code == 200:
+                p = res.json()
+                line_user_id = p.get("userId", "")
+                if line_user_id and not user:
+                    lp = LineProfile.objects.filter(line_user_id=line_user_id).first()
+                    if lp:
+                        user = lp.user
+        except Exception as err:
+            logger.warning(f"Error fetching LINE profile for novel reader: {err}")
+
+    if not line_user_id and user:
+        lp = LineProfile.objects.filter(user=user).first()
+        if lp:
+            line_user_id = lp.line_user_id
+        else:
+            line_user_id = f"user_{user.id}"
+
+    if not line_user_id:
+        line_user_id = "guest_default"
+
+    return user, line_user_id
+
+
+def liff_novel(request):
+    """LIFF Python DevStudio (程式工作區 & 閱讀器) 頁面"""
+    context = {
+        "liff_id": getattr(settings, "LINE_LIFF_ID", ""),
+        "title": "Python DevStudio",
+    }
+    response = render(request, "line_manager/liff_novel.html", context)
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    return response
+
+
+def api_novel_list(request):
+    """API 端點：取得已匯入 DB 之小說書架清單與使用者閱讀進度"""
+    from .models import Novel, NovelReadingProgress
+    user, line_user_id = _get_novel_user_identity(request)
+
+    novels = Novel.objects.all().order_by("-updated_at")
+    progress_map = {}
+    if line_user_id:
+        progs = NovelReadingProgress.objects.filter(line_user_id=line_user_id)
+        for p in progs:
+            progress_map[p.novel_id] = {
+                "chapter_id": p.last_chapter_key or (p.last_chapter.chapter_id if p.last_chapter else ""),
+                "chapter_title": p.last_chapter_title or (p.last_chapter.title if p.last_chapter else ""),
+                "paragraph_index": p.last_paragraph_index,
+                "scroll_percentage": p.scroll_percentage,
+                "updated_at": p.updated_at.strftime("%Y-%m-%d %H:%M"),
+            }
+
+    data = []
+    for n in novels:
+        prog = progress_map.get(n.id)
+        data.append({
+            "id": n.id,
+            "novel_id": n.novel_id,
+            "title": n.title,
+            "author": n.author,
+            "cover_url": n.cover_url,
+            "description": n.description,
+            "category": n.category,
+            "status": n.status,
+            "total_chapters": n.total_chapters or n.chapters.count(),
+            "updated_at": n.updated_at.strftime("%Y-%m-%d %H:%M"),
+            "progress": prog,
+        })
+
+    return JsonResponse({"status": "success", "novels": data})
+
+
+def api_novel_search(request):
+    """API 端點：搜尋 tw.linovelib.com / bilinovel 輕小說"""
+    from .models import Novel
+    from .services.linovelib_crawler import search_novels
+
+    keyword = request.GET.get("keyword") or request.GET.get("q") or ""
+    keyword = keyword.strip()
+    if not keyword:
+        return JsonResponse({"status": "success", "results": []})
+
+    results = search_novels(keyword)
+    imported_ids = set(Novel.objects.filter(novel_id__in=[r["novel_id"] for r in results]).values_list("novel_id", flat=True))
+
+    for r in results:
+        r["is_imported"] = r["novel_id"] in imported_ids
+
+    return JsonResponse({"status": "success", "results": results})
+
+
+@csrf_exempt
+def api_novel_import(request):
+    """API 端點：一鍵匯入輕小說書籍資料與章節目錄至 DB"""
+    from .models import Novel, NovelChapter
+    from .services.linovelib_crawler import fetch_novel_details
+
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8")) if request.body else {}
+        novel_id = str(data.get("novel_id") or "").strip()
+        if not novel_id:
+            return JsonResponse({"status": "error", "error": "缺少小說 ID"}, status=400)
+
+        details = fetch_novel_details(novel_id)
+        if not details:
+            return JsonResponse({"status": "error", "error": f"找不到小說 #{novel_id} 或抓取失敗"}, status=404)
+
+        # 1. 建立或更新小說主記錄
+        novel, _ = Novel.objects.update_or_create(
+            novel_id=details["novel_id"],
+            defaults={
+                "title": details.get("title", ""),
+                "author": details.get("author", ""),
+                "cover_url": details.get("cover_url", ""),
+                "description": details.get("description", ""),
+                "category": details.get("category", ""),
+                "status": details.get("status", ""),
+                "source_url": details.get("source_url", ""),
+            }
+        )
+
+        # 2. 建立分卷與章節
+        total_chapters = 0
+        order_counter = 1
+        for vol in details.get("volumes", []):
+            vol_title = vol.get("volume_title", "正文")
+            for ch in vol.get("chapters", []):
+                NovelChapter.objects.update_or_create(
+                    novel=novel,
+                    chapter_id=ch["chapter_id"],
+                    defaults={
+                        "volume_title": vol_title,
+                        "title": ch["title"],
+                        "chapter_url": ch.get("url", ""),
+                        "order": ch.get("order", order_counter),
+                    }
+                )
+                order_counter += 1
+                total_chapters += 1
+
+        novel.total_chapters = total_chapters
+        novel.save()
+
+        return JsonResponse({
+            "status": "success",
+            "message": f"成功匯入《{novel.title}》，共 {total_chapters} 章！",
+            "novel": {
+                "id": novel.id,
+                "novel_id": novel.novel_id,
+                "title": novel.title,
+                "author": novel.author,
+                "cover_url": novel.cover_url,
+                "total_chapters": total_chapters,
+            }
+        })
+    except Exception as e:
+        logger.error(f"[api_novel_import] Error: {e}", exc_info=True)
+        return JsonResponse({"status": "error", "error": str(e)}, status=500)
+
+
+def api_novel_catalog(request, novel_id):
+    """API 端點：取得小說章節目錄（支援已匯入與未匯入）"""
+    from .models import Novel, NovelChapter, NovelReadingProgress
+    from .services.linovelib_crawler import fetch_novel_details
+
+    user, line_user_id = _get_novel_user_identity(request)
+    novel = Novel.objects.filter(novel_id=novel_id).first()
+
+    volumes = []
+    if novel and novel.chapters.exists():
+        # 從 DB 整理分卷與章節
+        chapters_qs = novel.chapters.all().order_by("order", "id")
+        vol_map = {}
+        for ch in chapters_qs:
+            v_title = ch.volume_title or "正文"
+            if v_title not in vol_map:
+                vol_map[v_title] = []
+            vol_map[v_title].append({
+                "chapter_id": ch.chapter_id,
+                "title": ch.title,
+                "order": ch.order,
+                "has_cached": bool(ch.content_cached),
+                "has_images": ch.has_images,
+            })
+        for v_title, ch_list in vol_map.items():
+            volumes.append({
+                "volume_title": v_title,
+                "chapters": ch_list,
+            })
+        novel_data = {
+            "id": novel.id,
+            "novel_id": novel.novel_id,
+            "title": novel.title,
+            "author": novel.author,
+            "cover_url": novel.cover_url,
+            "description": novel.description,
+            "category": novel.category,
+            "status": novel.status,
+            "total_chapters": novel.total_chapters,
+            "is_imported": True,
+        }
+    else:
+        # 若 DB 尚無，直接即時抓取詳情與目錄
+        details = fetch_novel_details(novel_id)
+        if not details:
+            return JsonResponse({"status": "error", "error": "找不到此小說或連線逾時"}, status=404)
+        volumes = details.get("volumes", [])
+        novel_data = {
+            "novel_id": details["novel_id"],
+            "title": details.get("title", ""),
+            "author": details.get("author", ""),
+            "cover_url": details.get("cover_url", ""),
+            "description": details.get("description", ""),
+            "category": details.get("category", ""),
+            "status": details.get("status", ""),
+            "total_chapters": sum(len(v.get("chapters", [])) for v in volumes),
+            "is_imported": False,
+        }
+
+    # 附帶閱讀進度
+    prog = None
+    if novel and line_user_id:
+        p = NovelReadingProgress.objects.filter(novel=novel, line_user_id=line_user_id).first()
+        if p:
+            prog = {
+                "chapter_id": p.last_chapter_key or (p.last_chapter.chapter_id if p.last_chapter else ""),
+                "chapter_title": p.last_chapter_title or (p.last_chapter.title if p.last_chapter else ""),
+                "paragraph_index": p.last_paragraph_index,
+                "scroll_percentage": p.scroll_percentage,
+            }
+
+    return JsonResponse({
+        "status": "success",
+        "novel": novel_data,
+        "volumes": volumes,
+        "progress": prog,
+    })
+
+
+def api_novel_chapter(request, novel_id, chapter_id):
+    """API 端點：取得章節內容（段落與插圖陣列）"""
+    from .models import Novel, NovelChapter
+    from .services.linovelib_crawler import fetch_chapter_content
+
+    novel = Novel.objects.filter(novel_id=novel_id).first()
+    ch_obj = NovelChapter.objects.filter(novel=novel, chapter_id=chapter_id).first() if novel else None
+
+    force_refresh = request.GET.get("refresh") in ("1", "true")
+    cached = ch_obj.content_cached if (ch_obj and not force_refresh) else None
+
+    # 1. 檢查 DB 快取是否存在且有效（排除含有防盜報錯水印之污染快取）
+    is_valid_cache = False
+    if cached and cached.get("elements"):
+        cached_elements = cached.get("elements", [])
+        has_error_watermark = any(
+            isinstance(e, dict) and any(w in str(e.get("content", "")) for w in ["加載失敗", "加载失败", "更換瀏覽器", "更换浏览器"])
+            for e in cached_elements
+        )
+        if not has_error_watermark and len(cached_elements) > 0:
+            is_valid_cache = True
+
+    if is_valid_cache:
+        elements = cached.get("elements", [])
+        title = cached.get("title", ch_obj.title)
+        has_images = cached.get("has_images", ch_obj.has_images)
+    else:
+        # 2. 爬取最新章節內文
+        content = fetch_chapter_content(novel_id, chapter_id)
+        if not content or not content.get("elements"):
+            return JsonResponse({"status": "error", "error": "抓取章節內容失敗或章節為空"}, status=404)
+
+        elements = content.get("elements", [])
+        title = content.get("title") or (ch_obj.title if ch_obj else f"第 {chapter_id} 章")
+        has_images = content.get("has_images", False)
+
+        # 寫入快取 (如果小說已在 DB)
+        if ch_obj:
+            ch_obj.content_cached = {
+                "title": title,
+                "elements": elements,
+                "has_images": has_images,
+            }
+            ch_obj.has_images = has_images
+            ch_obj.save(update_fields=["content_cached", "has_images", "updated_at"])
+
+    # 3. 計算上一章與下一章導航 ID
+    prev_chapter_id = None
+    next_chapter_id = None
+    if novel and ch_obj:
+        prev_ch = NovelChapter.objects.filter(novel=novel, order__lt=ch_obj.order).order_by("-order").first()
+        next_ch = NovelChapter.objects.filter(novel=novel, order__gt=ch_obj.order).order_by("order").first()
+        if prev_ch:
+            prev_chapter_id = prev_ch.chapter_id
+        if next_ch:
+            next_chapter_id = next_ch.chapter_id
+
+    return JsonResponse({
+        "status": "success",
+        "chapter": {
+            "novel_id": novel_id,
+            "chapter_id": chapter_id,
+            "title": title,
+            "elements": elements,
+            "has_images": has_images,
+            "prev_chapter_id": prev_chapter_id,
+            "next_chapter_id": next_chapter_id,
+            "total_paragraphs": len(elements),
+        }
+    })
+
+
+@csrf_exempt
+def api_novel_progress_save(request):
+    """API 端點：儲存使用者目前章節與段落級閱讀進度"""
+    from .models import Novel, NovelChapter, NovelReadingProgress
+
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "error": "Method Not Allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8")) if request.body else {}
+        novel_id = str(data.get("novel_id") or "").strip()
+        chapter_id = str(data.get("chapter_id") or "").strip()
+        paragraph_index = int(data.get("paragraph_index", 0))
+        scroll_percentage = float(data.get("scroll_percentage", 0.0))
+        chapter_title = str(data.get("chapter_title") or "").strip()
+
+        user, line_user_id = _get_novel_user_identity(request, data)
+        if not novel_id:
+            return JsonResponse({"status": "error", "error": "缺少小說 ID"}, status=400)
+
+        novel = Novel.objects.filter(novel_id=novel_id).first()
+        if not novel:
+            return JsonResponse({"status": "error", "error": "找不到此小說紀錄"}, status=404)
+
+        ch_obj = NovelChapter.objects.filter(novel=novel, chapter_id=chapter_id).first() if chapter_id else None
+        if ch_obj and not chapter_title:
+            chapter_title = ch_obj.title
+
+        progress, created = NovelReadingProgress.objects.update_or_create(
+            novel=novel,
+            line_user_id=line_user_id,
+            defaults={
+                "user": user,
+                "last_chapter": ch_obj,
+                "last_chapter_key": chapter_id,
+                "last_chapter_title": chapter_title,
+                "last_paragraph_index": paragraph_index,
+                "scroll_percentage": scroll_percentage,
+            }
+        )
+
+        return JsonResponse({
+            "status": "success",
+            "message": "閱讀進度已同步！",
+            "novel_id": novel_id,
+            "chapter_id": chapter_id,
+            "paragraph_index": paragraph_index,
+            "updated_at": progress.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+        })
+    except Exception as e:
+        logger.error(f"[api_novel_progress_save] Error: {e}", exc_info=True)
+        return JsonResponse({"status": "error", "error": str(e)}, status=500)
+
+
+@csrf_exempt
+def api_novel_delete(request, novel_id):
+    """API 端點：從書架或 DB 移除小說"""
+    from .models import Novel
+    if request.method not in ["POST", "DELETE"]:
+        return JsonResponse({"status": "error", "error": "Method Not Allowed"}, status=405)
+
+    novel = Novel.objects.filter(novel_id=novel_id).first()
+    if not novel:
+        return JsonResponse({"status": "error", "error": "找不到該小說"}, status=404)
+
+    title = novel.title
+    novel.delete()
+    return JsonResponse({"status": "success", "message": f"已從書庫移除《{title}》！"})
+
+
+@csrf_exempt
+def api_novel_refresh(request, novel_id):
+    """
+    API 端點：一鍵更新此部小說內容與目錄結構。
+    向線上來源重新爬取最新章節目錄、更新小說詳情，
+    並清空所有已快取章節，確保獲得最新無污染的內文。
+    """
+    from .models import Novel, NovelChapter
+    from .services.linovelib_crawler import fetch_novel_details
+    from django.utils import timezone
+
+    if request.method not in ["POST", "GET"]:
+        return JsonResponse({"status": "error", "error": "Method Not Allowed"}, status=405)
+
+    novel = Novel.objects.filter(novel_id=novel_id).first()
+    if not novel:
+        return JsonResponse({"status": "error", "error": f"找不到編號 #{novel_id} 的小說紀錄"}, status=404)
+
+    try:
+        details = fetch_novel_details(novel_id)
+        if not details or not details.get("volumes"):
+            return JsonResponse({"status": "error", "error": "向線上來源同步目錄失敗，請稍候重試"}, status=502)
+
+        # 更新小說基本資訊
+        novel.title = details.get("title") or novel.title
+        novel.author = details.get("author") or novel.author
+        if details.get("cover_url"):
+            novel.cover_url = details.get("cover_url")
+        if details.get("description"):
+            novel.description = details.get("description")
+        if details.get("category"):
+            novel.category = details.get("category")
+        if details.get("status"):
+            novel.status = details.get("status")
+
+        # 同步章節目錄，並清空受影響章節的舊快取
+        existing_chapters = {ch.chapter_id: ch for ch in novel.chapters.all()}
+        total_count = 0
+        new_chapters_to_create = []
+
+        for vol in details.get("volumes", []):
+            vol_title = vol.get("volume_title", "分卷")
+            for ch_data in vol.get("chapters", []):
+                ch_id = str(ch_data.get("chapter_id"))
+                ch_title = ch_data.get("title", "")
+                order = ch_data.get("order", total_count + 1)
+                url = ch_data.get("url", "")
+                total_count += 1
+
+                if ch_id in existing_chapters:
+                    obj = existing_chapters[ch_id]
+                    obj.volume_title = vol_title
+                    obj.title = ch_title
+                    obj.order = order
+                    obj.chapter_url = url
+                    # 清空快取，確保後續載入採用最新爬取與淨化邏輯
+                    obj.content_cached = {}
+                    obj.save(update_fields=["volume_title", "title", "order", "chapter_url", "content_cached", "updated_at"])
+                else:
+                    new_chapters_to_create.append(NovelChapter(
+                        novel=novel,
+                        volume_title=vol_title,
+                        title=ch_title,
+                        chapter_id=ch_id,
+                        order=order,
+                        chapter_url=url,
+                        content_cached={},
+                    ))
+
+        if new_chapters_to_create:
+            NovelChapter.objects.bulk_create(new_chapters_to_create)
+
+        novel.total_chapters = total_count
+        novel.updated_at = timezone.now()
+        novel.save()
+
+        return JsonResponse({
+            "status": "success",
+            "message": f"《{novel.title}》已成功一鍵更新！共同步 {total_count} 個章節，並已重置章節快取。",
+            "total_chapters": total_count,
+            "novel": {
+                "novel_id": novel.novel_id,
+                "title": novel.title,
+                "author": novel.author,
+                "total_chapters": total_count,
+                "updated_at": novel.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+            }
+        })
+    except Exception as e:
+        logger.error(f"[api_novel_refresh] Error: {e}", exc_info=True)
+        return JsonResponse({"status": "error", "error": f"更新小說內容時發生異常: {str(e)}"}, status=500)
+
+
+@csrf_exempt
+def api_novel_proxy_image(request):
+    """
+    小說圖片反向代理 API。
+    解決 readpai.com / linovelib 等圖片伺服器的高強度防盜鏈（Hotlink 403）問題。
+    由後端帶上合法的 Referer: https://tw.linovelib.com/ 取得圖片二進位串流，並提供瀏覽器快取。
+    """
+    import urllib.request
+    import ssl
+    from django.http import HttpResponse
+
+    img_url = request.GET.get("url", "").strip()
+    if not img_url:
+        return HttpResponse("Missing image URL", status=400)
+
+    # 安全校驗：僅允許合法網址協定
+    if not (img_url.startswith("http://") or img_url.startswith("https://")):
+        return HttpResponse("Invalid URL scheme", status=400)
+
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Referer": "https://tw.linovelib.com/",
+            "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        }
+        req = urllib.request.Request(img_url, headers=headers)
+        ctx = ssl._create_unverified_context()
+        resp = urllib.request.urlopen(req, context=ctx, timeout=12)
+
+        content_type = resp.headers.get("Content-Type", "image/jpeg")
+        data = resp.read()
+
+        response = HttpResponse(data, content_type=content_type)
+        response["Cache-Control"] = "public, max-age=604800, immutable"
+        return response
+    except Exception as e:
+        logger.warning(f"[api_novel_proxy_image] Failed to fetch image '{img_url}': {e}")
+        return HttpResponse(f"Image fetch error: {e}", status=502)
+
+
+@csrf_exempt
+def api_novel_run_python(request):
+    """
+    API 端點：安全執行 Python 程式碼並回傳終端機輸出 (stdout/stderr) 與執行耗時。
+    提供工程師工作區/交互式終端真實執行能力。
+    """
+    import sys
+    import subprocess
+    import time
+
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "error": "Method Not Allowed"}, status=405)
+
+    #! 伺服器端執行任意程式碼風險極高：預設關閉，僅在明確開啟且為登入的管理員時允許
+    #! 回傳非 200 時，前端會自動改用瀏覽器端 Skulpt 執行，不影響使用者操作
+    if not getattr(settings, "NOVEL_SERVER_PYTHON_ENABLED", False) or not (
+        request.user.is_authenticated and request.user.is_superuser
+    ):
+        return JsonResponse({"status": "error", "error": "Server-side execution disabled"}, status=403)
+
+    try:
+        data = json.loads(request.body.decode("utf-8")) if request.body else {}
+        code = data.get("code", "")
+        if not code.strip():
+            return JsonResponse({
+                "status": "success",
+                "stdout": "",
+                "stderr": "",
+                "exit_code": 0,
+                "elapsed": 0.0,
+            })
+
+        # 基礎危險指令防護（防止惡意指令或直接破壞系統磁碟）
+        blocked_keywords = [
+            "format c:", "del /f /s /q c:", "rmdir /s /q c:",
+            "shutil.rmtree('c:", 'shutil.rmtree("c:',
+        ]
+        lower_code = code.lower()
+        for kw in blocked_keywords:
+            if kw in lower_code:
+                return JsonResponse({
+                    "status": "error",
+                    "stdout": "",
+                    "stderr": f"SecurityException: Prohibited command pattern detected: '{kw}'",
+                    "exit_code": 1,
+                    "elapsed": 0.0,
+                })
+
+        start_time = time.time()
+        python_bin = sys.executable
+        base_dir = str(settings.BASE_DIR)
+        process = subprocess.run(
+            [python_bin, "-c", code],
+            cwd=base_dir,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+        )
+        elapsed = round(time.time() - start_time, 4)
+
+        # 解析 stdout 中的圖片與圖表數據標籤
+        plot_images = []
+        chart_configs = []
+        clean_lines = []
+        for line in process.stdout.splitlines(keepends=True):
+            trimmed = line.strip()
+            if trimmed.startswith("[PLOT_IMAGE:") and trimmed.endswith("]"):
+                img_url = trimmed[len("[PLOT_IMAGE:"):-1]
+                plot_images.append(img_url)
+            elif trimmed.startswith("[CHART_DATA:") and trimmed.endswith("]"):
+                try:
+                    c_json = json.loads(trimmed[len("[CHART_DATA:"):-1])
+                    chart_configs.append(c_json)
+                except Exception:
+                    pass
+            else:
+                clean_lines.append(line)
+
+        clean_stdout = "".join(clean_lines)
+
+        return JsonResponse({
+            "status": "success",
+            "stdout": clean_stdout,
+            "stderr": process.stderr,
+            "plot_images": plot_images,
+            "chart_configs": chart_configs,
+            "exit_code": process.returncode,
+            "elapsed": elapsed,
+        })
+    except subprocess.TimeoutExpired:
+        return JsonResponse({
+            "status": "error",
+            "stdout": "",
+            "stderr": "TimeoutError: Execution timed out (limit: 10.0s exceeded). Potential infinite loop or slow network.",
+            "exit_code": 124,
+            "elapsed": 10.0,
+        })
+    except Exception as e:
+        logger.error(f"[api_novel_run_python] Error: {e}", exc_info=True)
+        return JsonResponse({
+            "status": "error",
+            "stdout": "",
+            "stderr": f"Internal execution error: {str(e)}",
+            "exit_code": 1,
+            "elapsed": 0.0,
+        }, status=500)
+
+
 

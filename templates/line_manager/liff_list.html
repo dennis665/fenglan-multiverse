@@ -655,6 +655,11 @@
                                 </a>
                             </li>
                             <li>
+                                <a class="dropdown-item" href="/line/liff/?page=novel">
+                                    <span><i class="fa-solid fa-book-open me-2 text-primary"></i>輕小說瀏覽器</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item" href="/line/liff/?page=music">
                                     <span><i class="fa-solid fa-compact-disc me-2 text-danger"></i>酷炫音樂平台</span>
                                 </a>
@@ -1182,6 +1187,11 @@
         // 解析 URL 中的 groupId 參數
         const urlParams = new URLSearchParams(window.location.search);
         const urlGroupId = urlParams.get("groupId");
+        let resolvedGroupId = (urlGroupId && urlGroupId.startsWith("C") && !urlGroupId.includes("-")) ? urlGroupId : null;
+
+        function getActiveGroupId() {
+            return resolvedGroupId || urlGroupId || (lineContext ? lineContext.groupId : null);
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             const pageParam = urlParams.get("page");
@@ -1208,7 +1218,7 @@
                         lineContext = liff.getContext();
                         
                         const addBtn = document.getElementById("add-btn");
-                        const currentGroupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+                        const currentGroupId = getActiveGroupId();
                         if (currentGroupId) {
                             addBtn.href = `/line/liff/create/?groupId=${currentGroupId}`;
                             document.getElementById("group-title").innerHTML = `<i class="fa-solid fa-users me-1"></i>群組共享行程`;
@@ -1242,7 +1252,7 @@
         }
 
         function fetchItineraries(tab) {
-            let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+            let groupId = getActiveGroupId();
             const state = tabState[tab];
 
             const listContainer = document.getElementById(`${tab}-list`);
@@ -1276,9 +1286,19 @@
                     return;
                 }
 
+                if (data.resolved_group_id) {
+                    resolvedGroupId = data.resolved_group_id;
+                    groupId = resolvedGroupId;
+                    const addBtn = document.getElementById("add-btn");
+                    if (addBtn) {
+                        addBtn.href = `/line/liff/create/?groupId=${resolvedGroupId}`;
+                    }
+                    document.getElementById("group-title").innerHTML = `<i class="fa-solid fa-users me-1"></i>群組共享行程`;
+                }
+
                 if (!data.is_bound) {
                     let bindUrl = `/line/liff/bind/`;
-                    if (groupId) {
+                    if (groupId && groupId.startsWith("C")) {
                         bindUrl += `?groupId=${groupId}`;
                     }
                     window.location.href = bindUrl;
@@ -1290,7 +1310,7 @@
 
                 if (data.is_temporary) {
                     const bindLink = document.getElementById("bind-link");
-                    if (groupId) {
+                    if (groupId && groupId.startsWith("C")) {
                         bindLink.href = `/line/liff/bind/?groupId=${groupId}`;
                     } else {
                         bindLink.href = `/line/liff/bind/`;
@@ -1635,7 +1655,7 @@
 
         function editItinerary(id) {
             let editUrl = `/line/liff/create/?editId=${id}`;
-            let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+            let groupId = getActiveGroupId();
             if (groupId) {
                 editUrl += `&groupId=${groupId}`;
             }
@@ -1674,7 +1694,7 @@
         }
 
         function joinUnscheduled(id) {
-            let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+            let groupId = getActiveGroupId();
             fetch(`/line/api/itineraries/join/${id}/`, {
                 method: "POST",
                 headers: {
@@ -1710,7 +1730,7 @@
         }
 
         function setFinalTimeModal(id) {
-            let groupId = urlGroupId || (lineContext ? lineContext.groupId : null);
+            let groupId = getActiveGroupId();
             
             const now = new Date();
             now.setDate(now.getDate() + 1);
@@ -1790,7 +1810,11 @@
                 return;
             }
 
-            const liffUrl = `https://liff.line.me/${liffId}/?action=join&itineraryId=${id}`;
+            let liffUrl = `https://liff.line.me/${liffId}/?action=join&itineraryId=${id}`;
+            const activeGid = getActiveGroupId();
+            if (activeGid && activeGid.startsWith("C")) {
+                liffUrl += `&groupId=${activeGid}`;
+            }
 
             const flexMessage = {
                 type: "flex",
