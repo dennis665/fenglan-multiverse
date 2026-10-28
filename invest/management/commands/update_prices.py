@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
         #! 先將資料庫已有的 StockPrice 撈出來轉成字典
         #! 這樣就不需要在迴圈裡一直去資料庫 SELECT 查詢了
-        existing_prices = {sp.stock.pk: sp for sp in StockPrice.objects.filter(stock__in=stocks_to_update)}
+        existing_prices = {sp.stock_id: sp for sp in StockPrice.objects.filter(stock__in=stocks_to_update)}  # * 用外鍵 id，避免每筆再查 Stock
 
         #! 準備三個陣列，用來「暫存」要寫入資料庫的物件
         prices_to_create = []
@@ -91,4 +91,8 @@ class Command(BaseCommand):
             Stock.objects.bulk_update(stocks_to_deactivate, ["is_active"], batch_size=500)
             self.stdout.write(self.style.WARNING(f"🚫 已批量停用 {len(stocks_to_deactivate)} 檔無效標的"))
 
+        #! 清除儀表板的大盤排行快取 (LocMem 快取僅限同一程序；其他程序最多 10 分鐘後自動更新)
+        from django.core.cache import cache
+
+        cache.delete("invest:market_summary")
         self.stdout.write(self.style.SUCCESS("🎉 所有報價更新完成！"))

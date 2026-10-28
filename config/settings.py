@@ -153,6 +153,7 @@ else:
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "utils.middleware.TextOnlyGZipMiddleware",  # * 壓縮 HTML / JSON 回應，需在會修改內容的 middleware 之前
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -277,6 +278,15 @@ LOGGING = {
 # ? ==============================================================================
 DATABASES = {
     "default": env.db(),  # * django-environ 會自動解析 DATABASE_URL
+}
+
+#! 快取設定：每個程序各自一份記憶體快取 (多程序部署時可改為 Redis)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "csi-default",
+        "OPTIONS": {"MAX_ENTRIES": 1000},
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [

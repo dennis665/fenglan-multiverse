@@ -1,5 +1,6 @@
 import os
 import sys
+import threading
 
 import torch
 import torchvision.transforms as T
@@ -17,9 +18,34 @@ if rtdetr_path not in sys.path:
 from src.core import YAMLConfig  # * 引入模型設定檔  # noqa: E402
 
 
-def run_image_inference(image_path, model_path, output_dir, threshold=0.5):
-    #! 執行圖片辨識流程，並回傳結果圖片路徑、文字結果與是否有辨識到物體
+#! 已載入的模型常駐於記憶體，避免每張圖片都重新讀取權重 (key: 權重路徑 + 修改時間)
+_MODEL_CACHE = {}
+_MODEL_CACHE_LOCK = threading.Lock()
+_MODEL_CACHE_MAX = 2
 
+
+def _get_model(model_path):
+    """取得 (model, postprocessor, device)；同一權重檔只載入一次，權重檔更新時自動重新載入"""
+    cache_key = (os.path.abspath(model_path), os.path.getmtime(model_path))
+    cached = _MODEL_CACHE.get(cache_key)
+    if cached:
+        return cached
+
+    with _MODEL_CACHE_LOCK:
+        cached = _MODEL_CACHE.get(cache_key)
+        if cached:
+            return cached
+        #! 同一路徑的舊版本模型移除，釋放記憶體
+        for key in [k for k in _MODEL_CACHE if k[0] == cache_key[0]]:
+            del _MODEL_CACHE[key]
+        #! 最多常駐 _MODEL_CACHE_MAX 個模型，超過時移除最早載入的
+        while len(_MODEL_CACHE) >= _MODEL_CACHE_MAX:
+            del _MODEL_CACHE[next(iter(_MODEL_CACHE))]
+        _MODEL_CACHE[cache_key] = _load_model(model_path)
+        return _MODEL_CACHE[cache_key]
+
+
+def _load_model(model_path):
     #! 步驟 1：載入設定與權重檔
     config_path = os.path.join(rtdetr_path, "configs", "custom", "rtdetrv2_m.yml")
     cfg = YAMLConfig(config_path, resume=model_path)
@@ -39,6 +65,12 @@ def run_image_inference(image_path, model_path, output_dir, threshold=0.5):
     model.to(device)
     postprocessor.to(device)
     model.eval()
+    return model, postprocessor, device
+
+
+def run_image_inference(image_path, model_path, output_dir, threshold=0.5):
+    #! 執行圖片辨識流程，並回傳結果圖片路徑、文字結果與是否有辨識到物體
+    model, postprocessor, device = _get_model(model_path)
 
     #! 步驟 3：圖片前處理 (Transforms)
     transforms = T.Compose(

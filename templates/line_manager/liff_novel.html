@@ -12,18 +12,41 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25"></script>
     <!-- LINE LIFF SDK -->
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <!-- Ace Editor (VS Code Style Code Editor) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-python.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-one_dark.js"></script>
-    <!-- Skulpt (Client-side Python 3 runner fallback) -->
-    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
-    <!-- Chart.js (Interactive Visual Charts) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Ace Editor / Skulpt / Chart.js 只有 Python 工作區會用到，改為進入工作區時才載入 (見 loadLazyLib) -->
+    <script>
+        // 依需求載入的大型函式庫 (依序載入，同一組只會下載一次)
+        const LAZY_LIBS = {
+            ace: [
+                "https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js",
+                "https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-python.js",
+                "https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-one_dark.js",
+            ],
+            skulpt: [
+                "https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js",
+                "https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js",
+            ],
+            chart: ["https://cdn.jsdelivr.net/npm/chart.js@4.6.1"],
+        };
+        const lazyLibPromises = {};
+        function loadLazyLib(name) {
+            if (!lazyLibPromises[name]) {
+                lazyLibPromises[name] = LAZY_LIBS[name].reduce((chain, src) => chain.then(() => new Promise((resolve, reject) => {
+                    const el = document.createElement("script");
+                    el.src = src;
+                    el.onload = resolve;
+                    el.onerror = () => reject(new Error("load failed: " + src));
+                    document.head.appendChild(el);
+                })), Promise.resolve()).catch((err) => {
+                    delete lazyLibPromises[name];  // 失敗時允許下次重試
+                    throw err;
+                });
+            }
+            return lazyLibPromises[name];
+        }
+    </script>
 
     <style>
         :root {
@@ -2488,6 +2511,55 @@
             saveProgressToDb(state.currentNovel.novel_id, state.currentChapter.chapter_id, currentPid, scrollPct, state.currentChapter.title);
         }
 
+        const PROGRESS_SYNC_INTERVAL_MS = 3000;
+        const progressSync = { pending: null, lastSentKey: "", lastSentAt: 0, timer: null };
+
+        function progressKey(p) {
+            return `${p.novel_id}|${p.chapter_id}|${p.paragraph_index}`;
+        }
+
+        function sendProgress(payload, keepalive = false) {
+            progressSync.lastSentKey = progressKey(payload);
+            progressSync.lastSentAt = Date.now();
+            progressSync.pending = null;
+            return safeFetchJson(CONFIG.apiNovelProgressSave, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                keepalive: keepalive,
+            }).catch(e => console.warn("Save progress error:", e));
+        }
+
+        function queueProgressSync(payload) {
+            if (progressKey(payload) === progressSync.lastSentKey) {
+                progressSync.pending = null;
+                return;  // 同一段落已同步過
+            }
+            progressSync.pending = payload;
+            const wait = PROGRESS_SYNC_INTERVAL_MS - (Date.now() - progressSync.lastSentAt);
+            if (wait <= 0) {
+                clearTimeout(progressSync.timer);
+                sendProgress(payload);
+            } else if (!progressSync.timer) {
+                progressSync.timer = setTimeout(() => {
+                    progressSync.timer = null;
+                    if (progressSync.pending) sendProgress(progressSync.pending);
+                }, wait);
+            }
+        }
+
+        function flushProgressSync() {
+            clearTimeout(progressSync.timer);
+            progressSync.timer = null;
+            if (progressSync.pending) sendProgress(progressSync.pending, true);
+        }
+
+        // 切換 App / 關閉 LIFF 時立即送出最後位置
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") flushProgressSync();
+        });
+        window.addEventListener("pagehide", flushProgressSync);
+
         async function saveProgressToDb(novelId, chapterId, pIndex, scrollPct, chapterTitle) {
             try {
                 const payload = {
@@ -2502,11 +2574,8 @@
                 // 更新 local cache
                 localStorage.setItem(`novel_prog_${novelId}`, JSON.stringify(payload));
 
-                safeFetchJson(CONFIG.apiNovelProgressSave, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                }).catch(e => console.warn("Save progress error:", e));
+                // 伺服器端存檔節流：段落沒變就不送；最多每 3 秒送一次最新位置，離開頁面時補送
+                queueProgressSync(payload);
 
                 showFloatingIndicator(`Ln ${pIndex + 1}, Saved`);
             } catch (err) {
@@ -2732,9 +2801,11 @@ tiobe.plot_top10(10)
                 if (toggleIcon) toggleIcon.className = "fa-brands fa-markdown text-info";
                 if (toggleText) toggleText.innerText = "返回閱讀 (Alt+Q)";
 
-                setTimeout(() => {
-                    initPythonEditor();
-                }, 50);
+                // 編輯器與執行引擎在第一次進入工作區時才下載
+                loadLazyLib("skulpt").catch((e) => console.warn(e));
+                loadLazyLib("ace")
+                    .catch((e) => console.warn("Ace editor load failed, using fallback textarea:", e))
+                    .then(() => setTimeout(() => initPythonEditor(), 50));
 
             } else {
                 const targetView = previousNonPythonView || "reader";
@@ -2985,7 +3056,10 @@ tiobe.plot_top10(10)
             }
         }
 
-        function renderPlots(plotImages = [], chartConfigs = []) {
+        async function renderPlots(plotImages = [], chartConfigs = []) {
+            if (chartConfigs && chartConfigs.length > 0 && typeof Chart === "undefined") {
+                try { await loadLazyLib("chart"); } catch (e) { console.warn(e); }
+            }
             const container = document.getElementById("plots-container");
             const emptyState = document.getElementById("plots-empty-state");
             const plotsBadge = document.getElementById("plots-badge");
@@ -3094,7 +3168,10 @@ tiobe.plot_top10(10)
             switchTerminalTab("plots");
         }
 
-        function runSkulptPython(code, terminal, statusLine, startTime) {
+        async function runSkulptPython(code, terminal, statusLine, startTime) {
+            if (typeof Sk === "undefined") {
+                try { await loadLazyLib("skulpt"); } catch (e) { console.warn(e); }
+            }
             return new Promise((resolve) => {
                 if (typeof Sk === "undefined") {
                     statusLine.remove();

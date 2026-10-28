@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.db.models import Count
 from .models import AnimeFranchise, Drama, GroupMembership, Itinerary, LineProfile, Novel, NovelChapter, NovelReadingProgress
 
 
@@ -13,12 +14,14 @@ def cleanup_empty_franchises():
 @admin.register(LineProfile)
 class LineProfileAdmin(admin.ModelAdmin):
     list_display = ["user", "line_display_name", "line_user_id", "created_at"]
+    list_select_related = ["user"]
     search_fields = ["user__username", "line_display_name", "line_user_id"]
 
 
 @admin.register(Itinerary)
 class ItineraryAdmin(admin.ModelAdmin):
     list_display = ["display_title", "activity_type", "date_time", "location", "notify_minutes_before", "is_notified", "user"]
+    list_select_related = ["user"]
     list_filter = ["activity_type", "is_notified", "date_time"]
     search_fields = ["user__username"]
 
@@ -56,6 +59,7 @@ class ItineraryAdmin(admin.ModelAdmin):
 @admin.register(GroupMembership)
 class GroupMembershipAdmin(admin.ModelAdmin):
     list_display = ["user", "group_id", "created_at"]
+    list_select_related = ["user"]
     search_fields = ["user__username", "group_id"]
 
 
@@ -75,10 +79,15 @@ class AnimeFranchiseAdmin(admin.ModelAdmin):
     inlines = [DramaInline]
     actions = ["merge_selected_franchises", "cleanup_empty_franchises_action"]
 
+    def get_queryset(self, request):
+        #! 清單的劇集數改用 annotate 一次算好，不必每列各查一次
+        return super().get_queryset(request).annotate(_dramas_count=Count("dramas"))
+
     def dramas_count(self, obj):
-        return obj.dramas.count()
+        return obj._dramas_count
 
     dramas_count.short_description = "關聯劇集數"
+    dramas_count.admin_order_field = "_dramas_count"
 
     def save_formset(self, request, form, formset, change):
         super().save_formset(request, form, formset, change)
@@ -133,6 +142,7 @@ class DramaAdmin(admin.ModelAdmin):
     list_filter = ["media_type", "category", "franchise"]
     search_fields = ["title", "category", "franchise__name"]
     list_editable = ["franchise", "media_type"]
+    list_select_related = ["franchise"]
     autocomplete_fields = ["franchise"]
     readonly_fields = ["github_media_picker"]
     fields = [
@@ -330,6 +340,15 @@ class NovelAdmin(admin.ModelAdmin):
 @admin.register(NovelChapter)
 class NovelChapterAdmin(admin.ModelAdmin):
     list_display = ("novel", "volume_title", "title", "chapter_id", "order", "has_images", "updated_at")
+    list_select_related = ("novel",)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        #! 清單頁不需要章節內文快取 (JSON 體積大)，編輯頁仍完整讀取
+        match = getattr(request, "resolver_match", None)
+        if match and match.url_name and match.url_name.endswith("_changelist"):
+            qs = qs.defer("content_cached")
+        return qs
     search_fields = ("title", "chapter_id", "novel__title")
     list_filter = ("has_images", "novel")
 
@@ -337,5 +356,6 @@ class NovelChapterAdmin(admin.ModelAdmin):
 @admin.register(NovelReadingProgress)
 class NovelReadingProgressAdmin(admin.ModelAdmin):
     list_display = ("line_user_id", "novel", "last_chapter_title", "last_paragraph_index", "updated_at")
+    list_select_related = ("novel",)
     search_fields = ("line_user_id", "novel__title")
 

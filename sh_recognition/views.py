@@ -17,7 +17,7 @@ with time_tracker("sh_recognition"):
 def index(request):
     #! 顯示首頁表單與最新紀錄
     models = AIModel.objects.all().order_by("-uploaded_at")
-    records = ImageRecord.objects.all().order_by("-created_at")[:10]
+    records = ImageRecord.objects.select_related("used_model").order_by("-created_at")[:10]
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -115,7 +115,7 @@ def record_list(request):
 
             return redirect("sh_recognition:record_list")
 
-    queryset = ImageRecord.objects.all().order_by("-created_at")
+    queryset = ImageRecord.objects.select_related("used_model").order_by("-created_at")  # * 清單每列顯示模型版本
 
     model_filter = request.GET.get("model_id")
     date_filter = request.GET.get("date")

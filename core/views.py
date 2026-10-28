@@ -64,9 +64,24 @@ def profile_view(request):
 
 def portal_ai_bot(request):
     from google import genai
-    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+
+    from utils.gemini_quota import available_models, is_quota_error, mark_exhausted
 
     if request.method == "POST":
+        #! 公開端點：同一來源每分鐘最多 10 次，避免被大量呼叫耗盡 Gemini 額度
+        from django.core.cache import cache
+
+        client_ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", "")).split(",")[0].strip()
+        rate_key = f"portal_ai_bot:rate:{client_ip}"
+        cache.add(rate_key, 0, 60)
+        try:
+            request_count = cache.incr(rate_key)
+        except ValueError:
+            request_count = 1
+        if request_count > 10:
+            return JsonResponse({"error": _("AI is currently resting, please try again later.")}, status=429)
+
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
         user_query = request.POST.get("message")
         current_lang = get_language()  # * 獲取當前語系 (如 'zh-hant' 或 'en')
         #! 取得語系名稱對照，幫助 AI 理解
@@ -95,7 +110,8 @@ def portal_ai_bot(request):
 
         #! 員工身分額外加成 (Extra Policy)
         policy_context = ""
-        is_employee = getattr(user.profile, "is_employee", False)
+        #! 未登入訪客沒有 profile，避免 AttributeError 造成 500
+        is_employee = getattr(getattr(user, "profile", None), "is_employee", False)
         if is_employee:
             emp_setting = AISystemSetting.objects.filter(role_level="EMPLOYEE", is_active=True).first()
             if emp_setting and emp_setting.internal_policy:
@@ -125,7 +141,7 @@ def portal_ai_bot(request):
         - Current time: {now().strftime("%Y-%m-%d %H:%M")}
         """
 
-        for model_name in FALLBACK_MODELS:
+        for model_name in available_models(FALLBACK_MODELS):
             try:
                 print(f"🤖 正在嘗試使用模型: {model_name}...")
                 response = client.models.generate_content(
@@ -138,8 +154,9 @@ def portal_ai_bot(request):
             except Exception as e:
                 error_msg = str(e)
                 #! 檢查是否為 429 額度耗盡錯誤
-                if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                if is_quota_error(e):
                     print(f"⚠️ 模型 {model_name} 額度已滿 (429)，準備切換下一個備援模型...")
+                    mark_exhausted(model_name)  # * 10 分鐘內不再先嘗試此模型
                     continue  # * 忽略錯誤，進入下一次迴圈換模型
                 else:
                     #! 如果是其他錯誤 (例如 JSON 解析失敗、系統斷線)，就不換模型，直接報錯

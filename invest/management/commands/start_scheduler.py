@@ -38,9 +38,21 @@ def check_itinerary_reminders_job():
 
         from line_manager.models import Itinerary
 
+        from django.db.models import Max
+
         current_time = now()
         # 查詢未通知且已設定時間的行程，排除時間待定的項目
-        itineraries = Itinerary.objects.filter(is_notified=False, date_time__isnull=False)
+        pending = Itinerary.objects.filter(is_notified=False, date_time__isnull=False)
+
+        # 只撈出可能落在通知時間窗內的行程，避免每分鐘全表掃描並解密已過期或遙遠未來的資料：
+        # 行程開始已超過 15 分鐘者不會再推播；最晚也只需看到「現在 + 最大提前通知分鐘數」
+        max_before = pending.aggregate(m=Max("notify_minutes_before"))["m"]
+        if max_before is None:
+            return
+        itineraries = pending.filter(
+            date_time__gte=current_time - timedelta(minutes=15),
+            date_time__lte=current_time + timedelta(minutes=max(max_before, 0)),
+        ).select_related("user__line_profile")
 
         configuration = Configuration(access_token=settings.LINE_CHANNEL_ACCESS_TOKEN)
 

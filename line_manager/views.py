@@ -299,6 +299,27 @@ def line_webhook(request):
 
 
 _GIFT_SIGN_SALT = "line_manager.broadcast_gift"
+_LINE_USER_ID_RE = re.compile(r"^U[0-9a-f]{32}$")
+
+
+def multicast_in_batches(api_instance, line_user_ids, messages, batch_size=500):
+    """以 multicast 一次發送相同訊息給多人 (每批最多 500 人)，取代逐人 push 的大量 API 呼叫。
+    multicast 只要一個 ID 格式錯誤整批就會失敗，因此先過濾掉非 LINE userId 的測試資料。
+    回傳 (成功人數, 失敗人數)。"""
+    from linebot.v3.messaging import MulticastRequest
+
+    unique_ids = list(dict.fromkeys(uid for uid in line_user_ids if uid))
+    valid_ids = [uid for uid in unique_ids if _LINE_USER_ID_RE.match(uid)]
+    success, fail = 0, len(unique_ids) - len(valid_ids)  # * 格式不符的 ID 計為失敗 (重複的不重複計算)
+    for i in range(0, len(valid_ids), batch_size):
+        chunk = valid_ids[i:i + batch_size]
+        try:
+            api_instance.multicast(MulticastRequest(to=chunk, messages=messages))
+            success += len(chunk)
+        except Exception as e:
+            jinfo_error(e, f"❌ multicast 發送失敗 ({len(chunk)} 人)")
+            fail += len(chunk)
+    return success, fail
 
 
 def sign_broadcast_gift(gift_id, coins):
@@ -326,121 +347,111 @@ def broadcast_coins_to_all_users(coins, message_text="🎉 系統獎勵金幣已
         ApiClient,
         Configuration,
         MessagingApi,
-        PushMessageRequest,
         FlexMessage,
         FlexContainer,
     )
     configuration = Configuration(access_token=settings.LINE_CHANNEL_ACCESS_TOKEN)
-    profiles = LineProfile.objects.all()
-    success_count = 0
-    fail_count = 0
+    profiles = LineProfile.objects.only("line_user_id")
     gift_id = f"gift_{uuid.uuid4().hex[:8]}"
     encoded_msg = urllib.parse.quote(str(message_text))
 
     with ApiClient(configuration) as api_client:
         api_instance = MessagingApi(api_client)
 
-        for prof in profiles:
-            if prof.line_user_id:
-                liff_claim_url = build_gift_claim_url(gift_id, coins, encoded_msg)
+        #! 每位使用者收到的卡片完全相同 (連結與簽章只依 gift_id 與金額)，改用 multicast 每 500 人一次發送
+        liff_claim_url = build_gift_claim_url(gift_id, coins, encoded_msg)
 
-                flex_contents = {
-                    "type": "bubble",
-                    "size": "mega",
-                    "header": {
-                        "type": "box",
-                        "layout": "vertical",
-                        "contents": [
-                            {
-                                "type": "text",
-                                "text": "🎁 禮物獎勵領取通知",
-                                "weight": "bold",
-                                "size": "sm",
-                                "color": "#ffffff"
-                            }
-                        ],
-                        "backgroundColor": "#ff9a9e",
-                        "paddingAll": "15px"
-                    },
-                    "body": {
-                        "type": "box",
-                        "layout": "vertical",
-                        "contents": [
-                            {
-                                "type": "text",
-                                "text": title_text,
-                                "weight": "bold",
-                                "size": "lg",
-                                "color": "#111111",
-                                "wrap": True
-                            },
-                            {
-                                "type": "text",
-                                "text": message_text,
-                                "size": "sm",
-                                "color": "#555555",
-                                "wrap": True,
-                                "margin": "md"
-                            },
-                            {
-                                "type": "box",
-                                "layout": "baseline",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": "獎勵金額：",
-                                        "size": "xs",
-                                        "color": "#888888"
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": f"+{coins} 金幣",
-                                        "weight": "bold",
-                                        "size": "md",
-                                        "color": "#e67e22"
-                                    }
-                                ],
-                                "margin": "lg"
-                            }
-                        ],
-                        "paddingAll": "20px"
-                    },
-                    "footer": {
-                        "type": "box",
-                        "layout": "vertical",
-                        "contents": [
-                            {
-                                "type": "button",
-                                "action": {
-                                    "type": "uri",
-                                    "label": f"🎁 點擊領取 {coins} 金幣",
-                                    "uri": liff_claim_url
-                                },
-                                "style": "primary",
-                                "color": "#ff9a9e",
-                                "height": "sm"
-                            }
-                        ],
-                        "paddingAll": "15px"
+        flex_contents = {
+            "type": "bubble",
+            "size": "mega",
+            "header": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "🎁 禮物獎勵領取通知",
+                        "weight": "bold",
+                        "size": "sm",
+                        "color": "#ffffff"
                     }
-                }
+                ],
+                "backgroundColor": "#ff9a9e",
+                "paddingAll": "15px"
+            },
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": title_text,
+                        "weight": "bold",
+                        "size": "lg",
+                        "color": "#111111",
+                        "wrap": True
+                    },
+                    {
+                        "type": "text",
+                        "text": message_text,
+                        "size": "sm",
+                        "color": "#555555",
+                        "wrap": True,
+                        "margin": "md"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "baseline",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "獎勵金額：",
+                                "size": "xs",
+                                "color": "#888888"
+                            },
+                            {
+                                "type": "text",
+                                "text": f"+{coins} 金幣",
+                                "weight": "bold",
+                                "size": "md",
+                                "color": "#e67e22"
+                            }
+                        ],
+                        "margin": "lg"
+                    }
+                ],
+                "paddingAll": "20px"
+            },
+            "footer": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "button",
+                        "action": {
+                            "type": "uri",
+                            "label": f"🎁 點擊領取 {coins} 金幣",
+                            "uri": liff_claim_url
+                        },
+                        "style": "primary",
+                        "color": "#ff9a9e",
+                        "height": "sm"
+                    }
+                ],
+                "paddingAll": "15px"
+            }
+        }
 
-                try:
-                    api_instance.push_message(
-                        PushMessageRequest(
-                            to=prof.line_user_id,
-                            messages=[
-                                FlexMessage(
-                                    alt_text=f"🎁【領取通知】{title_text} (+{coins}金幣)",
-                                    contents=FlexContainer.from_dict(flex_contents)
-                                )
-                            ]
-                        )
-                    )
-                    success_count += 1
-                except Exception as e:
-                    print(f"[Push Flex Error] {e}")
-                    fail_count += 1
+        success_count, fail_count = multicast_in_batches(
+            api_instance,
+            [prof.line_user_id for prof in profiles],
+            [
+                FlexMessage(
+                    alt_text=f"🎁【領取通知】{title_text} (+{coins}金幣)",
+                    contents=FlexContainer.from_dict(flex_contents)
+                )
+            ],
+        )
 
     return success_count, fail_count
 
@@ -759,7 +770,6 @@ def liff_itinerary_list(request):
 
     context = {
         "liff_id": settings.LINE_LIFF_ID,
-        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     response = render(request, "line_manager/liff_list.html", context)
     response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
@@ -772,7 +782,6 @@ def liff_itinerary_create(request):
     """LIFF 新增行程網頁"""
     context = {
         "liff_id": settings.LINE_LIFF_ID,
-        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     return render(request, "line_manager/liff_create.html", context)
 
@@ -781,7 +790,6 @@ def liff_bind_account(request):
     """LIFF 綁定既有帳號網頁"""
     context = {
         "liff_id": settings.LINE_LIFF_ID,
-        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     return render(request, "line_manager/liff_bind.html", context)
 
@@ -803,12 +811,10 @@ def api_get_itineraries(request):
         return JsonResponse({"error": "Access token required"}, status=400)
 
     # 向 LINE 驗證 Token 並取得 line_user_id
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    profile_data = res.json()
     line_user_id = profile_data["userId"]
 
     # 取得 Django 用戶
@@ -874,14 +880,17 @@ def api_get_itineraries(request):
     unscheduled_count = unscheduled_qs.count()
     history_count = history_qs.count()
 
+    # 建立者暱稱會在序列化時讀取，一併帶出避免每筆行程各查 2 次
     if tab == "upcoming":
-        itineraries_qs = upcoming_qs.order_by("-date_time")
+        itineraries_qs = upcoming_qs.order_by("-date_time").select_related("user__line_profile")
+        total_count = upcoming_count
     elif tab == "unscheduled":
-        itineraries_qs = unscheduled_qs.order_by("-id")
+        itineraries_qs = unscheduled_qs.order_by("-id").select_related("user__line_profile")
+        total_count = unscheduled_count
     else:
-        itineraries_qs = history_qs.order_by("-date_time")
+        itineraries_qs = history_qs.order_by("-date_time").select_related("user__line_profile")
+        total_count = history_count
 
-    total_count = itineraries_qs.count()
     import math
     total_pages = math.ceil(total_count / page_size) if total_count > 0 else 1
     if page > total_pages:
@@ -1033,12 +1042,11 @@ def api_create_itinerary(request):
         return JsonResponse({"error": "Missing required fields"}, status=400)
 
     # 驗證 LINE Token
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    line_user_id = res.json()["userId"]
+    line_user_id = profile_data["userId"]
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     if not line_profile:
         return JsonResponse({"error": "Account not bound"}, status=403)
@@ -1211,12 +1219,11 @@ def api_delete_itinerary(request, pk):
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
     # 驗證 LINE Token
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    line_user_id = res.json()["userId"]
+    line_user_id = profile_data["userId"]
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     if not line_profile:
         return JsonResponse({"error": "Account not bound"}, status=403)
@@ -1255,12 +1262,10 @@ def api_bind_account(request):
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
     # 驗證 LINE Token
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    profile_data = res.json()
     line_user_id = profile_data["userId"]
     line_display_name = profile_data.get("displayName", "LINE 用戶")
 
@@ -1367,12 +1372,11 @@ def api_get_itinerary_detail(request, pk):
         return JsonResponse({"error": "Invalid request body"}, status=400)
 
     # 驗證 LINE Token
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    line_user_id = res.json()["userId"]
+    line_user_id = profile_data["userId"]
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     if not line_profile:
         return JsonResponse({"error": "Account not bound"}, status=403)
@@ -1447,12 +1451,11 @@ def api_update_itinerary(request, pk):
         return JsonResponse({"error": "Missing required fields"}, status=400)
 
     # 驗證 LINE Token
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    line_user_id = res.json()["userId"]
+    line_user_id = profile_data["userId"]
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     if not line_profile:
         return JsonResponse({"error": "Account not bound"}, status=403)
@@ -1523,12 +1526,10 @@ def api_send_guide_message(request):
 
     # 驗證 Access Token
     import requests
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    profile_data = res.json()
     line_user_id = profile_data["userId"]
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     group_id = _resolve_valid_group_id(group_id, user=line_profile.user if line_profile else None)
@@ -1576,12 +1577,10 @@ def api_join_unscheduled_itinerary(request, pk):
         return JsonResponse({"error": "Access token required"}, status=400)
 
     # 驗證 LINE Token
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    profile_data = res.json()
     line_user_id = profile_data["userId"]
     line_display_name = profile_data.get("displayName", "LINE 用戶")
 
@@ -1637,12 +1636,10 @@ def api_set_unscheduled_time(request, pk):
         return JsonResponse({"error": "Missing required fields"}, status=400)
 
     # 驗證 LINE Token
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    profile_data = res.json()
     line_user_id = profile_data["userId"]
     _line_display_name = profile_data.get("displayName", "LINE 用戶")
 
@@ -1805,12 +1802,11 @@ def api_hide_itinerary(request, pk):
         return JsonResponse({"error": "Access token required"}, status=400)
 
     # 驗證 LINE Token
-    headers = {"Authorization": f"Bearer {access_token}"}
-    res = requests.get("https://api.line.me/v2/profile", headers=headers)
-    if res.status_code != 200:
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
         return JsonResponse({"error": "Invalid LINE Access Token"}, status=401)
 
-    line_user_id = res.json()["userId"]
+    line_user_id = profile_data["userId"]
     line_profile = LineProfile.objects.filter(line_user_id=line_user_id).first()
     if not line_profile:
         return JsonResponse({"error": "Account not bound"}, status=403)
@@ -1838,31 +1834,46 @@ def api_hide_itinerary(request, pk):
 
 import time
 
-_token_cache = {}  # key: access_token, value: (line_user_id, display_name, expire_time)
+LINE_PROFILE_CACHE_TTL = 600  # * LINE access token 驗證結果快取 10 分鐘
 
 
-def _verify_token_with_cache(access_token):
-    """自帶 10 分鐘快取的 LINE Token 驗證，避免高頻重複請求 LINE API"""
+def _get_line_profile_data(access_token):
+    """向 LINE 驗證 access token 並回傳 profile 資料 (userId / displayName)，失敗回傳 None。
+    結果放在 Django cache (以 token 雜湊為 key)，避免每支 API 都同步呼叫 LINE。"""
     if not access_token:
-        return None, None
-    now_ts = time.time()
-    if access_token in _token_cache:
-        line_user_id, display_name, expire = _token_cache[access_token]
-        if now_ts < expire:
-            return line_user_id, display_name
+        return None
+    import hashlib
+
+    from django.core.cache import cache
+
+    cache_key = "line_profile:" + hashlib.sha256(access_token.encode("utf-8")).hexdigest()
+    profile_data = cache.get(cache_key)
+    if profile_data:
+        return profile_data
 
     headers = {"Authorization": f"Bearer {access_token}"}
     try:
         res = requests.get("https://api.line.me/v2/profile", headers=headers, timeout=5)
         if res.status_code == 200:
-            profile_data = res.json()
-            line_user_id = profile_data["userId"]
-            display_name = profile_data.get("displayName", "LINE 用戶")
-            _token_cache[access_token] = (line_user_id, display_name, now_ts + 600)
-            return line_user_id, display_name
+            data = res.json()
+            profile_data = {
+                "userId": data["userId"],
+                "displayName": data.get("displayName", "LINE 用戶"),
+                "pictureUrl": data.get("pictureUrl", ""),
+            }
+            cache.set(cache_key, profile_data, LINE_PROFILE_CACHE_TTL)
+            return profile_data
     except Exception as e:
         jinfo_error(e, "❌ LINE Token 驗證請求失敗")
-    return None, None
+    return None
+
+
+def _verify_token_with_cache(access_token):
+    """自帶 10 分鐘快取的 LINE Token 驗證，避免高頻重複請求 LINE API"""
+    profile_data = _get_line_profile_data(access_token)
+    if not profile_data:
+        return None, None
+    return profile_data["userId"], profile_data["displayName"]
 
 
 def _get_or_create_profile(line_user_id, display_name="LINE 用戶"):
@@ -1909,7 +1920,7 @@ def api_get_friends(request):
     friends_list = []
     friend_ids = []
     for f in friendships:
-        friend_ids.append(f.friend.id)
+        friend_ids.append(f.friend_id)
         try:
             display_name = f.friend.line_profile.line_display_name or "未知 LINE 用戶"
         except AttributeError:
@@ -1931,7 +1942,7 @@ def api_get_friends(request):
 
     others_list = []
     for o in others_qs:
-        others_list.append({"id": o.user.id, "display_name": o.line_display_name or "未設定名稱"})
+        others_list.append({"id": o.user_id, "display_name": o.line_display_name or "未設定名稱"})
 
     return JsonResponse({"status": "success", "friends": friends_list, "others": others_list})
 
@@ -2035,8 +2046,10 @@ def api_get_dramas(request):
 
         from django.db.models import Count
         EXCLUDED_SYSTEM_USERNAMES = ["system_importer", "test_helper_user", "system"]
+        # 只計算本頁顯示的劇集，不必每次統計全庫
         tracked_counts = dict(
-            UserDramaProgress.objects.exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
+            UserDramaProgress.objects.filter(drama_id__in=[p.drama_id for p in sliced_qs])
+            .exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
             .exclude(user__is_staff=True)
             .exclude(user__is_superuser=True)
             .values("drama_id")
@@ -2116,8 +2129,10 @@ def api_get_dramas(request):
 
         tracked_drama_ids = set(UserDramaProgress.objects.filter(user=user).values_list("drama_id", flat=True))
         EXCLUDED_SYSTEM_USERNAMES = ["system_importer", "test_helper_user", "system"]
+        # 只計算本頁顯示的劇集，不必每次統計全庫
         tracked_counts = dict(
-            UserDramaProgress.objects.exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
+            UserDramaProgress.objects.filter(drama_id__in=[d.pk for d in sliced_dramas])
+            .exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
             .exclude(user__is_staff=True)
             .exclude(user__is_superuser=True)
             .values("drama_id")
@@ -2492,22 +2507,25 @@ def api_update_drama(request, pk):
                     PushMessageRequest,
                 )
 
+                #! 通知內容相同，收集所有追蹤者後以 multicast 發送 (原本逐人 push 且每人各開一次連線)
+                tracker_line_ids = []
                 for t in trackers:
-                    tracker_line_id = t.user.line_profile.line_user_id
-                    if tracker_line_id:
-                        with ApiClient(configuration) as api_client:
-                            api_instance = MessagingApi(api_client)
-                            api_instance.push_message(
-                                PushMessageRequest(
-                                    to=tracker_line_id,
-                                    messages=[
-                                        FlexMessage(
-                                            alt_text=f"🌟 劇集【{drama.title}】相關連結已更新！",
-                                            contents=FlexContainer.from_dict(flex_contents),
-                                        )
-                                    ],
-                                )
+                    try:
+                        tracker_line_ids.append(t.user.line_profile.line_user_id)
+                    except AttributeError:
+                        continue
+                with ApiClient(configuration) as api_client:
+                    api_instance = MessagingApi(api_client)
+                    multicast_in_batches(
+                        api_instance,
+                        tracker_line_ids,
+                        [
+                            FlexMessage(
+                                alt_text=f"🌟 劇集【{drama.title}】相關連結已更新！",
+                                contents=FlexContainer.from_dict(flex_contents),
                             )
+                        ],
+                    )
             except Exception as e:
                 jinfo_error(e, "❌ 追蹤者連結更新通知發送失敗")
 
@@ -2549,10 +2567,24 @@ def api_recommend_drama(request):
 
     success_names = []
     skipped_names = []
+    notify_line_ids = []
 
     from .models import UserDramaProgress
+
+    # 一次撈出所有好友與防呆所需資料，避免每位好友各查 3~4 次
+    friend_users = User.objects.filter(id__in=friend_ids).select_related("line_profile").in_bulk()
+    watching_ids = set(
+        UserDramaProgress.objects.filter(user_id__in=friend_users.keys(), drama=drama).values_list("user_id", flat=True)
+    )
+    pending_ids = set(
+        DramaRecommendation.objects.filter(to_user_id__in=friend_users.keys(), drama=drama, is_accepted=False)
+        .values_list("to_user_id", flat=True)
+    )
     for fid in friend_ids:
-        friend_user = User.objects.filter(id=fid).first()
+        try:
+            friend_user = friend_users.get(int(fid))
+        except (TypeError, ValueError):
+            friend_user = None
         if not friend_user:
             continue
 
@@ -2562,14 +2594,16 @@ def api_recommend_drama(request):
             friend_name = friend_user.username
 
         # 1. 防呆：檢查對方是否已在追此劇
-        if UserDramaProgress.objects.filter(user=friend_user, drama=drama).exists():
+        if friend_user.id in watching_ids:
             skipped_names.append(f"{friend_name} (已在追此劇)")
             continue
 
         # 2. 防呆：檢查是否已推薦過且對方尚未接受
-        if DramaRecommendation.objects.filter(to_user=friend_user, drama=drama, is_accepted=False).exists():
+        if friend_user.id in pending_ids:
             skipped_names.append(f"{friend_name} (已推薦過，等待接受中)")
             continue
+        #! 同一次請求重複傳入同一好友時，第二次視為已推薦
+        pending_ids.add(friend_user.id)
 
         # 3. 建立推薦紀錄
         DramaRecommendation.objects.create(
@@ -2580,96 +2614,94 @@ def api_recommend_drama(request):
         )
         success_names.append(friend_name)
 
-        # 推送 LINE 訊息通知被推薦的好友
+        # 收集要通知的好友，迴圈結束後以 multicast 一次發送 (每位好友收到的內容相同)
         try:
-            friend_line_id = friend_user.line_profile.line_user_id
-            if friend_line_id:
-                flex_contents = {
-                    "type": "bubble",
-                    "body": {
-                        "type": "box",
-                        "layout": "vertical",
-                        "contents": [
-                            {
-                                "type": "text",
-                                "text": "📬 收到好友追劇推薦",
-                                "weight": "bold",
-                                "color": "#1DB446",
-                                "size": "sm",
-                            },
-                            {
-                                "type": "text",
-                                "text": f"【{drama.title}】",
-                                "weight": "bold",
-                                "size": "lg",
-                                "margin": "md",
-                            },
-                            {"type": "separator", "margin": "md"},
-                            {
-                                "type": "box",
-                                "layout": "vertical",
-                                "margin": "md",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": f"推薦人: {from_name}",
-                                        "size": "xs",
-                                        "color": "#666666",
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": f"推薦語: {recommend_notes}"
-                                        if recommend_notes
-                                        else "推薦這部劇給您！",
-                                        "size": "xs",
-                                        "color": "#888888",
-                                        "wrap": True,
-                                        "margin": "xs",
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                    "footer": {
-                        "type": "box",
-                        "layout": "vertical",
-                        "contents": [
-                            {
-                                "type": "button",
-                                "style": "primary",
-                                "color": "#1DB446",
-                                "height": "sm",
-                                "action": {
-                                    "type": "uri",
-                                    "label": "📺 查看推薦清單",
-                                    "uri": f"https://liff.line.me/{settings.LINE_LIFF_ID}/?page=drama",
+            notify_line_ids.append(friend_user.line_profile.line_user_id)
+        except AttributeError:
+            pass
+
+    # 推送 LINE 訊息通知被推薦的好友
+    if notify_line_ids:
+        try:
+            flex_contents = {
+                "type": "bubble",
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "📬 收到好友追劇推薦",
+                            "weight": "bold",
+                            "color": "#1DB446",
+                            "size": "sm",
+                        },
+                        {
+                            "type": "text",
+                            "text": f"【{drama.title}】",
+                            "weight": "bold",
+                            "size": "lg",
+                            "margin": "md",
+                        },
+                        {"type": "separator", "margin": "md"},
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "margin": "md",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": f"推薦人: {from_name}",
+                                    "size": "xs",
+                                    "color": "#666666",
                                 },
-                            }
-                        ],
-                    },
-                }
-
-                from linebot.v3.messaging import (
-                    FlexContainer,
-                    FlexMessage,
-                    PushMessageRequest,
-                )
-
-                with ApiClient(configuration) as api_client:
-                    api_instance = MessagingApi(api_client)
-                    api_instance.push_message(
-                        PushMessageRequest(
-                            to=friend_line_id,
-                            messages=[
-                                FlexMessage(
-                                    alt_text=f"📬 好友 {from_name} 推薦了劇集【{drama.title}】給您！",
-                                    contents=FlexContainer.from_dict(flex_contents),
-                                )
+                                {
+                                    "type": "text",
+                                    "text": f"推薦語: {recommend_notes}"
+                                    if recommend_notes
+                                    else "推薦這部劇給您！",
+                                    "size": "xs",
+                                    "color": "#888888",
+                                    "wrap": True,
+                                    "margin": "xs",
+                                },
                             ],
+                        },
+                    ],
+                },
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#1DB446",
+                            "height": "sm",
+                            "action": {
+                                "type": "uri",
+                                "label": "📺 查看推薦清單",
+                                "uri": f"https://liff.line.me/{settings.LINE_LIFF_ID}/?page=drama",
+                            },
+                        }
+                    ],
+                },
+            }
+
+            with ApiClient(configuration) as api_client:
+                api_instance = MessagingApi(api_client)
+                multicast_in_batches(
+                    api_instance,
+                    notify_line_ids,
+                    [
+                        FlexMessage(
+                            alt_text=f"📬 好友 {from_name} 推薦了劇集【{drama.title}】給您！",
+                            contents=FlexContainer.from_dict(flex_contents),
                         )
-                    )
+                    ],
+                )
         except Exception as e:
-            jinfo_error(e, f"❌ 傳送好友推薦通知失敗 to {friend_user.username}")
+            jinfo_error(e, "❌ 傳送好友推薦通知失敗")
 
     if not success_names and skipped_names:
         return JsonResponse({
@@ -3257,9 +3289,15 @@ def api_compare_friends(request):
     friend_ids = list(Friendship.objects.filter(user=user).values_list("friend_id", flat=True))
     friend_profiles = LineProfile.objects.filter(user_id__in=friend_ids).select_related("user")
 
+    friend_track_counts = dict(
+        UserDramaProgress.objects.filter(user_id__in=friend_ids)
+        .values("user_id")
+        .annotate(cnt=Count("id"))
+        .values_list("user_id", "cnt")
+    )
     friends_list = []
     for fp in friend_profiles:
-        cnt = UserDramaProgress.objects.filter(user=fp.user).count()
+        cnt = friend_track_counts.get(fp.user_id, 0)
         friends_list.append({
             "user_id": fp.user.id,
             "name": fp.line_display_name or fp.user.username,
@@ -3302,18 +3340,19 @@ def api_compare_friends(request):
     my_only_ids = list(my_set - friend_set)
     friend_only_ids = list(friend_set - my_set)
 
-    # 預先計算全庫追蹤數索引 (排除系統匯入小幫手與管理員測試帳號)
+    all_target_ids = list(set(both_ids + my_only_ids + friend_only_ids))
+
+    # 預先計算追蹤數索引 (排除系統匯入小幫手與管理員測試帳號)，只計算本次會用到的劇集
     EXCLUDED_SYSTEM_USERNAMES = ["system_importer", "test_helper_user", "system"]
     tracked_counts = dict(
-        UserDramaProgress.objects.exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
+        UserDramaProgress.objects.filter(drama_id__in=all_target_ids)
+        .exclude(user__username__in=EXCLUDED_SYSTEM_USERNAMES)
         .exclude(user__is_staff=True)
         .exclude(user__is_superuser=True)
         .values("drama_id")
         .annotate(cnt=Count("id"))
         .values_list("drama_id", "cnt")
     )
-
-    all_target_ids = list(set(both_ids + my_only_ids + friend_only_ids))
     dramas_map = {d.id: d for d in Drama.objects.filter(id__in=all_target_ids)}
 
     def _serialize_item(d_id, is_friend_only=False):
@@ -3394,13 +3433,24 @@ def api_check_friend_drama_status(request):
     if not drama:
         return JsonResponse({"error": "Drama not found"}, status=404)
 
-    friendships = Friendship.objects.filter(user=user).select_related("friend__line_profile")
+    friend_ids = list(Friendship.objects.filter(user=user).values_list("friend_id", flat=True))
+    watching_ids = set(
+        UserDramaProgress.objects.filter(user_id__in=friend_ids, drama=drama).values_list("user_id", flat=True)
+    )
+    pending_ids = set(
+        DramaRecommendation.objects.filter(
+            to_user_id__in=friend_ids, drama=drama, is_accepted=False, is_rejected=False
+        ).values_list("to_user_id", flat=True)
+    )
+    accepted_ids = set(
+        DramaRecommendation.objects.filter(to_user_id__in=friend_ids, drama=drama, is_accepted=True)
+        .values_list("to_user_id", flat=True)
+    )
     status_map = {}
-    for f in friendships:
-        friend_user = f.friend
-        is_in_watchlist = UserDramaProgress.objects.filter(user=friend_user, drama=drama).exists()
-        is_pending = DramaRecommendation.objects.filter(to_user=friend_user, drama=drama, is_accepted=False, is_rejected=False).exists()
-        is_accepted = DramaRecommendation.objects.filter(to_user=friend_user, drama=drama, is_accepted=True).exists()
+    for friend_id in friend_ids:
+        is_in_watchlist = friend_id in watching_ids
+        is_pending = friend_id in pending_ids
+        is_accepted = friend_id in accepted_ids
 
         status_label = ""
         if is_in_watchlist or is_accepted:
@@ -3408,7 +3458,7 @@ def api_check_friend_drama_status(request):
         elif is_pending:
             status_label = "⏳ 已發送推薦，等待中"
 
-        status_map[friend_user.id] = {
+        status_map[friend_id] = {
             "is_in_watchlist": is_in_watchlist,
             "is_pending": is_pending,
             "is_accepted": is_accepted,
@@ -3530,38 +3580,46 @@ def api_remove_drama(request, pk):
 @csrf_exempt
 def api_get_categories(request):
     """API 端點：取得目前資料庫中所有唯一的劇集分類與對應數量 (僅限動畫類與動畫電影類，由新至舊排序)"""
-    from .models import Drama, UserDramaProgress
+    from django.core.cache import cache
 
-    # 取得所有的劇集分類
-    categories_qs = Drama.objects.values_list("category", flat=True)
+    from .models import DRAMA_CATEGORIES_CACHE_KEY, Drama, UserDramaProgress
 
-    # 計算資料庫中全部劇集的分類數量
-    all_counts = {}
-    for cat in categories_qs:
-        if cat:
-            clean_cat = cat.strip()
-            # 僅保留「動畫類」與「動畫電影類」
-            if ("新番" in clean_cat or "動畫" in clean_cat or "劇場版" in clean_cat) and clean_cat not in ["日劇", "韓劇", "美劇", "其他", "電影"]:
-                all_counts[clean_cat] = all_counts.get(clean_cat, 0) + 1
+    #! 全庫分類統計與使用者無關，快取 10 分鐘 (劇集新增/修改/刪除時會自動清除)
+    cached_categories = cache.get(DRAMA_CATEGORIES_CACHE_KEY)
+    if cached_categories:
+        all_counts, categories = cached_categories
+    else:
+        # 取得所有的劇集分類
+        categories_qs = Drama.objects.values_list("category", flat=True)
 
-    # 解析年份與月份/類型的排序 key (由新至舊，年份越大/月份越大越靠前)
-    def parse_sort_key(cat_name):
-        # 尋找年份 (例如 2027, 2026, 1968)
-        year_match = re.search(r'(19\d{2}|20\d{2})', cat_name)
-        year = int(year_match.group(1)) if year_match else 0
+        # 計算資料庫中全部劇集的分類數量
+        all_counts = {}
+        for cat in categories_qs:
+            if cat:
+                clean_cat = cat.strip()
+                # 僅保留「動畫類」與「動畫電影類」
+                if ("新番" in clean_cat or "動畫" in clean_cat or "劇場版" in clean_cat) and clean_cat not in ["日劇", "韓劇", "美劇", "其他", "電影"]:
+                    all_counts[clean_cat] = all_counts.get(clean_cat, 0) + 1
+
+        # 解析年份與月份/類型的排序 key (由新至舊，年份越大/月份越大越靠前)
+        def parse_sort_key(cat_name):
+            # 尋找年份 (例如 2027, 2026, 1968)
+            year_match = re.search(r'(19\d{2}|20\d{2})', cat_name)
+            year = int(year_match.group(1)) if year_match else 0
         
-        # 尋找月份或季度 (例如 10月, 7月, 4月, 1月)
-        month_match = re.search(r'(\d+)月', cat_name)
-        month = int(month_match.group(1)) if month_match else 0
+            # 尋找月份或季度 (例如 10月, 7月, 4月, 1月)
+            month_match = re.search(r'(\d+)月', cat_name)
+            month = int(month_match.group(1)) if month_match else 0
         
-        # 電影次序 (台版/日版)
-        is_movie = 1 if ("電影" in cat_name or "劇場版" in cat_name) else 0
-        is_tw = 1 if "台版" in cat_name else 0
+            # 電影次序 (台版/日版)
+            is_movie = 1 if ("電影" in cat_name or "劇場版" in cat_name) else 0
+            is_tw = 1 if "台版" in cat_name else 0
         
-        # 排序權重：年份 (降序), 類型 (電影/TV), 月份 (降序)
-        return (-year, -is_movie, -month, -is_tw, cat_name)
+            # 排序權重：年份 (降序), 類型 (電影/TV), 月份 (降序)
+            return (-year, -is_movie, -month, -is_tw, cat_name)
 
-    categories = sorted(list(all_counts.keys()), key=parse_sort_key)
+        categories = sorted(list(all_counts.keys()), key=parse_sort_key)
+        cache.set(DRAMA_CATEGORIES_CACHE_KEY, (all_counts, categories), 600)
 
     # 檢查是否有傳入 access_token 以計算該使用者的追劇分類數量
     my_counts = {cat: 0 for cat in categories}
@@ -3606,7 +3664,6 @@ def liff_drama(request):
     """追劇行程 LIFF 頁面渲染視圖"""
     context = {
         "liff_id": settings.LINE_LIFF_ID,
-        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     response = render(request, "line_manager/liff_drama.html", context)
     response["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
@@ -3668,10 +3725,14 @@ def get_github_video_playlist():
     except Exception as e:
         print(f"[Video Playlist Loader Warning] Failed to fetch GitHub videos: {e}")
 
-    return [
+    fallback = [
         {"id": "不才惡女", "title": "熱門動漫原聲 不才惡女", "mp3": "/video/不才惡女.mp3", "mp4": "/video/不才惡女.mp4"},
         {"id": "世界最強後衛", "title": "熱門動漫原聲 世界最強後衛", "mp3": "/video/世界最強後衛.mp3", "mp4": "/video/世界最強後衛.mp4"},
     ]
+    #! 失敗時快取備援清單 1 分鐘 (時間戳往前推 9 分鐘)，避免每次請求都等待 GitHub 逾時
+    _VIDEO_CACHE["timestamp"] = now_time - 540
+    _VIDEO_CACHE["data"] = fallback
+    return fallback
 
 
 def liff_pet(request):
@@ -3679,10 +3740,11 @@ def liff_pet(request):
     page = request.GET.get("page", "")
     context = {
         "liff_id": settings.LINE_LIFF_ID,
-        "playlist_json": json.dumps(get_github_video_playlist(), ensure_ascii=False),
     }
     if page == "music":
         template_name = "line_manager/liff_music.html"
+        #! 歌單只有音樂頁使用，其他頁面不必計算 (快取失效時會呼叫 GitHub API)
+        context["playlist_json"] = json.dumps(get_github_video_playlist(), ensure_ascii=False)
     elif page == "drama":
         template_name = "line_manager/liff_drama.html"
     else:
@@ -3785,10 +3847,6 @@ def get_char_assets(c_name):
 
 @csrf_exempt
 def api_line_pet_status(request):
-    import traceback
-    with open('django_api_call.log', 'a', encoding='utf-8') as log_f:
-        log_f.write('api_line_pet_status called\n')
-    
     """API 端點：取得 LINE 寵物系統首頁所需的完整狀態資料"""
     if request.method == "POST":
         try:
@@ -3881,23 +3939,6 @@ def api_line_pet_status(request):
             "assets": assets,
         }
 
-    # 取得玩家已解鎖的所有角色圖鑑 (Only unlocked characters shown)
-    all_user_pets = LinePet.objects.filter(user=user)
-    unlocked_characters = []
-    for pet in all_user_pets:
-        p_level = getattr(pet, 'level', 1) or 1
-        assets = get_char_assets(pet.name)
-        unlocked_characters.append({
-            "id": pet.id,
-            "name": pet.name,
-            "pet_type": pet.pet_type,
-            "pet_type_display": pet.name,
-            "level": p_level,
-            "is_active": pet.is_active,
-            "avatar": assets["avatar"],
-            "idle": assets["idle"],
-        })
-
     from pet_system.models import GoogleFitToken
 
     token_obj = GoogleFitToken.objects.filter(user=user).first()
@@ -3911,10 +3952,14 @@ def api_line_pet_status(request):
     has_daily_claim_today = profile.last_daily_claim == date.today()
 
     # 獲取各角色的獨立探索任務
-    unlocked_pets = LinePet.objects.filter(user=user)
+    unlocked_pets = list(LinePet.objects.filter(user=user))
+    #! 一次查出所有角色未領取的派遣，每隻寵物取 pk 最小的一筆 (與原本逐隻 .first() 相同)
+    open_expeditions = {}
+    for e in LinePetExpedition.objects.filter(pet__in=unlocked_pets).exclude(status="CLAIMED").order_by("pk"):
+        open_expeditions.setdefault(e.pet_id, e)
     pet_expeditions_map = {}
     for p in unlocked_pets:
-        exp = LinePetExpedition.objects.filter(pet=p).exclude(status="CLAIMED").first()
+        exp = open_expeditions.get(p.id)
         if exp:
             if exp.status == "ACTIVE" and now() >= exp.end_time:
                 exp.status = "COMPLETED"
@@ -3953,14 +3998,8 @@ def api_line_pet_status(request):
             "expedition": pet_expeditions_map.get(p.id)
         })
 
-    from pet_system.models import GoogleFitToken
-
-    token_obj = GoogleFitToken.objects.filter(user=user).first()
-    has_google_fit = token_obj is not None
-    google_email = token_obj.google_email if token_obj else None
-
     all_avail = get_available_characters()
-    unlocked_names = list(unlocked_pets.values_list('name', flat=True))
+    unlocked_names = [p.name for p in unlocked_pets]
     shop_characters = []
     for c_name, c_info in all_avail.items():
         shop_characters.append({
@@ -5862,9 +5901,16 @@ def api_analyze_daily_intake(request):
 
 def api_get_food_additives(request):
     """API 端點：取得台灣食品添加物與危害知識庫全資料"""
+    from django.core.cache import cache
+
     from .models import FoodAdditive
-    qs = FoodAdditive.objects.all().values("id", "name", "e_number", "category", "purpose", "common_foods", "health_hazards", "safe_advice")
-    items = list(qs)
+
+    #! 靜態知識庫資料，快取 1 小時
+    items = cache.get("line_manager:food_additives")
+    if items is None:
+        qs = FoodAdditive.objects.all().values("id", "name", "e_number", "category", "purpose", "common_foods", "health_hazards", "safe_advice")
+        items = list(qs)
+        cache.set("line_manager:food_additives", items, 3600)
     return JsonResponse({"status": "success", "count": len(items), "items": items})
 
 
@@ -5943,19 +5989,27 @@ def api_get_gnn_news(request):
                 "crawl_date": it.crawl_date.strftime("%Y-%m-%d") if it.crawl_date else "",
             })
 
-        # 計算統計各熱門標籤
-        tag_counter = {}
-        for tags_list in GNNNews.objects.values_list("tags", flat=True)[:500]:
-            if tags_list and isinstance(tags_list, list):
-                for t in tags_list:
-                    tag_counter[t] = tag_counter.get(t, 0) + 1
+        #! 熱門標籤與日期清單與查詢條件無關，快取 10 分鐘 (新聞每日才爬取一次)
+        from django.core.cache import cache
 
-        sorted_tags = sorted(tag_counter.items(), key=lambda x: x[1], reverse=True)[:100]
-        available_tags = [{"tag": k, "count": v} for k, v in sorted_tags]
+        gnn_meta = cache.get("line_manager:gnn_meta")
+        if gnn_meta is None:
+            # 計算統計各熱門標籤
+            tag_counter = {}
+            for tags_list in GNNNews.objects.values_list("tags", flat=True)[:500]:
+                if tags_list and isinstance(tags_list, list):
+                    for t in tags_list:
+                        tag_counter[t] = tag_counter.get(t, 0) + 1
 
-        # 日期列表 (最近有新聞的日期)
-        recent_dates = list(GNNNews.objects.values_list("crawl_date", flat=True).distinct().order_by("-crawl_date")[:14])
-        recent_dates_str = [d.strftime("%Y-%m-%d") for d in recent_dates if d]
+            sorted_tags = sorted(tag_counter.items(), key=lambda x: x[1], reverse=True)[:100]
+            available_tags = [{"tag": k, "count": v} for k, v in sorted_tags]
+
+            # 日期列表 (最近有新聞的日期)
+            recent_dates = list(GNNNews.objects.values_list("crawl_date", flat=True).distinct().order_by("-crawl_date")[:14])
+            recent_dates_str = [d.strftime("%Y-%m-%d") for d in recent_dates if d]
+            gnn_meta = (available_tags, recent_dates_str)
+            cache.set("line_manager:gnn_meta", gnn_meta, 600)
+        available_tags, recent_dates_str = gnn_meta
 
         return JsonResponse({
             "status": "success",
@@ -6010,13 +6064,8 @@ def _get_planner_user_identity(request, data=None):
 
     if access_token:
         try:
-            res = requests.get(
-                "https://api.line.me/v2/profile",
-                headers={"Authorization": f"Bearer {access_token}"},
-                timeout=5
-            )
-            if res.status_code == 200:
-                p = res.json()
+            p = _get_line_profile_data(access_token)
+            if p:
                 line_user_id = p.get("userId", "")
                 if line_user_id and not user:
                     lp = LineProfile.objects.filter(line_user_id=line_user_id).first()
@@ -6251,13 +6300,8 @@ def _get_novel_user_identity(request, data=None):
 
     if access_token and not line_user_id:
         try:
-            res = requests.get(
-                "https://api.line.me/v2/profile",
-                headers={"Authorization": f"Bearer {access_token}"},
-                timeout=5
-            )
-            if res.status_code == 200:
-                p = res.json()
+            p = _get_line_profile_data(access_token)
+            if p:
                 line_user_id = p.get("userId", "")
                 if line_user_id and not user:
                     lp = LineProfile.objects.filter(line_user_id=line_user_id).first()
@@ -6297,10 +6341,17 @@ def api_novel_list(request):
     from .models import Novel, NovelReadingProgress
     user, line_user_id = _get_novel_user_identity(request)
 
-    novels = Novel.objects.all().order_by("-updated_at")
+    from django.db.models import Count
+
+    novels = Novel.objects.annotate(chapter_count=Count("chapters")).order_by("-updated_at")
     progress_map = {}
     if line_user_id:
-        progs = NovelReadingProgress.objects.filter(line_user_id=line_user_id)
+        # 一併帶出最後章節，但不讀取章節內文快取 (content_cached 體積大)
+        progs = (
+            NovelReadingProgress.objects.filter(line_user_id=line_user_id)
+            .select_related("last_chapter")
+            .defer("last_chapter__content_cached")
+        )
         for p in progs:
             progress_map[p.novel_id] = {
                 "chapter_id": p.last_chapter_key or (p.last_chapter.chapter_id if p.last_chapter else ""),
@@ -6322,7 +6373,7 @@ def api_novel_list(request):
             "description": n.description,
             "category": n.category,
             "status": n.status,
-            "total_chapters": n.total_chapters or n.chapters.count(),
+            "total_chapters": n.total_chapters or n.chapter_count,
             "updated_at": n.updated_at.strftime("%Y-%m-%d %H:%M"),
             "progress": prog,
         })
@@ -6382,24 +6433,45 @@ def api_novel_import(request):
             }
         )
 
-        # 2. 建立分卷與章節
+        # 2. 建立分卷與章節 (批次寫入，避免逐章 update_or_create 造成上千次查詢)
+        from django.db import transaction
+        from django.utils import timezone
+
         total_chapters = 0
         order_counter = 1
+        incoming = {}  # * chapter_id -> 欄位資料；重複的 chapter_id 以最後一筆為準 (與逐筆更新結果相同)
         for vol in details.get("volumes", []):
             vol_title = vol.get("volume_title", "正文")
             for ch in vol.get("chapters", []):
-                NovelChapter.objects.update_or_create(
-                    novel=novel,
-                    chapter_id=ch["chapter_id"],
-                    defaults={
-                        "volume_title": vol_title,
-                        "title": ch["title"],
-                        "chapter_url": ch.get("url", ""),
-                        "order": ch.get("order", order_counter),
-                    }
-                )
+                incoming[str(ch["chapter_id"])] = {
+                    "volume_title": vol_title,
+                    "title": ch["title"],
+                    "chapter_url": ch.get("url", ""),
+                    "order": ch.get("order", order_counter),
+                }
                 order_counter += 1
                 total_chapters += 1
+
+        existing = {c.chapter_id: c for c in novel.chapters.defer("content_cached")}
+        now_ts = timezone.now()
+        to_update, to_create = [], []
+        for ch_id, fields in incoming.items():
+            obj = existing.get(ch_id)
+            if obj:
+                for k, v in fields.items():
+                    setattr(obj, k, v)
+                obj.updated_at = now_ts
+                to_update.append(obj)
+            else:
+                to_create.append(NovelChapter(novel=novel, chapter_id=ch_id, **fields))
+
+        with transaction.atomic():
+            if to_update:
+                NovelChapter.objects.bulk_update(
+                    to_update, ["volume_title", "title", "chapter_url", "order", "updated_at"], batch_size=500
+                )
+            if to_create:
+                NovelChapter.objects.bulk_create(to_create, batch_size=500)
 
         novel.total_chapters = total_chapters
         novel.save()
@@ -6432,7 +6504,9 @@ def api_novel_catalog(request, novel_id):
     volumes = []
     if novel and novel.chapters.exists():
         # 從 DB 整理分卷與章節
-        chapters_qs = novel.chapters.all().order_by("order", "id")
+        # 目錄只需要標題等欄位；是否已快取改用資料庫判斷，不必讀出整份內文 JSON
+        chapters_qs = novel.chapters.defer("content_cached").order_by("order", "id")
+        cached_ids = set(novel.chapters.exclude(content_cached={}).values_list("chapter_id", flat=True))
         vol_map = {}
         for ch in chapters_qs:
             v_title = ch.volume_title or "正文"
@@ -6442,7 +6516,7 @@ def api_novel_catalog(request, novel_id):
                 "chapter_id": ch.chapter_id,
                 "title": ch.title,
                 "order": ch.order,
-                "has_cached": bool(ch.content_cached),
+                "has_cached": ch.chapter_id in cached_ids,
                 "has_images": ch.has_images,
             })
         for v_title, ch_list in vol_map.items():
@@ -6483,7 +6557,12 @@ def api_novel_catalog(request, novel_id):
     # 附帶閱讀進度
     prog = None
     if novel and line_user_id:
-        p = NovelReadingProgress.objects.filter(novel=novel, line_user_id=line_user_id).first()
+        p = (
+            NovelReadingProgress.objects.filter(novel=novel, line_user_id=line_user_id)
+            .select_related("last_chapter")
+            .defer("last_chapter__content_cached")
+            .first()
+        )
         if p:
             prog = {
                 "chapter_id": p.last_chapter_key or (p.last_chapter.chapter_id if p.last_chapter else ""),
@@ -6550,12 +6629,14 @@ def api_novel_chapter(request, novel_id, chapter_id):
     prev_chapter_id = None
     next_chapter_id = None
     if novel and ch_obj:
-        prev_ch = NovelChapter.objects.filter(novel=novel, order__lt=ch_obj.order).order_by("-order").first()
-        next_ch = NovelChapter.objects.filter(novel=novel, order__gt=ch_obj.order).order_by("order").first()
-        if prev_ch:
-            prev_chapter_id = prev_ch.chapter_id
-        if next_ch:
-            next_chapter_id = next_ch.chapter_id
+        prev_chapter_id = (
+            NovelChapter.objects.filter(novel=novel, order__lt=ch_obj.order)
+            .order_by("-order").values_list("chapter_id", flat=True).first()
+        )
+        next_chapter_id = (
+            NovelChapter.objects.filter(novel=novel, order__gt=ch_obj.order)
+            .order_by("order").values_list("chapter_id", flat=True).first()
+        )
 
     return JsonResponse({
         "status": "success",
@@ -6596,7 +6677,10 @@ def api_novel_progress_save(request):
         if not novel:
             return JsonResponse({"status": "error", "error": "找不到此小說紀錄"}, status=404)
 
-        ch_obj = NovelChapter.objects.filter(novel=novel, chapter_id=chapter_id).first() if chapter_id else None
+        ch_obj = (
+            NovelChapter.objects.filter(novel=novel, chapter_id=chapter_id).defer("content_cached").first()
+            if chapter_id else None
+        )
         if ch_obj and not chapter_title:
             chapter_title = ch_obj.title
 
@@ -6678,9 +6762,10 @@ def api_novel_refresh(request, novel_id):
             novel.status = details.get("status")
 
         # 同步章節目錄，並清空受影響章節的舊快取
-        existing_chapters = {ch.chapter_id: ch for ch in novel.chapters.all()}
+        existing_chapters = {ch.chapter_id: ch for ch in novel.chapters.defer("content_cached")}
         total_count = 0
         new_chapters_to_create = []
+        chapters_to_update = {}  # * 以 id 去重，同一章重複出現時以最後一筆為準
 
         for vol in details.get("volumes", []):
             vol_title = vol.get("volume_title", "分卷")
@@ -6699,7 +6784,8 @@ def api_novel_refresh(request, novel_id):
                     obj.chapter_url = url
                     # 清空快取，確保後續載入採用最新爬取與淨化邏輯
                     obj.content_cached = {}
-                    obj.save(update_fields=["volume_title", "title", "order", "chapter_url", "content_cached", "updated_at"])
+                    obj.updated_at = timezone.now()
+                    chapters_to_update[obj.pk] = obj
                 else:
                     new_chapters_to_create.append(NovelChapter(
                         novel=novel,
@@ -6711,6 +6797,12 @@ def api_novel_refresh(request, novel_id):
                         content_cached={},
                     ))
 
+        if chapters_to_update:
+            NovelChapter.objects.bulk_update(
+                list(chapters_to_update.values()),
+                ["volume_title", "title", "order", "chapter_url", "content_cached", "updated_at"],
+                batch_size=500,
+            )
         if new_chapters_to_create:
             NovelChapter.objects.bulk_create(new_chapters_to_create)
 

@@ -55,7 +55,7 @@ def transfer_history(request):
         return redirect("/")
 
     #! 撈取全系統所有的轉移歷史，依發起時間反向排序
-    all_records = TransferRecord.objects.all().order_by("-created_at")
+    all_records = TransferRecord.objects.select_related("item", "sender", "receiver").order_by("-created_at")
 
     #! 每頁顯示 15 筆紀錄
     paginator = Paginator(all_records, 15)

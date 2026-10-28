@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models, transaction
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -104,3 +106,13 @@ class TicketRecord(models.Model):
 
     def __str__(self):
         return f"{self.serial_number} - {self.applicant}"
+
+
+@receiver([post_save, post_delete], sender=ExternalTool)
+def clear_external_tools_cache(sender, **kwargs):
+    """外部工具異動時清除全站導覽列的快取"""
+    from django.core.cache import cache
+
+    from .context_processors import EXTERNAL_TOOLS_CACHE_KEY
+
+    cache.delete(EXTERNAL_TOOLS_CACHE_KEY)

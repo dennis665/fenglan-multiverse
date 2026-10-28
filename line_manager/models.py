@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db import models
+from django.db.models.signals import post_delete, post_save
 from django.utils.translation import gettext_lazy as _
 from encrypted_model_fields.fields import EncryptedCharField, EncryptedTextField
 
@@ -125,7 +127,8 @@ class AnimeFranchise(models.Model):
         ordering = ["name"]
 
     def __str__(self):
-        return f"{self.name} (關聯劇集: {self.dramas.count()} 部)"
+        #! 後台下拉選單與清單每列都會呼叫，改用快取的彙總數字避免每次都 count()
+        return f"{self.name} (關聯劇集: {franchise_drama_counts().get(self.pk, 0)} 部)"
 
 
 class Drama(models.Model):
@@ -415,3 +418,32 @@ class NovelReadingProgress(models.Model):
 
     def __str__(self):
         return f"{self.line_user_id} - {self.novel.title} ({self.last_chapter_title} P{self.last_paragraph_index})"
+
+
+FRANCHISE_COUNTS_CACHE_KEY = "line_manager:franchise_drama_counts"
+
+
+def franchise_drama_counts():
+    """回傳 {franchise_id: 關聯劇集數}，一次查詢後快取 60 秒"""
+    counts = cache.get(FRANCHISE_COUNTS_CACHE_KEY)
+    if counts is None:
+        counts = dict(
+            Drama.objects.filter(franchise__isnull=False)
+            .values("franchise_id")
+            .annotate(cnt=models.Count("id"))
+            .values_list("franchise_id", "cnt")
+        )
+        cache.set(FRANCHISE_COUNTS_CACHE_KEY, counts, 60)
+    return counts
+
+
+DRAMA_CATEGORIES_CACHE_KEY = "line_manager:drama_categories"
+
+
+def _clear_franchise_counts(sender, **kwargs):
+    """劇集異動時清除系列劇集數與分類統計快取"""
+    cache.delete_many([FRANCHISE_COUNTS_CACHE_KEY, DRAMA_CATEGORIES_CACHE_KEY])
+
+
+post_save.connect(_clear_franchise_counts, sender=Drama, dispatch_uid="clear_franchise_counts_save")
+post_delete.connect(_clear_franchise_counts, sender=Drama, dispatch_uid="clear_franchise_counts_delete")

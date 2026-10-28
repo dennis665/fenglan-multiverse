@@ -26,12 +26,24 @@ class Profile(models.Model):
         verbose_name = _("個人檔案")
         verbose_name_plural = _("個人檔案")
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        #! 記錄載入時的頭像檔名，用來判斷這次儲存是否有更換頭像
+        #! 直接讀原始值，避免欄位被 defer 時在初始化階段多打一次查詢
+        raw_avatar = self.__dict__.get("avatar")
+        self._original_avatar_name = getattr(raw_avatar, "name", raw_avatar) or ""
+
     def save(self, *args, **kwargs):
         #! 先執行 Django 原本的儲存動作，確保檔案已經寫入硬碟
         super().save(*args, **kwargs)
 
+        #! 只有頭像有變更時才處理 (User 每次登入都會連帶儲存 Profile，不需每次重開圖片)
+        avatar_name = self.avatar.name if self.avatar else ""
+        avatar_changed = avatar_name != self._original_avatar_name
+        self._original_avatar_name = avatar_name
+
         #! 檢查是否有上傳圖片，並且檔案路徑存在
-        if self.avatar and os.path.exists(self.avatar.path):
+        if avatar_changed and self.avatar and os.path.exists(self.avatar.path):
             img_path = self.avatar.path
 
             try:

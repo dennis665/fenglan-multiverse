@@ -7,6 +7,12 @@ import time
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+from utils.gemini_quota import available_models, is_quota_error, mark_exhausted
+
+#! 出題時附在 prompt 裡、要求 AI 避免重複的舊題目數量與每題最大字數
+MAX_EXISTING_IN_PROMPT = 60
+EXISTING_QUESTION_MAX_CHARS = 120
+
 FALLBACK_MODELS = [
     "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
     "gemini-2.5-flash",  # * 備援 1：前代主力 (每天額外 20 次)
@@ -90,9 +96,11 @@ def generate_ai_content(file_path, text_content, existing_summary=None, existing
         【難度與多樣性要求】：請出具備深度的「情境應用題」或「觀念變化題」。
         """
         if existing_questions:
+            #! 題庫越大 prompt 越長：只附上最近 MAX_EXISTING_IN_PROMPT 題、每題截斷，避免 token 隨訓練次數線性成長
+            recent_questions = existing_questions[-MAX_EXISTING_IN_PROMPT:]
             prompt += "\n【重要限制】：以下是已經出過的題目，請「絕對不要」重複出類似的題目：\n"
-            for idx, q in enumerate(existing_questions):
-                prompt += f"{idx + 1}. {q.get('question')}\n"
+            for idx, q in enumerate(recent_questions):
+                prompt += f"{idx + 1}. {str(q.get('question') or '')[:EXISTING_QUESTION_MAX_CHARS]}\n"
 
     prompt += """
     \nJSON 格式範例：
@@ -143,6 +151,9 @@ def generate_ai_content(file_path, text_content, existing_summary=None, existing
             file_type_name = "影片" if is_video else "PDF"
             print(f"{file_type_name} 上傳失敗，嘗試退回純文字模式: {e}")
 
+            #! PDF 只有在 File API 上傳失敗時才需要純文字，這時才萃取
+            if not text_content:
+                text_content = extract_text_from_file(file_path)
             if is_pdf:
                 prompt = prompt.replace(
                     "請仔細閱讀我附上的 PDF 檔案內容（包含文字、圖片與表格）。",
@@ -161,7 +172,7 @@ def generate_ai_content(file_path, text_content, existing_summary=None, existing
     quiz_data = []
     error_msg = None
 
-    for model_name in FALLBACK_MODELS:
+    for model_name in available_models(FALLBACK_MODELS):
         try:
             print(f"🤖 正在嘗試使用模型: {model_name}...")
             response = client.models.generate_content(
@@ -180,16 +191,24 @@ def generate_ai_content(file_path, text_content, existing_summary=None, existing
                 quiz_json_str = result_text.split("===QUIZ_START===")[1].split("===QUIZ_END===")[0].strip()
                 quiz_json_str = quiz_json_str.replace("```json", "").replace("```", "").strip()
                 quiz_data = json.loads(quiz_json_str)
+            #! 成功時清除前面模型 429 留下的錯誤訊息，否則呼叫端會把這次成功產生的題目當成失敗丟棄
+            error_msg = None
             break
         except Exception as e:
             error_msg = str(e)
             #! 檢查是否為 429 額度耗盡錯誤
-            if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+            if is_quota_error(e):
                 print(f"⚠️ 模型 {model_name} 額度已滿 (429)，準備切換下一個備援模型...")
+                mark_exhausted(model_name)  # * 10 分鐘內不再先嘗試此模型
                 continue  # * 忽略錯誤，進入下一次迴圈換模型
             else:
                 #! 如果是其他錯誤 (例如 JSON 解析失敗、系統斷線)，就不換模型，直接報錯
+                #! (原本少了 break，會把同一份大型 PDF 再送給其餘每個模型，重複消耗 token)
                 print(f"❌ 發生非額度相關錯誤: {error_msg}")
+                error_msg = _("AI 忙碌中或檔案解析發生錯誤，請稍後再試！")
+                break
+    else:
+        #! 所有模型都額度已滿
         error_msg = _("AI 忙碌中或檔案解析發生錯誤，請稍後再試！")
 
     #! ======== 雙重閱後即焚機制 ========

@@ -8,12 +8,16 @@ with time_tracker("invest"):
     from django.conf import settings
     from django.contrib import messages
     from django.contrib.auth.decorators import login_required
+    from django.core.cache import cache
     from django.db.models import Sum
     from django.http import JsonResponse
     from django.shortcuts import redirect, render
 
     from .forms import AIRoboAdvisorForm, TransactionForm
     from .models import Holding, Portfolio, Stock, StockPrice, Transaction
+
+    #! 大盤排行快取 key (update_prices 指令會清除同程序的快取)
+    MARKET_SUMMARY_CACHE_KEY = "invest:market_summary"
 
     FALLBACK_MODELS = [
         "gemini-flash-latest",  # * 首選：最新主力 (每天 20 次)
@@ -129,39 +133,60 @@ def portfolio_dashboard(request):
     #! 注意：Decimal 不能直接轉 JSON，必須先轉成 float
     pie_data = [float(item["market_value"]) for item in holding_details]
 
-    #! 準備：大盤最新統計 Top 10 資料
-    #! 漲幅前 10 名
-    top_gainers = (
-        StockPrice.objects.filter(stock__is_active=True).select_related("stock").order_by("-daily_change_percent")[:10]
-    )
-    gainers_labels = [f"{p.stock.symbol} {p.stock.name}" for p in top_gainers]
-    gainers_data = [float(p.daily_change_percent) for p in top_gainers]
+    #! 大盤排行與股票清單每天收盤後才更新一次，快取 10 分鐘 (update_prices 完成時會清除)
+    market = cache.get(MARKET_SUMMARY_CACHE_KEY)
+    if market is None:
+        #! 準備：大盤最新統計 Top 10 資料
+        #! 漲幅前 10 名
+        top_gainers = (
+            StockPrice.objects.filter(stock__is_active=True).select_related("stock").order_by("-daily_change_percent")[:10]
+        )
+        gainers_labels = [f"{p.stock.symbol} {p.stock.name}" for p in top_gainers]
+        gainers_data = [float(p.daily_change_percent) for p in top_gainers]
 
-    #! 跌幅前 10 名
-    top_losers = (
-        StockPrice.objects.filter(stock__is_active=True).select_related("stock").order_by("daily_change_percent")[:10]
-    )
-    losers_labels = [f"{p.stock.symbol} {p.stock.name}" for p in top_losers]
-    losers_data = [float(p.daily_change_percent) for p in top_losers]
+        #! 跌幅前 10 名
+        top_losers = (
+            StockPrice.objects.filter(stock__is_active=True).select_related("stock").order_by("daily_change_percent")[:10]
+        )
+        losers_labels = [f"{p.stock.symbol} {p.stock.name}" for p in top_losers]
+        losers_data = [float(p.daily_change_percent) for p in top_losers]
 
-    #! 股價最高前 10 名
-    highest_prices = (
-        StockPrice.objects.filter(stock__is_active=True).select_related("stock").order_by("-current_price")[:10]
-    )
-    high_price_labels = [f"{p.stock.symbol} {p.stock.name}" for p in highest_prices]
-    high_price_data = [float(p.current_price) for p in highest_prices]
+        #! 股價最高前 10 名
+        highest_prices = (
+            StockPrice.objects.filter(stock__is_active=True).select_related("stock").order_by("-current_price")[:10]
+        )
+        high_price_labels = [f"{p.stock.symbol} {p.stock.name}" for p in highest_prices]
+        high_price_data = [float(p.current_price) for p in highest_prices]
 
-    #! 股價最低前 10 名 (過濾掉 0 元的異常資料)
-    lowest_prices = (
-        StockPrice.objects.filter(stock__is_active=True, current_price__gt=0)
-        .select_related("stock")
-        .order_by("current_price")[:10]
-    )
-    low_price_labels = [f"{p.stock.symbol} {p.stock.name}" for p in lowest_prices]
-    low_price_data = [float(p.current_price) for p in lowest_prices]
+        #! 股價最低前 10 名 (過濾掉 0 元的異常資料)
+        lowest_prices = (
+            StockPrice.objects.filter(stock__is_active=True, current_price__gt=0)
+            .select_related("stock")
+            .order_by("current_price")[:10]
+        )
+        low_price_labels = [f"{p.stock.symbol} {p.stock.name}" for p in lowest_prices]
+        low_price_data = [float(p.current_price) for p in lowest_prices]
 
-    #! 所有啟用狀態的股票標的（供雙股比對選單使用）
-    active_stocks = Stock.objects.filter(is_active=True).values("symbol", "name", "category", "exchange")
+        #! 所有啟用狀態的股票標的（供雙股比對選單使用）
+        active_stocks = Stock.objects.filter(is_active=True).values("symbol", "name", "category", "exchange")
+        active_stocks = list(active_stocks)
+        market = {
+            "gainers_labels": gainers_labels,
+            "gainers_data": gainers_data,
+            "losers_labels": losers_labels,
+            "losers_data": losers_data,
+            "high_price_labels": high_price_labels,
+            "high_price_data": high_price_data,
+            "low_price_labels": low_price_labels,
+            "low_price_data": low_price_data,
+            "active_stocks": active_stocks,
+        }
+        cache.set(MARKET_SUMMARY_CACHE_KEY, market, 600)
+    gainers_labels, gainers_data = market["gainers_labels"], market["gainers_data"]
+    losers_labels, losers_data = market["losers_labels"], market["losers_data"]
+    high_price_labels, high_price_data = market["high_price_labels"], market["high_price_data"]
+    low_price_labels, low_price_data = market["low_price_labels"], market["low_price_data"]
+    active_stocks = market["active_stocks"]
 
     context = {
         "portfolio": portfolio,  # * 把 portfolio 傳到前端，這樣才知道目前的目標設定值
@@ -208,6 +233,9 @@ def generate_ai_plan(request):
         return redirect("invest:dashboard")
 
     from google import genai
+
+    from utils.gemini_quota import available_models, is_quota_error, mark_exhausted
+
     #! 取得使用者輸入的參數
     data = form.cleaned_data
     risk_map = {"LOW": "保守", "MEDIUM": "穩健", "HIGH": "積極"}
@@ -245,12 +273,13 @@ def generate_ai_plan(request):
     - 風險承受度：{risk_str}型
     """
 
-    for model_name in FALLBACK_MODELS:
+    for model_name in available_models(FALLBACK_MODELS):
         try:
             print(f"🤖 正在嘗試使用模型: {model_name}...")
             response = client.models.generate_content(
                 model=model_name,
-                config={"system_instruction": dynamic_instruction},
+                #! 指定回傳 JSON，減少格式錯誤造成的失敗與重試
+                config={"system_instruction": dynamic_instruction, "response_mime_type": "application/json"},
                 contents=user_query,
             )
 
@@ -268,8 +297,9 @@ def generate_ai_plan(request):
         except Exception as e:
             error_msg = str(e)
             #! 檢查是否為 429 額度耗盡錯誤
-            if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+            if is_quota_error(e):
                 print(f"⚠️ 模型 {model_name} 額度已滿 (429)，準備切換下一個備援模型...")
+                mark_exhausted(model_name)  # * 10 分鐘內不再先嘗試此模型
                 continue  # * 忽略錯誤，進入下一次迴圈換模型
             else:
                 #! 如果是其他錯誤 (例如 JSON 解析失敗、系統斷線)，就不換模型，直接報錯

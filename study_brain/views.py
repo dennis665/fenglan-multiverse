@@ -32,11 +32,19 @@ def dashboard(request):
     """AI 教材大腦主控台"""
     categories = Category.objects.all()
 
+    # * 樣板每筆教材都會讀取分類、上傳者與是否已有分析結果，一次查好避免每筆 3 次查詢
+    #! 分析結果只用來判斷「是否存在」，只取 id 不讀出大量 AI 內容
+    from django.db.models import Prefetch
+
+    material_qs = Material.objects.select_related("category", "uploader").prefetch_related(
+        Prefetch("analysis_results", queryset=AnalysisResult.objects.only("id", "material_id"))
+    )
+
     # * 我的教材庫 (使用者有加入收藏的)
-    my_materials = Material.objects.filter(saved_by=request.user).order_by("-uploaded_at")
+    my_materials = material_qs.filter(saved_by=request.user).order_by("-uploaded_at")
 
     # * 探索公開教材 (使用者還沒加入收藏的)
-    explore_materials = Material.objects.exclude(saved_by=request.user).order_by("-uploaded_at")
+    explore_materials = material_qs.exclude(saved_by=request.user).order_by("-uploaded_at")
 
     context = {"categories": categories, "my_materials": my_materials, "explore_materials": explore_materials}
     return render(request, "study_brain/dashboard.html", context)
@@ -88,7 +96,11 @@ def generate_analysis(request, material_id):
 
             #! 讀取實體檔案路徑並萃取文字
             file_path = material.file.path
-            text_content = extract_text_from_file(file_path)
+            #! PDF / 影片改由 Gemini File API 直接讀取，只有上傳失敗時才需要萃取文字 (交由 generate_ai_content 處理)
+            if file_path.lower().endswith((".pdf", ".mp4", ".mov", ".avi")):
+                text_content = ""
+            else:
+                text_content = extract_text_from_file(file_path)
 
             if not text_content and not file_path.lower().endswith((".pdf", ".mp4", ".mov", ".avi")):
                 messages.error(request, _("檔案解析失敗或內容為空，無法進行訓練。"))
@@ -272,15 +284,19 @@ def submit_quiz(request, analysis_id):
             attempted_questions=attempted_list,  # * 存入剛才收集的作答清單
         )
 
-        #! 寫入詳細錯題紀錄
-        for mist in mistakes:
-            QuizMistake.objects.create(
-                quiz_record=quiz_record,
-                question_text=mist["question"],
-                user_answer=mist["user_answer"],
-                correct_answer=mist["correct_answer"],
-                explanation=mist["explanation"],
-            )
+        #! 寫入詳細錯題紀錄 (一次批次寫入)
+        QuizMistake.objects.bulk_create(
+            [
+                QuizMistake(
+                    quiz_record=quiz_record,
+                    question_text=mist["question"],
+                    user_answer=mist["user_answer"],
+                    correct_answer=mist["correct_answer"],
+                    explanation=mist["explanation"],
+                )
+                for mist in mistakes
+            ]
+        )
 
         messages.success(request, str(_(f"測驗提交成功！您的正確率為 {correct_count}/{total_q}。")))
         return redirect("study_brain:quiz_result", record_id=quiz_record.pk)

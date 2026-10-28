@@ -386,6 +386,25 @@ def tigf_dashboard(request):
             rule_empty_zero = request.POST.get("rule_empty_zero") == "true"
             rule_tolerance = request.POST.get("rule_tolerance") == "true"
 
+            #! 同一個範本 Sheet / DB CSV 會被多張工作表、多家公司重複使用，解析結果在本次請求內共用
+            parsed_excel_cache = {}
+            parsed_csv_cache = {}
+
+            def read_excel_once(file_obj, sheet_name):
+                key = (id(file_obj), sheet_name)
+                if key not in parsed_excel_cache:
+                    parsed_excel_cache[key] = smart_read_excel(file_obj, sheet_name=sheet_name, header=None)
+                return parsed_excel_cache[key]
+
+            def read_csv_once(file_obj):
+                key = id(file_obj)
+                if key not in parsed_csv_cache:
+                    if hasattr(file_obj, "seek"):
+                        file_obj.seek(0)
+                    parsed_csv_cache[key] = smart_read_csv(file_obj)
+                #! 呼叫端會修改欄位內容，回傳複本避免污染快取
+                return parsed_csv_cache[key].copy()
+
             #! 解析申報檔
             for name, report_obj in dict_report.items():
                 if len(name) < 18:
@@ -554,9 +573,7 @@ def tigf_dashboard(request):
 
                             #! 讀取範本檔對應的 Tag sheet (獲取 Schema 規則)
                             try:
-                                df_schema_raw = smart_read_excel(
-                                    global_templates[fid], sheet_name=tag, header=None
-                                )
+                                df_schema_raw = read_excel_once(global_templates[fid], tag)
                                 #! 動態尋找 COLUMN_NAME 所在的列
                                 sch_header_idx = df_schema_raw[
                                     df_schema_raw.eq("COLUMN_NAME").any(axis=1)
@@ -609,7 +626,7 @@ def tigf_dashboard(request):
                                 print(f"警告：找不到 {db_table_name} 的 DB 檔案來源，跳過比對")
                                 continue
 
-                            df_db_full = smart_read_csv(global_dbs[db_table_name])
+                            df_db_full = read_csv_once(global_dbs[db_table_name])
 
                             #! 過濾出該公司、未刪除的資料
                             df_db_full["Cno"] = df_db_full["Cno"].astype(str).str.strip()
